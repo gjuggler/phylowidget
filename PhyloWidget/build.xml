@@ -1,0 +1,121 @@
+<!--
+    P5 applet exporter for Eclipse
+    v0.4 : exports java1.1 compatible applet, source code .zip archive and valid xhtml1.0 wrapper
+    v0.5 : added optional obfuscation step using http://proguard.sourceforge.net/
+    
+    last update : 13/05/04
+    author : info@toxi.co.uk
+    usage and more info : http://proce55ing.net/discourse/yabb/YaBB.cgi?board=general;action=display;num=1072722668;
+-->
+
+<project name="${project_name}" default="dist" basedir=".">
+	<description>
+        basic P5 applet export build script (java1.1 compatible)
+    </description>
+	<!-- set global properties for this build -->
+	<property file="build.properties" />
+	<property name="src" location="src"/>
+	<property name="build" location="build"/>
+	<property name="dist" location="applet"/>
+	<property name="data" location="data"/>
+	<property name="lib" location="lib" />
+	<property name="html" location="html" />
+	
+	<path id="master-classpath">
+		<fileset dir="${lib}" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="init" depends="clean">
+		<!-- check if user properties are set, terminate if necessary -->
+		<fail unless="project_name">no project name specified</fail>
+		<fail unless="project_class">no project class specified</fail>
+		<fail unless="applet.width">no applet width specified</fail>
+		<fail unless="applet.height">no applet height specified</fail>
+		<!-- check if data folder exists -->
+		<available file="${data}" type="dir" property="data_exists"/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+
+	<target name="compile" depends="init" description="compile the source">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac fork="true" srcdir="${src}" destdir="${build}">
+			<classpath refid="master-classpath" />
+		</javac>
+	</target>
+
+	<target name="dist" depends="compile" description="generate the distribution">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}"/>
+		<!-- unjar core.jar to the build directory -->
+		<unjar dest="${build}" src="${lib}/core.jar" />
+		<!-- copy data if necessary -->
+		<antcall target="copyData"/>
+		<!-- Put everything in ${build} into a .jar file -->
+		<property name="final_jar_file" location="${dist}/${project_name}.jar"/>
+		<jar jarfile="${final_jar_file}" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="org.andrewberman.phyloinfo.PhyloWidget"/>
+			</manifest>
+		</jar>
+
+		<!-- call Proguard obfuscator -->
+		<available classname="proguard.ProGuard" property="proguard.present"/>
+		<antcall target="obfuscate"/>
+
+		<!-- create HTML wrapper file -->
+		<antcall target="makeHTML"/>
+	</target>
+
+	<target name="obfuscate" if="proguard.present">
+		<property name="temp_jar_file" location="${dist}/${project_name}_orig.jar"/>
+		<move file="${final_jar_file}" tofile="${temp_jar_file}"/>
+		<java classname="proguard.ProGuard">
+			<arg value="-injars ${temp_jar_file} -outjar ${final_jar_file} -libraryjars ${JAVA_HOME}/jre/lib/rt.jar -keep public class ${project_name}"/>
+		</java>
+		<echo>NOTE: in case the obfuscated archive is damaged, the original .jar file (without obfuscation) has been moved to:</echo>
+		<echo>${temp_jar_file}</echo>
+	</target>
+
+	<target name="copyData" if="data_exists">
+		<!-- copy contents of data folder -->
+		<copy todir="${build}/data">
+			<fileset dir="${data}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="makeHTML" description="generate HTML wrapper file">
+		<!-- building source code zip file
+		<property name="src.zipfile" value="${project_name}_src.zip"/>
+		<echo>archiving source code...</echo>
+		<zip destfile="${dist}/${src.zipfile}" basedir="${src}" update="true"/>
+		-->
+		<!-- generating html -->
+		<copy file="${html}/index.html" tofile="${dist}/index.html" />
+		<replace file="${dist}/index.html">
+			<replacefilter token="%%project_name%%" value="${project_name}" />
+			<replacefilter token="%%project_class%%" value="${project_class}" />
+			<replacefilter token="%%applet.width%%" value="${applet.width}" />
+			<replacefilter token="%%applet.height%%" value="${applet.height}" />
+			<replacefilter token="%%src.zipfile%%" value="${src.zipfile}" />
+		</replace>
+		<antcall target="insertComments" />
+	</target>
+	
+	<target name="insertComments" if="applet.comments">
+		<echo>${applet.comments}</echo>
+		<replace file="${dist}/index.html">
+			<replacetoken><![CDATA[<!--%%applet.comments%%-->]]>
+			</replacetoken>
+			<replacevalue><![CDATA[<tr><td>${applet.comments}</tr></td>]]>
+			</replacevalue>
+		</replace>
+	</target>
+</project>

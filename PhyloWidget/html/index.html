@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/2000/REC-xhtml1-20000126/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+		<title>
+			%%project_name%%: Built with Processing
+		</title>
+		<script type="text/javascript">
+		<!--
+		function insertApplet() {
+		document.write('<applet code="%%project_class%%" archive="%%project_name%%.jar" width="%%applet.width%%" height="%%applet.height%%"></applet>');
+		}
+		//-->
+		</script>
+		<style type="text/css">
+		html, body { background: #333; color: #eee; }
+		a:link { color: #fc3; }
+		a:visited { color: #ccc; }
+		td  { font-size: 11px; font-family: Verdana,Arial,sans-serif; text-align: left; }
+		</style>
+	</head>
+	<body>
+		<center>
+			<table width="600" border="0" cellspacing="0" cellpadding="10">
+				<tr>
+					<td>
+						<script type="text/javascript">insertApplet();</script>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<a href="%%src.zipfile%%">
+							Source code
+						</a>
+					</td>
+				</tr>
+				<!--%%applet.comments%%-->
+			</table>
+		</center>
+	</body>
+</html>

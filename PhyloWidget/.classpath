@@ -7,5 +7,5 @@
 			<attribute name="javadoc_location" value="http://dev.processing.org/reference/core/javadoc/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="applet"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

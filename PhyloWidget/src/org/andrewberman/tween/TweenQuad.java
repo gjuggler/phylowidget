@@ -1,10 +1,7 @@
 package org.andrewberman.tween;
 
-public class TweenQuad implements TweenFunction {
+public final class TweenQuad implements TweenFunction {
 	  
-	  public TweenQuad() {
-	    // Nothing to initialize.
-	  }
 	  
 	  public float easeIn(float t, float b, float c, float d) {
 	    return c*(t/=d)*t + b;

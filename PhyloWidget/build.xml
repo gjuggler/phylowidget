@@ -27,15 +27,19 @@
 
 	<target name="clean">
 		<delete dir="${build}" />
+		<!--
 		<delete dir="${dist}" />
+		 -->
 	</target>
 
 	<target name="init" depends="clean">
 		<!-- check if user properties are set, terminate if necessary -->
 		<fail unless="project_name">no project name specified</fail>
 		<fail unless="project_class">no project class specified</fail>
+		<!--
 		<fail unless="applet.width">no applet width specified</fail>
 		<fail unless="applet.height">no applet height specified</fail>
+		-->
 		<!-- check if data folder exists -->
 		<available file="${data}" type="dir" property="data_exists"/>
 		<mkdir dir="${build}"/>

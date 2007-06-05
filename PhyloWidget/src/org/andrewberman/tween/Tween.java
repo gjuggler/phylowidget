@@ -26,14 +26,15 @@ public class Tween {
 	    this.listener = _listen;
 	    this.func = _func;
 	    _type = _type.toLowerCase();
-	    if (_type.equals("easein")) {
+	    if (_type.equals("in")) {
 	     tweenType = 0; 
-	    } else if (_type.equals("easeut")) {
+	    } else if (_type.equals("out")) {
 	     tweenType = 1; 
 	    } else {
 	     tweenType = 2; 
 	    }
 	    this.begin = _begin;
+	    this.position = _begin;
 	    this.change = _end - _begin;
 	    this.useSeconds = _useSeconds;
 	    if (this.useSeconds) {
@@ -116,7 +117,7 @@ public class Tween {
 	    continueTo(this.begin,this.time);
 	  }
 		
-	  public void update() {
+	  public float update() {
 	    if (isTweening)
 	    {
 	      if (this.time > this.duration)
@@ -141,5 +142,6 @@ public class Tween {
 	        listener.onMotionUpdated(this);
 	      }
 	    }
+	    return position;
 	  }
 	}

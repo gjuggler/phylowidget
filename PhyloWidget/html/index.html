@@ -5,13 +5,6 @@
 		<title>
 			%%project_name%%: Built with Processing
 		</title>
-		<script type="text/javascript">
-		<!--
-		function insertApplet() {
-		document.write('<applet code="%%project_class%%" archive="%%project_name%%.jar" width="%%applet.width%%" height="%%applet.height%%"></applet>');
-		}
-		//-->
-		</script>
 		<style type="text/css">
 		html, body { background: #333; color: #eee; }
 		a:link { color: #fc3; }
@@ -21,21 +14,15 @@
 	</head>
 	<body>
 		<center>
-			<table width="600" border="0" cellspacing="0" cellpadding="10">
-				<tr>
-					<td>
-						<script type="text/javascript">insertApplet();</script>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<a href="%%src.zipfile%%">
-							Source code
-						</a>
-					</td>
-				</tr>
-				<!--%%applet.comments%%-->
-			</table>
+			<applet code="%%project_class%%" archive="%%project_name%%.jar" width="%%applet.width%%" height="%%applet.height%%">
+			<param name="cache_option" value="No"/>
+			<param name="cache_archive" value="%%project_name%%.jar, index.html"/>
+			</applet>
+			<br />
+			<a href="%%src.zipfile%%">
+			Source code
+			</a><br />
+			<!--%%applet.comments%%-->
 		</center>
 	</body>
 </html>

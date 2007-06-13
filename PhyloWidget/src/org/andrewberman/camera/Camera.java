@@ -10,8 +10,6 @@ import org.andrewberman.tween.TweenQuad;
 import processing.core.PApplet;
 
 public abstract class Camera extends TweenListener{
-	  
-	private PhyloWidget p;
 	
 	  public float x;
 	  public float y;
@@ -39,8 +37,8 @@ public abstract class Camera extends TweenListener{
 	  }
 	  
 	  public void zoomCenterTo(Rectangle2D.Float rect) {
-		  float xAspect = (float)rect.width / (float)(p.width);
-		  float yAspect = (float)rect.height / (float)(p.height);
+		  float xAspect = (float)rect.width / (float)(getStageWidth());
+		  float yAspect = (float)rect.height / (float)(getStageHeight());
 		  if (xAspect > yAspect)
 		  {
 			  zTween.continueTo(1.0f/xAspect, FRAMES);
@@ -54,24 +52,22 @@ public abstract class Camera extends TweenListener{
 		  }
 	  }
 	  
+	  public abstract float getStageWidth();
+	  public abstract float getStageHeight();
+	  
 	  public float getTranslationX() {
-	    return (float)p.width/2.0f - (float)x;
+	    return (float)getStageWidth()/2.0f - (float)x;
 	  }
 	  public float getTranslationY() {
-	    return (float)p.height/2.0f - (float)y;
+	    return (float)getStageHeight()/2.0f - (float)y;
 	  }
 	  public float getScale() {
 	    return (float)z;
 	  }
 	  public void updatePosition() {
-		  
 		x = xTween.update();
 		y = yTween.update();
 		z = zTween.update();
-	    
-		// Concrete classes should override this method, calling super.updatePosition()
-		// and making the position change actually change something.
 	  }
-	  
 	}
 

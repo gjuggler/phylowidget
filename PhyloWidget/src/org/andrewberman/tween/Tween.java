@@ -37,11 +37,12 @@ public class Tween {
 	    this.position = _begin;
 	    this.change = _end - _begin;
 	    this.useSeconds = _useSeconds;
-	    if (this.useSeconds) {
-	      this.duration = _duration * PhyloWidget.instance.frameRate;
-	    } else {
-		this.duration = _duration;
-	    }
+//	    if (this.useSeconds) {
+//	      this.duration = _duration * PhyloWidget.instance.frameRate;
+//	    } else {
+//		this.duration = _duration;
+//	    }
+	    this.duration = _duration;
 	    this.time = 0;
 	    this.isTweening = false;
 	    start();

@@ -1,21 +1,15 @@
 package org.andrewberman.phyloinfo.tree;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.andrewberman.phyloinfo.PhyloWidget;
@@ -25,17 +19,16 @@ import processing.core.PApplet;
 public class RandomTreeMutator implements Runnable
 {
 	private PhyloWidget p;
-	
 	private Tree tree;
 	private Thread wrapper;
 	private java.util.Random random;
 	private static String DEFAULT_NAME = "PhyloWidget";
 	
-	public RandomTreeMutator(Tree t) {
-		p = PhyloWidget.instance;
+	public RandomTreeMutator(PhyloWidget p, Tree t) {
+		this.p = p;
 		tree = t;
 		wrapper = new Thread(this);
-		wrapper.setName("NCBI-Taxonomy-fetcher");
+		wrapper.setName("PhyloWidget-tree-mutator");
 		wrapper.start();
 		random = new Random();
 	}
@@ -142,6 +135,10 @@ public class RandomTreeMutator implements Runnable
 			return taxonName;
 		}
 		return taxonName;
+	}
+	
+	public void setTree(Tree t) {
+		tree = t;
 	}
 	
 	public void stop() {

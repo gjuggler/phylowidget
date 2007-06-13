@@ -1,4 +1,4 @@
-package org.andrewberman.util;
+package org.andrewberman.camera;
 
 import java.awt.geom.Rectangle2D;
 

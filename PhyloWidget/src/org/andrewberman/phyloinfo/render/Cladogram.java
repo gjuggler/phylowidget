@@ -1,50 +1,48 @@
 package org.andrewberman.phyloinfo.render;
 
-import org.andrewberman.util.Locatable;
-import org.andrewberman.util.Position;
-
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.andrewberman.phyloinfo.PhyloWidget;
+import org.andrewberman.camera.Locatable;
 import org.andrewberman.phyloinfo.tree.Tree;
 import org.andrewberman.phyloinfo.tree.TreeNode;
+import org.andrewberman.util.Position;
 
+import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 
-public class CladoRenderer implements Locatable
+public class Cladogram implements Locatable
 {
+	protected PApplet p;
 
-	private PhyloWidget p;
+	protected Tree tree;
 
-	private Tree tree;
-
-	private PFont font;
-	private static int FONT_SIZE = 64;
+	protected PFont font;
+	protected static int FONT_SIZE = 64;
 	
-	private HashMap positions;
+	protected HashMap positions;
 
-	public CladoRenderer()
+	public Cladogram(PApplet applet)
 	{
-		// Get our singlet instance.
-		p = PhyloWidget.instance;
 
+		p = applet;
+		p.registerDraw(this);
+		
 		// Load the font from the data directory and set it to be used for text
 		// drawing.
-		font = p.loadFont("Verdana-64.vlw");
-		p.textFont(font);
-		p.textAlign(PConstants.LEFT);
+		font = p.loadFont("TimesNewRoman-64.vlw");
 		
 		positions = new HashMap();
 	}
 
-	public void render()
+	public void draw()
 	{
 		if (tree == null) return;
 		synchronized (tree)
 		{
+			setFont();
 			leafPositions();
 			branchPositions();
 			drawLines();
@@ -52,7 +50,15 @@ public class CladoRenderer implements Locatable
 //		getRect(); // for testing purpose.
 	}
 	
-	private void leafPositions() {
+	public void setFont()
+	{
+		p.fill(255);
+		p.textFont(font);
+		p.textAlign(PConstants.LEFT);
+		p.textSize(FONT_SIZE);
+	}
+	
+	public void leafPositions() {
 		ArrayList leaves = tree.getRoot().getAllLeaves();
 		for (int i = 0; i < leaves.size(); i++)
 		{
@@ -62,10 +68,10 @@ public class CladoRenderer implements Locatable
 		}
 		
 	}
-	private void branchPositions() {
+	public void branchPositions() {
 		branchPositions(tree.getRoot());
 	}
-	private Position branchPositions(TreeNode n) {
+	public Position branchPositions(TreeNode n) {
 		if (n.isLeaf()) {
 			// If N is a leaf, then it's already been laid out.
 			return (Position) positions.get(n.getSerial());
@@ -86,10 +92,10 @@ public class CladoRenderer implements Locatable
 			return pt;
 		}
 	}
-	private float xPosForNode(TreeNode n) {
+	public float xPosForNode(TreeNode n) {
 		return (float) RenderingConstants.BRANCH_LENGTH * (tree.getRoot().getMaxHeight() - n.getMaxHeight()) + 3; 
 	}
-	private void drawLines() {
+	public void drawLines() {
 		ArrayList nodes = tree.getAllNodes();
 		for (int i=0; i < nodes.size(); i++) {
 			TreeNode n = (TreeNode) nodes.get(i);
@@ -98,14 +104,12 @@ public class CladoRenderer implements Locatable
 			p.ellipse(pt.x,pt.y,5,5);
 			connectToParent(n);
 			if (n.isLeaf()) {
-				p.fill(255);
-				p.textSize(FONT_SIZE);
 				p.text(n.getName(),pt.x + RenderingConstants.NAMES_MARGIN,pt.y + font.ascent/2);
 			}
 		}
 	}
 	
-	private void connectToParent(TreeNode n) {
+	public void connectToParent(TreeNode n) {
 		if (n.getParent() == TreeNode.NULL_PARENT) return;
 		Position ptA = (Position) positions.get(n.getSerial());
 		Position ptB = (Position) positions.get(n.getParent().getSerial());
@@ -129,11 +133,10 @@ public class CladoRenderer implements Locatable
 		for (int i=0; i < leaves.size(); i++)
 		{
 			TreeNode n = (TreeNode) leaves.get(i);
-			p.textSize(FONT_SIZE);
+			setFont();
 			float width = p.textWidth(n.getName());
 			if (width > maxWidth) maxWidth = width;
 		}
-		System.out.println(maxWidth);
 		return maxWidth;
 	}
 	

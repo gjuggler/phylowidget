@@ -27,9 +27,8 @@
 
 	<target name="clean">
 		<delete dir="${build}" />
-		<!--
 		<delete dir="${dist}" />
-		 -->
+		
 	</target>
 
 	<target name="init" depends="clean">
@@ -48,7 +47,7 @@
 
 	<target name="compile" depends="init" description="compile the source">
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac fork="true" srcdir="${src}" destdir="${build}">
+		<javac fork="true" srcdir="${src}" destdir="${build}" source="1.4" target="1.4">
 			<classpath refid="master-classpath" />
 		</javac>
 	</target>
@@ -64,7 +63,7 @@
 		<property name="final_jar_file" location="${dist}/${project_name}.jar"/>
 		<jar jarfile="${final_jar_file}" basedir="${build}">
 			<manifest>
-				<attribute name="Main-Class" value="org.andrewberman.phyloinfo.PhyloWidget"/>
+				<attribute name="Main-Class" value="${project_class}"/>
 			</manifest>
 		</jar>
 
@@ -96,13 +95,15 @@
 	</target>
 
 	<target name="makeHTML" description="generate HTML wrapper file">
-		<!-- building source code zip file
 		<property name="src.zipfile" value="${project_name}_src.zip"/>
 		<echo>archiving source code...</echo>
 		<zip destfile="${dist}/${src.zipfile}" basedir="${src}" update="true"/>
-		-->
 		<!-- generating html -->
-		<copy file="${html}/index.html" tofile="${dist}/index.html" />
+		<copy todir="${dist}">
+			<fileset dir="${html}">
+				<include name="**/*.*"/>
+			</fileset>
+		</copy>
 		<replace file="${dist}/index.html">
 			<replacefilter token="%%project_name%%" value="${project_name}" />
 			<replacefilter token="%%project_class%%" value="${project_class}" />

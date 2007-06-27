@@ -105,9 +105,12 @@ public class Tween {
 	    this.isTweening = false;
 	    listener.onMotionStopped(this);
 	  }
+	  
+	  public void continueTo(float newF)
+	  {
+		  continueTo(newF,this.duration);
+	  }
 	  public void continueTo(float newF, float newD) {
-	    if (newD == -1) newD = this.duration;
-	    //FlashConnect3.trace("tweenTo: "+newF + "   " +newD);
 	    this.begin = this.position;
 	    this.change = newF - this.begin;
 	    this.time = 0;

@@ -55,8 +55,10 @@
 	<target name="dist" depends="compile" description="generate the distribution">
 		<!-- Create the distribution directory -->
 		<mkdir dir="${dist}"/>
+		
 		<!-- unjar core.jar to the build directory -->
 		<unjar dest="${build}" src="${lib}/core.jar" />
+		
 		<!-- copy data if necessary -->
 		<antcall target="copyData"/>
 		<!-- Put everything in ${build} into a .jar file -->
@@ -67,24 +69,25 @@
 			</manifest>
 		</jar>
 
-		<!-- call Proguard obfuscator -->
-		<available classname="proguard.ProGuard" property="proguard.present"/>
-		<antcall target="obfuscate"/>
-
+		<antcall target="signJar"/>
+		
 		<!-- create HTML wrapper file -->
 		<antcall target="makeHTML"/>
 	</target>
 
-	<target name="obfuscate" if="proguard.present">
-		<property name="temp_jar_file" location="${dist}/${project_name}_orig.jar"/>
-		<move file="${final_jar_file}" tofile="${temp_jar_file}"/>
-		<java classname="proguard.ProGuard">
-			<arg value="-injars ${temp_jar_file} -outjar ${final_jar_file} -libraryjars ${JAVA_HOME}/jre/lib/rt.jar -keep public class ${project_name}"/>
-		</java>
-		<echo>NOTE: in case the obfuscated archive is damaged, the original .jar file (without obfuscation) has been moved to:</echo>
-		<echo>${temp_jar_file}</echo>
+	<target name="signJar" if="applet.signed">
+		<!-- Generate a key and sign the applet. -->
+		<!--<genkey alias="phylowidget" storepass="gregjordanidae">
+			<dname>
+				<param name="CN" value="Gregory Jordan"/>
+				<param name="OU" value="NESCENT SoC 2007"/>
+				<param name="O" value="nescent.org"/>
+				<param name="C" value="US"/>
+			</dname>
+		</genkey>-->
+		<signjar jar="${final_jar_file}" alias="phylowidget" storepass="gregjordanidae"/>		
 	</target>
-
+	
 	<target name="copyData" if="data_exists">
 		<!-- copy contents of data folder -->
 		<copy todir="${build}/data">
@@ -116,11 +119,8 @@
 	
 	<target name="insertComments" if="applet.comments">
 		<echo>${applet.comments}</echo>
-		<replace file="${dist}/index.html">
-			<replacetoken><![CDATA[<!--%%applet.comments%%-->]]>
-			</replacetoken>
-			<replacevalue><![CDATA[<tr><td>${applet.comments}</tr></td>]]>
-			</replacevalue>
+		<replace file="${dist}/index.html" value="${applet.comments}">
+			<replacetoken><![CDATA[<!--%%applet.comments%%-->]]></replacetoken>
 		</replace>
 	</target>
 </project>

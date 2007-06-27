@@ -1,8 +1,11 @@
 package org.andrewberman.phyloinfo.tree;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,8 +17,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.andrewberman.phyloinfo.PhyloWidget;
 
-import processing.core.PApplet;
-
 public class RandomTreeMutator implements Runnable
 {
 	private PhyloWidget p;
@@ -24,6 +25,10 @@ public class RandomTreeMutator implements Runnable
 	private java.util.Random random;
 	private static String DEFAULT_NAME = "PhyloWidget";
 	
+	public int delay = 1000;
+	
+	public int mutations = 0;
+	
 	public RandomTreeMutator(PhyloWidget p, Tree t) {
 		this.p = p;
 		tree = t;
@@ -31,6 +36,10 @@ public class RandomTreeMutator implements Runnable
 		wrapper.setName("PhyloWidget-tree-mutator");
 		wrapper.start();
 		random = new Random();
+		
+		InputStream is = p.openStream("taxonomy.txt");
+		InputStreamReader read = new InputStreamReader(is);
+		in = new BufferedReader(read);
 	}
 	
 	public void run()
@@ -43,10 +52,9 @@ public class RandomTreeMutator implements Runnable
 		}
 		while (wrapper == thisThread)
 		{		
-			
 			try
 			{
-				Thread.sleep(1000);
+				Thread.sleep(delay);
 			} catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block
@@ -56,25 +64,28 @@ public class RandomTreeMutator implements Runnable
 		}
 	}
 
+	private ArrayList allNodes = new ArrayList(100);
 	public void randomlyMutateTree() {
 		String taxonName = DEFAULT_NAME;
 //		taxonName = getRemoteNCBITaxon();
 		taxonName = getLocalNCBITaxon();
 		
-		ArrayList all = tree.getAllNodes();
-		int i = random.nextInt(all.size());
-		TreeNode n = (TreeNode) all.get(i);
 		synchronized (tree)
 		{
+			allNodes.clear();
+			tree.getAllNodes(allNodes);
+			int i = random.nextInt(allNodes.size());
+			TreeNode n = (TreeNode) allNodes.get(i);
 			tree.addSisterNode(n,new TreeNode(taxonName));
-			tree.sortAllChildren();
+//			tree.sortAllChildren();
 		}
-		p.camera.zoomCenterTo(p.render.getRect());
+		mutations++;
+//		p.camera.zoomCenterTo(p.render.getRect());
 	}
 	
 	private String getRemoteNCBITaxon() {
 		// Retreive a random taxon name from NCBI:
-		int taxID = random.nextInt(10000);
+		int taxID = random.nextInt(100000);
 		String taxonName = DEFAULT_NAME;
 		
 		URL url;
@@ -103,22 +114,15 @@ public class RandomTreeMutator implements Runnable
 		return taxonName;
 	}
 	
+	BufferedReader in;
 	public String getLocalNCBITaxon() {
-		int taxID = random.nextInt(2000);
+		int taxID = random.nextInt(4000);
 		String taxonName = DEFAULT_NAME;
 		
 		try
 		{
-			URL url = new URL("http://pantheon.yale.edu/~gej5/SoC/week-1-phylowidget/taxonomy.txt");
-			
-			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-			
-			for (int i=0; i < taxID; i++) {
-				in.readLine();
-			}
 			String s = in.readLine();
 			taxonName = s;
-			in.close();
 		} catch (FileNotFoundException e)
 		{
 			// TODO Auto-generated catch block

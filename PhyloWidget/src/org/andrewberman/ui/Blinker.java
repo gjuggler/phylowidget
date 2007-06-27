@@ -5,13 +5,19 @@ import java.util.ArrayList;
 
 public class Blinker extends Thread
 {
+	public static Blinker instance;
+	
+	static {
+		new Blinker();
+	}
+	
 	private int delay;
 	public boolean isOn;
 	public boolean interrupted;
 	
 	private ArrayList listeners = new ArrayList(1);
 	
-	public Blinker()
+	private Blinker()
 	{
 		this(750);
 	}
@@ -22,6 +28,7 @@ public class Blinker extends Thread
 		this.isOn = true;
 		this.interrupted = false;
 		this.start();
+		Blinker.instance = this;
 	}
 
 	public void run()

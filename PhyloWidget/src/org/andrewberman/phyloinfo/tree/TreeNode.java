@@ -12,78 +12,142 @@ import org.andrewberman.phyloinfo.PhyloWidget;
 public class TreeNode implements Comparable
 {
 
-	public static TreeNode NULL_PARENT = null;
-	private static int serialNumber = 0;
-	protected ArrayList children;
-	protected TreeNode parent;
+	private static int serialSeed = 0;
+	
 	protected String name;
-	protected String serial;
-
-	public TreeNode()
+	public int serial;
+	
+	/*
+	 * Bread-and-butter fields for the TreeNode class.
+	 */
+	public static final TreeNode NULL_PARENT = null;
+	protected TreeNode parent = NULL_PARENT;
+	protected ArrayList children = new ArrayList(2);
+	protected float height = 0; // Height to the parent node.
+	
+	/*
+	 * Cached values. Each of these needs to be percolated upwards when a part
+	 * of the tree below this node is altered.
+	 */
+	protected int numLeaves=1;
+	protected int numDescendants=1;
+	protected int maxDepth=1;
+	protected float maxHeight=0;
+	
+	/*
+	 * Static integers for the switch statement in percolate().
+	 */
+	public static final int NUM_LEAVES=0;
+	public static final int NUM_DESCENDANTS=1;
+	public static final int MAX_DEPTH=2;
+	
+	/*
+	 * TODO: Implement a "percolate" method that allows us to percolate up, from leaf to root,
+	 * any important variable state updates. This will be an easy way to manage "cached" values,
+	 * such as numLeaves, maxHeight, and numDescendants.
+	 */
+	
+	private TreeNode()
 	{
-		parent = NULL_PARENT;
-
-		init();
+		serial = serialSeed++;
 	}
 
 	public TreeNode(TreeNode rent)
 	{
+		this();
 		parent = rent;
-		if (parent != NULL_PARENT)
-		{
-			parent.addChild(this);
-		}
-
-		init();
 	}
 
-	public TreeNode(String s) {
-		parent = NULL_PARENT;
-		name = s;
-		
-		init();
-	}
-	
-	private void init()
+	public TreeNode(String s)
 	{
-		children = new ArrayList();
-		serial = String.valueOf(serialNumber++);
-	}
-
-	public void addChild(TreeNode child) {
-		children.add(child);
-		child.setParent(this);
+		this();
+		name = s;
 	}
 	
-	public void addChildren(Collection children) {
-		Iterator it = children.iterator();
-		while (it.hasNext())
+	public TreeNode(TreeNode rent,String s) {
+		this(rent);
+		name = s;
+	}
+
+	public int getNumDescendants()
+	{
+		return numDescendants;
+	}
+	
+	public int getNumLeaves()
+	{
+		return numLeaves;
+	}
+	
+	public float getMaxHeight()
+	{
+		return maxHeight;
+	}
+	
+	public int getMaxDepth()
+	{
+		return maxDepth;
+	}
+	
+	public synchronized void percolateUp()
+	{
+		if (parent == NULL_PARENT) return;
+		parent.percolate(NUM_LEAVES,numLeaves);
+		parent.percolate(NUM_DESCENDANTS,numDescendants);
+		parent.percolate(MAX_DEPTH, maxDepth);
+	}
+	
+	public synchronized void percolate(int type, int val)
+	{
+		switch (type)
 		{
-			TreeNode child = (TreeNode) it.next();
-			addChild(child);
+			case (NUM_LEAVES):
+				numLeaves += val;
+				if (parent != NULL_PARENT)parent.percolate(type,val);
+				break;
+			case (NUM_DESCENDANTS):
+				numDescendants += val;
+				if (parent != NULL_PARENT)parent.percolate(type,val);
+				break;
+			case (MAX_DEPTH):
+				maxDepth = Math.max(maxDepth, val+1);
+				if (parent != NULL_PARENT)parent.percolate(type,maxDepth);
+				break;
 		}
 	}
 	
-	public void removeChild(TreeNode child) {
-		children.remove(child);
-		if (child.parent == this)
-			child.setParent(TreeNode.NULL_PARENT);
+	public synchronized void addChild(TreeNode child) {	
+		children.add(child);
+		if (this != child.parent)
+		{
+			child.parent = this;
+		}
+		child.percolateUp();
+		sortChildren();
 	}
 	
-	public void sortChildren() {
-		// Sort the children ArrayList by the number of descendants.
+	public synchronized void removeChild(TreeNode child) {
+		children.remove(child);
+		percolate(NUM_LEAVES,-child.numLeaves);
+		percolate(NUM_DESCENDANTS,-child.numDescendants);
+		// Reset and re-calculate the max height and depth.
+		maxDepth = 0;
+		maxHeight = 0;
+		for (int i=0; i < children.size(); i++)
+		{
+			TreeNode c = (TreeNode)children.get(i);
+			maxDepth = Math.max(c.maxDepth+1, maxDepth);
+			maxHeight = Math.max(c.maxHeight+c.height,maxHeight);
+		}
+	}
+	
+	public synchronized void sortChildren() {
 		Collections.sort(children);
 	}
 	
 	public boolean isLeaf()
 	{
-		if (children.size() == 0)
-		{
-			return true;
-		} else
-		{
-			return false;
-		}
+		return (getNumChildren() == 0);
 	}
 
 	public ArrayList getChildren()
@@ -91,72 +155,43 @@ public class TreeNode implements Comparable
 		return children;
 	}
 
-	public ArrayList getAllDescendants()
+	public int getNumChildren()
 	{
-		if (isLeaf())
-		{
-			return new ArrayList();
-		}
-		ArrayList desc = (ArrayList) children.clone();
-		for (int i = 0; i < children.size(); i++)
-		{
-			TreeNode child = (TreeNode) children.get(i);
-			desc.addAll(child.getAllDescendants());
-		}
-		return desc;
-	}
-
-	public ArrayList getAllNodes()
-	{
-		ArrayList desc = getAllDescendants();
-		desc.add(this);
-		return desc;
-	}
-
-	public TreeNode getParent()
-	{
-		return parent;
+		return children.size();
 	}
 	
-	public void setParent(TreeNode p) {
-		parent = p;
-	}
-
-	public ArrayList getAllLeaves()
+	public synchronized void getAllDescendants(ArrayList toAdd)
 	{
-		ArrayList leaves = new ArrayList();
-		Stack stack = new Stack();
-		stack.push(this);
-		while (!stack.isEmpty())
+		int size = children.size();
+		for (int i = 0; i < size; ++i)
 		{
-			TreeNode curNode = (TreeNode) stack.pop();
-			if (curNode.isLeaf())
-			{
-				leaves.add(curNode);
-			} else
-			{
-				stack.addAll(curNode.getChildren());
-			}
+			TreeNode child = (TreeNode) children.get(i);
+			toAdd.add(child);
+			child.getAllDescendants(toAdd);
 		}
-		return leaves;
 	}
-
-	public int getMaxHeight()
+	
+	public synchronized void getAllNodes(ArrayList toAdd)
+	{
+		getAllDescendants(toAdd);
+		toAdd.add(this);
+	}
+	
+	public synchronized void getAllLeaves(ArrayList toAdd)
 	{
 		if (children.size() == 0)
 		{
-			return 0;
-		} else
+			toAdd.add(this);
+			return;
+		}
+		int size = children.size();
+		for (int i = size-1; i >= 0; i--)
 		{
-			int maxHeight = 0;
-			for (int i = 0; i < children.size(); i++)
-			{
-				TreeNode n = (TreeNode) children.get(i);
-				int height = n.getMaxHeight();
-				if (height > maxHeight)
-					maxHeight = height;
-			}
-			return maxHeight + 1;
+			TreeNode child = (TreeNode) children.get(i);
+			if (!child.isLeaf())
+				child.getAllLeaves(toAdd);
+			else
+				toAdd.add(child);
 		}
 	}
 
@@ -170,15 +205,15 @@ public class TreeNode implements Comparable
 		return this.toString();
 	}
 
-	public String getSerial()
+	public TreeNode getParent()
 	{
-		return serial;
+		return parent;
 	}
 	
 	public boolean equals(Object o) {
 		if (o instanceof TreeNode) {
 			TreeNode b = (TreeNode)o;
-			if (this.getSerial().equals(b.getSerial())) return true;
+			if (this.serial == b.serial) return true;
 		}
 		return false;
 	}
@@ -186,8 +221,8 @@ public class TreeNode implements Comparable
 	public int compareTo(Object o) {
 		if (o == null) throw new NullPointerException();
 		TreeNode b = (TreeNode)o;
-		int mySize = this.getAllDescendants().size();
-		int hisSize = b.getAllDescendants().size();
+		int mySize = this.numDescendants;
+		int hisSize = b.numDescendants;
 		if (mySize > hisSize)
 			return -1;
 		else if (mySize < hisSize)

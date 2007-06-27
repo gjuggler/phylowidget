@@ -2,72 +2,97 @@ package org.andrewberman.camera;
 
 import java.awt.geom.Rectangle2D;
 
-import org.andrewberman.phyloinfo.PhyloWidget;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 
-import processing.core.PApplet;
-
 public abstract class Camera extends TweenListener{
 	
-	  public float x;
-	  public float y;
-	  public float z;
+	  protected Tween xTween;
+	  protected Tween yTween;
+	  protected Tween zTween;
 	  
-	  private Tween xTween;
-	  private Tween yTween;
-	  private Tween zTween;
-	  
-	  private int FRAMES = 60;
+	  protected int FRAMES = 15;
 	  
 	  public Camera() {
-	    x = 0;
-	    y = 0;
-	    z = 1;
-	    
-	    xTween = new Tween(this,new TweenQuad(),"inout",0,0,FRAMES,false);
-	    yTween = new Tween(this,new TweenQuad(),"inout",0,0,FRAMES,false);
-	    zTween = new Tween(this,new TweenQuad(),"out",.1f,.1f,FRAMES,false);
+	    xTween = new Tween(this,TweenQuad.instance,"out",0,0,FRAMES,false);
+	    yTween = new Tween(this,TweenQuad.instance,"out",0,0,FRAMES,false);
+	    zTween = new Tween(this,TweenQuad.instance,"out",1f,1f,FRAMES*2,false);
 	  }
 	  
 	  public void centerTo(Rectangle2D.Float rect) {
-		  xTween.continueTo((float)rect.getCenterX(), FRAMES);
-		  yTween.continueTo((float)rect.getCenterY(), FRAMES);
+		  xTween.continueTo((float)rect.getCenterX());
+		  yTween.continueTo((float)rect.getCenterY());
 	  }
 	  
-	  public void zoomCenterTo(Rectangle2D.Float rect) {
-		  float xAspect = (float)rect.width / (float)(getStageWidth());
-		  float yAspect = (float)rect.height / (float)(getStageHeight());
+	  /*
+	   * Zoom and center to the rectangle provided by the coordinates.
+	   * X and Y represent the upper-left hand corner of the rectangle.
+	   */
+	  public void zoomCenterTo(float leftX, float upperY, float w, float h) {
+		  
+		  float centerX = leftX + w/2;
+		  float centerY = upperY + h/2;
+		  
+		  float xAspect = w / getStageWidth();
+		  float yAspect = h / getStageHeight();
 		  if (xAspect > yAspect)
 		  {
-			  zTween.continueTo(1.0f/xAspect, FRAMES);
-			  xTween.continueTo((float)rect.getCenterX()/xAspect, FRAMES);
-			  yTween.continueTo((float)rect.getCenterY()/xAspect, FRAMES);
+			  zTween.continueTo(1.0f/xAspect);
+			  xTween.continueTo(centerX/xAspect);
+			  yTween.continueTo(centerY/xAspect);
 		  } else
 		  {
-			  zTween.continueTo(1/yAspect, FRAMES);
-			  yTween.continueTo((float)rect.getCenterY()/yAspect, FRAMES);
-			  xTween.continueTo((float)rect.getCenterX()/yAspect, FRAMES);
+			  zTween.continueTo(1/yAspect);
+			  yTween.continueTo(centerY/yAspect);
+			  xTween.continueTo(centerX/yAspect);
 		  }
 	  }
 	  
-	  public abstract float getStageWidth();
-	  public abstract float getStageHeight();
+	  public void zoomBy(float factor)
+	  {
+		  zTween.continueTo(zTween.getFinish() * factor);
+	  }
 	  
-	  public float getTranslationX() {
-	    return (float)getStageWidth()/2.0f - (float)x;
+	  public void nudge(float dx, float dy)
+	  {
+		  nudgeTo(xTween.getFinish()+dx,yTween.getFinish()+dy);
 	  }
-	  public float getTranslationY() {
-	    return (float)getStageHeight()/2.0f - (float)y;
+	  
+	  public void nudgeTo(float x, float y)
+	  {
+		  xTween.continueTo(x);
+		  yTween.continueTo(y);
 	  }
-	  public float getScale() {
-	    return (float)z;
+	  
+	  /*
+	   * These methods should be overrideen with something that makes sense.
+	   */
+	  public float getStageWidth()
+	  {
+		  return 100;
 	  }
-	  public void updatePosition() {
-		x = xTween.update();
-		y = yTween.update();
-		z = zTween.update();
+	  public float getStageHeight()
+	  {
+		  return 100;
+	  }
+	  
+	  public float getX()
+	  {
+		  return xTween.getPosition();
+	  }
+	  public float getY()
+	  {
+		  return yTween.getPosition();
+	  }
+	  public float getZ() {
+	    return zTween.getPosition();
+	  }
+	  
+	  public void update() {
+		xTween.update();
+		yTween.update();
+		zTween.update();
 	  }
 	}
 

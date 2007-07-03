@@ -63,7 +63,7 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 		
 	<!-- TARGET: BUILD -->
-	<target name="build" depends="init" description="compile the source">
+	<target name="build" depends="init,clean" description="compile the source">
 		<mkdir dir="${build}"/>
 
 		<!-- Compile the java code from ${src} into ${build} -->
@@ -159,7 +159,10 @@ This Ant task assumes a certain structure within your project directory:
 		<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
 			<istrue value="${project.opengl}"/>
 		</condition>
-		
+
+		<!-- If the applet.comments refers to a valid filename, load it up. -->
+		<loadfile property="internal.appletComments" srcFile="${applet.comments}" failonerror="false"/>
+		<echo>${internal.appletComments}</echo>
 		<!-- Let's be a little sneaky here: we expand out the current set
 		of properties, and use the <filterchain> to automatically replace
 		the property names (i.e. applet.width) with the values (i.e. 400)
@@ -175,31 +178,38 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<!-- TARGET: CLEAN -->
-	<target name="clean">
+	<target name="clean" depends="init">
+		<delete includeemptydirs="true" quiet="true">
+			<union>
+				<fileset dir="${applet}" includes=""/>
+				<fileset dir="${build}" includes=""/>
+			</union>
+		</delete>
 	</target>
 	
 	<!-- MISCELLANEOUS OR "EXTRA" TARGETS GO HERE -->
 	<!-- **************************************** -->
 
-	<target name="outputDebug" if="${internal.debugOut}">
+	<target name="outputDebug" if="internal.debugOut">
 	<echo>
-Script Filename: 	${ant.file}
-Project Home:		${basedir}
-		
-Ant Home: 			${ant.home}
-Ant Version:		${ant.version}
-Ant JVM Version:	${ant.java.version}
-		
-Java JVM Version:	${java.vm.version}
-Java Home: 			${java.home}
-		
-OS Name:			${os.name}
-OS Version:			${os.version}
-OS Architecture:	${os.arch}
+		Script Filename:	${ant.file}
+		Project Home:	${basedir}
+						
+		Ant JVM Version:	${ant.java.version}
+		Ant Version:	${ant.version}
+		Ant Home:		${ant.home}
+						
+		Java JVM Version:	${java.vm.version}
+		Java Version:	${java.version}
+		Java Home: 		${java.home}
+					
+		OS Name:		${os.name}
+		OS Version:		${os.version}
+		OS Architecture:	${os.arch}
 	</echo>
 	</target>
-	
-	<target name="loadJars">
+
+	<target name="loadJars" depends="init">
 		<!-- Create a fileset that includes all the library jar files. -->
 		<condition property="internal.includeOpengl" value="opengl/*.jar">
 			<istrue value="${project.opengl}"/>

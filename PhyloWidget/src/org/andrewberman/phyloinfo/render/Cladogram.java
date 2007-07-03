@@ -146,7 +146,8 @@ public final class Cladogram extends AbstractTreeRenderer implements PSettableRe
 				list.insert(r2,false);
 			}
 		}
-		list.quickSort();
+		list.sortFull();
+		
 	}
 
 	/**

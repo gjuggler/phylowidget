@@ -71,7 +71,7 @@ public class TreeManager implements PSettableRect
 		renderers.add(c);
 		
 		RandomTreeMutator mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 50; i++)
+		for (int i=0; i < 1000; i++)
 		{
 			mutator.randomlyMutateTree();
 		}

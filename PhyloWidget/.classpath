@@ -2,12 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/core.jar" sourcepath="/processing-head/core/src">
-		<attributes>
-			<attribute name="javadoc_location" value="http://dev.processing.org/reference/core/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/swing-worker.jar"/>
-	<classpathentry kind="lib" path="lib/batikfont.jar"/>
+	<classpathentry kind="src" path=".apt_generated"/>
+	<classpathentry kind="lib" path="C:/Users/Greg/workspace/PhyloWidget/lib/core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Greg/workspace/PhyloWidget/lib/swing-worker.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Greg/workspace/PhyloWidget/lib/opengl/jogl.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -61,11 +61,16 @@ public class SortedXYRangeList
 		}
 	}
 	
-	public void quickSort()
+	/**
+	 * Do a "full" sort of the entire list, i.e. do the most efficient
+	 * list sort given that it's expected to be almost completely out
+	 * of order.
+	 */
+	public void sortFull()
 	{
 		for (int i=0; i < lists.length; i++)
 		{
-			lists[i].quickSort();
+			lists[i].sortFull();
 		}
 	}
 	

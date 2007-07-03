@@ -1,14 +1,9 @@
 package org.andrewberman.ui;
 
-import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Cursor;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -17,12 +12,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-
-import javax.swing.SwingUtilities;
 
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
@@ -32,8 +23,6 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PGraphicsJava2D;
-import processing.core.PMatrix;
-import sun.reflect.Reflection;
 
 public class PRadialMenu implements TweenListener, MouseListener, MouseMotionListener
 {

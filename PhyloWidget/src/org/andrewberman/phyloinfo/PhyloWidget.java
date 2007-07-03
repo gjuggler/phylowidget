@@ -1,18 +1,8 @@
 package org.andrewberman.phyloinfo;
 
-import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
-import org.andrewberman.phyloinfo.render.Cladogram;
-import org.andrewberman.phyloinfo.render.TreeRenderer;
-import org.andrewberman.phyloinfo.tree.RandomTreeMutator;
-import org.andrewberman.phyloinfo.tree.Tree;
-import org.andrewberman.phyloinfo.tree.TreeNode;
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.PFontLoader;
-import org.andrewberman.ui.PRadialMenu;
 import org.andrewberman.ui.ProcessingUtils;
 
 import processing.core.PApplet;

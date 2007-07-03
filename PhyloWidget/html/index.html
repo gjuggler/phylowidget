@@ -1,32 +1,99 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/2000/REC-xhtml1-20000126/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-		<title>
-			%%project_name%%: Built with Processing
-		</title>
-		<style type="text/css">
-		html, body { background: #333; color: #eee; }
-		a:link { color: #fc3; }
-		a:visited { color: #ccc; }
-		td  { font-size: 11px; font-family: Verdana,Arial,sans-serif; text-align: left; }
-		</style>
-	</head>
-	<body>
-		<center>
-			<applet code="%%project_class%%" archive="%%project_name%%.jar" width="%%applet.width%%" height="%%applet.height%%">
-			<param name="cache_option" value="No"/>
-			<param name="cache_archive" value="%%project_name%%.jar, index.html"/>
-			<param name="image" value="loading.gif"/>
-			<param name="boxmessage" value="Loading Processing software..."/>
-			<param name="boxbgcolor" value="#FFFFFF"/>
-			</applet>
-			<br />
-			<!--%%applet.comments%%-->
-			<br /><br />
-			<a href="%%src.zipfile%%">
-			Source code
-			</a>
-		</center>
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>${project.name}: Built with Processing</title>
+
+<style type="text/css">
+body {
+  margin: 0px 0px 0px 0px;
+  font-family: verdana, geneva, arial, helvetica, sans-serif; 
+  font-size: 11px; 
+  background-color: #DDDDCC; 
+  text-decoration: none; 
+  font-weight: normal; 
+  line-height: normal; 
+}
+ 
+A          { color: #3399CC; }
+A:link     { color: #3399CC; text-decoration: underline; }
+A:visited  { color: #3399CC; text-decoration: underline; }
+A:active   { color: #3399CC; text-decoration: underline; }
+A:hover    { color: #3399CC; text-decoration: underline; }
+
+#content {
+  position: absolute;
+  left: 55px;
+  top: 60px;
+}
+</style>
+
+<script language="javascript">
+function resizeToWindow(name) {
+  if (navigator.appName.indexOf("Microsoft") != -1) {
+    width=document.body.clientWidth;
+    height=document.body.clientHeight;
+  } else {
+    var netscapeScrollWidth=15;
+    width=window.innerWidth - netscapeScrollWidth;
+    height=window.innerHeight-netscapeScrollWidth;
+  }
+  resize(name, width, height)
+}
+
+function resize(name, width, height) {
+  get(id).width = width;
+  get(id).height = height;
+  window.scroll(0,0);
+}
+
+function get(id) {
+  return document.getElementById(id);
+}
+
+window.onResize = resize;
+window.onLoad = resize;
+</script>
+
+</head>
+
+<body>
+
+<div id="content">
+
+<div>
+<applet
+ name="PApplet"
+ code="${project.class}" 
+ archive="${internal.allJars}"
+ width="${applet.width}" height="${applet.height}"
+ mayscript="true">
+<param name="image" value="loading.gif">
+<param name="boxmessage" value="Loading Processing software...">
+<param name="boxbgcolor" value="#FFFFFF">
+<param name="progressbar" value="true">
+<param name="subapplet.classname" VALUE="${project.class}"> 
+<param name="subapplet.displayname" VALUE="${project.name}"> 
+
+<!-- This is the message that shows up when people don't have
+     Java installed in their browser. Any HTML can go here
+     (i.e. if you wanted to include an image other links, 
+     or an anti-Microsoft diatribe. -->
+To view this content, you need to install Java from <A HREF="http://java.com">java.com</A>
+</applet>
+</div>
+
+<div>
+${applet.comments}
+</div>
+
+<div>
+<a href="${internal.sourceZip}">Source code</a>
+</div>
+
+</div>
+
+</body>
 </html>

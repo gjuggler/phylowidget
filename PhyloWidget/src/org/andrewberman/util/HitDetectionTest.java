@@ -37,7 +37,7 @@ public class HitDetectionTest extends PApplet
 			list.insert(r,false);
 		}
 //		System.out.println("begin sort");
-		list.quickSort();
+//		list.quickSort();
 //		System.out.println("end sort!");
 	}
 	

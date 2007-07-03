@@ -10,8 +10,6 @@ import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 
-import sun.reflect.Reflection;
-
 class PRadialMenuSegment implements TweenListener
 {
 

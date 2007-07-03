@@ -168,9 +168,9 @@ public final class SortedItemList
 		this.insertionSort(0, maxIndex, what, mult);
 	}
 	
-	public void quickSort()
+	public void sortFull()
 	{
-		quickSort(0,maxIndex);
+		this.heapSort();
 	}
 	
 	public void swap(int x, int y)
@@ -179,39 +179,54 @@ public final class SortedItemList
 		items[x] = items[y];
 		items[y] = swap;
 	}
+	
 	/**
-	 * 
+	 * Heap sort. Fits like a glove.
+	 * See http://www.iti.fh-flensburg.de/lang/algorithmen/sortieren/heap/heapen.htm
+	 * for a nice explanation and implementation, from which I adapted this version.
 	 */
-	public void quickSort(int left, int right)
-	{
-		if (left < right)
+	private int n;
+	public void heapSort() {
+		n = maxIndex;
+		buildHeap();
+		while (n>1)
 		{
-			int h = (right - left) / 2 + left;
-			int l, r;
-			float value = items[left].get(what)*mult;
-			
-			for (l = left + 1, r = right; l <= r;)
-			{
-				if (items[l].get(what)*mult < value)
-					l++;
-				else if (items[r].get(what)*mult >= value)
-					r--;
-				else
-				{
-					swap(l,r);
-					l++;
-					r--;
-				}
-			}
-			swap(left, l - 1);
-			quickSort(left, l - 2);
-			quickSort(l, right);
+			n--;
+			exchange(0,n);
+			downHeap(0);
 		}
+	}
+	private void buildHeap()
+	{
+		for (int v=items.length/2-1; v>=0; v--)
+			downHeap(v);
+	}
+	private void downHeap(int v)
+	{
+		int w=2*v+1; // first child of v
+		while (w<n)
+		{
+			if (w+1<n) // is there a second child?
+				if (items[w+1].get(what)*mult>items[w].get(what)*mult) w++;
+			// now, w is v's max-label child.
+			
+			if (items[v].get(what)*mult >= 
+				items[w].get(what)*mult) return; // we've got heap property.
+			exchange(v,w); // Otherwise, exchange v and w.
+			v=w;
+			w=2*v+1;
+		}
+	}
+	private void exchange(int i, int j)
+	{
+		ItemI t = items[i];
+		items[i] = items[j];
+		items[j] = t;
 	}
 	
 	/**
 	 * A recursive insertionsort implementation. Algorithm taken largely from
-	 * Matthew Caryl's collision detection test.
+	 * Matthew Caryl's collision detection tests.
 	 * http://www.permutationcity.co.uk/programming/collisioncode/ClosestPairTest.java
 	 * 
 	 * @param items Our array of Range objects.

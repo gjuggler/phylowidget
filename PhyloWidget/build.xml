@@ -27,7 +27,7 @@ This Ant task assumes a certain structure within your project directory:
              from the Processing distribution and place them in this directory. Last
              I saw they were "opengl.jar," "jogl.jar," and a bunch of "jogl-natives-XXX.jar".
 -->
-<project name="${project.name}" default="dist" basedir=".">
+<project name="Processing Applet Export" default="dist" basedir=".">
 	<description>
         Processing applet output script.
 		http://processing.org/
@@ -44,7 +44,10 @@ This Ant task assumes a certain structure within your project directory:
 		<fail unless="applet.height">Please specify applet.height in the build.properties file.</fail>
 	
 		<!-- Output debug info if desired. -->
-		<!-- TODO -->
+		<condition property="internal.debugOut">
+			<istrue value="${build.debug}"/>
+		</condition>
+		<antcall target="outputDebug"/>
 		
 		<!-- Store folder locations within named properties. -->
 		<property name="src" location="src"/>
@@ -93,7 +96,7 @@ This Ant task assumes a certain structure within your project directory:
 		<zip destfile="${applet}/${internal.sourceZip}" basedir="${src}"/>
 
 		<!-- COPY JARS FROM "LIB" TO "APPLET" -->
-		<antcall target="copyJars"/>
+		<antcall target="copyJars" inheritRefs="true"/>
 
 		<!-- SIGN THIS JAR, IF NECESSARY -->
 		<condition property="internal.signJar">
@@ -127,17 +130,17 @@ This Ant task assumes a certain structure within your project directory:
 	<!-- TARGET: SIGNJAR -->
 	<target name="signJar" if="internal.signJar">
 		<antcall target="genKey"/>
-		<signjar jar="${applet}/${internal.finalJar}" alias="signjar.alias" storepass="signjar.storepass"/>
+		<signjar jar="${applet}/${internal.finalJar}" alias="${signjar.alias}" storepass="${signjar.storepass}"/>
 	</target>
 
 	<!-- TARGET: GENKEY -->
 	<target name="genKey" if="internal.genKey">
-		<genkey alias="phylowidget" storepass="signjar.storepass">
+		<genkey alias="${signjar.alias}" storepass="${signjar.storepass}">
 			<dname>
-				<param name="CN" value="Gregory Jordan"/>
-				<param name="OU" value="NESCENT SoC 2007"/>
-				<param name="O" value="nescent.org"/>
-				<param name="C" value="US"/>
+				<param name="CN" value="${signjar.cn}"/>
+				<param name="OU" value="${signjar.ou}"/>
+				<param name="O" value="${signjar.o}"/>
+				<param name="C" value="${signjar.c}"/>
 			</dname>
 		</genkey>
 	</target>
@@ -176,7 +179,26 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 	
 	<!-- MISCELLANEOUS OR "EXTRA" TARGETS GO HERE -->
+	<!-- **************************************** -->
 
+	<target name="outputDebug" if="${internal.debugOut}">
+	<echo>
+Script Filename: 	${ant.file}
+Project Home:		${basedir}
+		
+Ant Home: 			${ant.home}
+Ant Version:		${ant.version}
+Ant JVM Version:	${ant.java.version}
+		
+Java JVM Version:	${java.vm.version}
+Java Home: 			${java.home}
+		
+OS Name:			${os.name}
+OS Version:			${os.version}
+OS Architecture:	${os.arch}
+	</echo>
+	</target>
+	
 	<target name="loadJars">
 		<!-- Create a fileset that includes all the library jar files. -->
 		<condition property="internal.includeOpengl" value="opengl/*.jar">

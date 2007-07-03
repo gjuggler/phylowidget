@@ -16,10 +16,6 @@ public class PFontLoader
 	public static PFont f16 = p.loadFont(base + "-16.vlw");
 	public static PFont f8 = p.loadFont(base + "-8.vlw");
 	
-	static {
-//		p = PhyloWidget.p;
-	}
-	
 	private PFontLoader()
 	{
 		

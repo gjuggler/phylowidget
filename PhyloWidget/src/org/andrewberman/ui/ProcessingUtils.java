@@ -4,23 +4,69 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
+import org.andrewberman.phyloinfo.PhyloWidget;
+
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
 import processing.core.PMatrix;
 
-public final class ProcessingUtils
+public class ProcessingUtils
 {
-
-	private static PMatrix temp = new PMatrix();
 	
+	private static PMatrix camera = new PMatrix();
+	private static PMatrix cameraInv = new PMatrix();
+	private static PMatrix modelview = new PMatrix();
+	private static PMatrix modelviewInv = new PMatrix();
+
 	/**
 	 * This should be called at the end of every draw() run.
 	 * @param mat the modelview matrix.
 	 */
 	public static void setMatrix(PApplet p)
 	{
-		temp.set(p.g.modelviewInv);
-//		temp.invert();
+		if (p.g.getClass() == PGraphicsJava2D.class)
+		{
+			PGraphicsJava2D g = (PGraphicsJava2D) p.g;
+			AffineTransform tr = g.g2.getTransform();
+			try
+			{
+				affineToPMatrix(tr, modelview);
+				tr.invert();
+				affineToPMatrix(tr, modelviewInv);
+				camera.reset();
+				cameraInv.reset();
+			} catch (NoninvertibleTransformException e)
+			{
+				return;
+			}
+		} else
+		{
+			camera.set(p.g.camera);
+			cameraInv.set(p.g.cameraInv);
+			modelview.set(p.g.modelview);
+			modelviewInv.set(p.g.modelviewInv);
+			
+		}
+	}
+
+	private static double[] temp = new double[6];
+	public static void affineToPMatrix(AffineTransform tr, PMatrix mat)
+	{
+		tr.getMatrix(temp);
+		mat.set((float) temp[0], (float) temp[2], 0, (float) temp[4],
+				(float) temp[1], (float) temp[3], 0, (float) temp[5],
+				0, 0, 0, 0,
+				0, 0, 0, 0);
+	}
+
+	public static void transform(PMatrix mat, Point2D.Float pt)
+	{
+		float x = pt.x;
+		float y = pt.y;
+		float z = 0;
+		
+		pt.x = mat.m00*x + mat.m01*y + mat.m02*z + mat.m03;
+		pt.y = mat.m10*x + mat.m11*y + mat.m12*z + mat.m13;
 	}
 	
 	/**
@@ -29,38 +75,15 @@ public final class ProcessingUtils
 	 * @param pt The point to transform in place. Should currently contain the mouse
 	 * coordinates.
 	 */
-	public static void mouseToModel(PApplet p, Point2D.Float pt)
+	public static void screenToModel(PApplet p, Point2D.Float pt)
+	{		
+		transform(camera,pt);
+		transform(modelviewInv,pt);
+	}
+
+	public static void modelToScreen(PApplet p, Point2D.Float pt)
 	{
-		if (p.g.getClass() == PGraphicsJava2D.class)
-		{
-			// If we're in Java2D, we need to get the AffineTransform and do an inverse.
-			PGraphicsJava2D g = (PGraphicsJava2D) p.g;
-//			g.loadMatrix();
-			AffineTransform a = g.g2.getTransform();
-			AffineTransform inv;
-			try
-			{
-				inv = a.createInverse();
-				inv.transform(pt, pt);
-			} catch (NoninvertibleTransformException e1)
-			{
-				inv = a;
-				System.err.println("Error transforming coordinates!");
-			}
-		} else
-		{
-			// We're using P3D or OpenGL.
-			
-			// Re-center the x and y coordinates back to zero-centered.
-			pt.x -= p.width/2;
-			pt.y -= p.height/2;
-			
-			// Transform the mouse coordinates into model space.
-		    float modelX =
-		        temp.m00*pt.x + temp.m01*pt.y + temp.m03;
-			float modelY =
-				temp.m10*pt.x + temp.m11*pt.y + temp.m13;
-			pt.setLocation(modelX,modelY);
-		}
+		transform(modelview,pt);
+		transform(cameraInv,pt);
 	}
 }

@@ -1,6 +1,7 @@
 package org.andrewberman.phyloinfo;
 
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -15,20 +16,20 @@ import org.andrewberman.ui.PRadialMenu;
 import org.andrewberman.ui.ProcessingUtils;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PFont;
+import processing.core.PGraphicsJava2D;
 
 public class PhyloWidget extends PApplet
 {
 	private static final long serialVersionUID = -7096870051293017660L;
-
-	private Graphics2D g2;
-	public static PApplet p;
+	
+	public static PhyloWidget p;
 
 	public PhyloCamera camera;
-	public TreeRenderer render;
-	public PRadialMenu menu;
-	public RandomTreeMutator mutator;
-	public static int WIDTH = 500;
+	public TreeManager manager;
+	
+	public static int WIDTH = 400;
 	public static int HEIGHT = 400;
 
 	private PFont debugFont;
@@ -41,88 +42,54 @@ public class PhyloWidget extends PApplet
 
 	public void setup()
 	{
-		size(WIDTH, HEIGHT, P3D);
-		
-		background(0, 0, 0);
+		registerSize(this);
+		size(WIDTH, HEIGHT);
 		frameRate(30f);
 		
-		camera = new PhyloCamera(this);
-		render = new Cladogram(this,new Tree(new TreeNode("PhyloWidget")));
-//		menu = new PRadialMenu(this);
-//		menu.addMenuItem("Hello, world!", 'h', "");
+		camera = new PhyloCamera();
+		manager = new TreeManager();
+		manager.createTree("PhyloWidget");
 		
-		debugFont = PFontLoader.f16;
-		
-		menu = new PRadialMenu(this, 200, 200, 50);
-		try
-		{
-			menu.addMenuItem("New",'+',"doSomething");
-			menu.addMenuItem("Delete",'x',"doSomething");
-			menu.addMenuItem("Move",'»',"doSomething");
-			menu.addMenuItem("Something",'u',"doSomething");
-		} catch (RuntimeException e)
-		{
-			e.printStackTrace();
-		}
-		
-		phyloInit();
+		debugFont = PFontLoader.f32;
 	}
 
 	public void draw()
 	{
 		background(255);
-		textMode(PApplet.SCREEN);
-		textAlign(PApplet.LEFT);
-		textFont(debugFont,16);
-		text(String.valueOf(round(frameRate*10)/10.0), 10, 15);
-		if (mutator != null)
-			text(mutator.mutations,10,35);
-		textMode(PApplet.MODEL);
+		drawFrameRate();
 		
 		camera.update();
-		
-		render.render();
-		menu.draw();
 		ProcessingUtils.setMatrix(this);
 		
-//		p.stroke(255,0,0);
-//		p.strokeWeight(2.0f);
-		Point2D.Float pt = render.getNearestPoint();
-//		p.ellipse(pt.x, pt.y, 10, 10);
-		if (!FocusManager.isModal())
+//		manager.setRect(0, 0, mouseX, mouseY);
+		manager.update();
+	}
+
+	public void drawFrameRate()
+	{
+//		textMode(PApplet.SCREEN);
+		textAlign(PApplet.LEFT);
+		textFont(debugFont);
+		fill(0);
+		text(String.valueOf(round(frameRate*10)/10.0), 10, 25);
+//		textMode(PApplet.MODEL);	
+	}
+	
+	public void size(int w, int h)
+	{
+		synchronized(this)
 		{
-			menu.setPosition(pt.x, pt.y);
+			size(w,h,JAVA2D);
+			if (g.getClass() == PGraphicsJava2D.class)
+			{
+				PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
+				
+				// I like the native fonts with Java2D.
+				p.hint(PConstants.ENABLE_NATIVE_FONTS);
+				pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+				
+//				p.smooth();
+			}	
 		}
-		
-		
-		Rectangle2D.Float rect = render.getRect();
-		noFill();
-		stroke(255,0,0);
-		p.rect(rect.x, rect.y, rect.width, rect.height);
 	}
-
-	public void phyloInit()
-	{
-		Tree tree = new Tree(new TreeNode("PhyloWidget"));
-		render.setTree(tree);
-//		camera.zoomCenterTo(render.getRect());
-		if (mutator != null)
-			mutator.stop();
-//		mutator = new RandomTreeMutator(this, render.getTree());
-//		mutator.delay = 2000;
-	}
-
-	
-	public void doSomething(String s)
-	{
-		// Do nothing.
-	}
-	
-	// Input handling starts here.
-	
-	public void mouseClicked()
-	{
-//		phyloInit();
-	}
-	
 }

@@ -89,8 +89,6 @@ public class PTextInput implements BlinkListener, MouseListener, KeyListener, Mo
 	{
 		p = applet;
 		p.registerDraw(this);
-//		p.registerKeyEvent(this);
-//		p.registerMouseEvent(this);
 		
 		p.addMouseListener(this);
 		p.addMouseMotionListener(this);
@@ -101,7 +99,7 @@ public class PTextInput implements BlinkListener, MouseListener, KeyListener, Mo
 		this.y = y;
 		this.w = w;
 		this.color = p.color(0, 0, 0);
-
+		
 		// Default font to Times New Roman.
 		setFont("TimesNewRoman-64.vlw", size);
 
@@ -490,7 +488,7 @@ public class PTextInput implements BlinkListener, MouseListener, KeyListener, Mo
 		
 		pt.x = e.getX();
 		pt.y = e.getY();
-		ProcessingUtils.mouseToModel(p, pt);
+		ProcessingUtils.screenToModel(p, pt);
 		
 		if (this.containsPoint(pt.x,pt.y,true)) // contained within text+padding area.
 		{
@@ -571,7 +569,7 @@ public class PTextInput implements BlinkListener, MouseListener, KeyListener, Mo
 		if (!FocusManager.isFocused(this))
 			return;
 		int code = e.getKeyCode();
-		System.out.println(KeyEvent.getKeyText(code)+ " " + code);
+//		System.out.println(KeyEvent.getKeyText(code)+ " " + code);
 		boolean ctrl = e.isControlDown();
 		boolean shift = e.isShiftDown();
 		if (e.getID() == KeyEvent.KEY_PRESSED)

@@ -12,7 +12,7 @@ import org.andrewberman.tween.TweenQuad;
 
 import sun.reflect.Reflection;
 
-class PRadialMenuSegment extends TweenListener
+class PRadialMenuSegment implements TweenListener
 {
 
 // Model.
@@ -94,9 +94,9 @@ class PRadialMenuSegment extends TweenListener
 		tween.continueTo(255,5);
 		tween.fforward();
 	}
-	
-	public void onMotionUpdated(Tween t)
+
+	public void tweenEvent(Tween source, int eventType)
 	{
-		this.alpha = Math.round(t.position);
+		this.alpha = Math.round(source.position);
 	}
 }

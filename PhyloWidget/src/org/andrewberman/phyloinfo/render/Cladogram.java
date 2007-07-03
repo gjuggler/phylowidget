@@ -1,212 +1,161 @@
 package org.andrewberman.phyloinfo.render;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.andrewberman.phyloinfo.tree.Tree;
+import org.andrewberman.camera.PSettableRect;
+import org.andrewberman.phyloinfo.PhyloWidget;
 import org.andrewberman.phyloinfo.tree.TreeNode;
-import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.util.Point;
+import org.andrewberman.util.SortedXYRangeList;
 
 import processing.core.PApplet;
-import processing.core.PFont;
+import processing.core.PConstants;
+import processing.core.PGraphicsJava2D;
+import processing.core.PImage;
 
-public class Cladogram extends AbstractTreeRenderer
+public final class Cladogram extends AbstractTreeRenderer implements PSettableRect
 {
-	protected PApplet p;
+	protected PApplet p = PhyloWidget.p;
 
 	/**
-	 * A hashmap containing: key is the TreeNode; value is a Point2D
-	 * object with the treeNode's position. A position should be an x,y pair
-	 * where x and y are between 0 and 1, respectively. These position values
-	 * are appropriately scaled and translated in the drawing steps. This way,
-	 * we can calculate the positions only when the tree changes, and the
-	 * redrawing only requires stepping through all leaves/nodes and multiplying
-	 * by the width and height of the current rectangle.
+	 * A data structure to store the rectangular regions of all nodes.
+	 * Instead of drawing all nodes, we retrieve the nodes whose regions
+	 * intersect with the visible rectangle, and then draw. This can
+	 * significantly improve performance when viewing only a portion of
+	 * a large tree.
 	 */
-	protected HashMap positions = new HashMap();
-
-	/**
-	 * A hashmap containing the "actual" node positions, i.e. the center of the drawn
-	 * circle for each node.
-	 */
-	protected HashMap realPositions = new HashMap();
-	
-	protected ArrayList leaves = new ArrayList(200); // all leaves.
-	protected ArrayList nodes = new ArrayList(200); // all nodes.
+	protected SortedXYRangeList list = new SortedXYRangeList();
+	protected ArrayList ranges = new ArrayList();
+	public static final int NODE = 0;
+	public static final int LABEL = 1;
 	
 	/**
-	 * This is the tree's "Mover" object. The mover is updated in the update()
-	 * method, and it sets the bounds for this tree's bounding rectangle. This
-	 * gives us an easy "camera-like" object to use to smoothly move the tree
-	 * around the stage. Keep in mind that the mover can either force an aspect
-	 * ratio or let the tree choose the best one.
+	 * Another optimization method -- if we're zoomed out so far that rows
+	 * become unreadable (i.e. if rowsize is <= SKIP_THRESH), then start
+	 * skipping drawing nodes to relieve the strain on the text functions.
 	 */
-	protected TreeMover mover;
+	HashMap skipMe = new HashMap();
+	public static final int SKIP_THRESH = 3;
+	
+	/**
+	 * An offscreen PGraphicsJava2D buffer, created during the layout()
+	 * process to cache the text for each node. This should decrease the
+	 * number of calls to Pgraphics.image() during the draw phase, increasing
+	 * rendering speed.
+	 * 
+	 * Note that if we're using native fonts, this should NOT be created.
+	 */
+	protected PImage labels;
+	protected PGraphicsJava2D temp;
+	public HashMap nodeToLabelIndex;
+	
+	/**
+	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
+	 * won't stretch to completely fill its enclosing rectangle.
+	 */
+	public boolean keepAspectRatio = true;
 
 	/**
-	 * Maximum label width (in pixels, at a size 1 font).
-	 * This is scaled up by fontSize in order to get the actual max label width.
+	 * These variables are set in the calculateSizes() method during every round
+	 * of rendering. Very important!
 	 */
-	protected float maxLabelWidth = 0;
-	protected PFont font;
-	protected float textSize = 12;
+	protected float rowSize, colSize = 0;
 
+	protected float dFont = 0;
+
+	protected int maxDepth = 0;
 	/**
-	 * These variables are set in the calculateSizes() method during every
-	 * round of rendering. Very important!
+	 * Radius of the node ellipses.
 	 */
-	protected float rowSize = 0;
-	protected float colSize = 0;
-	protected float minSize = 0;
-	protected int numRows = 0;
-	protected int numCols = 0;
-	
-	public Cladogram(PApplet applet)
+	protected float dotWidth = 0;
+	/**
+	 * Width of the node label gutter.
+	 */
+	protected float gutterWidth = 0;
+
+	protected Point ptemp = new Point(0, 0);
+	protected Point ptemp2 = new Point(0, 0);
+
+	public Cladogram()
 	{
-		this(applet, null);
+		super();
 	}
 
-	public Cladogram(PApplet applet, Tree tree)
+	public void layout()
 	{
-		p = applet;
-		this.tree = tree;
-
-		mover = new TreeMover(p, this);
-		mover.fillScreen();
-		mover.forceAspectRatio = false;
-
-		// Load the font from the data directory and set it to be used for text
-		// drawing.
-		font = p.loadFont("TimesNewRoman-32.vlw");
-	}
-
-	float pos = 0;
-
-	public void render()
-	{
-		if (tree == null)
-			return;
-
-		p.pushMatrix();
-		mover.updatePosition();
-		synchronized (tree)
-		{
-			if (tree.needsUpdating)
-			{
-				leaves.clear();
-				tree.getAllLeaves(leaves);
-				nodes.clear();
-				tree.getAllNodes(nodes);
-				calcMaxNameWidth();
-			}
-			calculateSizes(); // this requires knowing the max name width.
-			if (tree.needsUpdating)
-			{
-				leafPositions();
-				branchPositions();
-				tree.needsUpdating = false;
-			}
-			translateStage();
-			drawLines();
-			drawNodes();
-		}
-		p.popMatrix();
-	}
-
-	public void translateStage()
-	{
-		p.translate(getTranslationX(),getTranslationY());
-	}
-	
-	public float getTranslationX()
-	{
-		if (mover.forceAspectRatio)
-		{
-			return rect.x + colSize / 2;
-		} else
-		{
-			float gutterWidth = maxLabelWidth*textSize;
-			float realWidth =
-				minSize / colSize * (rect.width - gutterWidth) + gutterWidth;
-//			float realHeight =
-//				minSize / rowSize * (rect.height);
-//			colSize = minSize;
-			return rect.x + minSize / 2 + (rect.width - realWidth)/2;
-		}
-	}
-	
-	public float getTranslationY()
-	{
-		if (mover.forceAspectRatio)
-		{
-			return rect.y + rowSize / 2;
-		} else
-		{
-//			float gutterWidth = maxLabelWidth*textSize;
-//			float realWidth =
-//				minSize / colSize * (rect.width - gutterWidth) + gutterWidth;
-			float realHeight =
-				minSize / rowSize * (rect.height);
-//			rowSize = minSize;
-			return rect.y + minSize / 2 + (rect.height - realHeight)/2;
-		}
-	}
-	
-	public void calculateSizes()
-	{
-		// Calculate the "standard" row height.
-//		numRows = tree.getRoot().getNumLeaves();
-		numRows = leaves.size();
-//		System.out.println(numRows);
-		rowSize = rect.height / (float) numRows;
-
-		// at what font size would the labelas take up half the width?
-		float biggestSize = rect.width / 2 / maxLabelWidth;
-		textSize = Math.min(biggestSize, rowSize);
-
-		// Use font size and max height to get width per unit height.
-		numCols = tree.getRoot().getMaxDepth();
-		colSize = (rect.width - maxLabelWidth * textSize) / (float) numCols;
-		
-		minSize = Math.min(rowSize,colSize);
-	}
-
-	public void calcMaxNameWidth()
-	{
-		maxLabelWidth = 0;
+		/**
+		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
+		 * tree's leaves, i.e. in the correct ordering from top to bottom.
+		 */
+		maxDepth = tree.getRoot().getMaxDepth();
+		gutterWidth = 0;
+//		float spaceWidth = font.width(' ') * 3;
 		for (int i = 0; i < leaves.size(); i++)
 		{
 			TreeNode n = (TreeNode) leaves.get(i);
-
+			/**
+			 * Set the leaf position.
+			 */
+			float yPos = (float) ((i + .5) / (leaves.size()));
+			float xPos = 1 - (n.getMaxDepth() - .5f) / maxDepth;
+			setPosition(n, xPos, yPos);
+			/**
+			 * Find the width of this node's label.
+			 */
 			char[] chars = n.getName().toCharArray();
-			// Include a leading space to separate from the node ellipse.
-			float width = font.width(' ')*2;
+			float width = 0;//spaceWidth;
 			for (int j = 0; j < chars.length; j++)
 			{
 				width += font.width(chars[j]);
 			}
-			if (width > maxLabelWidth)
-				maxLabelWidth = width;
+			if (width > gutterWidth)
+				gutterWidth = width;
 		}
-	}
-
-	public void leafPositions()
-	{
-		System.out.println(leaves.size());
-		for (int i = 0; i < leaves.size(); i++)
-		{
-			TreeNode leaf = (TreeNode) leaves.get(i);
-			setPosition(leaf, xPosForNode(leaf), i);
-		}
-	}
-
-	public void branchPositions()
-	{
+		/**
+		 * Now, set the branch positions.
+		 */
 		branchPositions(tree.getRoot());
+		/**
+		 * Create an empty XYRange object for each TreeNode.
+		 */
+		list.clear();
+		ranges.clear();
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			TreeNode n = (TreeNode) nodes.get(i);
+			Point p = getPosition(n);
+			NodeRange r = new NodeRange();
+			r.loX = r.hiX = p.x;
+			r.loY = r.hiY = p.y;
+			r.type = NodeRange.NODE;
+			r.node = n;
+			r.render = this;
+			ranges.add(r);
+			list.insert(r, false);
+			if (n.isLeaf())
+			{
+				NodeRange r2 = new NodeRange();
+				r2.loX = r2.hiX = p.x;
+				r2.loY = r2.hiY = p.y + .001f;
+				r2.type = NodeRange.LABEL;
+				r2.node = n;
+				r2.render = this;
+				ranges.add(r2);
+				list.insert(r2,false);
+			}
+		}
+		list.quickSort();
 	}
 
+	/**
+	 * A recursive function to set the positions for all the branches. Only
+	 * works if the leaf positions have already been set.
+	 * 
+	 * @param n
+	 * @return
+	 */
 	public float branchPositions(TreeNode n)
 	{
 		if (n.isLeaf())
@@ -225,120 +174,182 @@ public class Cladogram extends AbstractTreeRenderer
 				sum += branchPositions(child);
 			}
 			float y = (float) sum / (float) children.size();
-			float x = xPosForNode(n);
-
+			float x = 1 - (n.getMaxDepth() - .5f) / maxDepth;
 			setPosition(n, x, y);
 			return y;
 		}
 	}
-
-	public float xPosForNode(TreeNode n)
+	
+	protected ArrayList inRange = new ArrayList();
+	protected boolean sorted = false;
+	public void draw()
 	{
-		int max = tree.getRoot().getMaxDepth();
-		int cur = n.getMaxDepth();
-		return (float) (max - cur);
-	}
+		float numRows = leaves.size();
+		float idealRowSize = rect.height / numRows;
 
-	public void setPosition(TreeNode n, float x, float y)
-	{
-		Point2D.Float pt = new Point2D.Float(x, y);
-		positions.put(n, pt);
-	}
+		float textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
+		float effectiveWidth = rect.width - gutterWidth * textSize;
 
-	public Point2D.Float getPosition(TreeNode n)
-	{
-		return (Point2D.Float) positions.get(n);
-	}
+		float numCols = maxDepth;
+		float idealColSize = effectiveWidth / numCols;
 
-	public void drawLines()
-	{
-		Point2D.Float mouse = new Point2D.Float(p.mouseX,p.mouseY);
-		ProcessingUtils.mouseToModel(p, mouse);
-		float nearestDistance = Float.MAX_VALUE;
-		float currentDistance = 0;
+		float rowSize = idealRowSize;
+		float colSize = idealColSize;
+		if (keepAspectRatio)
+			rowSize = colSize = Math.min(idealRowSize, idealColSize);
+
+		dotWidth = Math.min(rowSize / 2, textSize / 2);
+		scaleX = colSize * numCols;
+		scaleY = rowSize * numRows;
+		dx = (rect.width - scaleX - gutterWidth * textSize - dotWidth) / 2;
+		dy = (rect.height - scaleY) / 2;
+		dx += rect.getCenterX() - rect.width / 2;
+		dy += rect.getCenterY() - rect.height / 2;
+		dFont = (font.ascent() - font.descent()) * textSize / 2;
+
+		/**
+		 * Update all the XYRange objects.
+		 */
+		TreeNode n;
+		NodeRange r;
+		for (int i = 0; i < ranges.size(); i++)
+		{
+			r = (NodeRange) ranges.get(i);
+			n = r.node;
+			getTranslatedPosition(n, ptemp);
+			switch (r.type)
+			{
+				case (Cladogram.NODE):
+					r.loX = ptemp.x - dotWidth/2;
+					r.hiX = ptemp.x + dotWidth/2;
+					r.loY = ptemp.y - dotWidth/2;
+					r.hiY = ptemp.y + dotWidth/2;	
+					break;
+				case (Cladogram.LABEL):
+					r.loX = ptemp.x + dotWidth;
+				
+					float textHeight = (font.ascent() + font.descent()*2)*textSize;
+					r.loY = ptemp.y - textHeight/2;
+					r.hiY = ptemp.y + textHeight/2;
+					char[] chars = n.getName().toCharArray();
+					float width = 0;
+					for (int j = 0; j < chars.length; j++)
+					{
+						width += font.width(chars[j])*textSize;
+					}
+					// Don't use p.textWidth -- it's VERY SLOW when fonts are large!
+//					r.hiX = r.loX + p.textWidth(n.getName());
+					r.hiX = r.loX + width;
+					break;
+			}
+		}
+		// Only sort once.
+		if (!sorted)
+		{
+			list.sort();
+			sorted = true;
+		}
 		
-		Point2D.Float pt = new Point2D.Float(0,0);
+		/**
+		 * Now, draw the nodes that are in range.
+		 */
+		p.fill(0);
+		p.stroke(0);
+		p.strokeWeight(1);
+		drawAllLines();
+		p.noStroke();
+		p.textFont(font);
+		p.textSize(textSize);
+		p.textAlign(PConstants.LEFT);
+		
+		inRange.clear();
+		list.getInRange(inRange, -p.width / 2, p.width / 2,
+				-p.height / 2, p.height / 2);
+//		System.out.println(inRange.size());
+		
+		skipMe.clear();
+		if (rowSize < SKIP_THRESH)
+		{
+			for (int i=0; i < leaves.size(); i++)
+			{
+				n = (TreeNode)leaves.get(i);
+				int asdf = 1;
+				if (rowSize < SKIP_THRESH)
+					asdf = 2;
+				if (rowSize < SKIP_THRESH*.5)
+					asdf = 3;
+				if (rowSize < SKIP_THRESH*.25)
+					asdf = 4;
+				if (rowSize < SKIP_THRESH*.1)
+					asdf = 10;
+				if (i % asdf != 0)
+					skipMe.put(n, null);
+			}
+		}
+		
+		for (int i = 0; i < inRange.size(); i++)
+		{
+			r = (NodeRange) inRange.get(i);
+			n = r.node;
+			switch (r.type)
+			{
+				case (Cladogram.LABEL):
+					if (!skipMe.containsKey(n))
+						drawLabel(n);
+					break;
+				case (Cladogram.NODE):
+						drawNode(n);
+					break;
+			}
+		}
+	}
+
+	public void drawNode(TreeNode n)
+	{
+		getTranslatedPosition(n, ptemp);
+		p.ellipse(ptemp.x, ptemp.y, dotWidth, dotWidth);
+	}
+
+	public void drawLabel(TreeNode n)
+	{
+		getTranslatedPosition(n,ptemp);
+		p.text(n.getName(), ptemp.x+dotWidth, ptemp.y + dFont);
+	}
+	
+	public void drawAllLines()
+	{
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			TreeNode n = (TreeNode) nodes.get(i);
-			pt.setLocation(getPosition(n));
-			p.fill(0);
-			p.noStroke();
-			float radius = Math.min(textSize / 2, colSize / 2);
-			p.ellipse(pt.x * colSize, pt.y * rowSize, radius, radius);
-		
-			pt.setLocation(pt.x * colSize + getTranslationX(),
-					pt.y * rowSize + getTranslationY());
-			currentDistance = (float) pt.distanceSq(mouse);
-			if (currentDistance < nearestDistance)
-			{
-				nearestDistance = currentDistance;
-				nearestNode = n;
-				nearestNodePoint.setLocation(pt);
-			}
-			
-			connectToParent(n);
+			drawLine(n);
 		}
 	}
 
-	public Point2D.Float nearestNodePoint = new Point2D.Float(0,0);
-	public TreeNode nearestNode = null;
-	public Point2D.Float getNearestPoint()
+	public void drawLine(TreeNode n)
 	{
-		return nearestNodePoint;
-	}
-	public TreeNode getNearestNode()
-	{
-		return nearestNode;
+		getTranslatedPosition(n, ptemp);
+
+		if (n.getParent() != TreeNode.NULL_PARENT)
+		{
+			getTranslatedPosition(n.getParent(), ptemp2);
+
+			p.line(ptemp.x, ptemp.y, ptemp2.x, ptemp.y);
+		}
+
+		if (!n.isLeaf())
+		{
+			ArrayList children = n.getChildren();
+			TreeNode first = (TreeNode) children.get(0);
+			TreeNode last = (TreeNode) children.get(children.size() - 1);
+			float minY = getTranslatedPosition(first, ptemp2).y;
+			float maxY = getTranslatedPosition(last, ptemp2).y;
+
+			p.line(ptemp.x, minY, ptemp.x, maxY);
+		}
 	}
 	
-	public void drawNodes()
+	public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
 	{
-		p.fill(0);
-		p.textFont(font);
-		p.textAlign(PApplet.LEFT, PApplet.CENTER);
-		p.textSize(textSize);
-		float space = font.width(' ')*textSize;
-		
-		Point2D.Float pt = new Point2D.Float(0,0);
-		for (int i = 0; i < leaves.size(); i++)
-		{
-			TreeNode n = (TreeNode)leaves.get(i);
-			pt.setLocation(getPosition(n));
-			p.text("  "+n.getName(), pt.x * colSize, pt.y
-					* rowSize);
-		}
+		list.getInRange(arr, rect);
 	}
-
-	public void connectToParent(TreeNode n)
-	{
-		if (n.getParent() == TreeNode.NULL_PARENT)
-			return;
-		Point2D.Float ptA = getPosition(n);
-		Point2D.Float ptB = getPosition(n.getParent());
-		p.stroke(0);
-		p.strokeWeight(1.0f);
-		p.line(ptA.x * colSize, ptA.y * rowSize, ptB.x * colSize, ptA.y
-				* rowSize);
-		p.line(ptB.x * colSize, ptA.y * rowSize, ptB.x * colSize, ptB.y
-				* rowSize);
-	}
-
-	// public Rectangle2D.Float getRect()
-	// {
-	// float top = 0.0f;
-	// float left = 0.0f;
-	// float right = RenderingConstants.BRANCH_LENGTH
-	// * (tree.getRoot().getMaxHeight())
-	// + RenderingConstants.NAMES_MARGIN + getMaxNameWidth();
-	// float bottom = RenderingConstants.LEAF_SPACING
-	// * (tree.getRoot().getAllLeaves().size() - 1) + font.ascent
-	// + font.descent;
-	// // add 10% border.
-	// float wBorder = (right - left) / 10.0f;
-	// float hBorder = (bottom - top) / 10.0f;
-	// return new Rectangle2D.Float(left - wBorder, top - hBorder, right
-	// - left + 2 * wBorder, bottom - top + 2 * hBorder);
-	// }
-
 }

@@ -3,7 +3,6 @@ package org.andrewberman.phyloinfo.tree;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,7 +18,6 @@ import org.andrewberman.phyloinfo.PhyloWidget;
 
 public class RandomTreeMutator implements Runnable
 {
-	private PhyloWidget p;
 	private Tree tree;
 	private Thread wrapper;
 	private java.util.Random random;
@@ -29,17 +27,21 @@ public class RandomTreeMutator implements Runnable
 	
 	public int mutations = 0;
 	
-	public RandomTreeMutator(PhyloWidget p, Tree t) {
-		this.p = p;
+	public RandomTreeMutator(Tree t) {
 		tree = t;
-		wrapper = new Thread(this);
-		wrapper.setName("PhyloWidget-tree-mutator");
-		wrapper.start();
 		random = new Random();
 		
-		InputStream is = p.openStream("taxonomy.txt");
+//		InputStream is = new FileInputStream("taxonomy.txt");
+		InputStream is = PhyloWidget.p.openStream("taxonomy.txt");
 		InputStreamReader read = new InputStreamReader(is);
 		in = new BufferedReader(read);
+	}
+	
+	public void start()
+	{
+		wrapper = new Thread(this);
+		wrapper.setName("PhyloWidget-tree-mutator");
+		wrapper.start();	
 	}
 	
 	public void run()
@@ -77,10 +79,8 @@ public class RandomTreeMutator implements Runnable
 			int i = random.nextInt(allNodes.size());
 			TreeNode n = (TreeNode) allNodes.get(i);
 			tree.addSisterNode(n,new TreeNode(taxonName));
-//			tree.sortAllChildren();
 		}
 		mutations++;
-//		p.camera.zoomCenterTo(p.render.getRect());
 	}
 	
 	private String getRemoteNCBITaxon() {

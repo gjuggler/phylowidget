@@ -21,8 +21,27 @@ class StringClipboard implements ClipboardOwner
 		
 		private StringClipboard()
 		{
-			clip = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringClipboard.instance = this;
+			
+			/*
+			 * Check security to see if we can latch onto the system clipboard. 
+			 */
+			SecurityManager security = System.getSecurityManager();
+			boolean useSystem = false;
+			if (security != null)
+			{
+				try {
+					security.checkSystemClipboardAccess();
+					useSystem = true;
+				} catch (SecurityException e)
+				{
+					// Do nothing.
+				}
+			}
+			if (useSystem)
+				clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+			else
+				clip = new Clipboard("PhyloWidget Clipboard");
 		}
 		
 		public void lostOwnership(Clipboard clipboard, Transferable contents)

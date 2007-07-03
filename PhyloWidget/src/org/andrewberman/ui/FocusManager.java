@@ -2,8 +2,6 @@ package org.andrewberman.ui;
 
 public class FocusManager
 {
-
-	public static FocusManager instance;
 	private static Object focusedObject = null;
 	private static boolean isModal = false;
 	

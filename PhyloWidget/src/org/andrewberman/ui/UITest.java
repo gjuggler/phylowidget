@@ -14,23 +14,10 @@ public class UITest extends PApplet
 		size(400, 400, P3D);
 		
 		// Do something to set up the test.
-//		PTextInput input = new PTextInput(this, 64, 25, 96, 350);
-//		input.insert("Editing text is fun!", 0);
+		PTextInput input = new PTextInput(this, 64, 25, 96, 350);
+		input.insert("Editing text is fun!", 0);
 		
 		PFont f = loadFont("TimesNewRoman-64.vlw");
-		
-		PRadialMenu menu = new PRadialMenu(this, 200, 200, 40);
-		
-		try
-		{
-			menu.addMenuItem("New",'+',"doSomething");
-			menu.addMenuItem("Delete",'x',"doSomething");
-			menu.addMenuItem("Move",'»',"doSomething");
-			menu.addMenuItem("Something",'u',"doSomething");
-		} catch (RuntimeException e)
-		{
-			e.printStackTrace();
-		}
 		
 		textFont(f);
 		this.textSize(16);

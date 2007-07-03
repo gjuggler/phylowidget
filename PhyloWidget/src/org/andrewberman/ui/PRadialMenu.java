@@ -4,12 +4,15 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
@@ -29,9 +32,10 @@ import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PGraphicsJava2D;
+import processing.core.PMatrix;
 import sun.reflect.Reflection;
 
-public class PRadialMenu extends TweenListener
+public class PRadialMenu implements TweenListener, MouseListener, MouseMotionListener
 {
 	private PApplet p;
 	private PGraphicsJava2D pg;
@@ -62,6 +66,11 @@ public class PRadialMenu extends TweenListener
 	// Fading stuff.
 	protected int alpha = 0;
 	protected Tween tween;
+	/**
+	 * If true, draw this radialmenu to the model canvas.
+	 * If false (default), draw this radialmenu to the screen.
+	 */
+	public boolean modelMode = false;
 	
 // Controller.
 	public static final int UP = 0;
@@ -70,7 +79,8 @@ public class PRadialMenu extends TweenListener
 	Point2D.Float pt = new Point2D.Float(0,0); // Contains the current mouse coordinates.
 	protected Ellipse2D.Float outer = new Ellipse2D.Float(0,0,0,0);
 	protected Ellipse2D.Float inner = new Ellipse2D.Float(0,0,0,0);
-	protected Ellipse2D.Float center = new Ellipse2D.Float(0,0,0,0);
+	protected Ellipse2D.Float centerHi = new Ellipse2D.Float(0,0,0,0);
+	protected Ellipse2D.Float centerLo = new Ellipse2D.Float(0,0,0,0);
 	protected boolean isHidden = true;
 	protected boolean approaching = false;
 	
@@ -89,13 +99,11 @@ public class PRadialMenu extends TweenListener
 		this.p = p;
 		pg = (PGraphicsJava2D) p.createGraphics((int)r*2,(int)r*2, PApplet.JAVA2D);
 		resizeBuffer((int)r*2,(int)r*2);
-		pg.smooth();
-		g2 = pg.g2;
 		
-		p.registerMouseEvent(this);
-//		p.registerDraw(this);
+		p.addMouseListener(this);
+		p.addMouseMotionListener(this);
 		
-		setFont("TimesNewRoman-64.vlw",(int)Math.max(r / 2,12));
+		setFont("TimesNewRoman-16.vlw",(int)Math.max(r / 2,10));
 		
 		this.setAll(x, y, r);
 		
@@ -122,18 +130,22 @@ public class PRadialMenu extends TweenListener
 	public void draw()
 	{
 		tween.update();
-		
-//		Stroke origStroke = g2.getStroke();
-//		Paint origPaint = g2.getPaint();
-//		Composite origComposite = g2.getComposite();
-//		RenderingHints origHints = g2.getRenderingHints();
-//		AffineTransform origTransform = g2.getTransform();
-//		
 		setColors();
 		
+		if (!this.modelMode)
+		{
+			p.pushMatrix();
+			if (p.g.getClass() == PGraphicsJava2D.class)
+			{
+				p.resetMatrix();
+			} else
+			{
+				p.camera();
+			}
+		}
+		drawApproachingCircle();
 		pg.beginDraw();
 		pg.background(255,0);
-		drawApproachingCircle();
 		for(int i=0; i < shapes.length; i++)
 		{
 			shapes[i].tween.update();
@@ -143,19 +155,21 @@ public class PRadialMenu extends TweenListener
 		}
 		pg.endDraw();
 		pg.modified = true;
-		p.image(pg, x-pg.width/2, y-pg.height/2);
+		if (!this.isHidden)
+		{
+			p.image(pg, x-pg.width/2, y-pg.height/2);
+		}
 		
-		// Set everything back to how it was.
-//		g2.setTransform(origTransform);
-//		g2.setStroke(origStroke);
-//		g2.setPaint(origPaint);
-//		g2.setComposite(origComposite);
-//		g2.setRenderingHints(origHints);
+		if (!this.modelMode)
+		{
+			p.popMatrix();
+		}
 	}
 
 	// (re)sets the colors, with correct alpha values.
 	public void setColors()
 	{
+		alpha = constrain(alpha,0,255);
 		baseColor = new Color(200,200,200,alpha);
 		stateColors[0] = baseColor;
 		stateColors[1] = lightenColor(baseColor,20);
@@ -177,10 +191,10 @@ public class PRadialMenu extends TweenListener
 	{
 		if (approaching)
 		{
-			pg.stroke(255,0,0,255 - alpha);
-			pg.strokeWeight(r / 10);
-			pg.noFill();
-			pg.ellipse(cx, cy, inner.width, inner.height);
+			p.stroke(0,255,0);
+			p.strokeWeight(3);
+			p.noFill();
+			p.ellipse(x, y, inner.width, inner.height);
 		}
 	}
 	
@@ -196,12 +210,12 @@ public class PRadialMenu extends TweenListener
 		float newAlpha = (float)(alpha * seg.alpha) / (float)(255.0);
 		// Semi-transparent background behind the text.
 		pg.noStroke();
-		pg.fill(255,newAlpha-1);
+		pg.fill(255,(int)((newAlpha-1)*.95));
 		pg.rectMode(PConstants.CORNER);
-		pg.rect(cx+seg.textX-2, cy+seg.textY - ascent - descent, seg.textWidth+4, descent*2+ascent);
+		pg.rect(cx+seg.textX-r/4, cy+seg.textY - ascent - descent - (r/4), seg.textWidth+(r/4)*2, descent*2+ascent + (r/4)*2);
 		
 		// Now, draw the text.
-		pg.fill(0,newAlpha-1);
+		pg.fill(0,newAlpha);
 		pg.textAlign(PConstants.LEFT);
 		pg.textFont(font);
 		pg.textSize(fontSize);
@@ -340,7 +354,7 @@ public class PRadialMenu extends TweenListener
 		cx = (float)pg.width / 2.0f;
 		cy = (float)pg.height / 2.0f;
 		g2 = pg.g2;
-		pg.smooth();
+//		pg.smooth();
 	}
 	
 	
@@ -349,19 +363,17 @@ public class PRadialMenu extends TweenListener
 	{
 		AffineTransform tr = AffineTransform.getTranslateInstance(x,y);
 		AffineTransform sc = AffineTransform.getTranslateInstance(cx,cy);
-//		tr.setToTranslation(x, y);
 		tr.scale(r,r);
-//		sc.setToTranslation(cx, cy);
 		sc.scale(r,r);
 		for (int i=0; i < shapes.length; i++)
 		{
 			shapes[i].modelArea = shapes[i].area.createTransformedArea(tr);
 			shapes[i].bufferArea = shapes[i].area.createTransformedArea(sc);
 		}
-		
 		inner.setFrameFromCenter(x, y, x - r * INNER_MULTIPLIER/2, y - r * INNER_MULTIPLIER/2);
 		outer.setFrameFromCenter(x,y, x- 2 * r, y + 2 * r);
-		center.setFrameFromCenter(x,y,x-r,y-r);
+		centerHi.setFrameFromCenter(x,y,x-r,y-r);
+		centerLo.setFrameFromCenter(x,y,x-(r*INNER_MULTIPLIER),y-(r*INNER_MULTIPLIER));
 	}
 	
 	public void addMenuItem(String s, char c, String f)
@@ -381,10 +393,17 @@ public class PRadialMenu extends TweenListener
 		setAll(this.x,this.y,r);
 	}
 	
+	public void setAll(float x, float y, float r)
+	{
+		this.x = x;
+		this.y = y;
+		this.r = r;
+		updateTransformedAreas();
+	}
+
 	public void show()
 	{
 		if (!isHidden)return;
-//		System.out.println("Show!");
 		tween.continueTo(255, 10);
 		isHidden = false;
 		FocusManager.setModalFocus(this);
@@ -393,33 +412,39 @@ public class PRadialMenu extends TweenListener
 	public void hide()
 	{
 		if (isHidden)return;
-//		System.out.println("Hide!");
 		tween.continueTo(0, 10);
 		isHidden = true;
 		FocusManager.removeFromFocus(this);
 	}
 	
-	public void setAll(float x, float y, float r)
+	public boolean isHidden()
 	{
-		this.x = x;
-		this.y = y;
-		this.r = r;
-		updateTransformedAreas();
+		return isHidden;
 	}
 	
-	public void mouseEvent(MouseEvent e) throws NoninvertibleTransformException
+	public void setState(PRadialMenuSegment seg, int state)
+	{
+		seg.state = state;
+	}
+	
+	public void mouseEvent(MouseEvent e)
 	{
 		// Keep our modal contract with FocusManager.
-//		if (FocusManager.isModal() && !FocusManager.isFocused(this)) return;
+		if (FocusManager.isModal() && !FocusManager.isFocused(this)) return;
 		
 		pt.setLocation(e.getX(),e.getY());
-		ProcessingUtils.mouseToModel(p, pt);
+		
+		if (this.modelMode)
+		{
+			ProcessingUtils.screenToModel(p, pt);
+		}
 		
 		int type = e.getID();
 		
 		boolean in = inner.contains(pt);
 		boolean out = outer.contains(pt);
-		boolean ctr = center.contains(pt);
+		boolean ctrHi = centerHi.contains(pt);
+		boolean ctrLo = centerLo.contains(pt);
 		if (in) // if we're inside the innermost "trigger" boundary.
 		{
 			if (isHidden)
@@ -432,7 +457,10 @@ public class PRadialMenu extends TweenListener
 		if (out) // if we're within the outermost boundary.
 		{
 			if (isHidden)
+			{
 				approaching = true;
+			}
+				
 		} else // if we're outside the outermost boundary.
 		{
 			if (!isHidden)
@@ -440,15 +468,22 @@ public class PRadialMenu extends TweenListener
 			approaching = false;
 		}
 		
+		if (ctrHi && !ctrLo && !isHidden)
+		{
+			p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		} else
+		{
+			p.setCursor(Cursor.getDefaultCursor());
+		}
+		
 		if (!isHidden) // ONLY DO THE FOLLOWING IF VISIBLE:
 		{
-			if (!ctr) // if we're outside the visible boundary.
+			if (!ctrHi) // if we're outside the visible boundary.
 			{
 				// Fade out as we move further away.
 				float diff = (float)outer.getWidth()/2 - (float)pt.distance(x,y);
-				float ratio = diff / ((float)outer.getWidth()/2 - (float)center.getWidth()/2);
+				float ratio = diff / ((float)outer.getWidth()/2 - (float)centerHi.getWidth()/2);
 				int intDst = (int)(ratio * 255);
-//				System.out.println(intDst);
 				tween.continueTo(intDst, 30);
 				tween.fforward();
 				if (type == MouseEvent.MOUSE_PRESSED)
@@ -476,7 +511,9 @@ public class PRadialMenu extends TweenListener
 				case MouseEvent.MOUSE_MOVED:
 					if (containsPoint)
 					{
-						seg.state = OVER;
+						setState(seg,OVER);
+						// This stuff makes the non-selected segments fade out...
+						// it looks kinda silly, so I'm commenting it out.
 //						seg.show();
 //						for (int j=0; j < shapes.length; j++)
 //						{
@@ -485,23 +522,23 @@ public class PRadialMenu extends TweenListener
 //						}
 					} else
 					{
-						seg.state = UP;
+						setState(seg,UP);
 					}
 					break;
 				case MouseEvent.MOUSE_PRESSED:
 					if (containsPoint) seg.clickedInside = true;
 					else seg.clickedInside = false;
 				case MouseEvent.MOUSE_DRAGGED:
-					if (seg.clickedInside && containsPoint) seg.state = DOWN;
-					else if (containsPoint) seg.state = OVER;
-					else seg.state = UP;
+					if (seg.clickedInside && containsPoint) setState(seg,DOWN);
+					else if (containsPoint) setState(seg,OVER);
+					else setState(seg,UP);
 					break;
 				case MouseEvent.MOUSE_RELEASED:
 					if (containsPoint)
 					{
 						seg.performAction(seg.name);
-						seg.state = OVER;
-					} else seg.state = UP;
+						setState(seg,OVER);
+					} else setState(seg,UP);
 				default:
 					break;
 			}
@@ -515,10 +552,18 @@ public class PRadialMenu extends TweenListener
 		ascent = font.ascent() * fontSize;
 		descent = font.descent() * fontSize;
 	}
-	
-	public void onMotionUpdated(Tween t)
+
+	public void tweenEvent(Tween source, int eventType)
 	{
-		alpha = Math.round(t.position);
-//		System.out.println(alpha);
+		alpha = Math.round(source.position);
 	}
+
+	public void mouseClicked(MouseEvent e){mouseEvent(e);}
+
+	public void mouseEntered(MouseEvent e){mouseEvent(e);}
+	public void mouseExited(MouseEvent e){mouseEvent(e);}
+	public void mousePressed(MouseEvent e){mouseEvent(e);}
+	public void mouseReleased(MouseEvent e){mouseEvent(e);}
+	public void mouseDragged(MouseEvent e){mouseEvent(e);}
+	public void mouseMoved(MouseEvent e){mouseEvent(e);}
 }

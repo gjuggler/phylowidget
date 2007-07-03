@@ -9,13 +9,12 @@ import java.util.Stack;
 
 import org.andrewberman.phyloinfo.PhyloWidget;
 
-public class TreeNode implements Comparable
+public final class TreeNode implements Comparable
 {
-
 	private static int serialSeed = 0;
 	
 	protected String name;
-	public int serial;
+	public Integer serial;
 	
 	/*
 	 * Bread-and-butter fields for the TreeNode class.
@@ -47,25 +46,14 @@ public class TreeNode implements Comparable
 	 * such as numLeaves, maxHeight, and numDescendants.
 	 */
 	
-	private TreeNode()
+	public TreeNode()
 	{
-		serial = serialSeed++;
-	}
-
-	public TreeNode(TreeNode rent)
-	{
-		this();
-		parent = rent;
+		serial = new Integer(serialSeed++);
 	}
 
 	public TreeNode(String s)
 	{
 		this();
-		name = s;
-	}
-	
-	public TreeNode(TreeNode rent,String s) {
-		this(rent);
 		name = s;
 	}
 
@@ -160,39 +148,18 @@ public class TreeNode implements Comparable
 		return children.size();
 	}
 	
-	public synchronized void getAllDescendants(ArrayList toAdd)
+	public synchronized void getAll(ArrayList leaves, ArrayList nodes)
 	{
 		int size = children.size();
-		for (int i = 0; i < size; ++i)
+		for (int i=0; i < size; ++i)
 		{
 			TreeNode child = (TreeNode) children.get(i);
-			toAdd.add(child);
-			child.getAllDescendants(toAdd);
+			child.getAll(leaves, nodes);
 		}
-	}
-	
-	public synchronized void getAllNodes(ArrayList toAdd)
-	{
-		getAllDescendants(toAdd);
-		toAdd.add(this);
-	}
-	
-	public synchronized void getAllLeaves(ArrayList toAdd)
-	{
-		if (children.size() == 0)
-		{
-			toAdd.add(this);
-			return;
-		}
-		int size = children.size();
-		for (int i = size-1; i >= 0; i--)
-		{
-			TreeNode child = (TreeNode) children.get(i);
-			if (!child.isLeaf())
-				child.getAllLeaves(toAdd);
-			else
-				toAdd.add(child);
-		}
+		if (nodes != null)
+			nodes.add(this);
+		if (leaves != null && this.children.size() == 0)
+			leaves.add(this);
 	}
 
 	public void setName(String s)
@@ -223,9 +190,9 @@ public class TreeNode implements Comparable
 		TreeNode b = (TreeNode)o;
 		int mySize = this.numDescendants;
 		int hisSize = b.numDescendants;
-		if (mySize > hisSize)
+		if (mySize < hisSize)
 			return -1;
-		else if (mySize < hisSize)
+		else if (mySize > hisSize)
 			return 1;
 		else
 		{

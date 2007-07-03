@@ -9,18 +9,19 @@ public class Tree
 
 	private TreeNode root;
 
-	public boolean needsUpdating = true;
-
-	public Tree(TreeNode root)
-	{
-		this.root = root;
-	}
+	public boolean editable = true;
+	public int modCount = -1;
 
 	public Tree()
 	{
 		this.root = new TreeNode("");
 	}
 
+	public Tree(String s)
+	{
+		this.root = new TreeNode(s);
+	}
+	
 	public void addSisterNode(TreeNode orig, TreeNode sis)
 	{
 		if (orig.parent == TreeNode.NULL_PARENT)
@@ -39,13 +40,13 @@ public class Tree
 			newBranch.addChild(sis);
 			parent.addChild(newBranch);
 		}
-		needsUpdating = true;
+		modCount++;
 	}
 
 	public void sortAllChildren()
 	{
 		ArrayList all = new ArrayList();
-		root.getAllNodes(all);
+		root.getAll(null,all);
 		for (int i = 0; i < all.size(); i++)
 		{
 			TreeNode n = (TreeNode) all.get(i);
@@ -53,14 +54,19 @@ public class Tree
 		}
 	}
 
+	public void getAll(ArrayList leaves, ArrayList nodes)
+	{
+		root.getAll(leaves,nodes);
+	}
+	
 	public void getAllNodes(ArrayList nodes)
 	{
-		root.getAllNodes(nodes);
+		root.getAll(null,nodes);
 	}
 
 	public void getAllLeaves(ArrayList leaves)
 	{
-		root.getAllLeaves(leaves);
+		root.getAll(leaves,null);
 	}
 
 	public TreeNode getRoot()

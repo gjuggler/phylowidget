@@ -5,10 +5,10 @@ import java.awt.RenderingHints;
 import org.andrewberman.ui.PFontLoader;
 import org.andrewberman.ui.ProcessingUtils;
 
-import processing.core.*;
-import processing.opengl.*;
-import java.applet.*;
-import java.awt.*;
+import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PFont;
+import processing.core.PGraphicsJava2D;
 
 public class PhyloWidget extends PApplet
 {
@@ -32,8 +32,8 @@ public class PhyloWidget extends PApplet
 
 	public void setup()
 	{
-		registerSize(this);
 		size(WIDTH, HEIGHT);
+//		registerSize(this);
 		frameRate(30f);
 		
 		camera = new PhyloCamera();
@@ -69,7 +69,7 @@ public class PhyloWidget extends PApplet
 	{
 		synchronized(this)
 		{
-			size(w,h,OPENGL);
+			size(w,h,JAVA2D);
 			if (g.getClass() == PGraphicsJava2D.class)
 			{
 				PGraphicsJava2D pg = (PGraphicsJava2D) p.g;

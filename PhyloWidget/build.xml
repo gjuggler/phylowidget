@@ -1,113 +1,88 @@
 <!--
-    P5 applet exporter for Eclipse
-    
-    v0.4 : exports java1.1 compatible applet, source code .zip archive and valid xhtml1.0 wrapper
-    v0.5 : added optional obfuscation step using http://proguard.sourceforge.net/
-    v0.6 : improved, refactored, tooled around with by Greg
+    Ant build script for creating processing applets. Based loosely
+    on Toxi's P5 build script, with many enhancements.
+    (see http://processing.org/discourse/yabb_beta/YaBB.cgi?board=Integrate;action=display;num=1117133941 )
     
     last update : July 3, 2007
+    author : Gregory Jordan (phylowidget@gmail.com)
     author : info@toxi.co.uk
-    author : g.jordan
 -->
 
 <!--
-This Ant task assumes a certain amount of structure within your project directory:
+This Ant task assumes a certain structure within your project directory:
 
 [root]: The main directory. Should contain your build.xml and build.properties files.
- |
- -[src] : Source code. Pretty self-explanatory; put your source here.
- -[data]: If your applet uses PApplet.openStream() to access data resources, you'll
- |     want to put your data into this directory. It will ultimately be bundled
- |     up in the JAR file along with all the compiled java classes.
- -[html]: Here is placed the template HTML file and any other web-related items that
- |     will also end up in the applet directory. See the genHTML task (at the bottom)
- |     to see what will be done to the template in order to create the finished HTML.
- -[lib] : Place the core.jar file and any other .jar libraries you're using in here.
-   |   These will be copied to the applet directory and referenced from within the
-   |   "archive" attribute of the <applet> tag in the resulting HTML.
-   [opengl]: If you wish to enable opengl support, first grab the required .jar files
-       from the Processing distribution and place them in this directory. Last I saw,
-       they included "jogl.jar" and a bunch of "jogl-natives-XXX.jar" files.
+|
+|->[src] : Source code. Pretty self-explanatory; put your source here.
+|->[data]: If your applet uses PApplet.openStream() to access data resources, you'll
+|       want to put your data into this directory. It will ultimately be bundled
+|       up in the JAR file along with all the compiled java classes.
+|->[html]: Here is placed the template HTML file and any other web-related items that
+|       will also end up in the applet directory. See the genHTML task (at the bottom)
+|       to see what will be done to the template in order to create the finished HTML.
+|->[lib] : Place the core.jar file and any other .jar libraries you're using in here.
+   |    These will be copied to the applet directory and referenced from within the
+   |    "archive" attribute of the <applet> tag in the resulting HTML.
+   |->[opengl]: If you wish to enable opengl support, first grab the required .jar files
+             from the Processing distribution and place them in this directory. Last
+             I saw they were "opengl.jar," "jogl.jar," and a bunch of "jogl-natives-XXX.jar".
 -->
 <project name="${project.name}" default="dist" basedir=".">
 	<description>
-        moderately advanced Processing applet output script.
+        Processing applet output script.
 		http://processing.org/
     </description>
-	<!-- Import properties from build.properties -->
-	<property file="build.properties" />
 	
-	<!-- Store folder locations within named properties. -->
-	<property name="src" location="src"/>
-	<property name="build" location="build"/>
-	<property name="applet" location="applet"/>
-	<property name="data" location="data"/>
-	<property name="lib" location="lib" />
-	<property name="html" location="html" />
+	<target name="init">
+		<!-- Import properties from build.properties -->
+		<property file="build.properties" />
 	
-	<!-- Store the final jar and zip filenames (just filename, no dir). -->
-	<property name="internal.finalJar" value="${project.name}.jar"/>
-	<property name="internal.sourceZip" value="${project.name}_src.zip"/>
-	
-	<!-- Create a fileset that includes all the library jar files. -->
-	<condition property="internal.includeOpengl" value="opengl/*.jar">
-		<istrue value="${project.opengl}"/>
-	</condition>
-	<fileset id="jarFiles" dir="${lib}" casesensitive="no">
-		<include name="*.jar"/>
-		<include name="${internal.includeOpengl}"/>
-	</fileset>
-	<fileset id="jarFilesNoNatives" dir="${lib}" casesensitive="no">
-		<include name="*.jar"/>
-		<include name="${internal.includeOpengl}"/>
-		<exclude name="**/*native*.jar"/>
-	</fileset>
-	
-	<!-- Create a property that is a comma-separated list of the jarFilesNoNatives fileset. -->
-	<pathconvert pathsep="," property="internal.jarList" refid="jarFilesNoNatives">
-		<flattenmapper/>
-	</pathconvert>
-	<property name="internal.allJars" value="${internal.finalJar},${internal.jarList}"/>
-
-	<!-- If using OpenGL, set the launcherClass to com.sun.opengl.util.JOGLAppletLauncher. -->
-	<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
-		<istrue value="${project.opengl}"/>
-	</condition>
-	
-	<!-- TARGET: INIT -->
-	<target name="init" depends="clean">
-		<!-- check if user properties are set, terminate if necessary -->
+		<!-- Check if the minimum properties are set, terminate if necessary -->
 		<fail unless="project.name">Please specify a project name in build.properties.</fail>
 		<fail unless="project.class">Please specify a Main class to be called (i.e. org.foo.BarApplication or somesuch).</fail>
 		<fail unless="applet.width">Please specify applet.width in the build.properties file.</fail>
 		<fail unless="applet.height">Please specify applet.height in the build.properties file.</fail>
-	</target>
 	
+		<!-- Output debug info if desired. -->
+		<!-- TODO -->
+		
+		<!-- Store folder locations within named properties. -->
+		<property name="src" location="src"/>
+		<property name="build" location="build"/>
+		<property name="applet" location="applet"/>
+		<property name="data" location="data"/>
+		<property name="lib" location="lib" />
+		<property name="html" location="html" />
+	
+		<!-- Store the final jar and zip filenames. -->
+		<property name="internal.finalJar" value="${project.name}.jar"/>
+		<property name="internal.sourceZip" value="${project.name}_src.zip"/>
+	</target>
+		
 	<!-- TARGET: BUILD -->
 	<target name="build" depends="init" description="compile the source">
 		<mkdir dir="${build}"/>
 
-		<!-- Make a reference to the lib directory (for classpath purposes) -->
-		<path id="master-classpath">
-			<fileset dir="${lib}" />
-		</path>
-		
 		<!-- Compile the java code from ${src} into ${build} -->
-		<javac srcdir="${src}" destdir="${build}" source="1.4" target="1.4">
-			<classpath refid="master-classpath" />
+		<condition property="internal.javaSource" value="${project.javatarget}" else="1.4">
+			<isset property="project.javatarget"/>
+		</condition>
+		<javac srcdir="${src}" destdir="${build}" source="${internal.javaSource}" target="${internal.javaSource}">
+			<classpath>
+				<fileset dir="${lib}" />
+			</classpath>
 		</javac>
 	</target>
 
 	<!-- TARGET: DIST -->
-	<target name="dist" depends="build" description="generate the distribution">
+	<target name="dist" depends="build,loadJars" description="generate the distribution">
 		<mkdir dir="${applet}"/>
 
 		<!-- COPY THE "DATA" DIRECTORY TO THE BUILD FOLDER -->
 		<available property="internal.dataExists" file="${data}" type="dir"/>
 		<antcall target="copyData"/>
-		
-		<!-- JAR UP OUR COMPILED CLASES -->
 
+		<!-- JAR UP OUR COMPILED CLASES -->
 		<jar jarfile="${applet}/${internal.finalJar}" basedir="${build}">
 			<manifest>
 				<attribute name="Main-Class" value="${project.class}"/>
@@ -116,19 +91,19 @@ This Ant task assumes a certain amount of structure within your project director
 
 		<!-- ZIP UP OUR SOURCE -->
 		<zip destfile="${applet}/${internal.sourceZip}" basedir="${src}"/>
-		
-		<!-- COPY LIBRARY JARS FROM "LIB" TO "APPLET" -->
+
+		<!-- COPY JARS FROM "LIB" TO "APPLET" -->
 		<antcall target="copyJars"/>
-		
+
 		<!-- SIGN THIS JAR, IF NECESSARY -->
 		<condition property="internal.signJar">
-			<istrue value="signjar"/>
+			<istrue value="${signjar}"/>
 		</condition>
 		<condition property="internal.genKey">
-			<istrue value="signjar.genkey"/>
+			<istrue value="${signjar.genkey}"/>
 		</condition>
 		<antcall target="signJar"/>
-		
+
 		<!-- CREATE THE HTML FILE -->
 		<antcall target="genHTML"/>
 	</target>
@@ -141,18 +116,14 @@ This Ant task assumes a certain amount of structure within your project director
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<!-- TARGET: COPYJARS -->
-	<!-- Copies the jar files from the lib directory to the applet directory.
-	Note that there is a conditional check for the "project.opengl" property.
-	You should set this to "true" if your applet will be using Processing's
-	OpenGL functionality. -->
 	<target name="copyJars">
 		<copy todir="${applet}" flatten="true">
 			<fileset refid="jarFiles"/>
-		</copy>	
+		</copy>
 	</target>
-	
+
 	<!-- TARGET: SIGNJAR -->
 	<target name="signJar" if="internal.signJar">
 		<antcall target="genKey"/>
@@ -168,11 +139,11 @@ This Ant task assumes a certain amount of structure within your project director
 				<param name="O" value="nescent.org"/>
 				<param name="C" value="US"/>
 			</dname>
-		</genkey>		
+		</genkey>
 	</target>
-	
+
 	<!-- TARGET: GENHTML -->
-	<target name="genHTML" description="generate HTML wrapper file">
+	<target name="genHTML">
 		<!-- Copy all non-HTML files normally. -->
 		<copy todir="${applet}">
 			<fileset dir="${html}">
@@ -180,6 +151,11 @@ This Ant task assumes a certain amount of structure within your project director
 				<exclude name="**/*.html"/>
 			</fileset>
 		</copy>
+		
+		<!-- If using OpenGL, set the launcherClass to com.sun.opengl.util.JOGLAppletLauncher. -->
+		<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
+			<istrue value="${project.opengl}"/>
+		</condition>
 		
 		<!-- Let's be a little sneaky here: we expand out the current set
 		of properties, and use the <filterchain> to automatically replace
@@ -194,12 +170,33 @@ This Ant task assumes a certain amount of structure within your project director
 			</filterchain>
 		</copy>
 	</target>
-	
+
 	<!-- TARGET: CLEAN -->
-	<target name="clean" description="clean up">
-		<delete dir="${build}" />
-		<delete>
-			<fileset dir="${applet}" includes="**/*"/>
-		</delete>
+	<target name="clean">
 	</target>
+	
+	<!-- MISCELLANEOUS OR "EXTRA" TARGETS GO HERE -->
+
+	<target name="loadJars">
+		<!-- Create a fileset that includes all the library jar files. -->
+		<condition property="internal.includeOpengl" value="opengl/*.jar">
+			<istrue value="${project.opengl}"/>
+		</condition>
+		<fileset id="jarFiles" dir="${lib}" casesensitive="no">
+			<include name="*.jar"/>
+			<include name="${internal.includeOpengl}"/>
+		</fileset>
+		<fileset id="jarFilesNoNatives" dir="${lib}" casesensitive="no">
+			<include name="*.jar"/>
+			<include name="${internal.includeOpengl}"/>
+			<exclude name="**/*native*.jar"/>
+		</fileset>
+		
+		<!-- Create a property that is a comma-separated list of the jarFilesNoNatives fileset. -->
+		<pathconvert pathsep="," property="internal.jarList" refid="jarFilesNoNatives">
+			<flattenmapper/>
+		</pathconvert>
+		<property name="internal.allJars" value="${internal.finalJar},${internal.jarList}"/>
+	</target>
+	
 </project>

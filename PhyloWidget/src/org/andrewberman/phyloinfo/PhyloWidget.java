@@ -5,10 +5,10 @@ import java.awt.RenderingHints;
 import org.andrewberman.ui.PFontLoader;
 import org.andrewberman.ui.ProcessingUtils;
 
-import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PFont;
-import processing.core.PGraphicsJava2D;
+import processing.core.*;
+import processing.opengl.*;
+import java.applet.*;
+import java.awt.*;
 
 public class PhyloWidget extends PApplet
 {
@@ -69,7 +69,7 @@ public class PhyloWidget extends PApplet
 	{
 		synchronized(this)
 		{
-			size(w,h,JAVA2D);
+			size(w,h,OPENGL);
 			if (g.getClass() == PGraphicsJava2D.class)
 			{
 				PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
@@ -82,4 +82,6 @@ public class PhyloWidget extends PApplet
 			}	
 		}
 	}
+	
+	static public void main(String args[]) {   PApplet.main(new String[] { "Matrix" });}
 }

@@ -57,11 +57,22 @@ This Ant task assumes a certain amount of structure within your project director
 		<include name="*.jar"/>
 		<include name="${internal.includeOpengl}"/>
 	</fileset>
+	<fileset id="jarFilesNoNatives" dir="${lib}" casesensitive="no">
+		<include name="*.jar"/>
+		<include name="${internal.includeOpengl}"/>
+		<exclude name="**/*native*.jar"/>
+	</fileset>
 	
-	<pathconvert pathsep="," property="internal.jarList" refid="jarFiles">
+	<!-- Create a property that is a comma-separated list of the jarFilesNoNatives fileset. -->
+	<pathconvert pathsep="," property="internal.jarList" refid="jarFilesNoNatives">
 		<flattenmapper/>
 	</pathconvert>
 	<property name="internal.allJars" value="${internal.finalJar},${internal.jarList}"/>
+
+	<!-- If using OpenGL, set the launcherClass to com.sun.opengl.util.JOGLAppletLauncher. -->
+	<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
+		<istrue value="${project.opengl}"/>
+	</condition>
 	
 	<!-- TARGET: INIT -->
 	<target name="init" depends="clean">
@@ -187,6 +198,8 @@ This Ant task assumes a certain amount of structure within your project director
 	<!-- TARGET: CLEAN -->
 	<target name="clean" description="clean up">
 		<delete dir="${build}" />
-		<delete dir="${applet}" />		
+		<delete>
+			<fileset dir="${applet}" includes="**/*"/>
+		</delete>
 	</target>
 </project>

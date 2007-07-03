@@ -267,8 +267,8 @@ public class PRadialMenu implements TweenListener, MouseListener, MouseMotionLis
 		 * Calculate the sine and cosine, which we'll need to use often.
 		 */
 		float theta = degToRad(seg.thetaMid);
-		float cos = PApplet.cos(theta);
-		float sin = PApplet.sin(theta);
+		float cos = (float) Math.cos(theta);
+		float sin = (float) Math.sin(theta);
 
 		/*
 		 * First, let's handle the text labels.

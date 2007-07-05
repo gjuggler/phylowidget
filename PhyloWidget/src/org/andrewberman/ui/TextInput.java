@@ -7,18 +7,15 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
 import org.andrewberman.ui.Blinker.BlinkListener;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.ui.UIObject;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
-import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
-import processing.core.PMatrix;
 
 /**
  * A Processing-based text input field.
@@ -489,7 +486,7 @@ public class TextInput implements UIObject, BlinkListener, MouseListener, KeyLis
 		
 		pt.x = e.getX();
 		pt.y = e.getY();
-		ProcessingUtils.screenToModel(p, pt);
+		ProcessingUtils.screenToModel(pt);
 		
 		if (this.containsPoint(pt.x,pt.y,true)) // contained within text+padding area.
 		{

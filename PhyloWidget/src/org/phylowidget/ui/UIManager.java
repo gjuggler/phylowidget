@@ -3,48 +3,34 @@ package org.phylowidget.ui;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
-import org.andrewberman.sortedlist.XYRange;
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.HoverHalo;
-import org.andrewberman.ui.TextInput;
-import org.andrewberman.ui.ProcessingUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.TreeNode;
+import org.phylowidget.render.Point;
 
-import processing.core.PApplet;
-
-public final class UIManager implements MouseMotionListener, MouseListener
+public final class UIManager implements MouseMotionListener, MouseListener, MouseWheelListener
 {
 	PhyloWidget p = PhyloWidget.p;
 	
-	public static FocusManager focus;
-
+	public static FocusManager focus = new FocusManager();
+	public static EventDispatcher dispatch = new EventDispatcher();
+	
 	public UIManager()
 	{
-		focus = new FocusManager(p);	
 	}
 	
-	public void draw()
+	public void update()
 	{
-		updateHover();
-	}
-
-	Point2D.Float mpt = new Point2D.Float();
-	float minX,minY,minDist=0;
-	NodeRange minRange;
-	ArrayList hits = new ArrayList();
-	
-	public void updateHover()
-	{
-		if (minRange == null) return;
-		float cx = (minRange.loX + minRange.hiX) / 2;
-		float cy = (minRange.loY + minRange.hiY) / 2;
-//		h.setRect(cx, cy, minRange.hiX-minRange.loX, minRange.hiY-minRange.loY);
+		NodeRange r = NearestNodeFinder.nearestNode(p.mouseX, p.mouseY);
+		if (r != null)
+		{
+			Point pt = PhyloWidget.trees.getPosition(r);
+			System.out.println(pt);
+			p.ellipse(pt.x, pt.y, 10, 10);
+		}
 	}
 	
 	public void mouseEvent(MouseEvent e)
@@ -59,4 +45,6 @@ public final class UIManager implements MouseMotionListener, MouseListener
 	public void mouseExited(MouseEvent e){mouseEvent(e);}
 	public void mousePressed(MouseEvent e){mouseEvent(e);}
 	public void mouseReleased(MouseEvent e){mouseEvent(e);}
+
+	public void mouseWheelMoved(MouseWheelEvent e){mouseEvent(e);}
 }

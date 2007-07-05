@@ -1,8 +1,6 @@
 package org.phylowidget.tree;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 public class Tree
 {

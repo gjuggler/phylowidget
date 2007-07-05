@@ -2,7 +2,6 @@ package org.phylowidget;
 
 import java.awt.RenderingHints;
 
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ProcessingUtils;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.UIManager;
@@ -50,6 +49,7 @@ public class PhyloWidget extends PApplet
 		ProcessingUtils.setMatrix(this);
 
 		trees.update();
+		ui.update();
 	}
 
 	public void drawFrameRate()

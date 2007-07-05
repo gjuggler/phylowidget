@@ -1,21 +1,16 @@
 package org.phylowidget.render;
 
-import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.andrewberman.sortedlist.SortedXYRangeList;
-import org.andrewberman.sortedlist.XYRange;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
 import org.phylowidget.ui.FontLoader;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PFont;
-import processing.core.PGraphicsJava2D;
 
 /**
  * The abstract tree renderer class.
@@ -152,16 +147,23 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		pt.setLocation(x,y);
 	}
 
-	public Point getPosition(TreeNode n)
+	public Point getInternalPosition(TreeNode n)
 	{
 		return (Point) positions.get(n);
 	}
 	
-	public Point getTranslatedPosition(TreeNode n, Point pt)
+	public Point getPosition(TreeNode n)
 	{
-		Point orig = getPosition(n);
-		pt.setLocation(orig.x*scaleX + dx, orig.y*scaleY + dy);
+		Point pt = new Point(0,0);
+		getPosition(n,pt);
 		return pt;
+	}
+	
+	public Point getPosition(TreeNode n, Point tmp)
+	{
+		tmp.setLocation(getInternalPosition(n));
+		tmp.setLocation(tmp.x*scaleX + dx, tmp.y*scaleY + dy);
+		return tmp;
 	}
 	
 	public void setRect(float cx, float cy, float w, float h)

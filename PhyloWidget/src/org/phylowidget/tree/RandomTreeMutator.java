@@ -116,7 +116,6 @@ public class RandomTreeMutator implements Runnable
 	
 	BufferedReader in;
 	public String getLocalNCBITaxon() {
-		int taxID = random.nextInt(4000);
 		String taxonName = DEFAULT_NAME;
 		
 		try

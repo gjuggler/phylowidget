@@ -3,8 +3,9 @@ package org.andrewberman.ui;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.render.Point;
 
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
@@ -12,12 +13,13 @@ import processing.core.PMatrix;
 
 public class ProcessingUtils
 {
-	
 	private static PMatrix camera = new PMatrix();
 	private static PMatrix cameraInv = new PMatrix();
 	private static PMatrix modelview = new PMatrix();
 	private static PMatrix modelviewInv = new PMatrix();
 
+	private static Point tPoint = new Point(0,0);
+	
 	/**
 	 * This should be called at the end of every draw() run.
 	 * @param mat the modelview matrix.
@@ -69,19 +71,35 @@ public class ProcessingUtils
 		pt.y = mat.m10*x + mat.m11*y + mat.m12*z + mat.m13;
 	}
 	
+	public static void screenToModel(Rectangle2D.Float rect)
+	{
+		tPoint.x = rect.x;
+		tPoint.y = rect.y;
+		transform(camera,tPoint);
+		transform(modelviewInv,tPoint);
+		float x = tPoint.x;
+		float y = tPoint.y;
+		
+		tPoint.x = rect.x+rect.width;
+		tPoint.y = rect.y+rect.height;
+		transform(camera,tPoint);
+		transform(modelviewInv,tPoint);
+		
+		rect.setFrameFromDiagonal(x, y, tPoint.x, tPoint.y);
+	}
+	
 	/**
 	 * 
-	 * @param p The PApplet from which to base the transformation.
 	 * @param pt The point to transform in place. Should currently contain the mouse
 	 * coordinates.
 	 */
-	public static void screenToModel(PApplet p, Point2D.Float pt)
+	public static void screenToModel(Point2D.Float pt)
 	{		
 		transform(camera,pt);
 		transform(modelviewInv,pt);
 	}
 
-	public static void modelToScreen(PApplet p, Point2D.Float pt)
+	public static void modelToScreen(Point2D.Float pt)
 	{
 		transform(modelview,pt);
 		transform(cameraInv,pt);

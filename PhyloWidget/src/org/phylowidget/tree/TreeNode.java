@@ -1,13 +1,7 @@
 package org.phylowidget.tree;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Stack;
-
-import org.phylowidget.PhyloWidget;
 
 public final class TreeNode implements Comparable
 {

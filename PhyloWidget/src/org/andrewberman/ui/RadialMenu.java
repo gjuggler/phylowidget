@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
-import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -426,7 +425,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		
 		if (this.modelMode)
 		{
-			ProcessingUtils.screenToModel(p, pt);
+			ProcessingUtils.screenToModel(pt);
 		}
 		
 		int type = e.getID();

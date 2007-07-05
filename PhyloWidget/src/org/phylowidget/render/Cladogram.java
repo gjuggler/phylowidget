@@ -124,7 +124,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			TreeNode n = (TreeNode) nodes.get(i);
-			Point p = getPosition(n);
+			Point p = getInternalPosition(n);
 			NodeRange r = new NodeRange();
 			r.loX = r.hiX = p.x;
 			r.loY = r.hiY = p.y;
@@ -161,7 +161,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		if (n.isLeaf())
 		{
 			// If N is a leaf, then it's already been laid out.
-			return getPosition(n).y;
+			return getInternalPosition(n).y;
 		} else
 		{
 			// If not:
@@ -216,7 +216,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		{
 			r = (NodeRange) ranges.get(i);
 			n = r.node;
-			getTranslatedPosition(n, ptemp);
+			getPosition(n, ptemp);
 			switch (r.type)
 			{
 				case (Cladogram.NODE):
@@ -306,13 +306,13 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 
 	public void drawNode(TreeNode n)
 	{
-		getTranslatedPosition(n, ptemp);
+		getPosition(n, ptemp);
 		p.ellipse(ptemp.x, ptemp.y, dotWidth, dotWidth);
 	}
 
 	public void drawLabel(TreeNode n)
 	{
-		getTranslatedPosition(n,ptemp);
+		getPosition(n,ptemp);
 		p.text(n.getName(), ptemp.x+dotWidth, ptemp.y + dFont);
 	}
 	
@@ -327,11 +327,11 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 
 	public void drawLine(TreeNode n)
 	{
-		getTranslatedPosition(n, ptemp);
+		getPosition(n, ptemp);
 
 		if (n.getParent() != TreeNode.NULL_PARENT)
 		{
-			getTranslatedPosition(n.getParent(), ptemp2);
+			getPosition(n.getParent(), ptemp2);
 
 			p.line(ptemp.x, ptemp.y, ptemp2.x, ptemp.y);
 		}
@@ -341,8 +341,8 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			ArrayList children = n.getChildren();
 			TreeNode first = (TreeNode) children.get(0);
 			TreeNode last = (TreeNode) children.get(children.size() - 1);
-			float minY = getTranslatedPosition(first, ptemp2).y;
-			float maxY = getTranslatedPosition(last, ptemp2).y;
+			float minY = getPosition(first, ptemp2).y;
+			float maxY = getPosition(last, ptemp2).y;
 
 			p.line(ptemp.x, minY, ptemp.x, maxY);
 		}

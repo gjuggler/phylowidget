@@ -7,10 +7,10 @@ import java.util.HashMap;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.sortedlist.XYRange;
-import org.andrewberman.ui.FontLoader;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
+import org.phylowidget.ui.FontLoader;
 
 import processing.core.PApplet;
 import processing.core.PConstants;

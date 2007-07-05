@@ -3,8 +3,8 @@ package org.phylowidget;
 import java.awt.RenderingHints;
 
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.ProcessingUtils;
+import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.UIManager;
 
 import processing.core.PApplet;

@@ -1,6 +1,5 @@
 package org.andrewberman.sortedlist;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import processing.core.PApplet;

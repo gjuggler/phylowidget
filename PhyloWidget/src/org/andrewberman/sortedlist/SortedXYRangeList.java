@@ -3,9 +3,7 @@ package org.andrewberman.sortedlist;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
-import java.util.Set;
 
 public class SortedXYRangeList
 {

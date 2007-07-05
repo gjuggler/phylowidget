@@ -2,7 +2,6 @@ package org.andrewberman.camera;
 
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenQuad;
-import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
 

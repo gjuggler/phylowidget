@@ -1,0 +1,798 @@
+Lardizabala biternata
+Sinofranchetia
+Sinofranchetia chinensis
+Stauntonia
+Stauntonia hexaphylla
+Tinospora
+Tinospora caffra
+Desulfovibrio acrylicoreducens
+Desulfovibrio acrylicus
+Lanice
+Lanice conchilega
+Lineus sp.
+Phascolosomatidae
+Phascolosoma
+Phascolosoma granulatum
+Echiuroinea
+Echiuridae
+Ochetostoma
+Ochetostoma erythrogrammon
+Cuscuta europaea
+Cuscuta europaea L.
+Mortierella polycephala
+Babyrousa
+Babyrousa babyrussa
+babirusa
+Sus barbatus
+bearded pig
+Simulium sp.
+Camptochironomus
+Camptochironomus sp.
+Chironomus (Camptochironomus) sp.
+Chaoboridae
+phantom midges
+Chaoborus
+Chaoborus crystallinus
+Thaumaleidae
+solitary midges
+Androprosopa
+Androprosopa larvata
+Corethrella
+Corethrella sp.
+Ceratopogonidae
+biting midges
+no-see-ums
+Culicoides
+punkies
+Culicoides punctatus
+Dasyhelea
+Dasyhelea saxicola
+Dixidae
+dixid midges
+Paradixa
+Paradixa sp.
+Culicoidea
+Chironomoidea
+Tipuloidea
+Sciaroidea
+Psychodoidea
+Psychodinae
+moth flies
+mothflies
+Micromucor ramannianus
+Mortierella ramanniana
+Mucor ramannianus
+Umbelopsis ramanniana
+Anthoceros agrestis
+Anthoceros agrestis Paton
+Mnium hornum
+Mnium hornum Hedw.
+Polytrichum formosum
+Conocephalaceae
+Conocephalum
+Conocephalum conicum
+Sphagnum cuspidatum
+Ricciaceae
+Riccia
+Riccia fluitans
+Scapaniaceae
+Echovirus 30
+Echovirus type 30
+Echovirus type 30 E30
+Enterovirus E30
+Human echovirus 30
+Human echovirus type 30
+Scapania
+Scapania (Dumort.) Dumort.
+Scapania nemorea
+Scapania nemorea (L.) Grolle
+Scapania nemorosa
+"Scapania nemorosa (L.) Dumort., nom. illeg."
+Calypogeiaceae
+Calypogeia
+Calypogeia Raddi
+Calypogeia arguta
+Calypogeia arguta Nees & Mont. ex Nees
+Leptobryum
+Leptobryum pyriforme
+Hepatitis C virus 1
+Hepatitis C virus genotype 1
+Hepatitis C virus type 1
+hepatitis C virus 1 HCV 1
+Influenza A virus H3N2
+influenza virus A/H3N2
+Gorilla gorilla foamy virus
+Simian foamy virus-gorilla
+simian foamy virus-gorilla SFV-Gg
+Calyceraceae
+CVd-IIIa
+Citrus viroid IIIa
+Group III citrus viroid CVd-IIIa
+citrus viroid group III CVdIIIA
+CVd-IIIb
+Citrus viroid IIIb
+Group III citrus viroid CVd-IIIb
+Pentaphragmataceae
+Donatiaceae
+Stylidiaceae
+Sphenocleaceae
+Stilbaceae
+Martyniaceae
+Cloning vector pAS2
+Saccharomyces cerevisiae var. diastaticus
+Saccharomyces diastaticus
+Acipenser fulvescens
+lake sturgeon
+Mugiliformes
+Mamiellaceae
+Bathycoccus
+Bathycoccus prasinos
+Mamiella
+Mamiella sp.
+Pycnococcaceae
+Pycnococcus
+Pycnococcus provasolii
+Mesostigma
+Mesostigma viride
+Resultor
+Resultor mikron
+Pseudoscourfieldia
+Pseudoscourfieldia marina
+Tetraselmis aff. maculata
+Coccomyxa Schmidle 1901
+Coccomyxa sp. (strain PA)
+Coccomyxa sp. PA
+Petrogale assimilis
+allied rock wallaby
+Asplenium antiquum
+Tribolium madens
+black flour beetle
+Petrocoptis grandiflora
+Neurospora dodgei
+Aspergillus niveus var. indicus
+Fennellia nivea var. indica
+Aspergillus aureofulgens
+Astegopteryx muiri
+Ceratovacuna lanigera
+Ceratovacuna longifila
+Ceratovacuna sp.
+Chaitoregma
+Chaitoregma tattakana
+Lathraea
+Lathraea L.
+Lathraea clandestina
+Lathraea clandestina L.
+Helminthostachys
+Helminthostachys zeylandica
+Helminthostachys zeylanica
+Helminthostachys zeylanica (L.) Hook.
+kamraj
+Botrychium multifidum
+Sceptridium multifidum
+leathery grape fern
+Botrychium matricariifolium
+daisy-leaved grape fern
+Botrychium acuminatum
+Botrychium ascendens
+upswept moonwort
+Botrychium campestre
+Botrychium crenulatum
+Botrychium echo
+Botrychium hesperium
+Botrychium lanceolatum
+Botrychium lanceolatum (S.G.Gmel.) Angstr.
+Botrychium lineare
+Botrychium minganense
+Botrychium montanum
+Botrychium paradoxum
+Botrychium pedunculosum
+stalked moonwort
+Botrychium pinnatum
+Botrychium pseudopinnatum
+Botrychium pumicola
+Botrychium simplex
+little grapefern
+Botrychium spathulatum
+Botrychium watertonense
+Cornales
+Cornanae
+Cornineae
+Hydrangeales
+Rutanae
+Sapindales
+Malvales
+Malvanae
+Geraniales
+Geranianae
+Myrtales
+Myrtanae
+Ebenales
+Ericales
+Primulales
+Styracales
+Theales
+Theanae
+Hamamelidales
+Saxifragales
+Santalales
+Santalanae
+Crouania
+Crouania attenuata
+Griffithsia monilis
+Griffithsia monolis
+LYSV
+Leek yellow stripe potyvirus
+Leek yellow stripe virus
+HEV
+Hemagglutinating encephalomyelitis virus
+Porcine hemagglutinating encephalomyelitis coronavirus
+Porcine hemagglutinating encephalomyelitis virus
+porcine hemagglutinating encephalomyelitis virus HEV
+Cloning vector pFD288
+Chinese Rape Mosaic Virus
+Oilseed Rape Mosaic Virus
+Callophyllis rangiferina
+Carpopeltis phyllophora
+Cryptonemia
+Cryptonemia undulata
+Dilsea carnosa
+Epymenia
+Epymenia wilsonis
+Farlowia
+Farlowia mollis
+Gleiopeltis furcata
+Gloiopeltis furcata
+Gloioderma
+Halymenia
+Halymenia plana
+Mychodea
+Mychodea carnosa
+Sebdenia flabellata
+Lomentaria australis
+Drosophila bipectinata
+Drosophila kuntzei
+Drosophila limbata
+Spodoptera ornithogalli
+yellow-striped armyworm moth
+Cychrus
+Cychrus attenuatus
+Dianthus seguieri
+Dianthus seguieri Balb.
+Saponaria ocymoides
+Lychnis coronaria
+Lychnis coronaria (L.) Desr.
+Silene coronaria
+Silene coronaria (L.) Clairv.
+mullein pink
+rose campion
+Silene diclinis
+Lychnis flos-cuculi
+Lychnis flos-cuculi L.
+Lychnis floscuculi
+Silene flos-cuculi
+Silene flos-cuculi (L.) Greuter & Burdet
+cuckoo flower
+ragged-robin
+Silene italica
+Silene nutans
+Silene nutans L.
+Silene otites
+Spanish catchfly
+Silene pendula
+nodding catchfly
+Silene pseudotites
+German catchfly
+Lychnis viscaria
+Lychnis viscaria L.
+Silene viscaria
+Silene viscaria (L.) Jessen
+Steris viscaria
+Steris viscaria (L.) Raf.
+Viscaria vulgaris
+Viscaria vulgaris Bernh.
+clammy campion
+Silene cucubalus
+Silene vulgaris
+bladder campion
+maiden's-tears
+Centropodia
+Centropodia Rchb.
+Centropodia glauca
+Centropodia glauca (Nees) Cope
+Danthonia
+Danthonia DC.
+Danthonia spicata
+Danthonia spicata (L.) P.Beauv. ex Roem. & Schult.
+poverty oat grass
+Enneapogon
+Enneapogon Desv. ex P.Beauv.
+Enneapogon scaber
+Enneapogon scaber Lehm.
+Eragrostis capensis
+Gynerium
+Gynerium sagittatum
+arrow cane
+uva grass
+wild cane
+Chromohalobacter
+Chromohalobacter Ventosa et al. 1989 emend. Arahal et al. 2001
+Chromobacterium marismortui Elazari-Volcani 1940
+Chromobacterium maris-mortui
+Chromobacterium marismortui
+Chromohalobacter marismortui
+Chromohalobacter marismortui (ex Elazari-Volcani 1940) Ventosa et al. 1989
+Desulfovibrio gabonensis
+Desulfovibrio gabonensis Tardy-Jacquenod et al. 1996
+Cloning vector pBluescript
+Pronolagus
+Natal red rockhare
+Pronolagus crassicaudatus
+greater red rock rabbit
+Jameson's red rock rabbit
+Jameson's red rockhare
+Pronolagus randensis
+Pronolagus rupestris
+Smith's red rock rabbit
+Smith's red rockhare
+Drosophila nasuta
+Drosophila ercepeae
+American pitch pine
+Pinus elliotti
+Pinus elliottii
+longleaf pitch pine
+slash pine
+swamp pine
+Notropis chrysoleucas
+golden shiner
+Pneumocystis carinii f. sp. muris
+Pneumocystis carinii muris
+Pneumocystis carinii f. sp. oryctolagi
+Pneumocystis carinii oryctolagi
+Pneumocystis carinii f. sp. hominis
+Pneumocystis carinii hominis
+Pneumocystis jiroveci
+Pneumocystis jirovecii
+Pneumocystis carinii f. sp. mustelae
+Pneumocystis carinii mustelae
+non-culturable plant pathogenic bacterial sp.
+Monachather
+Monachather paradoxa
+Monachather paradoxus
+Stipagrostis
+Stipagrostis Nees
+Stipagrostis zeyheri
+Stipagrostis zeyheri (Nees) De Winter
+Stipagrostis zeyheri subsp. zeyheri
+Tristachya
+Tristachya biseriata
+Hyparrhenia
+Hyparrhenia hirta
+Karroochloa
+Karroochloa Conert & Turpe
+Karrochloa purpurea
+Karroochloa purpurea
+Karroochloa purpurea (L.f.) Conert & Turpe
+Merxmuellera
+Merxmuellera macowanii
+Merxmuellera macowanii (Stapf) Conert
+Moliniopsis
+Moliniopsis japonica
+Plinthanthesis
+Plinthanthesis Steud.
+Plinthanthesis paradoxa
+Plinthanthesis paradoxa (R.Br.) S.T.Blake
+Rytidosperma
+Rytidosperma Steud.
+Rytidosperma nudiflora
+Rytidosperma nudiflorum
+Rytidosperma nudiflorum (P.Morris) Connor & Edgar
+Stipa dregeana
+Stipa dregeana Steud.
+Stipa dregeana var. dregeana
+Ureaplasma canigenitalium
+Ureaplasma canigenitalium Harasawa et al. 1993
+Ureaplasma cati
+Ureaplasma cati Harasawa et al. 1990
+Ureaplasma diversum
+Ureaplasma diversum Howard and Gourlay 1982
+Ureaplasma felinum
+Ureaplasma felinum Harasawa et al. 1990
+Ureaplasma gallorale
+Ureaplasma gallorale Koshimizu et al. 1987
+ILV
+Isla Vista virus
+Isla Vista virus (ILV)
+Cloning vector pAS2-1
+Pythium vexans
+Phocoena sinus
+vaquita
+Bracon
+Bracon hebetor
+"Bracon hebetor Say, 1857"
+Bracon sp. AP-2007
+Oncinocalyx
+Oncinocalyx betchei
+Prasium
+Prasium majus
+Borrelia andersonii Marconi et al. 1995
+'Borrelia andersonii'
+Borrelia andersoni
+Borrelia andersonii
+Coleochaete sp.
+Microthamniales
+unclassified Streptococcaceae
+Clitellata
+Neanthes
+Arenicolidae
+Gossypium arboreum x Gossypium thurberi
+Dobsonia
+bare-backed fruit bats
+Dobsonia mollucensis
+Dobsonia moluccensis
+Moluccan bare-backed fruit bat
+Moluccan naked-backed fruit bat
+Moronidae
+temperate basses
+Pseudohalonectria lignicola
+Podolsk mole rat
+Spalax polonicus
+Spalax zemni
+East African long-eared elephant shrew
+Elephantulus rufescens
+rufous elephant shrew
+Brazilian agouti
+Dasyprocta agouti
+Dasyprocta aguti
+Dasyprocta leporina
+Brugia buckleyi
+Brugia patei
+Brugia timori
+Litomosoides sigmodontis
+Onchocerca ochengi
+Wuchereria kalimantani
+Morro Bay virus
+Chamaeleolis
+Podarcis
+Acrochordidae
+Atractaspis microlepidota
+Acanthophiinae
+Elapinae
+Laticaudinae
+Deinagkistrodon
+Bactereiophage N 209
+Bacteriophage N 209
+Phage N 209
+Bacteriophage 3/14
+Phage 3/14
+Bacteriophage Cz
+Phage Cz
+Bacteriophage DD VI
+Phage DD VI
+Bacteriophage LZ1
+Phage LZ1
+Bacteriophage LZ4
+Phage LZ4
+Bacteriophage LZ6
+Phage LZ6
+Bacteriophage LZ7
+Phage LZ7
+Bacteriophage LZ8
+Phage LZ8
+Bacteriophage SC1
+Phage SC1
+Ichthyosporidium sp.
+Hepatitis C virus genotype 6
+Hepatitis C virus type 6
+Ovophis
+Tropidolaemus
+Schizymeniaceae
+Anomalepididae
+Macrovipera
+Daboia
+'Bacillus israeli'
+Bacillus israeli
+Ochrobactrum sp.
+Mytilus coruscus
+Pteridium sp.
+Scutellospora castanea
+Dieffenbachia
+Dieffenbachia Schott
+Dieffenbachia seguine
+Dieffenbachia seguine (Jacq.) Schott
+dumb cane
+mother-in-law plant
+Centruroides infamatus infamatus
+Psolus chitonoides
+Cucumaria vegae
+Cucumaria pallida
+Cucumaria piperata
+Cucumaria lubrica
+Bouchea
+Bouchea fluminensis
+Bouchea fluminensis (Vell.) Moldenke
+Segestriidae
+Hadronyche
+Zoophthora radicans
+Cloning vector pOTSf1Blu
+Cucumaria curata
+Lycopodiella
+unclassified Acidaminococcaceae
+unclassified Selenomonadaceae
+unclassified Sporomusa subbranch
+Hamamelidaceae
+Hamamelidineae
+witch-hazel family
+Mastixioideae
+Alangiaceae
+Cornaceae
+dogwood family
+Curtisiaceae
+Davidioideae
+Griseliniaceae
+Helwingiaceae
+Acoraceae
+sweet flag family
+Prunus avium
+Prunus avium (L.) L.
+gean
+mazzard
+sweet cherry
+Mansonella
+Dipetalonema perstans
+Mansonella perstans
+Spirilliplanes
+Spirilliplanes Tamura et al. 1997
+Spirilloplanes
+Spirilliplanes yamanashiensis
+Spirilliplanes yamanashiensis Tamura et al. 1997
+Spirilloplanes yamanashiensis
+Streptomyces acidiscabiei
+Streptomyces acidiscabies
+Streptomyces acidiscabies Lambert and Loria 1989
+Actinomyces bottropensis
+Streptomyces bottropensis
+Streptomyces bottropensis Waksman 1961
+Actinomyces diastatochromogenes Krainsky 1914
+Actinomyces diastatochromogenes
+Streptomyces diastatochromogenes
+Streptomyces diastatochromogenes (Krainsky 1914) Waksman and Henrici 1948
+Streptomyces eurythermus
+Streptomyces eurythermus Corbaz et al. 1957
+Streptomyces neyagawaensis
+Streptomyces neyagawaensis Yamamoto et al. 1960
+Streptomyces neyagawensis
+Actinomyces sampsonii Millard and Burr 1926
+Actinomyces sampsonii
+Streptomyces sampsonii
+Streptomyces sampsonii (Millard and Burr 1926) Waksman 1953
+Hydra littoralis
+swiftwater hydra
+Tardigrada
+tardigrades
+tardigrades
+water bears
+Eutardigrada
+Macrobiotidae
+Macrobiotus
+Macrobiotus sp.
+unidentified diatom endosymbiont of Peridinium
+unidentified diatom endosymbiont of Peridinium foliaceum
+Gelasinospora sp. (strain G114)
+Gelasinospora sp. G114
+Tuber magnatum
+gray truffle
+white Piedmont truffle
+Tuber ferrugineum
+Tuber borchii
+whitish truffle
+Desulfovibrio termitidis
+Desulfovibrio termitidis Trinkerl et al. 1991
+Nitrospira moscoviensis
+Nitrospira moscoviensis Ehrich et al. 2001
+Eurasian shrew
+European shrew
+Sorex araneus
+Rubrobacter
+Rubrobacter Suzuki et al. 1989
+Arthrobacter radiotolerans
+Arthrobacter radiotolerans Yoshinaka et al. 1973 (Approved Lists 1980)
+Rubrobacter radiotolerans
+Rubrobacter radiotolerans (Yoshinaka et al. 1973) Suzuki et al. 1989
+Zygosaccharomyces mellis
+Zygosaccharomyces microellipsoides
+Zygosaccharomyces mrakii
+Charaxinae
+Anaea
+Anaea andria
+goatweed butterfly
+Riodininae
+Apodemia
+Apodemia mormo
+Mormon metalmark
+Basilarchia archippus
+Limenitis archippus
+viceroy
+Speyeria
+Atlantis fritillary
+Speyeria atlantis
+Bassaris
+Cynthia
+Vanessa
+Vanessa atalanta
+red admiral
+Phyciodes
+Phyciodes sp.
+Libytheinae
+snout butterflies
+Libytheana
+Libytheana bachmanii
+snout butterfly
+Morphinae
+Satyrinae
+"graylings, ringlets, browns & heaths"
+Enodia
+Enodia portlandia
+pearly eye
+southern pearly eye
+Hermeuptychia
+Euptychia hermes
+Hermes satyr
+Hermeuptychia (Euptychia) hermes
+Hermeuptychia hermes
+little wood satyr
+Battus
+Battus philenor
+pipe-vine swallowtail
+Papilioninae
+Troidinae
+swallowtails
+Apollo butterflies
+Parnassiinae
+Parnassinae
+parnassians
+Parnassius
+Clodius parnassian
+Parnassius clodius
+Pontia
+Pontia protodice
+checkered white
+Colias
+clouded yellow butterflies
+clouded yellows
+Colias euritheme
+Colias eurytheme
+alfalfa caterpillar
+orange sulphur butterfly
+Polyommatinae
+blues
+Celastrina
+Celastrina argiolus ladon
+Celastrina ladon
+common blue
+spring azure
+Theclinae
+hairstreak butterflies
+hairstreaks
+Balansia sclerotica
+Lasiosphaeriaceae
+Cercophora
+Cercophora septentrionalis
+Hypocrella
+Cladobotryum clavisporum
+Hypomyces polyporinus
+Hypoxylon
+Annulohypoxylon atroroseum
+Hypoxylon atroroseum
+Halosphaeriaceae
+Halosphaeriopsis
+Halosphaeriopsis mediosetigera
+Petriella
+Petriella setifera
+Ithomiini
+Ithomia
+Ithomia Huebner 1816
+Ithomia sp.
+Incisalia
+Incisalia sp.
+Solenostemon
+Graphiola cylindrica
+Eubacterium ruminantium
+Eubacterium ruminantium Bryant 1959
+Listonella anguillarum serovar O1
+Vibrio anguillarum 01
+Vibrio anguillarum O1
+Vibrio anguillarum serovar O1
+Dendrohydrax
+Dendrohyrax
+bush hyraxes
+tree hyraxes
+Dendrohydrax dorsalis
+Microbacterium ammoniaphilum Yamamoto et al.
+'Microbacterium ammoniaphilum'
+Microbacterium ammoniaphilum
+Fungi/Metazoa incertae sedis
+Psorospermium
+Psorospermium haeckeli
+Psorospermium haeckelii
+Zalerion
+Zalerion arboricola
+Thraustochytrium aureum
+Scenedesmus ovalternus
+Protomyces gravidus
+Cloning vector pSU36
+Desulfotomaculum thermocisternum
+Desulfotomaculum thermocisternum Nilsen et al. 1996
+Ischnuridae
+Liochelidae
+Phalanger orientalis
+gray cuscus
+Acyrthosiphon kondoi endosymbiont
+Acyrthosiphon kondoi symbiont
+Acyrthosiphon kondoi symbiont bacterium
+Acyrthosiphon kondoi symbiotic bacterium
+RRSV
+Rice ragged stunt virus
+rice ragged stunt oryzavirus
+Oscheius
+Saccharomyces cerevisiae virus L-BC (La)
+Saccharomyces cerevisiae virus La
+Saccharomyces cerevisiae virus ScV-La
+ScV-La
+Gracilariophila
+Gracilariophila oryzoides
+Tetragonopterinae
+Alestes
+Alestes sp.
+Phenacogrammus
+Congo tetra
+Phenacogrammus interruptus
+Distichodus
+Distichodus sp.
+Chalceus
+Chalceus sp.
+Paracheirodon
+Paracheirodon innesi
+Gymnocorymbus
+Gymnocorymbus ternetzi
+Serrasalminae
+Metynnis
+Metynnis sp.
+Gasteropelecus
+Gasteropelecus sp.
+Leporinus sp.
+Hemiodus
+Hemiodus sp.
+Hoplias sp.
+Pimelodus
+Pimelodus sp.
+Schilbe
+Schilbe sp.
+Synodontis
+Synodontis sp.
+Nannobrycon
+Nannobrycon sp.
+Pygocentrus
+Pygocentrus nattereri
+Serrasalmus
+Buthus sindicus
+Mesobuthus tamulus sindicus
+California mouse
+Peromyscus californicus
+Mylossoma
+Mylossoma paraguayensis
+Mylossoma aureum
+Colossoma
+Colossoma macropomum
+Piaractus
+Myletes mesopotamicus
+Piaractus mesopotamicus
+"Piaractus mesopotamicus (Holmberg, 1887)"
+pacu
+Colossoma brachypomum
+Colossoma branchypomus
+Myletes brachypomus
+Piaractus brachipomus
+Piaractus brachypomus
+"Piaractus brachypomus (Cuvier, 1818)"
+pirapitinga
+Bryconinae

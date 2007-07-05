@@ -4,7 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -18,13 +20,15 @@ import java.util.ArrayList;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
+import org.phylowidget.ui.FontLoader;
+import org.phylowidget.ui.UIObject;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PGraphicsJava2D;
 
-public class RadialMenu implements TweenListener, MouseListener, MouseMotionListener
+public class RadialMenu implements TweenListener, UIObject, MouseListener, MouseMotionListener
 {
 	private PApplet p;
 	private PGraphicsJava2D pg;
@@ -35,8 +39,8 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	
 // View.
 	protected Graphics2D g2;
-	private float x;
-	private float y;
+	protected float x;
+	protected float y;
 	private float cx; // x position of the center relative to the offscreen buffer.
 	private float cy; // y position  "" .
 	private float r; // radius.
@@ -55,11 +59,6 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	// Fading stuff.
 	protected int alpha = 0;
 	protected Tween tween;
-	/**
-	 * If true, draw this radialmenu to the model canvas.
-	 * If false (default), draw this radialmenu to the screen.
-	 */
-	public boolean modelMode = false;
 	
 // Controller.
 	public static final int UP = 0;
@@ -70,7 +69,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	protected Ellipse2D.Float inner = new Ellipse2D.Float(0,0,0,0);
 	protected Ellipse2D.Float centerHi = new Ellipse2D.Float(0,0,0,0);
 	protected Ellipse2D.Float centerLo = new Ellipse2D.Float(0,0,0,0);
-	protected boolean isHidden = true;
+	protected boolean hidden = true;
 	protected boolean approaching = false;
 	
 // Statics & Constants.
@@ -88,16 +87,23 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		this.p = p;
 		pg = (PGraphicsJava2D) p.createGraphics((int)r*2,(int)r*2, PApplet.JAVA2D);
 		resizeBuffer((int)r*2,(int)r*2);
+
 		
-		p.addMouseListener(this);
-		p.addMouseMotionListener(this);
-		
-		setFont("TimesNewRoman-16.vlw",(int)Math.max(r / 2,10));
-		
+		this.font = FontLoader.f64;
+		this.fontSize = (int)Math.max(r / 2,10);
+		ascent = font.ascent() * fontSize;
+		descent = font.descent() * fontSize;
+	
 		this.setAll(x, y, r);
 		
 		tween = new Tween(this, new TweenQuad(), "inout", 0, 255, 30, false);
 		tween.stop();
+	}
+
+	public void addListeners()
+	{
+		p.addMouseListener(this);
+		p.addMouseMotionListener(this);		
 	}
 	
 	public static final Color lightenColor(Color c, int lighten)
@@ -121,17 +127,6 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		tween.update();
 		setColors();
 		
-		if (!this.modelMode)
-		{
-			p.pushMatrix();
-			if (p.g.getClass() == PGraphicsJava2D.class)
-			{
-				p.resetMatrix();
-			} else
-			{
-				p.camera();
-			}
-		}
 		drawApproachingCircle();
 		pg.beginDraw();
 		pg.background(255,0);
@@ -144,14 +139,10 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		}
 		pg.endDraw();
 		pg.modified = true;
-		if (!this.isHidden)
+		if (!this.isHidden())
 		{
+			System.out.println("Drawing!");
 			p.image(pg, x-pg.width/2, y-pg.height/2);
-		}
-		
-		if (!this.modelMode)
-		{
-			p.popMatrix();
 		}
 	}
 
@@ -167,7 +158,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	}
 	
 	protected static Stroke myStroke = new BasicStroke(2);
-	private void drawShape(RadialMenuSegment seg)
+	protected void drawShape(RadialMenuSegment seg)
 	{
 		g2.setPaint(stateColors[seg.state]);
 		g2.fill(seg.bufferArea);
@@ -176,7 +167,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		g2.draw(seg.bufferArea);
 	}
 	
-	private void drawApproachingCircle()
+	protected void drawApproachingCircle()
 	{
 		if (approaching)
 		{
@@ -201,7 +192,15 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		pg.noStroke();
 		pg.fill(255,(int)((newAlpha-1)*.95));
 		pg.rectMode(PConstants.CORNER);
-		pg.rect(cx+seg.textX-r/4, cy+seg.textY - ascent - descent - (r/4), seg.textWidth+(r/4)*2, descent*2+ascent + (r/4)*2);
+		
+		float x = cx+seg.textX-r/4;
+		float y = cy+seg.textY-ascent-descent - (r/4);
+		float w = seg.textWidth+(r/4)*2;
+		float h = descent*2+ascent + (r/4)*2;
+		pg.noSmooth();
+		ProcessingUtils.roundedRect(pg,x,y,w,h,w/5);
+		pg.smooth();
+//		pg.rect(cx+seg.textX-r/4, cy+seg.textY - ascent - descent - (r/4), seg.textWidth+(r/4)*2, descent*2+ascent + (r/4)*2);
 		
 		// Now, draw the text.
 		pg.fill(0,newAlpha);
@@ -343,10 +342,10 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		cx = (float)pg.width / 2.0f;
 		cy = (float)pg.height / 2.0f;
 		g2 = pg.g2;
-//		pg.smooth();
+		pg.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
+//		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		pg.smooth();
 	}
-	
-	
 
 	public void updateTransformedAreas()
 	{
@@ -365,9 +364,9 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		centerLo.setFrameFromCenter(x,y,x-(r*INNER_MULTIPLIER),y-(r*INNER_MULTIPLIER));
 	}
 	
-	public void addMenuItem(String s, char c, String f)
+	public void addMenuItem(String label, char shortcut, Object functionTarget, String function)
 	{
-		RadialMenuSegment seg = new RadialMenuSegment(p,f,s,c);
+		RadialMenuSegment seg = new RadialMenuSegment(label,shortcut,functionTarget,function);
 		menuItems.add(seg);
 		createShapes();
 	}
@@ -392,23 +391,22 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 
 	public void show()
 	{
-		if (!isHidden)return;
+//		if (!hidden)return;
 		tween.continueTo(255, 10);
-		isHidden = false;
-//		PhyloWidget.focus.setModalFocus(this);
+		hidden = false;
+		System.out.println("SHOW!!! "+hidden);
 	}
 	
 	public void hide()
 	{
-		if (isHidden)return;
+		if (hidden)return;
 		tween.continueTo(0, 10);
-		isHidden = true;
-//		PhyloWidget.focus.removeFromFocus(this);
+		hidden = true;
 	}
 	
 	public boolean isHidden()
 	{
-		return isHidden;
+		return hidden;
 	}
 	
 	public void setState(RadialMenuSegment seg, int state)
@@ -418,25 +416,17 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	
 	public void mouseEvent(MouseEvent e)
 	{
-		// Keep our modal contract with PhyloWidget.focus.
-//		if (PhyloWidget.focus.isModal() && !PhyloWidget.focus.isFocused(this)) return;
-		
-		pt.setLocation(e.getX(),e.getY());
-		
-		if (this.modelMode)
-		{
-			ProcessingUtils.screenToModel(pt);
-		}
-		
 		int type = e.getID();
 		
+		pt.setLocation(e.getX(),e.getY());
+		ProcessingUtils.screenToModel(pt);
 		boolean in = inner.contains(pt);
 		boolean out = outer.contains(pt);
 		boolean ctrHi = centerHi.contains(pt);
 		boolean ctrLo = centerLo.contains(pt);
 		if (in) // if we're inside the innermost "trigger" boundary.
 		{
-			if (isHidden)
+			if (hidden)
 			{
 				show();
 				approaching = false;
@@ -445,19 +435,19 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 		
 		if (out) // if we're within the outermost boundary.
 		{
-			if (isHidden)
+			if (hidden)
 			{
 				approaching = true;
 			}
 				
 		} else // if we're outside the outermost boundary.
 		{
-			if (!isHidden)
+			if (!hidden)
 				hide();
 			approaching = false;
 		}
 		
-		if (ctrHi && !ctrLo && !isHidden)
+		if (ctrHi && !ctrLo && !hidden)
 		{
 			p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		} else
@@ -465,7 +455,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 			p.setCursor(Cursor.getDefaultCursor());
 		}
 		
-		if (!isHidden) // ONLY DO THE FOLLOWING IF VISIBLE:
+		if (!hidden) // ONLY DO THE FOLLOWING IF VISIBLE:
 		{
 			if (!ctrHi) // if we're outside the visible boundary.
 			{
@@ -477,7 +467,6 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 				tween.fforward();
 				if (type == MouseEvent.MOUSE_PRESSED)
 				{
-//					PhyloWidget.focus.removeFromFocus(this);
 					hide();
 				}
 			} else
@@ -487,7 +476,7 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 			}
 		}
 		
-		if (isHidden) return;
+		if (hidden) return;
 		
 		// The following loop is ONLY for switching individual segment
 		// states. For general mouse goodness, use the logic ABOVE this point.
@@ -533,14 +522,6 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 			}
 		}
 	}
-	
-	public void setFont(String fontName, int fontSize)
-	{
-		this.font = p.loadFont(fontName);
-		this.fontSize = fontSize;
-		ascent = font.ascent() * fontSize;
-		descent = font.descent() * fontSize;
-	}
 
 	public void tweenEvent(Tween source, int eventType)
 	{
@@ -555,4 +536,10 @@ public class RadialMenu implements TweenListener, MouseListener, MouseMotionList
 	public void mouseReleased(MouseEvent e){mouseEvent(e);}
 	public void mouseDragged(MouseEvent e){mouseEvent(e);}
 	public void mouseMoved(MouseEvent e){mouseEvent(e);}
+
+	public void keyEvent(KeyEvent e)
+	{
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -26,6 +26,10 @@ public class TreeManager implements SettableRect
 
 	public TreeManager()
 	{
+	}
+	
+	public void setup()
+	{
 		trees = new ArrayList();
 		renderers = new ArrayList();
 		cameraRect = new Rectangle2D.Float(0,0,0,0);
@@ -80,7 +84,7 @@ public class TreeManager implements SettableRect
 		renderers.add(c);
 		
 		RandomTreeMutator mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 50; i++)
+		for (int i=0; i < 20; i++)
 		{
 			mutator.randomlyMutateTree();
 		}

@@ -148,6 +148,15 @@ public class Tween
 		start();
 	}
 
+	public void restart(float newStart, float newFinish, float newD)
+	{
+		this.begin = newStart;
+		this.change = newFinish - newStart;
+		this.time = 0;
+		this.duration = newD;
+		start();
+	}
+	
 	public void yoyo()
 	{
 		continueTo(this.begin, this.time);

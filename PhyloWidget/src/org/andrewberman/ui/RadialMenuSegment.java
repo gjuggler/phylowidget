@@ -50,13 +50,12 @@ class RadialMenuSegment implements TweenListener
 	private Object object;
 	private String function;
 	
-	public RadialMenuSegment(Object p, String function, String name, char shortcut)
+	public RadialMenuSegment(String label, char shortcut, Object functionTarget, String functionName)
 	{
-		this.object = p;
-		this.function = function;
-		this.name = name;
+		this.name = label;
 		this.shortcut = shortcut;
-		
+		this.object = functionTarget;
+		this.function = functionName;
 		tween = new Tween(this,new TweenQuad(),"out",255,255,30,false);
 	}
 	
@@ -64,12 +63,12 @@ class RadialMenuSegment implements TweenListener
 	{
 		try
 		{
-			Class functionArgs[] = new Class[1];
-			functionArgs[0] = String.class;
-			Method m = object.getClass().getDeclaredMethod(function, functionArgs);
-			Object args[] = new Object[1];
-			args[0] = name;
-			m.invoke(object, args);
+//			Class functionArgs[] = new Class[1];
+//			functionArgs[0] = String.class;
+			Method m = object.getClass().getDeclaredMethod(function, null);
+//			Object args[] = new Object[1];
+//			args[0] = name;
+			m.invoke(object, null);
 		} catch (Exception e)
 		{
 			e.printStackTrace();

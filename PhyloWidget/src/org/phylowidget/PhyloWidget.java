@@ -26,17 +26,19 @@ public class PhyloWidget extends PApplet
 	{
 		super();
 		p = this;
+		
+		// Creates, manages, and renders trees.
+		trees = new TreeManager();
+		// Creates and manages UI elements.
+		ui = new UIManager();
 	}
 
 	public void setup()
 	{
 		frameRate(30f);
 		
-		// Creates, manages, and renders trees.
-		trees = new TreeManager();
-		// Creates and manages UI elements.
-		ui = new UIManager();
-		
+		trees.setup();
+		ui.setup();
 		trees.createTree("PhyloWidget");
 	}
 
@@ -44,10 +46,10 @@ public class PhyloWidget extends PApplet
 	{
 		background(255);
 		drawFrameRate();
-		
 		translate(width/2,height/2);
+		
 		ProcessingUtils.setMatrix(this);
-
+		
 		trees.update();
 		ui.update();
 	}

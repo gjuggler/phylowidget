@@ -6,10 +6,9 @@ public class FocusManager
 	private Object focusedObject = null;
 	private boolean isModal = false;
 	
-	public FocusManager()
-	{
-		
-	}
+	public FocusManager(){}
+	
+	public void setup(){}
 	
 	public boolean setFocus(Object o)
 	{

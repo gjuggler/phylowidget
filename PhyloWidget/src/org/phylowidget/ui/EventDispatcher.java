@@ -17,11 +17,17 @@ import processing.core.PApplet;
 public class EventDispatcher implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 	private PApplet p = PhyloWidget.p;
-	private FocusManager f = UIManager.focus;
+	private FocusManager f;
 	private ArrayList delegates = new ArrayList(5);
 	
 	public EventDispatcher()
 	{
+	}
+	
+	public void setup()
+	{
+		f = PhyloWidget.ui.focus;
+		
 		p.addMouseListener(this);
 		p.addMouseMotionListener(this);
 		p.addMouseWheelListener(this);

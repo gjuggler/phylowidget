@@ -17,11 +17,16 @@ public class NearestNodeFinder
 	static ArrayList hits = new ArrayList(50);
 	public static NodeRange nearestNode(float x, float y)
 	{
+		return nearestNode(x,y,RADIUS);
+	}
+	
+	public static NodeRange nearestNode(float x, float y, float rad)
+	{
 		pt.setLocation(x,y);
-		rect.x = pt.x - RADIUS;
-		rect.y = pt.y - RADIUS;
-		rect.width = RADIUS * 2;
-		rect.height = RADIUS * 2;
+		rect.x = pt.x - rad;
+		rect.y = pt.y - rad;
+		rect.width = rad * 2;
+		rect.height = rad * 2;
 		ProcessingUtils.screenToModel(pt);
 		ProcessingUtils.screenToModel(rect);
 //		System.out.println(rect);

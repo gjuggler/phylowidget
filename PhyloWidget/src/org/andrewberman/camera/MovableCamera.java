@@ -9,7 +9,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 
-import org.andrewberman.ui.FocusManager;
 import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;

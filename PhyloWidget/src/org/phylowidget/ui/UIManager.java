@@ -5,37 +5,122 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 
 import org.andrewberman.ui.FocusManager;
+import org.andrewberman.ui.RadialMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.Point;
+import org.phylowidget.tree.Tree;
+import org.phylowidget.tree.TreeNode;
 
 public final class UIManager implements MouseMotionListener, MouseListener, MouseWheelListener
 {
 	PhyloWidget p = PhyloWidget.p;
 	
-	public static FocusManager focus = new FocusManager();
-	public static EventDispatcher dispatch = new EventDispatcher();
+	public FocusManager focus = new FocusManager();
+	public EventDispatcher event = new EventDispatcher();
+	
+	public ArrayList uiObjects = new ArrayList(5);
+	
+	public NodeRange nearest;
+	public Point nearestP;
+	public PhyloMenu menu;
+	public HoverHalo halo;
 	
 	public UIManager()
 	{
+		focus = new FocusManager();
+		event = new EventDispatcher();
+	}
+	
+	public void setup()
+	{
+		focus.setup();
+		event.setup();
+		
+		menu = new PhyloMenu();
+		
+		menu.addMenuItem("Add", 'a', this, "addSisterNode");
+		menu.addMenuItem("Delete", 'x', this, null);
+		menu.addMenuItem("Rename", 'r', this, null);
+		
+		halo = new HoverHalo();
+		
+		// Keep in mind that the first added is the first drawn.
+		addObject(halo);
+		addObject(menu);
+		
+		halo.show();
 	}
 	
 	public void update()
 	{
-		NodeRange r = NearestNodeFinder.nearestNode(p.mouseX, p.mouseY);
-		if (r != null)
+		updateNearest();
+		
+		for (int i=0; i < uiObjects.size(); i++)
 		{
-			Point pt = PhyloWidget.trees.getPosition(r);
-			System.out.println(pt);
-			p.ellipse(pt.x, pt.y, 10, 10);
+			((UIObject)uiObjects.get(i)).draw();
 		}
+	}
+	
+	public void updateNearest()
+	{
+		nearest = NearestNodeFinder.nearestNode(p.mouseX, p.mouseY);
+		if (nearest == null)
+		{
+			nearestP = null;
+			return;
+		}
+		nearestP = nearest.render.getPosition(nearest.node);
+	}
+	
+	//*******************************************************
+	// ACTIONS
+	//*******************************************************
+	
+	public void showMenu(NodeRange r)
+	{
+//		halo.setNodeRange(r);
+//		halo.stopTweening();
+		menu.setNodeRange(r);
+		menu.show();
+	}
+	
+	public void hideMenu()
+	{
+		halo.setNodeRange(null);
+		if (!menu.isHidden())
+			menu.hide();
+	}
+	
+	public void addSisterNode()
+	{
+		NodeRange r = menu.curNode;
+		Tree t = r.render.getTree();
+		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
+		hideMenu();
+	}
+	
+	//*******************************************************
+	// UTILITY / LISTENER FUNCTIONS
+	//*******************************************************
+	
+	public void addObject(UIObject o)
+	{
+		uiObjects.add(o);
+		event.addListener(o);
+	}
+	
+	public void removeObject(UIObject o)
+	{
+		uiObjects.remove(o);
+		event.removeListener(o);
 	}
 	
 	public void mouseEvent(MouseEvent e)
 	{
-
 	}
 	
 	public void mouseDragged(MouseEvent e){mouseEvent(e);}

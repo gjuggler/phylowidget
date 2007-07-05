@@ -136,6 +136,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		this.lastModCount = t.modCount - 1;
 	}
 
+	public Tree getTree()
+	{
+		return tree;
+	}
 
 	public void setPosition(TreeNode n, float x, float y)
 	{

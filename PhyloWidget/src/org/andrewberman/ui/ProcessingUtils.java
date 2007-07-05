@@ -8,6 +8,8 @@ import java.awt.geom.Rectangle2D;
 import org.phylowidget.render.Point;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 import processing.core.PMatrix;
 
@@ -19,6 +21,46 @@ public class ProcessingUtils
 	private static PMatrix modelviewInv = new PMatrix();
 
 	private static Point tPoint = new Point(0,0);
+	
+	public static void roundedRect(PGraphics g, float x, float y, float w, float h, float r)
+	{
+		int fill = g.fillColor;
+		int strokeC = g.strokeColor;
+		boolean stroke = g.stroke;
+		float strokeW = g.strokeWeight;
+		
+		float cx = x + w/2;
+		float cy = y + h/2;
+		
+//		p.rect(x,y,w,h);
+		
+		float dX = cx - (x + r);
+		float dY = cy - (y + r);
+		float dTheta = PConstants.QUARTER_PI;
+		for (int i=0; i < 4; i++)
+		{
+			float theta = dTheta + (i*PConstants.HALF_PI);
+			int sX = (PApplet.cos(theta) > 0 ? 1 : -1);
+			int sY = (PApplet.sin(theta) > 0 ? 1 : -1);
+			g.arc(cx+dX*sX,cy+dY*sY,2*r,2*r,theta-PConstants.QUARTER_PI,theta+PConstants.QUARTER_PI);
+		}
+		
+		g.noStroke();
+		g.rect(x, y+r, w, h-2*r);
+		g.rect(x+r,y,w-2*r,r);
+		g.rect(x+r,y+h-r,w-2*r,r);
+		
+		g.stroke = stroke;
+		g.strokeColor = strokeC;
+		g.line(x+r, y, x+w-r, y); // top border.
+		g.line(x+r, y+h, x+w-r, y+h);
+		g.line(x, y+r, x, y+h-r);
+		g.line(x+w, y+r, x+w, y+h-r);
+		
+		// upper-left.
+//		p.arc(x+r, y+r, r, r, PConstants.PI, 3/2*PConstants.PI);
+		
+	}
 	
 	/**
 	 * This should be called at the end of every draw() run.

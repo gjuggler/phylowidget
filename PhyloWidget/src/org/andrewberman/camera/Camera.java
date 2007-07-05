@@ -1,7 +1,5 @@
 package org.andrewberman.camera;
 
-import java.awt.geom.Rectangle2D;
-
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;

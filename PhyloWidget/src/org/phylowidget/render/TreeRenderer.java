@@ -12,9 +12,13 @@ public interface TreeRenderer
 	
 	public void setTree(Tree t);
 	
+	public Tree getTree();
+	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 	
 	public Point getPosition(TreeNode node);
+	
+	public Point getPosition(TreeNode node, Point pt);
 	
 	public void setRect(float cx, float cy, float w, float h);
 }

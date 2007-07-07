@@ -123,6 +123,35 @@ public final class TreeNode implements Comparable
 		}
 	}
 	
+	public synchronized void prune()
+	{
+		if (children.size() == 1)
+		{ // Only child.
+			TreeNode n = (TreeNode)children.get(0);
+			if (!n.isLeaf())
+			{ // Child has children.
+				removeChild(n);
+				for (int i=0; i < n.children.size(); i++)
+				{
+					TreeNode child = (TreeNode)n.children.get(i);
+					addChild(child);
+				}
+			} else
+			{ // Child is a leaf... so we just remove ourselves.
+				if (this.parent != TreeNode.NULL_PARENT)
+				{
+					this.parent.removeChild(this);
+					this.parent.addChild(n);
+					return;
+				}	
+			}
+		}
+		for (int i=0; i < children.size(); i++)
+		{
+			((TreeNode)children.get(i)).prune();
+		}
+	}
+	
 	public synchronized void sortChildren() {
 		Collections.sort(children);
 	}

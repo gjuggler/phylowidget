@@ -15,10 +15,9 @@ public abstract class Camera implements TweenListener
 
 	public Camera()
 	{
-		xTween = new Tween(this, TweenQuad.instance, "out", 0, 0, FRAMES, false);
-		yTween = new Tween(this, TweenQuad.instance, "out", 0, 0, FRAMES, false);
-		zTween = new Tween(this, TweenQuad.instance, "out", 1f, 1f, FRAMES * 2,
-				false);
+		xTween = new Tween(this, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
+		yTween = new Tween(this, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
+		zTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES * 2);
 	}
 
 	/*

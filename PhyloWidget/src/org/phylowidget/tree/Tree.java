@@ -40,7 +40,29 @@ public class Tree
 		}
 		modCount++;
 	}
+	
+	public void deleteNode(TreeNode node)
+	{
+		if (node.parent == TreeNode.NULL_PARENT)
+			return;
+		
+		TreeNode parent = node.parent;
+		parent.removeChild(node);
+		for (int i=0; i < node.children.size(); i++)
+		{
+			TreeNode n = (TreeNode)node.children.get(i);
+			parent.addChild(n);
+		}
+		parent.sortChildren();
+		pruneTree();
+		modCount++;
+	}
 
+	public void pruneTree()
+	{
+		root.prune();
+	}
+	
 	public void sortAllChildren()
 	{
 		ArrayList all = new ArrayList();

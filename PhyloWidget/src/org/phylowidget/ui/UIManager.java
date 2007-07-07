@@ -8,12 +8,15 @@ import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.RadialMenu;
+import org.andrewberman.ui.Menu;
+import org.andrewberman.ui.RadialPopupMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.Point;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
+
+import processing.core.PConstants;
 
 public final class UIManager implements MouseMotionListener, MouseListener, MouseWheelListener
 {
@@ -41,9 +44,12 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 		event.setup();
 		
 		menu = new PhyloMenu();
-		
+		menu.thetaLo = 0;
+		menu.thetaHi = PConstants.TWO_PI;
+		menu.radLo = 15;
+		menu.radHi = 40;
 		menu.addMenuItem("Add", 'a', this, "addSisterNode");
-		menu.addMenuItem("Delete", 'x', this, null);
+		menu.addMenuItem("Delete", 'x', this, "deleteNode");
 		menu.addMenuItem("Rename", 'r', this, null);
 		
 		halo = new HoverHalo();
@@ -82,8 +88,8 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public void showMenu(NodeRange r)
 	{
-//		halo.setNodeRange(r);
-//		halo.stopTweening();
+		halo.setNodeRange(r);
+		halo.becomeSolid();
 		menu.setNodeRange(r);
 		menu.show();
 	}
@@ -91,7 +97,7 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	public void hideMenu()
 	{
 		halo.setNodeRange(null);
-		if (!menu.isHidden())
+		if (!menu.hidden)
 			menu.hide();
 	}
 	
@@ -100,6 +106,14 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 		NodeRange r = menu.curNode;
 		Tree t = r.render.getTree();
 		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
+		hideMenu();
+	}
+	
+	public void deleteNode()
+	{
+		NodeRange r = menu.curNode;
+		Tree t = r.render.getTree();
+		t.deleteNode(r.node);
 		hideMenu();
 	}
 	

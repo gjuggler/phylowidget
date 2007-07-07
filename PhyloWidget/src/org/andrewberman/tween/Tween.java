@@ -1,9 +1,8 @@
 package org.andrewberman.tween;
 
 
-public class Tween
+public final class Tween
 {
-
 	public TweenListener listener;
 	public TweenFunction func;
 
@@ -11,6 +10,10 @@ public class Tween
 	public static final int UPDATED = 1;
 	public static final int STOPPED = 2;
 	public static final int FINISHED = 3;
+	
+	public static final int IN = 0;
+	public static final int OUT = 1;
+	public static final int INOUT = 2;
 	
 	public Object obj;
 	public String tweenProp;
@@ -25,26 +28,16 @@ public class Tween
 	public float duration;
 	public boolean useSeconds;
 
-	public Tween(TweenListener _listen, TweenFunction _func, String _type,
-			float _begin, float _end, float _duration, boolean _useSeconds)
+	public Tween(TweenListener _listen, TweenFunction _func, int _type,
+			float _begin, float _end, float _duration)
 	{
 		this.listener = _listen;
 		this.func = _func;
-		_type = _type.toLowerCase();
-		if (_type.equals("in"))
-		{
-			tweenType = 0;
-		} else if (_type.equals("out"))
-		{
-			tweenType = 1;
-		} else
-		{
-			tweenType = 2;
-		}
+		this.tweenType = _type;
 		this.begin = _begin;
 		this.position = _begin;
 		this.change = _end - _begin;
-		this.useSeconds = _useSeconds;
+//		this.useSeconds = _useSeconds;
 		//	    if (this.useSeconds) {
 		//	      this.duration = _duration * PhyloWidget.instance.frameRate;
 		//	    } else {
@@ -117,7 +110,7 @@ public class Tween
 	public void fforward()
 	{
 		this.time = this.duration;
-		this.position = this.begin + this.change;
+		this.position = getFinish();
 		listener.tweenEvent(this, UPDATED);
 		//	    this.obj[this.tweenProp] = this.position;
 	}
@@ -176,13 +169,13 @@ public class Tween
 				this.time++;
 				switch (tweenType)
 				{
-					case 0:
+					case IN:
 						position = func.easeIn(time, begin, change, duration);
 						break;
-					case 1:
+					case OUT:
 						position = func.easeOut(time, begin, change, duration);
 						break;
-					case 2:
+					case INOUT:
 						position = func
 								.easeInOut(time, begin, change, duration);
 						break;

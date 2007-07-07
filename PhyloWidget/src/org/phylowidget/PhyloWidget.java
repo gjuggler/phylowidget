@@ -50,6 +50,11 @@ public class PhyloWidget extends PApplet
 		
 		ProcessingUtils.setMatrix(this);
 		
+//		p.fill(200,200,255,200);
+//		p.stroke(200,200,255,200);
+//		p.strokeWeight(3);
+//		ProcessingUtils.roundedRect(p.g, -100f, -50f, 200f, 100f, 10f);
+		
 		trees.update();
 		ui.update();
 	}
@@ -75,8 +80,10 @@ public class PhyloWidget extends PApplet
 				PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
 				p.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
 				pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-				pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-//				p.smooth();
+//				pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+				pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+//				pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+				//				p.smooth();
 			}	
 		}
 	}

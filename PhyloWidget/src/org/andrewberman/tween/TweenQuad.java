@@ -3,10 +3,10 @@ package org.andrewberman.tween;
 public final class TweenQuad implements TweenFunction
 {
 
-	public static TweenQuad instance;
+	public static TweenQuad tween;
 	
 	static {
-		instance = new TweenQuad();
+		tween = new TweenQuad();
 	}
 	
 	public float easeIn(float t, float b, float c, float d)

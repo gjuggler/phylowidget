@@ -1,5 +1,6 @@
 package org.andrewberman.ui;
 
+import java.awt.Cursor;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -21,6 +22,13 @@ public class ProcessingUtils
 	private static PMatrix modelviewInv = new PMatrix();
 
 	private static Point tPoint = new Point(0,0);
+	
+	public static void releaseCursor(PApplet p, Cursor c)
+	{
+		if (p.getCursor() != c)
+			return;
+		p.setCursor(Cursor.getDefaultCursor());
+	}
 	
 	public static void roundedRect(PGraphics g, float x, float y, float w, float h, float r)
 	{
@@ -46,9 +54,9 @@ public class ProcessingUtils
 		}
 		
 		g.noStroke();
-		g.rect(x, y+r, w, h-2*r);
-		g.rect(x+r,y,w-2*r,r);
-		g.rect(x+r,y+h-r,w-2*r,r);
+		g.rect(x, y+r, w, (float) Math.ceil(h-2*r));
+		g.rect(x+r,y,(float) Math.ceil(w-2*r+1),r);
+		g.rect(x+r,y+h-r,(float) Math.ceil(w-2*r),r);
 		
 		g.stroke = stroke;
 		g.strokeColor = strokeC;

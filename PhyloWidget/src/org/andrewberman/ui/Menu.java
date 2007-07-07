@@ -28,14 +28,15 @@ import processing.core.PConstants;
 import processing.core.PFont;
 import processing.core.PGraphicsJava2D;
 
-public class RadialMenu implements TweenListener, UIObject, MouseListener, MouseMotionListener
+public class Menu implements TweenListener, UIObject, MouseListener, MouseMotionListener
 {
 	private PApplet p;
 	private PGraphicsJava2D pg;
 	
 // Model.
-	public ArrayList menuItems = new ArrayList();
-	public RadialMenuSegment[] shapes = new RadialMenuSegment[0];
+	public MenuSegment[] segments = new MenuSegment[0];
+	public RadialMenuSegmentBackup[] shapes = new RadialMenuSegmentBackup[0];
+	public ArrayList menuItems = new ArrayList(10);
 	
 // View.
 	protected Graphics2D g2;
@@ -48,6 +49,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	protected static Color baseColor;
 	protected static Color[] stateColors = new Color[3];
 	protected static Color strokeColor;
+	protected int textBackgroundColor = 255;
 	// font stuff...
 	protected StringBuffer sb = new StringBuffer();
 	protected PFont font;
@@ -77,18 +79,22 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	private static final float TWO_PI = PApplet.TWO_PI;
 	private static final float HALF_PI = PApplet.HALF_PI;
 	
-	public RadialMenu(PApplet p)
+	protected boolean in;
+	protected boolean out;
+	protected boolean ctrHi;
+	protected boolean ctrLo;
+	
+	public Menu(PApplet p)
 	{
-		this(p,20,20,40);
+		this(p,20,20,50);
 	}
 	
-	public RadialMenu(PApplet p, float x, float y, float r)
+	public Menu(PApplet p, float x, float y, float r)
 	{
 		this.p = p;
 		pg = (PGraphicsJava2D) p.createGraphics((int)r*2,(int)r*2, PApplet.JAVA2D);
 		resizeBuffer((int)r*2,(int)r*2);
 
-		
 		this.font = FontLoader.f64;
 		this.fontSize = (int)Math.max(r / 2,10);
 		ascent = font.ascent() * fontSize;
@@ -96,7 +102,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	
 		this.setAll(x, y, r);
 		
-		tween = new Tween(this, new TweenQuad(), "inout", 0, 255, 30, false);
+		tween = new Tween(this, new TweenQuad(), Tween.INOUT, 0, 255, 30);
 		tween.stop();
 	}
 
@@ -139,9 +145,8 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		}
 		pg.endDraw();
 		pg.modified = true;
-		if (!this.isHidden())
+		if (tween.position > 0)
 		{
-			System.out.println("Drawing!");
 			p.image(pg, x-pg.width/2, y-pg.height/2);
 		}
 	}
@@ -158,7 +163,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	}
 	
 	protected static Stroke myStroke = new BasicStroke(2);
-	protected void drawShape(RadialMenuSegment seg)
+	protected void drawShape(RadialMenuSegmentBackup seg)
 	{
 		g2.setPaint(stateColors[seg.state]);
 		g2.fill(seg.bufferArea);
@@ -185,12 +190,12 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		return theta;
 	}
 	
-	private void drawText(RadialMenuSegment seg)
+	private void drawText(RadialMenuSegmentBackup seg)
 	{
 		float newAlpha = (float)(alpha * seg.alpha) / (float)(255.0);
 		// Semi-transparent background behind the text.
 		pg.noStroke();
-		pg.fill(255,(int)((newAlpha-1)*.95));
+		pg.fill(textBackgroundColor,(int)((newAlpha-1)*.95));
 		pg.rectMode(PConstants.CORNER);
 		
 		float x = cx+seg.textX-r/4;
@@ -210,10 +215,9 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		pg.text(seg.name,cx+seg.textX,cy+seg.textY);
 	}
 	
-	public void drawHintText(RadialMenuSegment seg)
+	public void drawHintText(RadialMenuSegmentBackup seg)
 	{
 		float myFontSize = fontSize*1.5f;
-		
 		pg.textFont(font);
 		pg.textSize(myFontSize);
 		
@@ -226,7 +230,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	
 	private void createShapes()
 	{
-		shapes = new RadialMenuSegment[menuItems.size()];
+		shapes = new RadialMenuSegmentBackup[menuItems.size()];
 		float dtheta = (float)360 / menuItems.size();
 		System.out.println(dtheta);
 		float theta = -90;
@@ -245,7 +249,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 			wedge = new Area(arc);
 			wedge.subtract(del);
 			
-			RadialMenuSegment seg = (RadialMenuSegment) menuItems.get(i);
+			RadialMenuSegmentBackup seg = (RadialMenuSegmentBackup) menuItems.get(i);
 			seg.area = wedge;
 			seg.thetaLo = (float)theta;
 			seg.thetaHi = (float)theta + dtheta;
@@ -260,7 +264,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		updateTransformedAreas();
 	}
 	
-	public void layoutShapeText(RadialMenuSegment seg)
+	public void layoutShapeText(RadialMenuSegmentBackup seg)
 	{
 		/*
 		 * Calculate the sine and cosine, which we'll need to use often.
@@ -331,11 +335,6 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		seg.hintY = centerY - cDesc + cHeight / 2.0f;
 	}
 	
-	/**
-	 * 
-	 * @param width buffer width.
-	 * @param height buffer height.
-	 */
 	public void resizeBuffer(int width, int height)
 	{
 		pg.resize(width, height);
@@ -343,7 +342,6 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		cy = (float)pg.height / 2.0f;
 		g2 = pg.g2;
 		pg.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
-//		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		pg.smooth();
 	}
 
@@ -366,7 +364,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	
 	public void addMenuItem(String label, char shortcut, Object functionTarget, String function)
 	{
-		RadialMenuSegment seg = new RadialMenuSegment(label,shortcut,functionTarget,function);
+		RadialMenuSegmentBackup seg = new RadialMenuSegmentBackup(label,shortcut,functionTarget,function);
 		menuItems.add(seg);
 		createShapes();
 	}
@@ -374,11 +372,6 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	public void setPosition(float x, float y)
 	{
 		setAll(x,y,this.r);
-	}
-	
-	public void setRadius(float r)
-	{
-		setAll(this.x,this.y,r);
 	}
 	
 	public void setAll(float x, float y, float r)
@@ -391,10 +384,10 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 
 	public void show()
 	{
-//		if (!hidden)return;
+		if (!hidden)return;
 		tween.continueTo(255, 10);
 		hidden = false;
-		System.out.println("SHOW!!! "+hidden);
+		System.out.println("SHOW!!!");
 	}
 	
 	public void hide()
@@ -402,6 +395,7 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		if (hidden)return;
 		tween.continueTo(0, 10);
 		hidden = true;
+		System.out.println("HIDE!");
 	}
 	
 	public boolean isHidden()
@@ -409,55 +403,64 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 		return hidden;
 	}
 	
-	public void setState(RadialMenuSegment seg, int state)
+	public synchronized void mouseEvent(MouseEvent e)
 	{
-		seg.state = state;
-	}
-	
-	public void mouseEvent(MouseEvent e)
-	{
-		int type = e.getID();
-		
 		pt.setLocation(e.getX(),e.getY());
 		ProcessingUtils.screenToModel(pt);
-		boolean in = inner.contains(pt);
-		boolean out = outer.contains(pt);
-		boolean ctrHi = centerHi.contains(pt);
-		boolean ctrLo = centerLo.contains(pt);
-		if (in) // if we're inside the innermost "trigger" boundary.
+		if (e.getID() == MouseEvent.MOUSE_PRESSED)
+			System.out.println(pt);
+		in = inner.contains(pt);
+		out = outer.contains(pt);
+		ctrHi = centerHi.contains(pt);
+		ctrLo = centerLo.contains(pt);
+		if (hidden)
+			hiddenMouseEvent(e);
+		else
+			visibleMouseEvent(e);
+		
+		if (!hidden)
+			segmentMouseEvent(e);
+	}
+	
+	public void hiddenMouseEvent(MouseEvent e)
+	{
+		if (hidden)
 		{
-			if (hidden)
+			if (in) // if we're inside the innermost "trigger" boundary.
 			{
-				show();
+				if (hidden)
+				{
+					show();
+					approaching = false;
+				}
+			}
+			
+			if (out) // if we're within the outermost boundary.
+			{
+				if (hidden)
+				{
+					approaching = true;
+				}
+					
+			} else // if we're outside the outermost boundary.
+			{
 				approaching = false;
-			}
+			}			
 		}
-		
-		if (out) // if we're within the outermost boundary.
-		{
-			if (hidden)
+	}	
+	public void visibleMouseEvent(MouseEvent e)
+	{
+			if (ctrHi && !ctrLo)
 			{
-				approaching = true;
+				p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			} else
+			{
+				p.setCursor(Cursor.getDefaultCursor());
 			}
-				
-		} else // if we're outside the outermost boundary.
-		{
-			if (!hidden)
+			if (!out)
+			{
 				hide();
-			approaching = false;
-		}
-		
-		if (ctrHi && !ctrLo && !hidden)
-		{
-			p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		} else
-		{
-			p.setCursor(Cursor.getDefaultCursor());
-		}
-		
-		if (!hidden) // ONLY DO THE FOLLOWING IF VISIBLE:
-		{
-			if (!ctrHi) // if we're outside the visible boundary.
+			} else if (!ctrHi) // if we're outside the visible boundary.
 			{
 				// Fade out as we move further away.
 				float diff = (float)outer.getWidth()/2 - (float)pt.distance(x,y);
@@ -465,26 +468,42 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 				int intDst = (int)(ratio * 255);
 				tween.continueTo(intDst, 30);
 				tween.fforward();
-				if (type == MouseEvent.MOUSE_PRESSED)
-				{
-					hide();
-				}
 			} else
 			{
+				// We're inside the boundary. Make it full alpha.
 				tween.continueTo(255, 30);
 				tween.fforward();
 			}
+			if (!ctrHi || (ctrLo && !in))
+			{
+				if (e.getID() == MouseEvent.MOUSE_PRESSED)
+				{
+					System.out.println("Helloooo doggy");
+					hide();
+				}
+			}
+			if (e.getID() == MouseEvent.MOUSE_PRESSED)
+			{
+				System.out.println(outer);
+				System.out.println("CtrHi:"+ctrHi);
+				System.out.println("CtrLo:"+ctrLo);
+				System.out.println("outer:"+out);
+				System.out.println("in:"+in);
+			}
 		}
-		
+	
+	public void segmentMouseEvent(MouseEvent e)
+	{
+	
 		if (hidden) return;
 		
 		// The following loop is ONLY for switching individual segment
 		// states. For general mouse goodness, use the logic ABOVE this point.
 		for (int i=0; i < shapes.length; i++)
 		{
-			RadialMenuSegment seg = shapes[i];
+			RadialMenuSegmentBackup seg = shapes[i];
 			boolean containsPoint = shapes[i].modelArea.contains(pt.x,pt.y);
-			switch (type)
+			switch (e.getID())
 			{
 				case MouseEvent.MOUSE_MOVED:
 					if (containsPoint)
@@ -514,13 +533,18 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 				case MouseEvent.MOUSE_RELEASED:
 					if (containsPoint)
 					{
-						seg.performAction(seg.name);
+						seg.performAction();
 						setState(seg,OVER);
 					} else setState(seg,UP);
 				default:
 					break;
 			}
 		}
+	}
+
+	public void setState(RadialMenuSegmentBackup seg, int state)
+	{
+		seg.state = state;
 	}
 
 	public void tweenEvent(Tween source, int eventType)
@@ -537,9 +561,15 @@ public class RadialMenu implements TweenListener, UIObject, MouseListener, Mouse
 	public void mouseDragged(MouseEvent e){mouseEvent(e);}
 	public void mouseMoved(MouseEvent e){mouseEvent(e);}
 
-	public void keyEvent(KeyEvent e)
-	{
-		// TODO Auto-generated method stub
-		
+	public void keyEvent(KeyEvent e){
+		char c = e.getKeyChar();
+		for (int i=0; i < menuItems.size(); i++)
+		{
+			RadialMenuSegmentBackup seg = (RadialMenuSegmentBackup)menuItems.get(i);
+			if (seg.shortcut == c)
+			{
+				seg.performAction();
+			}
+		}
 	}
 }

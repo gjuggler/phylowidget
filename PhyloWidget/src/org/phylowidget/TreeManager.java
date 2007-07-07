@@ -84,7 +84,7 @@ public class TreeManager implements SettableRect
 		renderers.add(c);
 		
 		RandomTreeMutator mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 20; i++)
+		for (int i=0; i < 500; i++)
 		{
 			mutator.randomlyMutateTree();
 		}

@@ -9,7 +9,7 @@ import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.RadialMenu;
+import org.andrewberman.ui.Menu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.Point;
@@ -33,12 +33,13 @@ public final class HoverHalo implements TweenListener, UIObject
 	public static final int ELLIPSE = 1;
 	
 	public boolean hidden = true;
+	public boolean solid = false;
 	
 	public HoverHalo()
 	{
-		aTween = new Tween(this, TweenQuad.instance, "inout", .75f,  .25f, FRAMES, false);
-		wTween = new Tween(this, TweenQuad.instance, "inout", 1.5f, 1.1f, FRAMES, false);
-		hTween = new Tween(this, TweenQuad.instance, "inout", 1.5f, 1.1f, FRAMES, false);
+		aTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f,  .25f, FRAMES);
+		wTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1.5f, 1.1f, FRAMES);
+		hTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1.5f, 1.1f, FRAMES);
 	}
 
 	public synchronized void draw()
@@ -51,9 +52,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		if (r != prevNearest)
 		{
 			prevNearest = r;
-			aTween.restart(.75f, .25f, FRAMES);
-			hTween.restart(1.5f, 1.1f, FRAMES);
-			wTween.restart(1.5f, 1.1f, FRAMES);
+			restart();
 		}
 		if (r == null)
 			return;
@@ -75,9 +74,19 @@ public final class HoverHalo implements TweenListener, UIObject
 		hTween.update();
 		
 //		p.stroke(color,255*aTween.position);
-		p.stroke(color,alpha);
-		p.strokeWeight(Math.max(rect.width/20,3));
-		p.noFill();
+		
+		if (solid)
+		{
+//			p.noStroke();
+//			p.fill(color,255);
+			p.stroke(color,255);
+			p.strokeWeight(Math.max(rect.width/20,3));
+		} else
+		{
+			p.noFill();
+			p.stroke(color,alpha);
+			p.strokeWeight(Math.max(rect.width/20,3));
+		}
 		float w = wTween.position * rect.width;
 		float h = hTween.position * rect.height;
 		float x = (float) rect.getCenterX();
@@ -103,12 +112,24 @@ public final class HoverHalo implements TweenListener, UIObject
 	{
 		hidden = false;
 	}
-	
-	public void stopTweening()
+
+	public void restart()
 	{
-		aTween.stop();
+		solid = false;
+		aTween.restart(.75f, .25f, FRAMES);
+		hTween.restart(1.5f, 1.1f, FRAMES);
+		wTween.restart(1.5f, 1.1f, FRAMES);
+	}
+	
+	public void becomeSolid()
+	{
+		hTween.continueTo(1.1f);
+		hTween.fforward();
 		hTween.stop();
+		wTween.continueTo(1.1f);
+		wTween.fforward();
 		wTween.stop();
+		solid = true;
 	}
 	
 	public void tweenEvent(Tween source, int eventType)
@@ -152,10 +173,8 @@ public final class HoverHalo implements TweenListener, UIObject
 				{
 					PhyloWidget.ui.showMenu(r2);
 				}
-				
 				break;
 		}
-		
 	}
 
 	public boolean containsPoint(NodeRange r, Point pt)

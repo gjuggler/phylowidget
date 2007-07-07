@@ -3,14 +3,16 @@
  */
 package org.andrewberman.ui;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.lang.reflect.Method;
 
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 
-class RadialMenuSegment implements TweenListener
+class RadialMenuSegmentBackup implements TweenListener
 {
 
 // Model.
@@ -43,23 +45,23 @@ class RadialMenuSegment implements TweenListener
 	public float hintY;
 	
 // Controller.
-	public int state = RadialMenu.UP;
+	public int state = Menu.UP;
 	public boolean clickedInside = false; // True if the button has been clicked within its boundary.
 	
 // Menu action call.
 	private Object object;
 	private String function;
 	
-	public RadialMenuSegment(String label, char shortcut, Object functionTarget, String functionName)
+	public RadialMenuSegmentBackup(String label, char shortcut, Object functionTarget, String functionName)
 	{
 		this.name = label;
 		this.shortcut = shortcut;
 		this.object = functionTarget;
 		this.function = functionName;
-		tween = new Tween(this,new TweenQuad(),"out",255,255,30,false);
+		tween = new Tween(this,TweenQuad.tween,Tween.INOUT,255,255,30);
 	}
 	
-	public void performAction(String name)
+	public void performAction()
 	{
 		try
 		{

@@ -287,19 +287,21 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			}
 		}
 		
-		for (int i = 0; i < inRange.size(); i++)
-		{
-			r = (NodeRange) inRange.get(i);
-			n = r.node;
-			switch (r.type)
+		synchronized (tree) {
+			for (int i = 0; i < inRange.size(); i++)
 			{
-				case (Cladogram.LABEL):
-					if (!skipMe.containsKey(n))
-						drawLabel(n);
-					break;
-				case (Cladogram.NODE):
-						drawNode(n);
-					break;
+				r = (NodeRange) inRange.get(i);
+				n = r.node;
+				switch (r.type)
+				{
+					case (Cladogram.LABEL):
+						if (!skipMe.containsKey(n))
+							drawLabel(n);
+						break;
+					case (Cladogram.NODE):
+							drawNode(n);
+						break;
+				}
 			}
 		}
 	}

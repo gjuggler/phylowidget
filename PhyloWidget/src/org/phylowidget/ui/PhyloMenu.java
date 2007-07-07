@@ -1,31 +1,29 @@
 package org.phylowidget.ui;
 
-import java.awt.event.MouseEvent;
-
-import org.andrewberman.ui.RadialMenu;
+import org.andrewberman.ui.RadialPopupMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.Point;
 
-public final class PhyloMenu extends RadialMenu
+public final class PhyloMenu extends RadialPopupMenu
 {
-	PhyloWidget p = PhyloWidget.p;
 	
 	NodeRange curNode;
-	Point pt = new Point(0,0);
+	Point nodePt = new Point(0,0);
 	
 	public PhyloMenu()
 	{
-		super(PhyloWidget.p);
+		super();
 	}
 
-	public synchronized void draw()
+	public void draw()
 	{
 		if (curNode != null)
 		{
 			// Update our position based on the current menu node.
-			curNode.render.getPosition(curNode.node,pt);
-			this.setPosition(pt.x, pt.y);
+			curNode.render.getPosition(curNode.node,nodePt);
+			this.x = nodePt.x;
+			this.y = nodePt.y;
 		}
 		super.draw();
 	}
@@ -43,21 +41,11 @@ public final class PhyloMenu extends RadialMenu
 		PhyloWidget.ui.hideMenu();
 	}
 	
-	protected void drawApproachingCircle()
-	{
-		// HoverHalo takes care of this.
-		return;
-	}
-	
-	public synchronized void setNodeRange(NodeRange r)
+	public void setNodeRange(NodeRange r)
 	{
 		curNode = r;
+		curNode.render.getPosition(curNode.node,nodePt);
+		this.x = nodePt.x;
+		this.y = nodePt.y;
 	}
-	
-	public void mouseEvent(MouseEvent e)
-	{
-		if (this.isHidden())return;
-		super.mouseEvent(e);
-	}
-	
 }

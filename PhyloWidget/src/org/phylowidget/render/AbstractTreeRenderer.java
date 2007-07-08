@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.andrewberman.ui.Point;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;

@@ -1,4 +1,4 @@
-package org.phylowidget.ui;
+package org.andrewberman.ui;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;

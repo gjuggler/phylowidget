@@ -10,7 +10,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.andrewberman.ui.Blinker.BlinkListener;
-import org.phylowidget.ui.UIObject;
 
 import processing.core.PApplet;
 import processing.core.PConstants;

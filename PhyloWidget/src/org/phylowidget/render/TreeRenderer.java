@@ -3,6 +3,7 @@ package org.phylowidget.render;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.Point;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
 

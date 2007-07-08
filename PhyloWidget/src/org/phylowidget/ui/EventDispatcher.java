@@ -10,6 +10,7 @@ import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.FocusManager;
+import org.andrewberman.ui.UIObject;
 import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;

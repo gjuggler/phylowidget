@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.andrewberman.camera.SettableRect;
 import org.andrewberman.sortedlist.SortedXYRangeList;
+import org.andrewberman.ui.Point;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeNode;
 

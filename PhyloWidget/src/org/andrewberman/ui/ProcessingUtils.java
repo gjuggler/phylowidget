@@ -5,8 +5,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 
-import org.phylowidget.render.Point;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -22,6 +22,8 @@ public class ProcessingUtils
 	private static PMatrix modelviewInv = new PMatrix();
 
 	private static Point tPoint = new Point(0,0);
+	
+	static HashMap cache = new HashMap(50);
 	
 	public static void releaseCursor(PApplet p, Cursor c)
 	{
@@ -54,9 +56,16 @@ public class ProcessingUtils
 		}
 		
 		g.noStroke();
-		g.rect(x, y+r, w, (float) Math.ceil(h-2*r));
-		g.rect(x+r,y,(float) Math.ceil(w-2*r+1),r);
-		g.rect(x+r,y+h-r,(float) Math.ceil(w-2*r),r);
+		float left = (float) Math.floor(x+r);
+		float right = (float) Math.ceil(x+w-r);
+		float top = (float) Math.floor(y+r);
+		float bottom = (float) Math.floor(y+h-r);
+		float width = right - left;
+		float height = bottom - top;
+		
+		g.rect(x, top, w, height);
+		g.rect(left,y,width,r);
+		g.rect(left,bottom,width,r);
 		
 		g.stroke = stroke;
 		g.strokeColor = strokeC;
@@ -76,6 +85,8 @@ public class ProcessingUtils
 	 */
 	public static void setMatrix(PApplet p)
 	{
+		cache.clear();
+		
 		if (p.g.getClass() == PGraphicsJava2D.class)
 		{
 			PGraphicsJava2D g = (PGraphicsJava2D) p.g;
@@ -143,8 +154,9 @@ public class ProcessingUtils
 	 * @param pt The point to transform in place. Should currently contain the mouse
 	 * coordinates.
 	 */
+
 	public static void screenToModel(Point2D.Float pt)
-	{		
+	{
 		transform(camera,pt);
 		transform(modelviewInv,pt);
 	}

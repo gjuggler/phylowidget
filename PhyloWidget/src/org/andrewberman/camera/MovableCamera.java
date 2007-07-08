@@ -61,7 +61,7 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 		/*
 		 * Handle the edge scrolling.
 		 */
-		if (mouseInside && !PhyloWidget.ui.focus.isModal() && enableSideScrolling)
+		if (mouseInside && enableSideScrolling)
 		{
 			pt.setLocation(p.mouseX, p.mouseY);
 			float zoomMultiplier = NUDGE_SCALE / getZ();

@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 import org.andrewberman.camera.RectMover;
 import org.andrewberman.camera.SettableRect;
+import org.andrewberman.ui.Point;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.Point;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.Tree;
@@ -84,7 +84,7 @@ public class TreeManager implements SettableRect
 		renderers.add(c);
 		
 		RandomTreeMutator mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 500; i++)
+		for (int i=0; i < 50; i++)
 		{
 			mutator.randomlyMutateTree();
 		}

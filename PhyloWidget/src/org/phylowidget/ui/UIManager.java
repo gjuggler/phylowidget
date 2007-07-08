@@ -8,11 +8,14 @@ import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.Menu;
-import org.andrewberman.ui.RadialPopupMenu;
+import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIObject;
+import org.andrewberman.ui.menu.Menu;
+import org.andrewberman.ui.menu.MenuItem;
+import org.andrewberman.ui.menu.RadialMenu;
+import org.andrewberman.ui.menu.RectMenuItem;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.Point;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
 
@@ -44,13 +47,15 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 		event.setup();
 		
 		menu = new PhyloMenu();
-		menu.thetaLo = 0;
-		menu.thetaHi = PConstants.TWO_PI;
-		menu.radLo = 15;
-		menu.radHi = 40;
-		menu.addMenuItem("Add", 'a', this, "addSisterNode");
-		menu.addMenuItem("Delete", 'x', this, "deleteNode");
-		menu.addMenuItem("Rename", 'r', this, null);
+		RectMenuItem hello = new RectMenuItem("Hello!");
+		RectMenuItem whatever = new RectMenuItem("Whatev");
+		hello.add(whatever);
+		whatever.add(new RectMenuItem("Heya!"));
+		RectMenuItem goodbye = new RectMenuItem("Goodbye!");
+		RectMenuItem asdf = new RectMenuItem("Heya");
+		goodbye.add(asdf);
+		menu.add(hello);
+		menu.add(goodbye);
 		
 		halo = new HoverHalo();
 		
@@ -63,6 +68,8 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public void update()
 	{
+//		menu.setArc(menu.thetaLo+.05f,menu.thetaHi+.05f);
+		
 		updateNearest();
 		
 		for (int i=0; i < uiObjects.size(); i++)
@@ -97,8 +104,7 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	public void hideMenu()
 	{
 		halo.setNodeRange(null);
-		if (!menu.hidden)
-			menu.hide();
+		halo.restart();
 	}
 	
 	public void addSisterNode()
@@ -107,6 +113,10 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 		Tree t = r.render.getTree();
 		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
 		hideMenu();
+	}
+	
+	public void addChildNode()
+	{
 	}
 	
 	public void deleteNode()

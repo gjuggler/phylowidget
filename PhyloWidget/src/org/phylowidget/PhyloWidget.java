@@ -9,6 +9,7 @@ import org.phylowidget.ui.UIManager;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphicsJava2D;
+import processing.opengl.PGraphicsOpenGL;
 
 public class PhyloWidget extends PApplet
 {
@@ -67,14 +68,14 @@ public class PhyloWidget extends PApplet
 		text(String.valueOf(round(frameRate*10)/10.0), 10, 25);	
 	}
 	
-	
-	
 	public void size(int w, int h)
 	{
 		System.out.println("Size("+w+","+h+")");
-		synchronized(this)
-		{
+//		synchronized(this)
+//		{
 			size(w,h,JAVA2D);
+//			size(w,h,P3D);
+//			size(w,h,OPENGL);
 			if (g.getClass() == PGraphicsJava2D.class)
 			{
 				PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
@@ -85,7 +86,7 @@ public class PhyloWidget extends PApplet
 //				pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
 				//				p.smooth();
 			}	
-		}
+//		}
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

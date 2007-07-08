@@ -1,13 +1,13 @@
 package org.phylowidget.ui;
 
-import org.andrewberman.ui.RadialPopupMenu;
+import org.andrewberman.ui.Point;
+import org.andrewberman.ui.menu.Menu;
+import org.andrewberman.ui.menu.VerticalMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.Point;
 
-public final class PhyloMenu extends RadialPopupMenu
+public final class PhyloMenu extends VerticalMenu
 {
-	
 	NodeRange curNode;
 	Point nodePt = new Point(0,0);
 	
@@ -22,8 +22,8 @@ public final class PhyloMenu extends RadialPopupMenu
 		{
 			// Update our position based on the current menu node.
 			curNode.render.getPosition(curNode.node,nodePt);
-			this.x = nodePt.x;
-			this.y = nodePt.y;
+			this.x = nodePt.x+2;
+			this.y = nodePt.y+2;
 		}
 		super.draw();
 	}

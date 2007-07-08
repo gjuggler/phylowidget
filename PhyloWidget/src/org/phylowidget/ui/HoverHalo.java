@@ -8,11 +8,12 @@ import java.awt.geom.Rectangle2D;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
+import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.Menu;
+import org.andrewberman.ui.UIObject;
+import org.andrewberman.ui.menu.Menu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.Point;
 
 import processing.core.PApplet;
 

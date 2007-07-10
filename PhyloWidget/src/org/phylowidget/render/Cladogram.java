@@ -1,5 +1,7 @@
 package org.phylowidget.render;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +9,7 @@ import java.util.HashMap;
 import org.andrewberman.camera.SettableRect;
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.ProcessingUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeNode;
 
@@ -49,7 +52,6 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	 */
 	protected PImage labels;
 	protected PGraphicsJava2D temp;
-	public HashMap nodeToLabelIndex;
 	
 	/**
 	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
@@ -61,7 +63,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	 * These variables are set in the calculateSizes() method during every round
 	 * of rendering. Very important!
 	 */
-	protected float rowSize, colSize = 0;
+	protected float rowSize, colSize, textSize = 0;
 
 	protected float dFont = 0;
 
@@ -77,7 +79,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 
 	protected Point ptemp = new Point(0, 0);
 	protected Point ptemp2 = new Point(0, 0);
-
+	
 	public Cladogram()
 	{
 		super();
@@ -185,20 +187,19 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	protected boolean sorted = false;
 	public void draw()
 	{
+		TreeNode n;
+		NodeRange r;
+		
 		float numRows = leaves.size();
 		float idealRowSize = rect.height / numRows;
-
-		float textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
+		textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
 		float effectiveWidth = rect.width - gutterWidth * textSize;
-
 		float numCols = maxDepth;
 		float idealColSize = effectiveWidth / numCols;
-
 		float rowSize = idealRowSize;
 		float colSize = idealColSize;
 		if (keepAspectRatio)
 			rowSize = colSize = Math.min(idealRowSize, idealColSize);
-
 		dotWidth = Math.min(rowSize / 2, textSize / 2);
 		scaleX = colSize * numCols;
 		scaleY = rowSize * numRows;
@@ -207,12 +208,9 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		dx += rect.getCenterX() - rect.width / 2;
 		dy += rect.getCenterY() - rect.height / 2;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
-
-		/**
+		/*
 		 * Update all the XYRange objects.
 		 */
-		TreeNode n;
-		NodeRange r;
 		for (int i = 0; i < ranges.size(); i++)
 		{
 			r = (NodeRange) ranges.get(i);
@@ -232,42 +230,22 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 					float textHeight = (font.ascent() + font.descent()*2)*textSize;
 					r.loY = ptemp.y - textHeight/2;
 					r.hiY = ptemp.y + textHeight/2;
-					char[] chars = n.getName().toCharArray();
-					float width = 0;
-					for (int j = 0; j < chars.length; j++)
-					{
-						width += font.width(chars[j])*textSize;
-					}
-					// Don't use p.textWidth -- it's VERY SLOW when fonts are large!
-//					r.hiX = r.loX + p.textWidth(n.getName());
+					float width = ProcessingUtils.getTextWidth(p.g,font,textSize,n.getName(),PhyloWidget.usingNativeFonts);
 					r.hiX = r.loX + width;
 					break;
 			}
 		}
-		// Only sort once.
+		/*
+		 * Only sort the list once -- these things aren't moving!
+		 */
 		if (!sorted)
 		{
 			list.sort();
 			sorted = true;
 		}
-		
-		/**
-		 * Now, draw the nodes that are in range.
+		/*
+		 * Skip nodes if the rows are small enough to allow it.
 		 */
-		p.fill(0);
-		p.stroke(0);
-		p.strokeWeight(1);
-		drawAllLines();
-		p.noStroke();
-		p.textFont(font);
-		p.textSize(textSize);
-		p.textAlign(PConstants.LEFT);
-		
-		inRange.clear();
-		list.getInRange(inRange, -p.width / 2, p.width / 2,
-				-p.height / 2, p.height / 2);
-//		System.out.println(inRange.size());
-		
 		skipMe.clear();
 		if (rowSize < SKIP_THRESH)
 		{
@@ -287,9 +265,23 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 					skipMe.put(n, null);
 			}
 		}
-		
+		/*
+		 * Draw the nodes that are in range.
+		 */
+		p.fill(0);
+		p.stroke(0);
+		p.strokeWeight(1);
+		drawAllLines();
+		p.noStroke();
+		p.textFont(font);
+		p.textSize(textSize);
+		p.textAlign(PConstants.LEFT);
+		inRange.clear();
+		list.getInRange(inRange, -p.width / 2, p.width / 2,
+				-p.height / 2, p.height / 2);
 		synchronized (tree) {
-			for (int i = 0; i < inRange.size(); i++)
+			int size = inRange.size();
+			for (int i = 0; i < size; i++)
 			{
 				r = (NodeRange) inRange.get(i);
 				n = r.node;
@@ -316,7 +308,15 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	public void drawLabel(TreeNode n)
 	{
 		getPosition(n,ptemp);
-		p.text(n.getName(), ptemp.x+dotWidth, ptemp.y + dFont);
+		if (PhyloWidget.usingNativeFonts)
+		{
+			PGraphicsJava2D pgj = (PGraphicsJava2D) p.g;
+			Graphics2D g2 = pgj.g2;
+			g2.setFont(font.font.deriveFont(textSize));
+			g2.setPaint(Color.black);
+			g2.drawString(n.getName(), ptemp.x+dotWidth, ptemp.y+dFont);
+		} else
+			p.text(n.getName(), ptemp.x+dotWidth, ptemp.y + dFont);
 	}
 	
 	public void drawAllLines()
@@ -331,11 +331,9 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	public void drawLine(TreeNode n)
 	{
 		getPosition(n, ptemp);
-
 		if (n.getParent() != TreeNode.NULL_PARENT)
 		{
 			getPosition(n.getParent(), ptemp2);
-
 			p.line(ptemp.x, ptemp.y, ptemp2.x, ptemp.y);
 		}
 
@@ -346,7 +344,6 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			TreeNode last = (TreeNode) children.get(children.size() - 1);
 			float minY = getPosition(first, ptemp2).y;
 			float maxY = getPosition(last, ptemp2).y;
-
 			p.line(ptemp.x, minY, ptemp.x, maxY);
 		}
 	}

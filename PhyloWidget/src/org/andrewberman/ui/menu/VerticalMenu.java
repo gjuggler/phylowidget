@@ -1,60 +1,89 @@
 package org.andrewberman.ui.menu;
 
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 
-import org.phylowidget.ui.FontLoader;
+import org.andrewberman.ui.ProcessingUtils;
 
 import processing.core.PFont;
 
 public class VerticalMenu extends Menu
-{
-	final static int INNER_PAD = 4;
+{	
+	/*
+	 * Values to cache and send off as static to VerticalItemMenu to avoid
+	 * creating objects during each draw cycle.
+	 */
+	float fontOffset;
+	float triWidth;
+	Area tri;
+	float iconSize;
 	
-	public int layoutRule;
-	public float itemWidth = 80;
-	public float itemHeight = 15;
-	
-	PFont font = FontLoader.f64;
-	float fontSize = 12;
-	
-	protected void drawAbove()
+	protected void drawBefore()
 	{
-		if (items.size() > 0)
-		{
-			g2.setStroke(colors.stroke);
-			g2.setPaint(colors.strokeColor);
-			Rectangle2D.Float rect = new Rectangle2D.Float(PAD,PAD,
-					itemWidth, itemHeight*items.size());
-			g2.draw(rect);
-		}
+//		pg.textFont(menu.style.font);
+//		pg.textSize(menu.style.fontSize);
+//		pg.fill(0);
+	}
+	
+	public void draw()
+	{
+		VerticalMenuItem.fontOffset = fontOffset;
+		VerticalMenuItem.triWidth = triWidth;
+		VerticalMenuItem.tri = tri;
+		VerticalMenuItem.iconSize = iconSize;
+		super.draw();
+	}
+	
+	protected void drawAfter()
+	{
+		VerticalMenuItem.drawChildrenRect(this);
 	}
 	
 	public void layout()
 	{
-		final float height = itemHeight - INNER_PAD * 2;
-		fontSize = height / (font.descent() * 2 + font.ascent());
-		
-//		System.out.println("Menu layout!"+items.size());
+		/*
+		 * Calculate the height of each row in this menu.
+		 */
+		PFont font = style.font;
+		float fontSize = style.fontSize;
+		float descent = ProcessingUtils.getTextDescent(menu.pg,font,fontSize,true);
+		float ascent = ProcessingUtils.getTextAscent(menu.pg,font,fontSize,true);
+		float textHeight = descent+ascent;
+		float itemHeight = textHeight + 2*style.pad;
+		fontOffset = style.pad + textHeight - descent;
+		/*
+		 * Calculate the width of the "submenu" triangle shape.
+		 */
+		float innerHeight = itemHeight - 2*style.pad;
+		AffineTransform at = AffineTransform.getScaleInstance(innerHeight/2, innerHeight/2);
+		Area a = style.subTriangle.createTransformedArea(at);
+		VerticalMenuItem.tri = tri = a;
+		VerticalMenuItem.triWidth = triWidth = (float) a.getBounds2D().getWidth();
+		/*
+		 * Calculate the max width of text in the menu items.
+		 */
+		float itemWidth = getMaxWidth();
+		/*
+		 * Set the width, height and position for the top-level items.
+		 */
 		for (int i=0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem)items.get(i);
-			if (item instanceof RectMenuItem)
+			if (item instanceof Sizable)
 			{
-				RectMenuItem rItem = (RectMenuItem) item;
-				rItem.x = PAD;
-				rItem.y = PAD + i*itemHeight;
-				rItem.width = itemWidth;
-				rItem.height = itemHeight;
-				if (i == 0)
-					rItem.position = RectMenuItem.TOP;
-				else if (i == items.size()-1)
-					rItem.position = RectMenuItem.BOTTOM;
+				Sizable size = (Sizable) item;
+				size.setSize(itemWidth, itemHeight);
+			}
+			if (item instanceof Positionable)
+			{
+				Positionable pos = (Positionable) item;
+				if (menu == this)
+					pos.setPosition(OFFSET, OFFSET + i*itemHeight);
 				else
-					rItem.position = RectMenuItem.MIDDLE;
+					pos.setPosition(x, y + i*itemHeight);
 			}
 		}
 		// Trigger the recursive layout for the rest of the menu.
 		super.layout();
 	}
-
 }

@@ -13,7 +13,9 @@ public final class MenuTimer extends Thread
 	MenuItem item;
 	MenuItem parent;
 	MenuItem lastSet;
-	static final int delay = 150;
+	static final int delay = 100;
+	
+	boolean unset;
 	
 	int tick;
 	boolean interrupted;
@@ -28,22 +30,25 @@ public final class MenuTimer extends Thread
 				{
 					if (!interrupted)
 					{
-						if (parent != null)
+						if (parent == null)
+							wait();
+						else if (unset)
 						{
-							parent.setOpenItem(item);
-//							lastSet = item;
-							parent = null;
+							item.hideAllChildren();
 							item = null;
+							parent = null;
 						} else
 						{
-							wait();
+							parent.setOpenItem(item);
+							parent = null;
+							item = null;
 						}
 					} else
 					{
 						interrupted = false;
 					}
 					wait(delay);
-					System.out.println("waiting");
+//					System.out.println("waiting");
 				}
 			} catch (InterruptedException e)
 			{
@@ -57,11 +62,12 @@ public final class MenuTimer extends Thread
 	{
 		if (setMe == null) return;
 		if (setMe == lastSet) return;
-		if (item == setMe) return;
+//		if (item == setMe) return;
 //		System.out.println("Set item:"+setMe);
 		item = setMe;
 		parent = item.parent;
 		lastSet = item;
+		unset = false;
 		triggerDelay();
 	}
 	
@@ -70,9 +76,11 @@ public final class MenuTimer extends Thread
 		if (unsetMe == item || (unsetMe == lastSet))
 		{
 //			System.out.println("Unset item:"+unsetMe);
-			parent = unsetMe.parent;
-			item = null;
+//			parent = unsetMe.nearestMenu;
+//			parent = unsetMe.parent;
+			item = unsetMe;
 			lastSet = null;
+			unset = true;
 			triggerDelay();
 		}
 	}

@@ -1,7 +1,7 @@
 package org.andrewberman.ui.menu;
 
 
-public final class RadialMenuItem //extends MenuItem
+public final class RadialMenuItem
 {
 //	float rLo,rHi,tLo,tHi = 0;
 //	

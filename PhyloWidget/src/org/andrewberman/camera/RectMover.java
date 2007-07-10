@@ -63,7 +63,7 @@ public class RectMover extends MovableCamera
 	{
 		zoomCenterTo(0, 0, p.width, p.height);
 	}
-
+	
 	public float getZ()
 	{
 		return w / p.width;

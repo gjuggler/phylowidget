@@ -14,6 +14,7 @@ import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.Tree;
 
 import processing.core.PApplet;
+import processing.core.PGraphicsJava2D;
 
 public class TreeManager implements SettableRect
 {
@@ -40,9 +41,6 @@ public class TreeManager implements SettableRect
 	public void update()
 	{
 		camera.update();
-//		p.stroke(0);
-//		p.noFill();
-//		p.rect(cameraRect.x, cameraRect.y, cameraRect.width,cameraRect.height);
 		
 		for (int i=0; i < renderers.size(); i++)
 		{
@@ -84,7 +82,7 @@ public class TreeManager implements SettableRect
 		renderers.add(c);
 		
 		RandomTreeMutator mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 50; i++)
+		for (int i=0; i < 200; i++)
 		{
 			mutator.randomlyMutateTree();
 		}

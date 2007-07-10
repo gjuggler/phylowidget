@@ -13,7 +13,10 @@ import org.andrewberman.ui.UIObject;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.RadialMenu;
-import org.andrewberman.ui.menu.RectMenuItem;
+import org.andrewberman.ui.menu.ToolbarMenu;
+import org.andrewberman.ui.menu.ToolbarMenuItem;
+import org.andrewberman.ui.menu.VerticalMenu;
+import org.andrewberman.ui.menu.VerticalMenuItem;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.Tree;
@@ -46,16 +49,27 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 		focus.setup();
 		event.setup();
 		
-		menu = new PhyloMenu();
-		RectMenuItem hello = new RectMenuItem("Hello!");
-		RectMenuItem whatever = new RectMenuItem("Whatev");
+		VerticalMenu vert = new VerticalMenu();
+		vert.label = "Sub-menu!";
+		VerticalMenuItem hello = new VerticalMenuItem("Hello!");
+		VerticalMenuItem whatever = new VerticalMenuItem("hhhahaaaaete");
 		hello.add(whatever);
-		whatever.add(new RectMenuItem("Heya!"));
-		RectMenuItem goodbye = new RectMenuItem("Goodbye!");
-		RectMenuItem asdf = new RectMenuItem("Heya");
+		VerticalMenuItem heya = new VerticalMenuItem("Heya!");
+		heya.add(new VerticalMenuItem("Whooo!"));
+		whatever.add(heya);
+		VerticalMenuItem goodbye = new VerticalMenuItem("Goodbye!");
+		VerticalMenuItem asdf = new VerticalMenuItem("Heya");
 		goodbye.add(asdf);
-		menu.add(hello);
-		menu.add(goodbye);
+		vert.add(hello);
+		vert.add(goodbye);
+		
+		menu = new PhyloMenu();
+		menu.label = "Menu.";
+		ToolbarMenuItem file = new ToolbarMenuItem("File");
+		menu.add(file);
+		ToolbarMenuItem what = new ToolbarMenuItem("What?");
+		menu.add(what);
+		file.add(vert);
 		
 		halo = new HoverHalo();
 		

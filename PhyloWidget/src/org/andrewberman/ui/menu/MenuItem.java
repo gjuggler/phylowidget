@@ -1,12 +1,17 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.ProcessingUtils;
+
+import processing.core.PFont;
 
 public abstract class MenuItem
 {
@@ -14,24 +19,33 @@ public abstract class MenuItem
 	public static final int OVER = 1;
 	public static final int DOWN = 2;
 
-	static MenuColorSet colors = MenuColorSet.defaultSet;
 	static MenuTimer timer = MenuTimer.instance;
 	
 	public Menu menu;
+	public Menu nearestMenu;
 	public MenuItem parent;
+	
 	Object o;
 	Method m;
+	public String label;
 	ArrayList items;
+	
+	int state = UP;	
 	boolean clickedInside;
 	boolean mouseInside;
 	boolean hidden = true;
-	boolean showingChildren;
-	boolean hoverToggle = true;
-	int state = UP;	
+
 	
 	public MenuItem()
 	{
 		items = new ArrayList(2);
+		label = "";
+	}
+	
+	public MenuItem(String label)
+	{
+		this();
+		this.label = label;
 	}
 	
 	public void setAction(Object object, String method)
@@ -44,11 +58,9 @@ public abstract class MenuItem
 				m = o.getClass().getMethod(method, null);
 			} catch (SecurityException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -61,20 +73,57 @@ public abstract class MenuItem
 		return true;
 	}
 	
-	public void hide()
+	public boolean showingChildren()
+	{
+		for (int i=0; i < items.size(); i++)
+		{
+			if (((MenuItem)items.get(i)).isVisible())
+				return true;
+		}
+		return false;
+	}
+	
+	boolean isAncestorOfSelected()
+	{
+		if (menu == null) return false;
+		if (this == menu.currentlySelected)
+			return true;
+		else if (isAncestorOf(menu.currentlySelected))
+			return true;
+		return false;
+	}
+	
+	public boolean isAncestorOf(MenuItem child)
+	{
+		if (child == null) return false;
+		else if (child.parent == this) return true;
+		else {
+			boolean found = false;
+			for (int i=0; i < items.size(); i++)
+			{
+				MenuItem item = (MenuItem)items.get(i);
+				if (item.isAncestorOf(child))
+					found = true;
+			}
+			return found;
+		}
+	}
+	
+	protected void hide()
 	{
 		hidden = true;
 	}
 	
 	protected void hideChildren()
 	{
-		showingChildren = true;
-		toggleChildren();
+		for (int i=0; i < items.size(); i++)
+		{
+			((MenuItem)items.get(i)).hide();
+		}
 	}
 	
 	protected void hideAllChildren()
 	{
-		System.out.println("Hide all!");
 		hideChildren();
 		for (int i=0; i < items.size(); i++)
 		{
@@ -90,8 +139,12 @@ public abstract class MenuItem
 
 	protected void showChildren()
 	{
-		showingChildren = false;
-		toggleChildren();
+		// We hide all children first to make sure any sub-submenus aren't showing.
+		hideAllChildren();
+		for (int i=0; i < items.size(); i++)
+		{
+			((MenuItem)items.get(i)).show();
+		}
 	}
 	
 	protected void setOpenItem(MenuItem openMe)
@@ -116,6 +169,7 @@ public abstract class MenuItem
 	
 	protected void toggleChildren()
 	{
+		final boolean showingChildren = showingChildren();
 		for (int i=0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem)items.get(i);
@@ -127,7 +181,6 @@ public abstract class MenuItem
 				seg.show();
 			}
 		}	
-		showingChildren = !showingChildren;
 	}
 	
 	public void draw()
@@ -159,11 +212,28 @@ public abstract class MenuItem
 	protected void setMenu(Menu menu)
 	{
 		this.menu = menu;
+		getNearestMenu();
 		for (int i=0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem)items.get(i);
 			item.setMenu(menu);
 		}
+	}
+	
+	protected Menu getNearestMenu()
+	{
+//		if (nearestMenu != null) return nearestMenu;
+		MenuItem item = this;
+		while (item != null)
+		{
+			if (item instanceof Menu)
+			{
+				nearestMenu = (Menu)item;
+				return nearestMenu;
+			} else
+				item = item.parent;
+		}
+		return null;
 	}
 	
 	protected void setParent(MenuItem item)
@@ -175,7 +245,7 @@ public abstract class MenuItem
 	{
 		if (items.size() > 0)
 		{
-			toggleChildren();
+			menuTriggerLogic();
 		} else
 		{
 			if (m == null || o == null) return;
@@ -187,6 +257,27 @@ public abstract class MenuItem
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	protected void menuTriggerLogic()
+	{
+		if (timer.item == this || !nearestMenu.clickToggles)
+		{ 
+			if (nearestMenu.singletNavigation)
+				parent.setOpenItem(this);
+			else
+				showChildren();
+		} else if (nearestMenu.clickToggles)
+		{
+			if (nearestMenu.singletNavigation)
+			{
+				if (showingChildren())
+					parent.setOpenItem(null);
+				else
+					parent.setOpenItem(this);
+			} else
+				toggleChildren();
+		}	
 	}
 	
 	/**
@@ -213,13 +304,42 @@ public abstract class MenuItem
 		}
 	}
 	
+	/**
+	 * Calculates the maximum width among this MenuItem's sub-items.
+	 * @return the maximum width of the MenuItems in the "items" arraylist.
+	 */
+	protected float getMaxWidth()
+	{
+		float max = 0;
+		for (int i=0; i < items.size(); i++)
+		{
+			float curWidth = ((MenuItem)items.get(i)).getWidth();
+			if (curWidth > max)
+				max = curWidth;
+		}
+		return max;
+	}
+	
+	/**
+	 * Determines the max width of this MenuItem's "content".
+	 * Currently just returns the max width based on the width of the label
+	 * text and the current Palette's padding, but subclassers should override
+	 * this default behavior.
+	 * @return the maximum width of this MenuItem.
+	 */
+	protected float getWidth()
+	{
+		PFont font = menu.style.font;
+		float fontSize = menu.style.fontSize;
+		float width = ProcessingUtils.getTextWidth(menu.pg,font, fontSize, label,true);
+		return width + 2*menu.style.pad;
+	}
+	
 	protected void mouseEvent(MouseEvent e, Point tempPt)
 	{
 		mouseInside = false;
-		
 		if (this.isVisible())
 			visibleMouseEvent(e,tempPt);
-		
 		for (int i=0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem)items.get(i);
@@ -233,14 +353,17 @@ public abstract class MenuItem
 	{
 		if (this.state == state) return;
 		this.state = state;
-		
-		if (hoverToggle)
+		if (nearestMenu.hoverNavigable)
 		{
 			if (state == MenuItem.OVER)
 				timer.setMenuItem(this);
 			else if (state == MenuItem.UP)
 				timer.unsetMenuItem(this);
 		}
+		if (state == MenuItem.OVER || state == MenuItem.DOWN)
+			menu.currentlySelected = this;
+//		else if (state == MenuItem.UP && menu.currentlySelected == this)
+//			menu.currentlySelected = null;
 	}
 	
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)

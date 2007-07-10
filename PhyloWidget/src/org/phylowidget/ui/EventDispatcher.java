@@ -14,8 +14,9 @@ import org.andrewberman.ui.UIObject;
 import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
+import processing.opengl.PGraphicsOpenGL;
 
-public class EventDispatcher implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
+public final class EventDispatcher implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
 	private PApplet p = PhyloWidget.p;
 	private FocusManager f;
@@ -29,10 +30,20 @@ public class EventDispatcher implements MouseListener, MouseMotionListener, Mous
 	{
 		f = PhyloWidget.ui.focus;
 		
-		p.addMouseListener(this);
-		p.addMouseMotionListener(this);
-		p.addMouseWheelListener(this);
-		p.addKeyListener(this);
+		if (PhyloWidget.openGL)
+		{
+			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
+			gl.canvas.addMouseListener(this);
+			gl.canvas.addMouseMotionListener(this);
+			gl.canvas.addKeyListener(this);
+			gl.canvas.addMouseWheelListener(this);
+		} else
+		{
+			p.addMouseListener(this);
+			p.addMouseMotionListener(this);
+			p.addMouseWheelListener(this);
+			p.addKeyListener(this);			
+		}
 	}
 	
 	public void addListener(UIObject o)

@@ -79,7 +79,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	public AbstractTreeRenderer()
 	{
 		rect = new Rectangle2D.Float(0,0,0,0);
-		font = FontLoader.f64;
+		font = FontLoader.v12;
 	}
 	
 	public void render()

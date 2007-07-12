@@ -26,6 +26,8 @@ public class PhyloWidget extends PApplet
 	public static boolean java2D;
 	public static boolean openGL;
 	
+	public boolean stopCreatedThreads = false;
+	
 	public PhyloWidget()
 	{
 		super();
@@ -38,8 +40,7 @@ public class PhyloWidget extends PApplet
 
 	public void setup()
 	{
-//		size(500,500,OPENGL);
-		size(500,500);
+		this.size(500,500);
 		frameRate(30f);
 		
 		trees.setup();
@@ -54,16 +55,16 @@ public class PhyloWidget extends PApplet
 		translate(width/2,height/2);
 		
 		ProcessingUtils.setMatrix(this);
-		
-//		p.fill(200,200,255,200);
-//		p.stroke(200,200,255,200);
-//		p.strokeWeight(3);
-//		ProcessingUtils.roundedRect(p.g, -100f, -50f, 200f, 100f, 10f);
-		
 		trees.update();
 		ui.update();
 	}
 
+	public void stop()
+	{
+		super.stop();
+		stopCreatedThreads = true;
+	}
+	
 	public void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
@@ -92,7 +93,7 @@ public class PhyloWidget extends PApplet
 				pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 //				pg.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 //				p.smooth();
-			} else if (g.getClass() == PGraphicsOpenGL.class)
+			} else if (g.getClass().getName().equals("OPENGL"))
 			{
 				openGL = true;
 			}

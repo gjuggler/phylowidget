@@ -3,7 +3,7 @@ package org.phylowidget.tree;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public final class TreeNode implements Comparable
+public class TreeNode implements Comparable
 {
 	private static int serialSeed = 0;
 	

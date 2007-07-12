@@ -25,6 +25,11 @@ public class VerticalMenu extends Menu
 //		pg.fill(0);
 	}
 	
+	public MenuItem create(String label)
+	{
+		return new VerticalMenuItem(label);
+	}
+	
 	public void draw()
 	{
 		VerticalMenuItem.fontOffset = fontOffset;

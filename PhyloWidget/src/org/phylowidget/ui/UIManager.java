@@ -13,6 +13,7 @@ import org.andrewberman.ui.UIObject;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.RadialMenu;
+import org.andrewberman.ui.menu.Toolbar;
 import org.andrewberman.ui.menu.ToolbarMenu;
 import org.andrewberman.ui.menu.ToolbarMenuItem;
 import org.andrewberman.ui.menu.VerticalMenu;
@@ -35,7 +36,6 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public NodeRange nearest;
 	public Point nearestP;
-	public PhyloMenu menu;
 	public HoverHalo halo;
 	
 	public UIManager()
@@ -48,36 +48,24 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	{
 		focus.setup();
 		event.setup();
-		
-		VerticalMenu vert = new VerticalMenu();
-		vert.label = "Sub-menu!";
-		VerticalMenuItem hello = new VerticalMenuItem("Hello!");
-		VerticalMenuItem whatever = new VerticalMenuItem("hhhahaaaaete");
-		hello.add(whatever);
-		VerticalMenuItem heya = new VerticalMenuItem("Heya!");
-		heya.add(new VerticalMenuItem("Whooo!"));
-		whatever.add(heya);
-		VerticalMenuItem goodbye = new VerticalMenuItem("Goodbye!");
-		VerticalMenuItem asdf = new VerticalMenuItem("Heya");
-		goodbye.add(asdf);
-		vert.add(hello);
-		vert.add(goodbye);
-		
-		menu = new PhyloMenu();
-		menu.label = "Menu.";
-		ToolbarMenuItem file = new ToolbarMenuItem("File");
-		menu.add(file);
-		ToolbarMenuItem what = new ToolbarMenuItem("What?");
-		menu.add(what);
-		file.add(vert);
+
+		Toolbar t = new Toolbar(p);
+		t.add("File").add("Do Something").setAction(this, "doSomething");
+		t.get("File").add("Do Nothing");
+		t.add("Edit").add("Undo").add("When?").add("Now!");
+		t.get("Edit").add("Redo");
 		
 		halo = new HoverHalo();
+		halo.show();
 		
 		// Keep in mind that the first added is the first drawn.
-		addObject(halo);
-		addObject(menu);
-		
-		halo.show();
+		addObject(t);
+//		addObject(halo);
+	}
+	
+	public void doSomething()
+	{
+		PhyloWidget.trees.mutator.randomlyMutateTree();
 	}
 	
 	public void update()
@@ -111,8 +99,8 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	{
 		halo.setNodeRange(r);
 		halo.becomeSolid();
-		menu.setNodeRange(r);
-		menu.show();
+//		menu.setNodeRange(r);
+//		menu.show();
 	}
 	
 	public void hideMenu()
@@ -123,9 +111,9 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public void addSisterNode()
 	{
-		NodeRange r = menu.curNode;
-		Tree t = r.render.getTree();
-		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
+//		NodeRange r = menu.curNode;
+//		Tree t = r.render.getTree();
+//		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
 		hideMenu();
 	}
 	
@@ -135,9 +123,9 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public void deleteNode()
 	{
-		NodeRange r = menu.curNode;
-		Tree t = r.render.getTree();
-		t.deleteNode(r.node);
+//		NodeRange r = menu.curNode;
+//		Tree t = r.render.getTree();
+//		t.deleteNode(r.node);
 		hideMenu();
 	}
 	

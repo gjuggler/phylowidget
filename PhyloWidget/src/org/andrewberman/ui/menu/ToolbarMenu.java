@@ -6,16 +6,16 @@ import processing.core.PFont;
 
 public class ToolbarMenu extends Menu
 {
+	float itemHeight;
 	float fontOffset;
 	boolean isActive;
-	
-	public void draw()
+
+	public ToolbarMenu()
 	{
-		ToolbarMenuItem.fontOffset = fontOffset;
-		super.draw();
 		clickToggles = true;
 		hoverNavigable = false;
 		clickAwayBehavior = Menu.CLICKAWAY_COLLAPSES;
+		actionOnMouseDown = true;
 	}
 	
 	protected void setOpenItem(MenuItem item)
@@ -25,6 +25,11 @@ public class ToolbarMenu extends Menu
 			isActive = false;
 		else
 			isActive = true;
+	}
+	
+	public MenuItem create(String label)
+	{
+		return new ToolbarMenuItem(label);
 	}
 	
 	public void layout()
@@ -37,20 +42,21 @@ public class ToolbarMenu extends Menu
 		float descent = ProcessingUtils.getTextDescent(pg,font,fontSize,true);
 		float ascent = ProcessingUtils.getTextAscent(pg,font,fontSize,true);
 		float textHeight = descent+ascent;
-		float itemHeight = textHeight + 2*menu.style.pad;
-		fontOffset = menu.style.pad + textHeight - descent;
+		itemHeight = textHeight + menu.style.pad*2;
+		fontOffset = itemHeight/2 + textHeight/2 - descent;
 		/*
 		 * Set the width, height and position for the top-level items.
 		 */
-		float curPos = x;
+		float curPos = 0;
 		for (int i=0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem)items.get(i);
-			float curWidth = item.getWidth();
+			float textWidth = item.getWidth();
+			float fullWidth = textWidth + 4*menu.style.pad;
 			if (item instanceof Sizable)
 			{
 				Sizable size = (Sizable) item;
-				size.setSize(curWidth, itemHeight);
+				size.setSize(fullWidth, itemHeight);
 			}
 			if (item instanceof Positionable)
 			{
@@ -60,7 +66,13 @@ public class ToolbarMenu extends Menu
 				else
 					pos.setPosition(x + curPos, y);
 			}
-			curPos += curWidth + menu.style.pad;
+			if (item instanceof ToolbarMenuItem)
+			{
+				ToolbarMenuItem tbi = (ToolbarMenuItem) item;
+				tbi.textWidth = textWidth;
+				tbi.textOffsetY = fontOffset;
+			}
+			curPos += fullWidth + menu.style.pad/2;
 		}
 		// Trigger the recursive layout for the rest of the menu.
 		super.layout();

@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.render.PhyloNode;
 
 public class RandomTreeMutator implements Runnable
 {
@@ -77,7 +78,7 @@ public class RandomTreeMutator implements Runnable
 			tree.getAllNodes(allNodes);
 			int i = random.nextInt(allNodes.size());
 			TreeNode n = (TreeNode) allNodes.get(i);
-			tree.addSisterNode(n,new TreeNode(taxonName));
+			tree.addSisterNode(n,new PhyloNode(taxonName));
 		}
 		mutations++;
 	}

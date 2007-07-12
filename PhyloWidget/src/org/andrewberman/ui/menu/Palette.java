@@ -26,7 +26,7 @@ public final class Palette
 	/*
 	 * Menu-specific stuff.
 	 */
-	public Paint[] stateColors;
+	public Color[] stateColors;
 	public Color menuGradLo;
 	public Color menuGradHi;
 	
@@ -70,12 +70,12 @@ public final class Palette
 		 * Menu-specific colors.
 		 */
 		Color color = new Color(245,245,255);
-		stateColors = new Paint[3];
+		stateColors = new Color[3];
 		stateColors[MenuItem.UP] = color;
 		stateColors[MenuItem.OVER] = color.brighter(20);
 		stateColors[MenuItem.DOWN] = color.darker(20);
 		menuGradLo = new Color(255,255,255);
-		menuGradHi = new Color(200,220,255);
+		menuGradHi = new Color(180,200,245);
 		/*
 		 * Text stuff.
 		 */
@@ -100,7 +100,7 @@ public final class Palette
 	
 	public Paint getGradient(float lo, float hi)
 	{
-		return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi);
+		return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi,true);
 	}
 	
 	public Paint getGradient(int state, float lo, float hi)
@@ -108,13 +108,13 @@ public final class Palette
 		switch (state)
 		{
 			case (MenuItem.UP):
-				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi.brighter(40));
+				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi.brighter(15),true);
 			case (MenuItem.OVER):
-				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi.brighter(20)); 
+				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi.brighter(0),true); 
 			case (MenuItem.DOWN):
-				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi);
+				return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi.darker(30),true);
 			default:
-				return Color.white;
+				return Color.black;
 		}
 	}
 }

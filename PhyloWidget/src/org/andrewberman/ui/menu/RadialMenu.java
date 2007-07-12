@@ -60,7 +60,12 @@ public class RadialMenu extends Menu
 //		this.radius = outer;
 //		layout();
 //	}
-//	
+	
+	public MenuItem create(String s)
+	{
+		return null;
+	}
+	
 //	public void setArc(float thetaLo, float thetaHi)
 //	{
 //		this.thetaLo = thetaLo;

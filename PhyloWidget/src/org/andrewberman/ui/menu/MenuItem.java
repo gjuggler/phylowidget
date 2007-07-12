@@ -19,7 +19,7 @@ public abstract class MenuItem
 	public static final int OVER = 1;
 	public static final int DOWN = 2;
 
-	static MenuTimer timer = MenuTimer.instance;
+	static MenuTimer timer;
 	
 	public Menu menu;
 	public Menu nearestMenu;
@@ -36,15 +36,15 @@ public abstract class MenuItem
 	boolean hidden = true;
 
 	
-	public MenuItem()
+	MenuItem()
 	{
-		items = new ArrayList(2);
-		label = "";
+		this("[Unnamed MenuItem]");
 	}
 	
-	public MenuItem(String label)
+	MenuItem(String label)
 	{
-		this();
+		timer = MenuTimer.instance();
+		items = new ArrayList(2);
 		this.label = label;
 	}
 	
@@ -66,6 +66,55 @@ public abstract class MenuItem
 		}
 	}
 	
+	public MenuItem add(MenuItem seg)
+	{
+		items.add(seg);
+		seg.setParent(this);
+		seg.setMenu(menu);
+		if (menu != null) menu.layout();
+		return seg;
+	}
+
+	public MenuItem add(String newLabel)
+	{
+		if (nearestMenu != null)
+		{
+			MenuItem item = nearestMenu.create(newLabel);
+			add(item);
+			return item;
+		} else if (menu != null)
+		{
+			MenuItem item = menu.create(newLabel);
+			add(item);
+			return item;
+		} else
+		{
+			throw new RuntimeException("Error in MenuItem.add(String): This MenuItem is not associated with any menu!");
+		}
+	}
+	
+	public MenuItem get(String search)
+	{
+		if (label.equals(search))
+			return this;
+		else
+		{
+			for (int i=0; i < items.size(); i++)
+			{
+				MenuItem mightBeNull = ((MenuItem)items.get(i)).get(search);
+				if (mightBeNull != null)
+					return mightBeNull;
+			}
+		}
+		return null;
+//		throw new RuntimeException("Unable to find MenuItem (label \""+search+"\") within the specified MenuItem (label \""+label+"\")");
+	}
+	
+	/**
+	 * Returns whether this MenuItem is visible or not.
+	 * For example, an 
+	 * @return
+	 */
 	public boolean isVisible()
 	{
 		if (hidden)
@@ -73,6 +122,10 @@ public abstract class MenuItem
 		return true;
 	}
 	
+	/**
+	 * Returns whether this MenuItem is showing its children or not.
+	 * @return true if any of this MenuItem's children are showing.
+	 */
 	public boolean showingChildren()
 	{
 		for (int i=0; i < items.size(); i++)
@@ -83,6 +136,33 @@ public abstract class MenuItem
 		return false;
 	}
 	
+	/**
+	 * Draws this MenuItem to the current root menu's buffer PGraphics object.
+	 * The correct way to do the drawing:
+	 *   (for Java2D) menu.pg.g2.drawBlah(...)
+	 *   (for PGraphics) menu.pg.drawBlah(...)
+	 */
+	public void draw()
+	{
+		for (int i=0; i < items.size(); i++)
+		{
+			MenuItem seg = (MenuItem)items.get(i);
+			seg.draw();
+		}
+	}
+
+	/**
+	 * Lays out this MenuItem and all of its sub-items.
+	 */
+	public void layout()
+	{
+		for (int i=0; i < items.size(); i++)
+		{
+			MenuItem seg = (MenuItem)items.get(i);
+			seg.layout();
+		}
+	}
+
 	boolean isAncestorOfSelected()
 	{
 		if (menu == null) return false;
@@ -93,7 +173,7 @@ public abstract class MenuItem
 		return false;
 	}
 	
-	public boolean isAncestorOf(MenuItem child)
+	protected boolean isAncestorOf(MenuItem child)
 	{
 		if (child == null) return false;
 		else if (child.parent == this) return true;
@@ -183,32 +263,6 @@ public abstract class MenuItem
 		}	
 	}
 	
-	public void draw()
-	{
-		for (int i=0; i < items.size(); i++)
-		{
-			MenuItem seg = (MenuItem)items.get(i);
-			seg.draw();
-		}
-	}
-	
-	protected void layout()
-	{
-		for (int i=0; i < items.size(); i++)
-		{
-			MenuItem seg = (MenuItem)items.get(i);
-			seg.layout();
-		}
-	}
-	
-	public void add(MenuItem seg)
-	{
-		items.add(seg);
-		seg.setParent(this);
-		seg.setMenu(menu);
-		if (menu != null) menu.layout();
-	}
-	
 	protected void setMenu(Menu menu)
 	{
 		this.menu = menu;
@@ -248,6 +302,8 @@ public abstract class MenuItem
 			menuTriggerLogic();
 		} else
 		{
+			if (menu.hideOnAction)
+				menu.hide();
 			if (m == null || o == null) return;
 			try
 			{
@@ -332,7 +388,7 @@ public abstract class MenuItem
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
 		float width = ProcessingUtils.getTextWidth(menu.pg,font, fontSize, label,true);
-		return width + 2*menu.style.pad;
+		return width;
 	}
 	
 	protected void mouseEvent(MouseEvent e, Point tempPt)
@@ -355,7 +411,7 @@ public abstract class MenuItem
 		this.state = state;
 		if (nearestMenu.hoverNavigable)
 		{
-			if (state == MenuItem.OVER)
+			if (state == MenuItem.OVER || state == MenuItem.DOWN)
 				timer.setMenuItem(this);
 			else if (state == MenuItem.UP)
 				timer.unsetMenuItem(this);
@@ -383,7 +439,12 @@ public abstract class MenuItem
 				}
 				break;
 			case MouseEvent.MOUSE_PRESSED:
-				if (containsPoint) clickedInside = true;
+				if (containsPoint)
+				{
+					clickedInside = true;
+					if (nearestMenu.actionOnMouseDown)
+						performAction();
+				}
 				else clickedInside = false;
 			case MouseEvent.MOUSE_DRAGGED:
 				if (/*clickedInside && */containsPoint) setState(MenuItem.DOWN);
@@ -393,9 +454,9 @@ public abstract class MenuItem
 			case MouseEvent.MOUSE_RELEASED:
 				if (containsPoint)
 				{
-//					if (clickedInside)
+					if (!nearestMenu.actionOnMouseDown)
 						performAction();
-					setState(MenuItem.OVER);
+//					setState(MenuItem.OVER);
 				} else setState(MenuItem.UP);
 			default:
 				break;

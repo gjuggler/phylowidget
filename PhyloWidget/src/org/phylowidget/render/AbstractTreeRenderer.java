@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.menu.Positionable;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
@@ -144,17 +145,31 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 
 	public void setPosition(TreeNode n, float x, float y)
 	{
-		if (positions.get(n) == null)
+		if (n instanceof Positionable)
 		{
-			positions.put(n, new Point(x,y));
+			Positionable pos = (Positionable) n;
+			pos.setPosition(x, y);
+		} else 
+		{
+			if (positions.get(n) == null)
+			{
+				positions.put(n, new Point(x,y));
+			}
+			Point pt = (Point)positions.get(n);
+			pt.setLocation(x,y);
 		}
-		Point pt = (Point)positions.get(n);
-		pt.setLocation(x,y);
 	}
 
 	public Point getInternalPosition(TreeNode n)
 	{
-		return (Point) positions.get(n);
+		if (n instanceof Positionable)
+		{
+			Positionable pos = (Positionable) n;
+			return new Point(pos.getX(),pos.getY());
+		} else
+		{
+			return (Point) positions.get(n);
+		}
 	}
 	
 	public Point getPosition(TreeNode n)
@@ -166,9 +181,18 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	
 	public Point getPosition(TreeNode n, Point tmp)
 	{
-		tmp.setLocation(getInternalPosition(n));
-		tmp.setLocation(tmp.x*scaleX + dx, tmp.y*scaleY + dy);
-		return tmp;
+		if (n instanceof Positionable)
+		{
+			Positionable pos = (Positionable) n;
+			tmp.x = pos.getX()*scaleX + dx;
+			tmp.y = pos.getY()*scaleY + dy;
+			return tmp;
+		} else
+		{
+			tmp.setLocation(getInternalPosition(n));
+			tmp.setLocation(tmp.x*scaleX + dx, tmp.y*scaleY + dy);
+			return tmp;
+		}
 	}
 	
 	public void setRect(float cx, float cy, float w, float h)

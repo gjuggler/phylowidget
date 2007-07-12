@@ -1,37 +1,55 @@
 package org.andrewberman.ui.menu;
 
-
 public final class MenuTimer extends Thread
 {
-	public static MenuTimer instance;
-	
-	static {
-		instance = new MenuTimer();
-		instance.start();
-	}
-	
+	private static MenuTimer instance;
+
 	MenuItem item;
 	MenuItem parent;
 	MenuItem lastSet;
 	static final int delay = 100;
-	
 	boolean unset;
+	boolean startDelay;
 	
-	int tick;
-	boolean interrupted;
+	public static MenuTimer instance()
+	{
+		if (instance == null || !instance.isAlive())
+		{
+			System.out.println("Creating timer!");
+			instance = new MenuTimer();
+			instance.start();
+		}
+		return instance;
+	}
 	
 	public void run()
 	{
-		while (this.isAlive())
+		while (!Thread.currentThread().isInterrupted())
 		{
-			try
-			{
 				synchronized (this)
 				{
-					if (!interrupted)
+					if (startDelay)
+					{
+						startDelay = false;
+						try
+						{
+							wait(delay);
+						} catch (InterruptedException e)
+						{
+//							System.out.println("Interrupted!");
+							break;
+						}
+					} else
 					{
 						if (parent == null)
-							wait();
+							try
+							{
+								wait();
+							} catch (InterruptedException e)
+							{
+//								System.out.println("Interrupted!");
+								break;
+							}
 						else if (unset)
 						{
 							item.hideAllChildren();
@@ -43,51 +61,44 @@ public final class MenuTimer extends Thread
 							parent = null;
 							item = null;
 						}
-					} else
-					{
-						interrupted = false;
 					}
-					wait(delay);
-//					System.out.println("waiting");
 				}
-			} catch (InterruptedException e)
-			{
-				e.printStackTrace();
-				return;
-			}
+			yield();
 		}
 	}
-	
+
 	public void setMenuItem(MenuItem setMe)
 	{
-		if (setMe == null) return;
-		if (setMe == lastSet) return;
-//		if (item == setMe) return;
-//		System.out.println("Set item:"+setMe);
+		if (setMe == null)
+			return;
+		if (setMe == lastSet)
+			return;
+		// if (item == setMe) return;
+		// System.out.println("Set item:"+setMe);
 		item = setMe;
 		parent = item.parent;
 		lastSet = item;
 		unset = false;
 		triggerDelay();
 	}
-	
+
 	public void unsetMenuItem(MenuItem unsetMe)
 	{
 		if (unsetMe == item || (unsetMe == lastSet))
 		{
-//			System.out.println("Unset item:"+unsetMe);
-//			parent = unsetMe.nearestMenu;
-//			parent = unsetMe.parent;
+			// System.out.println("Unset item:"+unsetMe);
+			// parent = unsetMe.nearestMenu;
+			// parent = unsetMe.parent;
 			item = unsetMe;
 			lastSet = null;
 			unset = true;
 			triggerDelay();
 		}
 	}
-	
+
 	public synchronized void triggerDelay()
 	{
-		interrupted = true;
+		startDelay = true;
 		notifyAll();
 	}
 }

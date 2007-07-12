@@ -7,7 +7,7 @@ import org.andrewberman.ui.menu.VerticalMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 
-public final class PhyloMenu extends ToolbarMenu
+public final class PhyloMenu extends VerticalMenu
 {
 	NodeRange curNode;
 	Point nodePt = new Point(0,0);
@@ -45,7 +45,6 @@ public final class PhyloMenu extends ToolbarMenu
 	{
 		curNode = r;
 		curNode.render.getPosition(curNode.node,nodePt);
-		this.x = nodePt.x;
-		this.y = nodePt.y;
+		this.setPosition(nodePt.x, nodePt.y);
 	}
 }

@@ -18,47 +18,68 @@ import processing.core.PGraphicsJava2D;
 import processing.opengl.PGraphicsOpenGL;
 
 public abstract class Menu extends MenuItem implements UIObject, Positionable
-{
+{	
 	public static final int START_SIZE = 100;
 	public static final int OFFSET = 10;
-	Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
-	Rectangle2D.Float buff = new Rectangle2D.Float(0, 0, 0, 0);
-	protected static PApplet p = PhyloWidget.p;
-
+	
 	public PGraphicsJava2D pg;
 	public Palette style = Palette.defaultSet;
-	protected Graphics2D g2;
-	protected MenuItem currentlySelected;
-	protected float x, y;
-	protected boolean justShown = false;
+
+	static PApplet p;
+	Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
+	Rectangle2D.Float buff = new Rectangle2D.Float(0, 0, 0, 0);
+	Graphics2D g2;
+	MenuItem currentlySelected;
+	float x, y;
+	boolean justShown = false;
 
 	/**
 	 * If true, a mouse hover will expand a menu item.
 	 */
 	boolean hoverNavigable = true;
 	/**
-	 * If true, a click will hide a submenu as well as show it.
-	 * This option works best when set to the opposite of the above
-	 * hoverNavigable option.
+	 * If true, a click will hide a submenu as well as show it. This option
+	 * works best when set to the opposite of the above hoverNavigable option.
 	 */
 	boolean clickToggles = false;
 	/**
-	 * If true, only one of this MenuItem's submenus will be allowed to be
-	 * shown at once.
+	 * If true, only one of this MenuItem's submenus will be allowed to be shown
+	 * at once.
 	 */
 	boolean singletNavigation = true;
 	/**
-	 * Defines the behavior of a click that happens outside the bounds of the menu 
-	 * and its sub-menus).
+	 * If true, this menu's items will open up on mouse down instead of a full
+	 * click gesture.
+	 */
+	boolean actionOnMouseDown = false;
+	/**
+	 * Defines the behavior of a click that happens outside the bounds of the
+	 * menu and its sub-menus).
 	 */
 	int clickAwayBehavior;
 	public static final int CLICKAWAY_HIDES = 0;
 	public static final int CLICKAWAY_COLLAPSES = 1;
 	public static final int CLICKAWAY_IGNORED = 2;
+	/**
+	 * If true, then this Menu will translate the mouse coordinates by the current
+	 * camera transformation before sending them to the sub-items.
+	 */
+	boolean useCameraCoordinates = true;
+	/**
+	 * If true, this Menu will change to the hand cursor when one of its constituent
+	 * sub-MenuItems is selected. I am the walrus.
+	 */
+	boolean useHandCursor = true;
+	/**
+	 * If true, this menu will hide when one of its component MenuItems has its
+	 * action performed. If false, it will stay open.
+	 */
+	boolean hideOnAction = true;
 	
 	public Menu()
 	{
-		super();
+		super("[unnamed menu]");
+		p = PhyloWidget.p;
 		setMenu(this);
 		setSize(START_SIZE, START_SIZE);
 	}
@@ -66,9 +87,9 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	protected void setSize(int w, int h)
 	{
 		pg = (PGraphicsJava2D) p.createGraphics(w, h, PApplet.JAVA2D);
-		// pg.smooth();
 		g2 = pg.g2;
-//		pg.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
+		// pg.smooth();
+		pg.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
 		// g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 		// RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		// g2.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -89,6 +110,18 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		this.y = y;
 	}
 
+	public float getX()
+	{
+		return x;
+	}
+	
+	public float getY()
+	{
+		return y;
+	}
+	
+	public abstract MenuItem create(String label);
+	
 	public void show()
 	{
 		super.show();
@@ -99,11 +132,6 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	public void hide()
 	{
 		super.hide();
-		hideChildren();
-	}
-	
-	public void hideMenu()
-	{
 		hideAllChildren();
 	}
 
@@ -124,7 +152,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		drawBefore();
 		super.draw(); // draws all of the sub segments.
 		drawAfter();
-			pg.modified = true;
+		pg.modified = true;
 		pg.endDraw();
 		drawToCanvas();
 	}
@@ -143,12 +171,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		int w = PApplet.round(rect.width + OFFSET * 2);
 		int h = PApplet.round(rect.height + OFFSET * 2);
-		p.g.image(pg, PApplet.round(x - OFFSET), PApplet.round(y - OFFSET),
-				w,h, 0, 0, w, h);
-		if (p.g instanceof PGraphicsOpenGL)
-		{
-			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
-		}
+		p.g.image(pg, PApplet.round(x - OFFSET), PApplet.round(y - OFFSET), w,
+				h, 0, 0, w, h);
 	}
 
 	protected float[] getOverhang()
@@ -185,7 +209,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 					+ (int) overhang[1] + 1);
 		}
 	}
-	
+
 	protected boolean containsPoint(Point pt)
 	{
 		return false;
@@ -210,9 +234,10 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 
 	protected void mouseEvent(MouseEvent e, Point p)
 	{
-		super.mouseEvent(e,p);
+		super.mouseEvent(e, p);
 		// case (MouseEvent.MOUSE_CLICKED):
-		if (!mouseInside && isVisible() && e.getID() == MouseEvent.MOUSE_PRESSED)
+		if (!mouseInside && isVisible()
+				&& e.getID() == MouseEvent.MOUSE_PRESSED)
 		{
 			switch (clickAwayBehavior)
 			{
@@ -223,19 +248,15 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 						hide();
 					break;
 				case (CLICKAWAY_COLLAPSES):
-					System.out.println(label + "  "+mouseInside);
 					setOpenItem(null);
 					break;
 				case (CLICKAWAY_IGNORED):
 				default:
 					break;
 			}
-//			if (justShown)
-//				justShown = false;
-//			else 
 		}
 	}
-	
+
 	public void mouseEvent(MouseEvent e)
 	{
 		if (!isVisible())
@@ -248,8 +269,9 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		// }
 
 		Point pt = new Point(e.getX(), e.getY());
-		ProcessingUtils.screenToModel(pt);
-//		System.out.println(pt.x+"   "+pt.y);
+		if (useCameraCoordinates)
+			ProcessingUtils.screenToModel(pt);
+		// System.out.println(pt.x+" "+pt.y);
 		pt.translate(-x + OFFSET, -y + OFFSET);
 
 		// Recurse through sub-menus with this mouse event.
@@ -258,17 +280,20 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		switch (e.getID())
 		{
 			case (MouseEvent.MOUSE_MOVED):
-				if (mouseInside)
+				if (useHandCursor)
 				{
-					p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				} else
-				{
-					ProcessingUtils.releaseCursor(p, Cursor
-							.getPredefinedCursor(Cursor.HAND_CURSOR));
+					if (mouseInside)
+					{
+						p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					} else
+					{
+						ProcessingUtils.releaseCursor(p, Cursor
+								.getPredefinedCursor(Cursor.HAND_CURSOR));
+					}
 				}
 				break;
 			case (MouseEvent.MOUSE_PRESSED):
-				
+
 				break;
 		}
 	}

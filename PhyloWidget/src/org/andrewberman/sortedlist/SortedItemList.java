@@ -1,7 +1,6 @@
 package org.andrewberman.sortedlist;
 
 import java.util.HashMap;
-import java.util.Random;
 
 public final class SortedItemList
 {	

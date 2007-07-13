@@ -17,7 +17,7 @@ import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 import processing.core.PMatrix;
 
-public class ProcessingUtils
+public class PUtils
 {
 	private static PMatrix camera = new PMatrix();
 	private static PMatrix cameraInv = new PMatrix();
@@ -26,7 +26,7 @@ public class ProcessingUtils
 
 	private static Point tPoint = new Point(0,0);
 	
-	static HashMap cache = new HashMap(50);
+	static HashMap metricsCache = new HashMap();
 	
 	public static void releaseCursor(PApplet p, Cursor c)
 	{
@@ -40,14 +40,28 @@ public class ProcessingUtils
 		return g.color(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
 	}
 	
+	public static FontMetrics getMetrics(Graphics2D g2, Font font, float size)
+	{
+//		String key = font.getName() + size;
+//		if (metricsCache.containsKey(key))
+//		{
+//			return (FontMetrics) metricsCache.get(key);
+//		} else
+//		{
+			Font f = font.deriveFont(size);
+			FontMetrics fm = g2.getFontMetrics(f);
+//			metricsCache.put(key, fm);
+//			System.out.println(metricsCache.size());
+			return fm;
+//		}
+	}
+	
 	public static float getTextDescent(PGraphics g, PFont font, float size, boolean useNativeFonts)
 	{
 		if (g.getClass() == PGraphicsJava2D.class && useNativeFonts)
 		{
-			PGraphicsJava2D pgj = (PGraphicsJava2D) g;
-			Graphics2D g2 = pgj.g2;
-			Font f = font.font.deriveFont(size);
-			FontMetrics fm = g2.getFontMetrics(f);
+			Graphics2D g2 = ((PGraphicsJava2D)g).g2;
+			FontMetrics fm = getMetrics(g2,font.font,size);
 			return fm.getDescent();
 		}
 		return font.descent()*size;
@@ -57,10 +71,8 @@ public class ProcessingUtils
 	{
 		if (g.getClass() == PGraphicsJava2D.class && useNativeFonts)
 		{
-			PGraphicsJava2D pgj = (PGraphicsJava2D) g;
-			Graphics2D g2 = pgj.g2;
-			Font f = font.font.deriveFont(size);
-			FontMetrics fm = g2.getFontMetrics(f);
+			Graphics2D g2 = ((PGraphicsJava2D)g).g2;
+			FontMetrics fm = getMetrics(g2,font.font,size);
 			return fm.getAscent();
 		}
 		return font.ascent()*size;
@@ -70,23 +82,19 @@ public class ProcessingUtils
 	{
 		if (g.getClass() == PGraphicsJava2D.class && useNativeFonts)
 		{
-			PGraphicsJava2D pgj = (PGraphicsJava2D) g;
-			Graphics2D g2 = pgj.g2;
-			Font f = font.font.deriveFont(size);
-			FontMetrics fm = g2.getFontMetrics(f);
+			Graphics2D g2 = ((PGraphicsJava2D)g).g2;
+			FontMetrics fm = getMetrics(g2,font.font,size);
 			return fm.getAscent() + fm.getDescent();
 		}
-		return font.ascent()*size;
+		return font.ascent()*size + font.descent()*size;
 	}
 	
 	public static float getTextWidth(PGraphics g, PFont font, float size, String text, boolean useNativeFonts)
 	{
 		if (useNativeFonts)
 		{	
-			PGraphicsJava2D pgj = (PGraphicsJava2D) g;
-			Graphics2D g2 = pgj.g2;
-			Font f = font.font.deriveFont(size);
-			FontMetrics fm = g2.getFontMetrics(f);
+			Graphics2D g2 = ((PGraphicsJava2D)g).g2;
+			FontMetrics fm = getMetrics(g2,font.font,size);
 			return fm.stringWidth(text);
 		}
 		char[] chars = text.toCharArray();
@@ -150,9 +158,7 @@ public class ProcessingUtils
 	 * @param mat the modelview matrix.
 	 */
 	public static void setMatrix(PApplet p)
-	{
-		cache.clear();
-		
+	{	
 		if (p.g.getClass() == PGraphicsJava2D.class)
 		{
 			PGraphicsJava2D g = (PGraphicsJava2D) p.g;

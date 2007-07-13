@@ -10,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 import org.andrewberman.ui.Blinker.BlinkListener;
+import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -485,7 +486,7 @@ public class TextInput implements UIObject, BlinkListener, MouseListener, KeyLis
 		
 		pt.x = e.getX();
 		pt.y = e.getY();
-		ProcessingUtils.screenToModel(pt);
+		PUtils.screenToModel(pt);
 		
 		if (this.containsPoint(pt.x,pt.y,true)) // contained within text+padding area.
 		{

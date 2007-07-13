@@ -6,10 +6,14 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
+import org.andrewberman.tween.PropertyTween;
+import org.andrewberman.tween.Tween;
+import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.Positionable;
-import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.Sizable;
+import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.Point;
+import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.Sizable;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -18,21 +22,37 @@ public class Toolbar extends Menu
 {
 	float width,height;
 	boolean isActive;
-
 	RoundRectangle2D.Float roundRect = new RoundRectangle2D.Float(0,0,0,0,0,0);
-
+	Rectangle2D.Float buffRect = new Rectangle2D.Float(0,0,0,0);
+	PropertyTween aTween;
+	
+	
 	/**
 	 * If set to true, the toolbar will take up the entire width of the PApplet. 
 	 */
 	public boolean fullWidth = false;
 	/**
-	 * If true, this option will cause the menu to grab modal focus on opening.
+	 * If true, this option will cause the menu to grab modal focus from the 
+	 * FocusManager upon opening.
 	 */
-	boolean isModal = true;
+	public boolean isModal = true;
+	/**
+	 * If true, the toolbar will dim when not active.
+	 */
+	public boolean autoDim = true;
+	public static float dimAlpha = .3f;
+	public static float fullAlpha = 1f;
 	
 	public Toolbar(PApplet app)
 	{
 		super(app);
+		/*
+		 * Create the alpha tween.
+		 */
+		aTween = new PropertyTween(this,"alpha",TweenQuad.tween,Tween.OUT,fullAlpha,fullAlpha,15);
+		/*
+		 * Override some default options from the Menu class.
+		 */
 		clickToggles = true;
 		hoverNavigable = false;
 		clickAwayBehavior = Menu.CLICKAWAY_COLLAPSES;
@@ -41,6 +61,9 @@ public class Toolbar extends Menu
 		useHandCursor = false;
 		layout();
 		show();
+		/*
+		 * Do some automatic positioning.
+		 */
 		if (fullWidth)
 		{
 			x = style.strokeWidth;
@@ -54,6 +77,7 @@ public class Toolbar extends Menu
 	
 	public void drawBefore()
 	{
+		aTween.update();
 		if (fullWidth)
 			setFullWidth();
 		roundRect.setRoundRect(x, y, width, height, height*style.roundOff, height*style.roundOff);
@@ -70,7 +94,7 @@ public class Toolbar extends Menu
 		 * and going to the bottom.
 		 */
 		Composite oldC = g2.getComposite();
-		AlphaComposite c = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.5f);
+		AlphaComposite c = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.5f*menu.alpha);
 		g2.setComposite(c);
 		g2.setPaint(style.getGradient(y+height, y+height/3));
 		g2.fillRect((int)x, (int)(y+height/2), (int)width, (int)height/2);
@@ -150,19 +174,18 @@ public class Toolbar extends Menu
 		 */
 		PFont font = style.font;
 		float fontSize = style.fontSize;
-		float descent = ProcessingUtils.getTextDescent(g,font,fontSize,true);
-		float ascent = ProcessingUtils.getTextAscent(g,font,fontSize,true);
+		float descent = PUtils.getTextDescent(g,font,fontSize,true);
+		float ascent = PUtils.getTextAscent(g,font,fontSize,true);
 		float textHeight = descent+ascent;
 		float itemHeight = textHeight + style.padY*2;
 		float fontOffsetY = itemHeight/2 + textHeight/2 - descent;
 		/*
 		 * Set the width, height and position for the top-level items.
 		 */
-		float xOffset = 0;
+		float xOffset = style.margin;
 		float yOffset = style.margin;
 		for (int i=0; i < items.size(); i++)
 		{
-			xOffset += style.margin;
 			MenuItem item = (MenuItem)items.get(i);
 			float itemWidth = item.getWidth();
 			if (item instanceof Sizable)
@@ -182,6 +205,8 @@ public class Toolbar extends Menu
 				tbi.textOffsetY = fontOffsetY;
 			}
 			xOffset += itemWidth;
+			if (i < items.size() - 1)
+				xOffset += 0;
 		}
 		/*
 		 * Set this Toolbar's width and height.
@@ -212,4 +237,19 @@ public class Toolbar extends Menu
 		super.getRect(rect, buff);
 	}
 	
+	protected boolean containsPoint(Point pt)
+	{
+		buffRect.setRect(x,y,width,height);
+		if (autoDim)
+		{
+			if (buffRect.contains(pt))
+			{
+				aTween.continueTo(fullAlpha);
+			} else if (!isActive)
+			{
+				aTween.continueTo(dimAlpha);
+			}
+		}
+		return false;
+	}
 }

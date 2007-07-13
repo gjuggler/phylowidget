@@ -2,7 +2,7 @@ package org.phylowidget;
 
 import java.awt.RenderingHints;
 
-import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.PUtils;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.UIManager;
 
@@ -58,7 +58,7 @@ public class PhyloWidget extends PApplet
 		strokeWeight(1);
 		ellipse(0,0,10,10);
 		
-		ProcessingUtils.setMatrix(this);
+		PUtils.setMatrix(this);
 		trees.update();
 		ui.update();
 	}
@@ -80,8 +80,8 @@ public class PhyloWidget extends PApplet
 	public void size(int w, int h)
 	{
 		if (width != w || h != h)
-			size(w,h,JAVA2D);
-//			size(w,h,P3D);
+//			size(w,h,JAVA2D);
+			size(w,h,P3D);
 //			size(w,h,OPENGL);
 			if (g.getClass() == PGraphicsJava2D.class)
 			{

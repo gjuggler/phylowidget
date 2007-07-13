@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.PUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 
@@ -27,8 +27,8 @@ public class NearestNodeFinder
 		rect.y = pt.y - rad;
 		rect.width = rad * 2;
 		rect.height = rad * 2;
-		ProcessingUtils.screenToModel(pt);
-		ProcessingUtils.screenToModel(rect);
+		PUtils.screenToModel(pt);
+		PUtils.screenToModel(rect);
 //		System.out.println(rect);
 		hits.clear();
 		PhyloWidget.trees.nodesInRange(hits, rect);

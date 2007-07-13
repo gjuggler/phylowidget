@@ -3,12 +3,13 @@ package org.andrewberman.ui.menu;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.Action;
+import org.andrewberman.ui.PUtils;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Positionable;
-import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.ifaces.Positionable;
 
 import processing.core.PFont;
 
@@ -24,8 +25,8 @@ public abstract class MenuItem implements Positionable
 	public Menu nearestMenu;
 	public MenuItem parent;
 	
-	Object o;
-	Method m;
+	Action action;
+	Shortcut shortcut;
 	public String label;
 	ArrayList items;
 	
@@ -50,20 +51,17 @@ public abstract class MenuItem implements Positionable
 	
 	public void setAction(Object object, String method)
 	{
-		this.o = object;
-		if (method != null && !method.equals("") && o != null)
-		{
-			try
-			{
-				m = o.getClass().getMethod(method, null);
-			} catch (SecurityException e)
-			{
-				e.printStackTrace();
-			} catch (NoSuchMethodException e)
-			{
-				e.printStackTrace();
-			}
-		}
+		action = new Action(object,method);
+		if (shortcut != null)
+			shortcut.action = action;
+	}
+	
+	public void setShortcut(String s)
+	{
+		shortcut = new Shortcut(s);
+		if (action != null)
+			shortcut.action = action;
+		menu.layout();
 	}
 	
 	public void setPosition(float x, float y)
@@ -320,14 +318,8 @@ public abstract class MenuItem implements Positionable
 		{
 			if (menu.hideOnAction)
 				menu.hide();
-			if (m == null || o == null) return;
-			try
-			{
-				m.invoke(o, null);
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+			if (action != null)
+				action.performAction();
 		}
 	}
 	
@@ -403,7 +395,7 @@ public abstract class MenuItem implements Positionable
 	{
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		float width = ProcessingUtils.getTextWidth(menu.g,font, fontSize, label,true);
+		float width = PUtils.getTextWidth(menu.g,font, fontSize, label,true);
 		return width + menu.style.padX*2;
 	}
 	
@@ -411,7 +403,7 @@ public abstract class MenuItem implements Positionable
 	{
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		return ProcessingUtils.getTextHeight(menu.g,font,fontSize,label,true) + menu.style.padY*2;
+		return PUtils.getTextHeight(menu.g,font,fontSize,label,true) + menu.style.padY*2;
 	}
 	
 	protected void mouseEvent(MouseEvent e, Point tempPt)

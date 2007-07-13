@@ -9,7 +9,7 @@ import java.util.HashMap;
 import org.andrewberman.camera.SettableRect;
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.PUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeNode;
 
@@ -230,7 +230,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 					float textHeight = (font.ascent() + font.descent()*2)*textSize;
 					r.loY = ptemp.y - textHeight/2;
 					r.hiY = ptemp.y + textHeight/2;
-					float width = ProcessingUtils.getTextWidth(p.g,font,textSize,n.getName(),PhyloWidget.usingNativeFonts);
+					float width = PUtils.getTextWidth(p.g,font,textSize,n.getName(),PhyloWidget.usingNativeFonts);
 					r.hiX = r.loX + width;
 					break;
 			}

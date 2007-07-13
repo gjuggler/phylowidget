@@ -1,4 +1,4 @@
-package org.andrewberman.ui;
+package org.andrewberman.ui.ifaces;
 
 public interface Positionable
 {

@@ -19,15 +19,13 @@ public class PropertyTween extends Tween
 		try
 		{
 			field = o.getClass().getField(prop);
-			field.setAccessible(true);
+//			field.setAccessible(true);
 			fieldClass = field.getType();
 		} catch (SecurityException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchFieldException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -44,11 +42,9 @@ public class PropertyTween extends Tween
 				field.setInt(o, (int)value);
 		} catch (IllegalArgumentException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return value;

@@ -7,8 +7,8 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Positionable;
-import org.andrewberman.ui.Sizable;
+import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.Sizable;
 
 public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 {

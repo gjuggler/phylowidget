@@ -7,9 +7,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.EventDispatcher;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIObject;
+import org.andrewberman.ui.ShortcutManager;
+import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
@@ -20,6 +22,7 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public FocusManager focus;
 	public EventDispatcher event;
+	public ShortcutManager keys; 
 	
 	public ArrayList uiObjects = new ArrayList(5);
 	
@@ -30,19 +33,22 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	public UIManager()
 	{
 		focus = FocusManager.instance;
-		event = new EventDispatcher();
+		event = new EventDispatcher(p);
+		keys = new ShortcutManager(p);
 	}
 	
 	public void setup()
 	{
 		focus.setup();
 		event.setup();
-
+		keys.setup();
+		
 		Toolbar t = new Toolbar(p);
-		t.add("File").add("Do Something").setAction(this, "doSomething");
-		t.get("File").add("Do Nothing");
-		t.add("Edit").add("Undo").add("When?").add("Now!");
-		t.get("Edit").add("Redo");
+		t.add("File").add("Save").setAction(this, "doSomething");
+		t.get("Save").setShortcut("control-s");
+		t.get("File").add("Save...");
+		t.add("Edit").add("Undo").setShortcut("control-z");
+		t.get("Edit").add("Redo").setShortcut("control-shift-z");
 		
 		halo = new HoverHalo();
 		halo.show();

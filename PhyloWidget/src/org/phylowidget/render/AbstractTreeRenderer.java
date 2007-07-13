@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Positionable;
+import org.andrewberman.ui.ifaces.Positionable;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;

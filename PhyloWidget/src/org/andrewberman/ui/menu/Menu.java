@@ -1,5 +1,7 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -7,11 +9,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
-import org.andrewberman.ui.FocusManager;
+import org.andrewberman.ui.PUtils;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Positionable;
-import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.UIObject;
+import org.andrewberman.ui.ShortcutManager;
+import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -29,6 +31,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * after each round of drawing.
 	 */
 	protected PApplet canvas;
+	protected ShortcutManager keys;
 	/**
 	 * Our offscreen buffer graphics object.
 	 */
@@ -40,6 +43,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	
 	MenuItem currentlySelected;
 	float x, y;
+	public float alpha = 1.0f;
 	boolean justShown = false;
 
 	/**
@@ -89,6 +93,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		super("[unnamed menu]");
 		canvas = app;
+		keys = ShortcutManager.loadLazy(app);
 		setMenu(this);
 		setSize(START_SIZE,START_SIZE);
 	}
@@ -113,6 +118,11 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		// RenderingHints.VALUE_ANTIALIAS_ON);
 	}
 
+	public boolean isJava2D()
+	{
+		return canvas.g.getClass().getName().equals(PApplet.JAVA2D);
+	}
+	
 	public void setPosition(float x, float y)
 	{
 		this.x = x;
@@ -165,34 +175,36 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		}
 		if (!isVisible())
 			return;
-		if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
+		if (isJava2D())
 		{
 			PGraphicsJava2D j2d = (PGraphicsJava2D) canvas.g;
 			j2d.pushMatrix();
 			if (!useCameraCoordinates)
-			{
 				j2d.resetMatrix();
-			}
+			j2d.translate(x, y);
 			this.g2 = j2d.g2;
 			RenderingHints rh = g2.getRenderingHints();
 			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			Composite oldC = g2.getComposite();
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 			drawBefore();
 			super.draw();
 			drawAfter();
+			g2.setComposite(oldC);
 			g2.setRenderingHints(rh);
 			j2d.popMatrix();
 		} else
 		{
-		resizeBuffer();
-		g.beginDraw();
-		g.background(255, 0);
-		g.translate(OFFSET, OFFSET);
-		drawBefore();
-		super.draw(); // draws all of the sub segments.
-		drawAfter();
-		g.modified = true;
-		g.endDraw();
-		drawToCanvas();
+			resizeBuffer();
+			g.beginDraw();
+			g.background(255, 0);
+			g.translate(OFFSET, OFFSET);
+			drawBefore();
+			super.draw(); // draws all of the sub segments.
+			drawAfter();
+			g.modified = true;
+			g.endDraw();
+			drawToCanvas();
 		}
 	}
 
@@ -208,32 +220,14 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	
 	protected void drawToCanvas()
 	{
-		int w = PApplet.round(rect.width + OFFSET*2);
-		int h = PApplet.round(rect.height + OFFSET*2);
-		
+		int w = (int) (rect.width + OFFSET*2);
+		int h = (int) (rect.height + OFFSET*2);
 		canvas.pushMatrix();
 		if (!useCameraCoordinates)
-		{
-			if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
-				canvas.resetMatrix();
-			else
-				canvas.camera();
-		}
-//		canvas.stroke(255,0,0);
-//		canvas.strokeWeight(1);
-//		canvas.noFill();
-//		canvas.rect(x, y, rect.width, rect.height);
-//		canvas.stroke(0,255,0);
-//		canvas.rect(x-OFFSET,y-OFFSET,g.width,g.height);
-		if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
-		{
-//			PGraphicsJava2D j2d = (PGraphicsJava2D) canvas.g;
-//			j2d.g2.drawImage(g.image, (int)x-OFFSET, (int)y-OFFSET, w, g.height, null);
-		} else
-		{
-			canvas.image(g, PApplet.round(x-OFFSET), PApplet.round(y-OFFSET), w,
-				h, 0, 0, w, h);
-		}
+			canvas.camera();
+		canvas.tint(255, alpha*255);
+		canvas.image(g, (int)(x-OFFSET), (int)(y-OFFSET), w,
+			h, 0, 0, w, h);
 		canvas.popMatrix();
 	}
 
@@ -329,7 +323,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 
 		Point pt = new Point(e.getX(), e.getY());
 		if (useCameraCoordinates)
-			ProcessingUtils.screenToModel(pt);
+			PUtils.screenToModel(pt);
 		// System.out.println(pt.x+" "+pt.y);
 		pt.translate(-x, -y);
 
@@ -346,7 +340,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 						canvas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					} else
 					{
-						ProcessingUtils.releaseCursor(canvas, Cursor
+						PUtils.releaseCursor(canvas, Cursor
 								.getPredefinedCursor(Cursor.HAND_CURSOR));
 					}
 				}

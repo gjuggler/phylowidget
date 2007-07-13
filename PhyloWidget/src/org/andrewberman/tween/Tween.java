@@ -126,6 +126,8 @@ public class Tween
 
 	public void continueTo(float newF)
 	{
+		if (!isTweening)
+			start();
 		continueTo(newF, this.duration);
 	}
 

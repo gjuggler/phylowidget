@@ -9,8 +9,8 @@ import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.UIObject;
+import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 
@@ -57,7 +57,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		
 		float maxD = 100;
 		Point pt = r.render.getPosition(r.node);
-		ProcessingUtils.modelToScreen(pt);
+		PUtils.modelToScreen(pt);
 		float dist = (float) pt.distance(p.mouseX,p.mouseY);
 		dist = (dist > maxD ? maxD : dist);
 		float alpha = (maxD-dist)/maxD * 255;
@@ -151,7 +151,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		{
 			case (MouseEvent.MOUSE_MOVED):
 				mPt.setLocation(e.getX(),e.getY());
-				ProcessingUtils.screenToModel(mPt);
+				PUtils.screenToModel(mPt);
 				// Node radius is equal to half-width of NodeRange object.
 				NodeRange r = PhyloWidget.ui.nearest;
 				
@@ -165,7 +165,7 @@ public final class HoverHalo implements TweenListener, UIObject
 				break;
 			case (MouseEvent.MOUSE_PRESSED):
 				mPt.setLocation(e.getX(),e.getY());
-				ProcessingUtils.screenToModel(mPt);
+				PUtils.screenToModel(mPt);
 				NodeRange r2 = PhyloWidget.ui.nearest;
 				if (containsPoint(r2,mPt))
 				{

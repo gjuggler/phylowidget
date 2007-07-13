@@ -32,8 +32,8 @@ public final class Palette
 	 */
 	public PFont font;
 	public float fontSize;
-	public Paint textColor;
-	public Paint selectedTextColor;
+	public Color textColor;
+	public Color selectedTextColor;
 	/*
 	 * "Layout" stuff 
 	 */
@@ -85,7 +85,7 @@ public final class Palette
 		 * "Layout" stuff 
 		 */
 		padY = Math.round(fontSize/3);
-		padX = padY * 2;
+		padX = padY * 1.5f;
 		margin = Math.min(padX,padY);
 		/*
 		 * Shape stuff.

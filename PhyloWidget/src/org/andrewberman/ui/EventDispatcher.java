@@ -1,4 +1,4 @@
-package org.phylowidget.ui;
+package org.andrewberman.ui;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -9,28 +9,26 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
-import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.UIObject;
-import org.phylowidget.PhyloWidget;
+import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
 
 public final class EventDispatcher implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener
 {
-	private PApplet p = PhyloWidget.p;
+	private PApplet p;
 	private FocusManager f;
 	private ArrayList delegates = new ArrayList(5);
 	
-	public EventDispatcher()
+	public EventDispatcher(PApplet p)
 	{
+		this.p = p;
+		f = FocusManager.instance;
 	}
 	
 	public void setup()
 	{
-		f = PhyloWidget.ui.focus;
-		
-		if (PhyloWidget.openGL)
+		if (p.g.getClass().getName().equals(PApplet.OPENGL))
 		{
 			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
 			gl.canvas.addMouseListener(this);

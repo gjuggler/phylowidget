@@ -1,4 +1,4 @@
-package org.andrewberman.ui;
+package org.andrewberman.ui.ifaces;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;

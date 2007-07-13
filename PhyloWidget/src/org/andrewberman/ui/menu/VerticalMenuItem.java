@@ -1,30 +1,30 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
+import org.andrewberman.ui.PUtils;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Positionable;
-import org.andrewberman.ui.ProcessingUtils;
-import org.andrewberman.ui.Sizable;
+import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.Sizable;
 
 import processing.core.PFont;
-import processing.core.PImage;
 
 public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 {
+	static final float shortcutSize = .75f;
+	
 	float width, height;
-	PImage icon;
+	float labelWidth, shortcutWidth;
+	float labelOffsetY, shortcutOffsetY;
 	
 	static Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
 	static AffineTransform at = AffineTransform.getTranslateInstance(0, 0);
 	static Area tri;
 	static float triWidth;
-	static float fontOffset;
-	static float iconSize;
 
 	public VerticalMenuItem(String label)
 	{
@@ -51,26 +51,38 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 	{
 		if (isVisible())
 		{
+			Graphics2D g2 = menu.g2;
 			/*
 			 * Draw the filled-in rectangle.
 			 */
 			rect.setFrame(x, y, width, height);
 			if (isAncestorOfSelected())
-				menu.g2.setPaint(menu.style.getGradient(y, y + height));
+				g2.setPaint(menu.style.getGradient(y, y + height));
 			else
-				menu.g2.setPaint(menu.style.stateColors[state]);
-			menu.g2.fill(rect);
+				g2.setPaint(menu.style.stateColors[state]);
+			g2.fill(rect);
 			/*
 			 * Draw the text.
 			 */
-			menu.g2.setFont(menu.style.font.font
+			g2.setFont(menu.style.font.font
 					.deriveFont(menu.style.fontSize));
 			if (isAncestorOfSelected())
-				menu.g2.setPaint(menu.style.selectedTextColor);
+				g2.setPaint(menu.style.selectedTextColor);
 			else
-				menu.g2.setPaint(menu.style.textColor);
-			menu.g2.drawString(label, x+menu.style.padX, y+fontOffset);
-//			menu.pg.text(label, x + menu.style.pad, y + fontOffset);
+				g2.setPaint(menu.style.textColor);
+			g2.drawString(label, x+menu.style.padX, y+labelOffsetY);
+			/*
+			 * Draw the shortcut text if necessary.
+			 */
+			if (shortcut != null)
+			{
+				g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize*shortcutSize));
+				if (isAncestorOfSelected())
+					g2.setPaint(menu.style.selectedTextColor.brighter(100));
+				else
+					g2.setPaint(menu.style.textColor.brighter(100));
+				g2.drawString(shortcut.label, x+menu.style.padX*2+labelWidth, y+shortcutOffsetY);
+			}
 			/*
 			 * Draw the "subMenu" triangle if necessary.
 			 */
@@ -79,19 +91,9 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 				float triXPos = Math.round(x + width - menu.style.padX - triWidth);
 				at.setToIdentity();
 				at.translate(triXPos, y + height / 2);
-				tri.transform(at);
-				menu.g2.setPaint(menu.style.strokeColor);
-				menu.g2.fill(tri);
-				try
-				{
-//					at.invert();
-					at = at.createInverse();
-				} catch (NoninvertibleTransformException e)
-				{
-					// Should never get here.
-					System.err.println("AAAAGGHHH!!! Gasp... I'm dying... Save me!!!");
-				}
-				tri.transform(at);
+				Area a2 = tri.createTransformedArea(at);
+				g2.setPaint(menu.style.strokeColor);
+				g2.fill(a2);
 			}
 		}
 		super.draw();
@@ -100,8 +102,22 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 
 	public void layout()
 	{
+		/*
+		 * Position our text correctly.
+		 */
+		getWidth();
+		float labelAscent = PUtils.getTextAscent(menu.g, menu.style.font, menu.style.fontSize, true);
+		float labelDescent = PUtils.getTextDescent(menu.g, menu.style.font, menu.style.fontSize, true);
+		float labelHeight = labelAscent+labelDescent;
+		labelOffsetY = (height/2 - labelHeight/2) + labelAscent;
+		float shortcutAscent = PUtils.getTextAscent(menu.g, menu.style.font, menu.style.fontSize*shortcutSize, true);
+		float shortcutDescent = PUtils.getTextDescent(menu.g, menu.style.font, menu.style.fontSize*shortcutSize, true);
+		float shortcutHeight = shortcutAscent+shortcutDescent;
+		shortcutOffsetY = (height/2 - shortcutHeight/2) + shortcutAscent;
+		/*
+		 * Layout my sub-items.
+		 */
 		float maxWidth = getMaxWidth();
-
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
@@ -127,7 +143,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		 */
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		float textWidth = ProcessingUtils.getTextWidth(menu.g,font, fontSize, label,true);
+		labelWidth = PUtils.getTextWidth(menu.g,font, fontSize, label,true);
 		numElements++;
 		/*
 		 * Triangle width (if any).
@@ -141,14 +157,13 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		/*
 		 * Icon width (if any).
 		 */
-		float iconWidth = 0;
-		if (icon != null)
+		if (shortcut != null)
 		{
-			iconWidth = icon.width;
+			shortcutWidth = PUtils.getTextWidth(menu.g, font, fontSize*shortcutSize, shortcut.label, true);
 			numElements++;
 		}
 		
-		return textWidth + myTriWidth + iconWidth + (numElements+1)*menu.style.padX;
+		return labelWidth + myTriWidth + shortcutWidth + (numElements+1)*menu.style.padX;
 	}
 	
 	protected boolean containsPoint(Point p)

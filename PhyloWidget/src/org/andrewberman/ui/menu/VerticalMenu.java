@@ -3,12 +3,21 @@ package org.andrewberman.ui.menu;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 
+import org.andrewberman.ui.Positionable;
 import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.Sizable;
 
+import processing.core.PApplet;
 import processing.core.PFont;
 
 public class VerticalMenu extends Menu
 {	
+	public VerticalMenu(PApplet app)
+	{
+		super(app);
+		// TODO Auto-generated constructor stub
+	}
+
 	/*
 	 * Values to cache and send off as static to VerticalItemMenu to avoid
 	 * creating objects during each draw cycle.
@@ -51,15 +60,15 @@ public class VerticalMenu extends Menu
 		 */
 		PFont font = style.font;
 		float fontSize = style.fontSize;
-		float descent = ProcessingUtils.getTextDescent(menu.pg,font,fontSize,true);
-		float ascent = ProcessingUtils.getTextAscent(menu.pg,font,fontSize,true);
+		float descent = ProcessingUtils.getTextDescent(menu.g,font,fontSize,true);
+		float ascent = ProcessingUtils.getTextAscent(menu.g,font,fontSize,true);
 		float textHeight = descent+ascent;
-		float itemHeight = textHeight + 2*style.pad;
-		fontOffset = style.pad + textHeight - descent;
+		float itemHeight = textHeight + 2*style.padY;
+		fontOffset = style.padY + textHeight - descent;
 		/*
 		 * Calculate the width of the "submenu" triangle shape.
 		 */
-		float innerHeight = itemHeight - 2*style.pad;
+		float innerHeight = textHeight;
 		AffineTransform at = AffineTransform.getScaleInstance(innerHeight/2, innerHeight/2);
 		Area a = style.subTriangle.createTransformedArea(at);
 		VerticalMenuItem.tri = tri = a;

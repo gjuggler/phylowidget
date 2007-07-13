@@ -6,6 +6,8 @@ public class FocusManager
 	private Object focusedObject = null;
 	private boolean isModal = false;
 	
+	public static FocusManager instance = new FocusManager();
+	
 	public FocusManager(){}
 	
 	public void setup(){}

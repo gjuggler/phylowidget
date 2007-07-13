@@ -3,7 +3,6 @@ package org.andrewberman.ui.menu;
 import java.awt.BasicStroke;
 import java.awt.GradientPaint;
 import java.awt.Paint;
-import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
@@ -22,14 +21,12 @@ public final class Palette
 	public Stroke noStroke;
 	public float strokeWidth;
 	public Paint strokeColor;
-
 	/*
 	 * Menu-specific stuff.
 	 */
 	public Color[] stateColors;
 	public Color menuGradLo;
 	public Color menuGradHi;
-	
 	/*
 	 * Text stuff.
 	 */
@@ -37,16 +34,17 @@ public final class Palette
 	public float fontSize;
 	public Paint textColor;
 	public Paint selectedTextColor;
-	
 	/*
 	 * "Layout" stuff 
 	 */
-	public float pad;
-	
+	public float padY;
+	public float padX;
+	public float margin;
 	/*
-	 * Standard shapes.
+	 * Shape stuff.
 	 */
 	public Area subTriangle;
+	public float roundOff;
 	
 	public static Palette defaultSet = new Palette();
 	
@@ -60,7 +58,7 @@ public final class Palette
 		/*
 		 * Basic colors and strokes.
 		 */
-		strokeWidth = 1;
+		strokeWidth = .5f;
 		stroke = new BasicStroke(strokeWidth,BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_ROUND);
 		noStroke = new BasicStroke(0,BasicStroke.CAP_ROUND,
@@ -86,21 +84,24 @@ public final class Palette
 		/*
 		 * "Layout" stuff 
 		 */
-		pad = Math.round(fontSize/3);
+		padY = Math.round(fontSize/3);
+		padX = padY * 2;
+		margin = Math.min(padX,padY);
 		/*
-		 * Standard shapes.
+		 * Shape stuff.
 		 */
 		GeneralPath p = new GeneralPath(GeneralPath.WIND_EVEN_ODD,3);
-		p.moveTo(0,-.5);
-		p.lineTo(.5, 0);
-		p.lineTo(0, .5);
+		p.moveTo(0f,-.5f);
+		p.lineTo(.5f, 0f);
+		p.lineTo(0f, .5f);
 		p.closePath();
 		subTriangle = new Area(p);
+		roundOff = .2f;
 	}
 	
 	public Paint getGradient(float lo, float hi)
 	{
-		return new GradientPaint(0,lo,menuGradLo,0,hi,menuGradHi,true);
+		return new GradientPaint(0,lo,menuGradHi.brighter(60),0,hi,menuGradHi,true);
 	}
 	
 	public Paint getGradient(int state, float lo, float hi)

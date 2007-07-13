@@ -11,11 +11,8 @@ import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ProcessingUtils;
 import org.andrewberman.ui.UIObject;
-import org.andrewberman.ui.menu.Menu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-
-import processing.core.PApplet;
 
 public final class HoverHalo implements TweenListener, UIObject
 {

@@ -1,19 +1,18 @@
 package org.andrewberman.ui.menu;
 
-import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Positionable;
 import org.andrewberman.ui.ProcessingUtils;
 
 import processing.core.PFont;
 
-public abstract class MenuItem
+public abstract class MenuItem implements Positionable
 {
 	public static final int UP = 0;
 	public static final int OVER = 1;
@@ -30,11 +29,12 @@ public abstract class MenuItem
 	public String label;
 	ArrayList items;
 	
+	protected float x,y;
+	
 	int state = UP;	
 	boolean clickedInside;
 	boolean mouseInside;
 	boolean hidden = true;
-
 	
 	MenuItem()
 	{
@@ -64,6 +64,22 @@ public abstract class MenuItem
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void setPosition(float x, float y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+	
+	public float getX()
+	{
+		return x;
+	}
+	
+	public float getY()
+	{
+		return y;
 	}
 	
 	public MenuItem add(MenuItem seg)
@@ -379,7 +395,7 @@ public abstract class MenuItem
 	/**
 	 * Determines the max width of this MenuItem's "content".
 	 * Currently just returns the max width based on the width of the label
-	 * text and the current Palette's padding, but subclassers should override
+	 * text and the current Palette's padding, but subclasses can override
 	 * this default behavior.
 	 * @return the maximum width of this MenuItem.
 	 */
@@ -387,8 +403,15 @@ public abstract class MenuItem
 	{
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		float width = ProcessingUtils.getTextWidth(menu.pg,font, fontSize, label,true);
-		return width;
+		float width = ProcessingUtils.getTextWidth(menu.g,font, fontSize, label,true);
+		return width + menu.style.padX*2;
+	}
+	
+	protected float getHeight()
+	{
+		PFont font = menu.style.font;
+		float fontSize = menu.style.fontSize;
+		return ProcessingUtils.getTextHeight(menu.g,font,fontSize,label,true) + menu.style.padY*2;
 	}
 	
 	protected void mouseEvent(MouseEvent e, Point tempPt)

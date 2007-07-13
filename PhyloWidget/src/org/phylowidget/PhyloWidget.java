@@ -9,7 +9,6 @@ import org.phylowidget.ui.UIManager;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphicsJava2D;
-import processing.opengl.PGraphicsOpenGL;
 
 public class PhyloWidget extends PApplet
 {
@@ -54,6 +53,11 @@ public class PhyloWidget extends PApplet
 		drawFrameRate();
 		translate(width/2,height/2);
 		
+		noFill();
+		stroke(0);
+		strokeWeight(1);
+		ellipse(0,0,10,10);
+		
 		ProcessingUtils.setMatrix(this);
 		trees.update();
 		ui.update();
@@ -76,8 +80,6 @@ public class PhyloWidget extends PApplet
 	public void size(int w, int h)
 	{
 		if (width != w || h != h)
-//		synchronized(this)
-//		{
 			size(w,h,JAVA2D);
 //			size(w,h,P3D);
 //			size(w,h,OPENGL);
@@ -97,7 +99,6 @@ public class PhyloWidget extends PApplet
 			{
 				openGL = true;
 			}
-//		}
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

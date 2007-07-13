@@ -10,27 +10,16 @@ import java.util.ArrayList;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIObject;
-import org.andrewberman.ui.menu.Menu;
-import org.andrewberman.ui.menu.MenuItem;
-import org.andrewberman.ui.menu.RadialMenu;
 import org.andrewberman.ui.menu.Toolbar;
-import org.andrewberman.ui.menu.ToolbarMenu;
-import org.andrewberman.ui.menu.ToolbarMenuItem;
-import org.andrewberman.ui.menu.VerticalMenu;
-import org.andrewberman.ui.menu.VerticalMenuItem;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.Tree;
-import org.phylowidget.tree.TreeNode;
-
-import processing.core.PConstants;
 
 public final class UIManager implements MouseMotionListener, MouseListener, MouseWheelListener
 {
 	PhyloWidget p = PhyloWidget.p;
 	
-	public FocusManager focus = new FocusManager();
-	public EventDispatcher event = new EventDispatcher();
+	public FocusManager focus;
+	public EventDispatcher event;
 	
 	public ArrayList uiObjects = new ArrayList(5);
 	
@@ -40,7 +29,7 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public UIManager()
 	{
-		focus = new FocusManager();
+		focus = FocusManager.instance;
 		event = new EventDispatcher();
 	}
 	

@@ -9,9 +9,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
+//import javax.xml.stream.XMLInputFactory;
+//import javax.xml.stream.XMLStreamConstants;
+//import javax.xml.stream.XMLStreamReader;
 
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.PhyloNode;
@@ -85,28 +85,28 @@ public class RandomTreeMutator implements Runnable
 	
 	private String getRemoteNCBITaxon() {
 		// Retreive a random taxon name from NCBI:
-		int taxID = random.nextInt(100000);
+		final int taxID = random.nextInt(100000);
 		String taxonName = DEFAULT_NAME;
 		
 		URL url;
 		try
 		{
-			url = new URL("http://www.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id="+String.valueOf(taxID));
-			XMLInputFactory f = XMLInputFactory.newInstance();
-			XMLStreamReader r = f.createXMLStreamReader(url.openStream());
-			while (r.hasNext())
-			{
-				if (r.getEventType() == XMLStreamConstants.START_ELEMENT)
-				{
-					if (r.getAttributeCount() > 0 && r.getAttributeValue(0).equals("ScientificName"))
-					{
-						r.next();
-						taxonName = r.getText();
-					}
-				}
-				r.next();
-			}
-		} catch (Exception e)
+//			url = new URL("http://www.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id="+String.valueOf(taxID));
+//			final XMLInputFactory f = XMLInputFactory.newInstance();
+//			final XMLStreamReader r = f.createXMLStreamReader(url.openStream());
+//			while (r.hasNext())
+//			{
+//				if (r.getEventType() == XMLStreamConstants.START_ELEMENT)
+//				{
+//					if (r.getAttributeCount() > 0 && r.getAttributeValue(0).equals("ScientificName"))
+//					{
+//						r.next();
+//						taxonName = r.getText();
+//					}
+//				}
+//				r.next();
+//			}
+		} catch (final Exception e)
 		{
 			e.printStackTrace();
 			return taxonName;

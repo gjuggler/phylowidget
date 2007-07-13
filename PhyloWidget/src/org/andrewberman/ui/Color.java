@@ -1,6 +1,5 @@
 package org.andrewberman.ui;
 
-import java.awt.color.ColorSpace;
 
 public final class Color extends java.awt.Color
 {

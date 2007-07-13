@@ -4,15 +4,11 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineMetrics;
-import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
-
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -66,6 +62,19 @@ public class ProcessingUtils
 			Font f = font.font.deriveFont(size);
 			FontMetrics fm = g2.getFontMetrics(f);
 			return fm.getAscent();
+		}
+		return font.ascent()*size;
+	}
+	
+	public static float getTextHeight(PGraphics g, PFont font, float size, String text,boolean useNativeFonts)
+	{
+		if (g.getClass() == PGraphicsJava2D.class && useNativeFonts)
+		{
+			PGraphicsJava2D pgj = (PGraphicsJava2D) g;
+			Graphics2D g2 = pgj.g2;
+			Font f = font.font.deriveFont(size);
+			FontMetrics fm = g2.getFontMetrics(f);
+			return fm.getAscent() + fm.getDescent();
 		}
 		return font.ascent()*size;
 	}
@@ -151,8 +160,8 @@ public class ProcessingUtils
 			try
 			{
 				affineToPMatrix(tr, modelview);
-				tr.invert();
-				affineToPMatrix(tr, modelviewInv);
+//				tr.invert();
+				affineToPMatrix(tr.createInverse(), modelviewInv);
 				camera.reset();
 				cameraInv.reset();
 			} catch (NoninvertibleTransformException e)

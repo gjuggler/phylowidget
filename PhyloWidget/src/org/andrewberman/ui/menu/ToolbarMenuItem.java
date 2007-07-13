@@ -1,13 +1,14 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
-import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Positionable;
+import org.andrewberman.ui.Sizable;
 
 public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 {
@@ -15,38 +16,37 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 	static RoundRectangle2D.Float roundRect = new RoundRectangle2D.Float(0,0,0,0,0,0);
 	static RoundRectangle2D.Float buffRoundRect = new RoundRectangle2D.Float(0,0,0,0,0,0);
 	
-	float x,y,width,height;
-	float textWidth;
+	float width,height;
+	float textOffsetX;
 	float textOffsetY;
 	
 	public ToolbarMenuItem(String label)
 	{
 		super(label);
-		add(new VerticalMenu());
 	}
 	
 	public void draw()
 	{
 		if (isVisible())
 		{
-			roundRect.setRoundRect(Math.round(x), Math.round(y),
-					Math.round(width), Math.round(height), Math.round(roundOff*width), Math.round(roundOff*width));
+			roundRect.setRoundRect(x,y,width,height,roundOff*height,roundOff*height);
+			Graphics2D g2 = menu.g2;
 			/*
 			 * Set the correct fill gradient
 			 */
 			if (showingChildren())
 			{
-				menu.g2.setPaint(menu.style.getGradient(MenuItem.DOWN,y, y + height));
+				g2.setPaint(menu.style.getGradient(MenuItem.DOWN,y, y + height));
 			} else
 			{
-				menu.g2.setPaint(menu.style.getGradient(MenuItem.OVER,y, y + height));
+				g2.setPaint(menu.style.getGradient(MenuItem.OVER,y, y + height));
 			}
 			/*
-			 * Only perform the fill if the conditions are right.
+			 * Only perform the fill if the mood is right.
 			 */
 			if (state != MenuItem.UP || showingChildren())
 			{
-				menu.g2.fill(roundRect);
+				g2.fill(roundRect);
 			}
 			/*
 			 * Draw the rounded rectangle outline.
@@ -54,18 +54,19 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 			if (state != MenuItem.UP || showingChildren())
 			{
 				RenderingHints rh = menu.g2.getRenderingHints();
-				menu.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON); 
-				menu.g2.setPaint(menu.style.strokeColor);
-				menu.g2.draw(roundRect);
-				menu.g2.setRenderingHints(rh);
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON); 
+				g2.setPaint(menu.style.strokeColor);
+				g2.setStroke(menu.style.stroke);
+				g2.draw(roundRect);
+				g2.setRenderingHints(rh);
 			}
 			/*
 			 * Draw the text.
 			 */
-			menu.g2.setFont(menu.style.font.font
+			g2.setFont(menu.style.font.font
 					.deriveFont(menu.style.fontSize));
-			menu.g2.setPaint(menu.style.textColor);
-			menu.g2.drawString(label, x + width/2 - textWidth/2, y + textOffsetY);
+			g2.setPaint(menu.style.textColor);
+			g2.drawString(label, x + textOffsetX, y + textOffsetY);
 		}
 		super.draw();
 	}
@@ -82,7 +83,7 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 			return vm.add(s);
 		} else
 		{
-			return add(new VerticalMenu()).add(s);
+			return add(new VerticalMenu(menu.canvas)).add(s);
 		}
 	}
 	
@@ -94,7 +95,7 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 			if (item instanceof Positionable)
 			{
 				Positionable pos = (Positionable) item;
-				pos.setPosition(x,y+height+menu.style.pad/2);
+				pos.setPosition(x,(int)y+height+menu.style.margin/2);
 			}
 		}
 		super.layout();
@@ -102,17 +103,20 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 	
 	protected void getRect(Float rect, Float buff)
 	{
-		buff.setFrame(x, y, width, height);
-		Rectangle2D.union(rect, buff, rect);
+		if (isVisible())
+		{
+			buff.setFrame(x, y, width, height);
+			Rectangle2D.union(rect, buff, rect);
+		}
 		super.getRect(rect, buff);
 	}
 	
 	protected void setState(int state)
 	{
 		super.setState(state);
-		if (menu instanceof ToolbarMenu)
+		if (menu instanceof Toolbar)
 		{
-			ToolbarMenu tb = (ToolbarMenu) menu;
+			Toolbar tb = (Toolbar) menu;
 			if (tb.isActive && state == MenuItem.OVER)
 			{
 				menu.setOpenItem(this);
@@ -131,21 +135,5 @@ public class ToolbarMenuItem extends MenuItem implements Sizable, Positionable
 	{
 		this.width = w;
 		this.height = h;
-	}
-
-	public void setPosition(float x, float y)
-	{
-		this.x = x;
-		this.y = y;
-	}
-
-	public float getX()
-	{
-		return x;
-	}
-	
-	public float getY()
-	{
-		return y;
 	}
 }

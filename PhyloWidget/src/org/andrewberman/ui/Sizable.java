@@ -1,4 +1,4 @@
-package org.andrewberman.ui.menu;
+package org.andrewberman.ui;
 
 public interface Sizable
 {

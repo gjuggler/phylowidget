@@ -15,7 +15,6 @@ public final class MenuTimer extends Thread
 	{
 		if (instance == null || !instance.isAlive())
 		{
-			System.out.println("Creating timer!");
 			instance = new MenuTimer();
 			instance.start();
 		}

@@ -7,28 +7,37 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Positionable;
 import org.andrewberman.ui.ProcessingUtils;
 import org.andrewberman.ui.UIObject;
-import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphicsJava2D;
-import processing.opengl.PGraphicsOpenGL;
 
 public abstract class Menu extends MenuItem implements UIObject, Positionable
 {	
 	public static final int START_SIZE = 100;
 	public static final int OFFSET = 10;
 	
-	public PGraphicsJava2D pg;
 	public Palette style = Palette.defaultSet;
 
-	static PApplet p;
+	/**
+	 * The "canvas" PApplet object, to which we draw our offscreen buffer
+	 * after each round of drawing.
+	 */
+	protected PApplet canvas;
+	/**
+	 * Our offscreen buffer graphics object.
+	 */
+	protected PGraphicsJava2D g;
+	public Graphics2D g2;
+	
 	Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
 	Rectangle2D.Float buff = new Rectangle2D.Float(0, 0, 0, 0);
-	Graphics2D g2;
+	
 	MenuItem currentlySelected;
 	float x, y;
 	boolean justShown = false;
@@ -76,20 +85,20 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 */
 	boolean hideOnAction = true;
 	
-	public Menu()
+	public Menu(PApplet app)
 	{
 		super("[unnamed menu]");
-		p = PhyloWidget.p;
+		canvas = app;
 		setMenu(this);
-		setSize(START_SIZE, START_SIZE);
+		setSize(START_SIZE,START_SIZE);
 	}
-
+	
 	protected void setSize(int w, int h)
 	{
-		pg = (PGraphicsJava2D) p.createGraphics(w, h, PApplet.JAVA2D);
-		g2 = pg.g2;
-		// pg.smooth();
-		pg.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
+		g = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
+		g2 = g.g2;
+//		 g.smooth();
+		g.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
 		// g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 		// RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		// g2.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -135,26 +144,56 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		hideAllChildren();
 	}
 
+	public boolean isRootMenu()
+	{
+		return (menu == this);
+	}
+	
+	public void layout()
+	{
+		super.layout();
+	}
+	
 	public void draw()
 	{
-		if (menu != this)
+		if (!isRootMenu())
 		{
 			drawBefore();
 			super.draw();
 			drawAfter();
 			return;
 		}
-		resizeBuffer();
 		if (!isVisible())
 			return;
-		pg.beginDraw();
-		pg.background(255, 0);
+		if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
+		{
+			PGraphicsJava2D j2d = (PGraphicsJava2D) canvas.g;
+			j2d.pushMatrix();
+			if (!useCameraCoordinates)
+			{
+				j2d.resetMatrix();
+			}
+			this.g2 = j2d.g2;
+			RenderingHints rh = g2.getRenderingHints();
+			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			drawBefore();
+			super.draw();
+			drawAfter();
+			g2.setRenderingHints(rh);
+			j2d.popMatrix();
+		} else
+		{
+		resizeBuffer();
+		g.beginDraw();
+		g.background(255, 0);
+		g.translate(OFFSET, OFFSET);
 		drawBefore();
 		super.draw(); // draws all of the sub segments.
 		drawAfter();
-		pg.modified = true;
-		pg.endDraw();
+		g.modified = true;
+		g.endDraw();
 		drawToCanvas();
+		}
 	}
 
 	protected void drawBefore()
@@ -166,36 +205,56 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		// Subclasses can use this to do some of their own drawing.
 	}
-
+	
 	protected void drawToCanvas()
 	{
-		int w = PApplet.round(rect.width + OFFSET * 2);
-		int h = PApplet.round(rect.height + OFFSET * 2);
-		p.g.image(pg, PApplet.round(x - OFFSET), PApplet.round(y - OFFSET), w,
+		int w = PApplet.round(rect.width + OFFSET*2);
+		int h = PApplet.round(rect.height + OFFSET*2);
+		
+		canvas.pushMatrix();
+		if (!useCameraCoordinates)
+		{
+			if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
+				canvas.resetMatrix();
+			else
+				canvas.camera();
+		}
+//		canvas.stroke(255,0,0);
+//		canvas.strokeWeight(1);
+//		canvas.noFill();
+//		canvas.rect(x, y, rect.width, rect.height);
+//		canvas.stroke(0,255,0);
+//		canvas.rect(x-OFFSET,y-OFFSET,g.width,g.height);
+		if (canvas.g.getClass().getName().equals(PApplet.JAVA2D))
+		{
+//			PGraphicsJava2D j2d = (PGraphicsJava2D) canvas.g;
+//			j2d.g2.drawImage(g.image, (int)x-OFFSET, (int)y-OFFSET, w, g.height, null);
+		} else
+		{
+			canvas.image(g, PApplet.round(x-OFFSET), PApplet.round(y-OFFSET), w,
 				h, 0, 0, w, h);
+		}
+		canvas.popMatrix();
 	}
 
 	protected float[] getOverhang()
 	{
 		rect.setFrame(0, 0, 0, 0);
 		buff.setFrame(0, 0, 0, 0);
-		for (int i = 0; i < items.size(); i++)
-		{
-			MenuItem seg = (MenuItem) items.get(i);
-			seg.getRect(rect, buff);
-		}
+		getRect(rect,buff);
 		float dx = 0;
 		float dy = 0;
-		final int PAD = 50;
+		final int PAD = 10;
+		float gWidth = g.width - OFFSET - PAD;
+		float gHeight = g.height - OFFSET - PAD;
 		if (rect.x < 0)
-			dx += -rect.x + PAD;
-		if (rect.x + rect.width > pg.width)
-			dx += rect.x + rect.width - pg.width + PAD;
+			dx += -rect.x;
+		if (rect.x + rect.width > gWidth)
+			dx += rect.x + rect.width - gWidth;
 		if (rect.y < 0)
-			dy += -rect.y + PAD;
-		if (rect.y + rect.height > pg.height)
-			dy += rect.y + rect.height - pg.height + PAD;
-
+			dy += -rect.y;
+		if (rect.y + rect.height > gHeight)
+			dy += rect.y + rect.height - gHeight;
 		float[] overhang = { dx, dy };
 		return overhang;
 	}
@@ -205,8 +264,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		float[] overhang = getOverhang();
 		if (overhang[0] > 0 || overhang[1] > 0)
 		{
-			setSize(pg.width + (int) overhang[0] + 1, pg.height
-					+ (int) overhang[1] + 1);
+			setSize(g.width + (int) overhang[0], g.height
+					+ (int) overhang[1]);
 		}
 	}
 
@@ -272,7 +331,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		if (useCameraCoordinates)
 			ProcessingUtils.screenToModel(pt);
 		// System.out.println(pt.x+" "+pt.y);
-		pt.translate(-x + OFFSET, -y + OFFSET);
+		pt.translate(-x, -y);
 
 		// Recurse through sub-menus with this mouse event.
 		mouseEvent(e, pt);
@@ -284,10 +343,10 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 				{
 					if (mouseInside)
 					{
-						p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						canvas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					} else
 					{
-						ProcessingUtils.releaseCursor(p, Cursor
+						ProcessingUtils.releaseCursor(canvas, Cursor
 								.getPredefinedCursor(Cursor.HAND_CURSOR));
 					}
 				}

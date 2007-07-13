@@ -1,6 +1,5 @@
 package org.andrewberman.ui.menu;
 
-import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.NoninvertibleTransformException;
@@ -8,14 +7,16 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Positionable;
 import org.andrewberman.ui.ProcessingUtils;
+import org.andrewberman.ui.Sizable;
 
 import processing.core.PFont;
 import processing.core.PImage;
 
 public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 {
-	float x, y, width, height;
+	float width, height;
 	PImage icon;
 	
 	static Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
@@ -39,8 +40,8 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 			VerticalMenuItem firstChild = (VerticalMenuItem) item.items.get(0);
 			item.menu.g2.setStroke(item.menu.style.stroke);
 			item.menu.g2.setPaint(item.menu.style.strokeColor);
-			Rectangle2D.Float rect = new Rectangle2D.Float(firstChild.x,
-					firstChild.y, firstChild.width, firstChild.height
+			Rectangle2D.Float rect = new Rectangle2D.Float(firstChild.x-item.menu.style.strokeWidth,
+					firstChild.y-item.menu.style.strokeWidth, firstChild.width, firstChild.height
 							* item.items.size());
 			item.menu.g2.draw(rect);
 		}
@@ -68,14 +69,14 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 				menu.g2.setPaint(menu.style.selectedTextColor);
 			else
 				menu.g2.setPaint(menu.style.textColor);
-			menu.g2.drawString(label, x+menu.style.pad, y+fontOffset);
+			menu.g2.drawString(label, x+menu.style.padX, y+fontOffset);
 //			menu.pg.text(label, x + menu.style.pad, y + fontOffset);
 			/*
 			 * Draw the "subMenu" triangle if necessary.
 			 */
 			if (items.size() > 0)
 			{
-				float triXPos = Math.round(x + width - menu.style.pad - triWidth);
+				float triXPos = Math.round(x + width - menu.style.padX - triWidth);
 				at.setToIdentity();
 				at.translate(triXPos, y + height / 2);
 				tri.transform(at);
@@ -83,7 +84,8 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 				menu.g2.fill(tri);
 				try
 				{
-					at.invert();
+//					at.invert();
+					at = at.createInverse();
 				} catch (NoninvertibleTransformException e)
 				{
 					// Should never get here.
@@ -125,7 +127,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		 */
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		float textWidth = ProcessingUtils.getTextWidth(menu.pg,font, fontSize, label,true);
+		float textWidth = ProcessingUtils.getTextWidth(menu.g,font, fontSize, label,true);
 		numElements++;
 		/*
 		 * Triangle width (if any).
@@ -146,7 +148,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 			numElements++;
 		}
 		
-		return textWidth + myTriWidth + iconWidth + (numElements+1)*menu.style.pad;
+		return textWidth + myTriWidth + iconWidth + (numElements+1)*menu.style.padX;
 	}
 	
 	protected boolean containsPoint(Point p)
@@ -162,8 +164,11 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 
 	protected void getRect(Float rect, Float buff)
 	{
-		buff.setFrame(x, y, width, height);
-		Rectangle2D.union(rect, buff, rect);
+		if (isVisible())
+		{
+			buff.setFrame(x, y, width, height);
+			Rectangle2D.union(rect, buff, rect);
+		}
 		super.getRect(rect, buff);
 	}
 

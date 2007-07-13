@@ -1,6 +1,6 @@
 package org.phylowidget.render;
 
-import org.andrewberman.ui.menu.Positionable;
+import org.andrewberman.ui.Positionable;
 import org.phylowidget.tree.TreeNode;
 
 public final class PhyloNode extends TreeNode implements Positionable

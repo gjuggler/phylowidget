@@ -287,16 +287,5 @@ public final class SortedItemList
 	 */
 	public static void main(String[] args)
 	{
-		Random random = new Random();
-	
-		SortedItemList list = new SortedItemList();
-		list.setSort(0,1);
-		list.sort();
-		
-		for (int i=0; i < 2000; i++)
-		{
-			list.insert(new Item(random.nextInt(2000)));
-		}
-		list.printItems();
 	}	
 }

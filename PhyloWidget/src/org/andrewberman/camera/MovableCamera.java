@@ -9,6 +9,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 
+import org.andrewberman.ui.FocusManager;
 import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
@@ -61,7 +62,7 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 		/*
 		 * Handle the edge scrolling.
 		 */
-		if (mouseInside && enableSideScrolling)
+		if (mouseInside && enableSideScrolling && !FocusManager.instance.isModal())
 		{
 			pt.setLocation(p.mouseX, p.mouseY);
 			float zoomMultiplier = NUDGE_SCALE / getZ();
@@ -93,7 +94,8 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 		this.zTween.stop();
 
 		float rotVal = (float) Math.sqrt(Math.abs(e.getWheelRotation()));
-		int rotDir = (int) Math.signum(e.getWheelRotation());
+//		int rotDir = (int) Math.signum(e.getWheelRotation());
+		int rotDir = (e.getWheelRotation() > 0 ? 1 : -1);
 		float mult = (float) Math.pow(rotVal*.75,rotDir);
 		this.zoomBy(mult);
 

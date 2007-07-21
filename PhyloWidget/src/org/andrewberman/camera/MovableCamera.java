@@ -13,7 +13,7 @@ import org.andrewberman.ui.FocusManager;
 
 import processing.core.PApplet;
 
-public abstract class MovableCamera extends Camera implements MouseWheelListener,
+public class MovableCamera extends Camera implements MouseWheelListener,
 		KeyListener, MouseMotionListener, MouseListener
 {
 	protected PApplet p;
@@ -29,7 +29,8 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 	{
 		super();
 		this.p = p;
-
+		makeResponsive();
+		
 		NUDGE_DISTANCE = p.width / 5;
 		NUDGE_SCALE = 10f / (float) NUDGE_DISTANCE;
 	}
@@ -54,8 +55,26 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 	{
 		super.update();
 		scroll();
+		applyTransformations();
 	}
 
+	protected void applyTransformations()
+	{
+		/*
+		 * Translate by half the stage width and height to re-center the stage
+		 * at (0,0).
+		 */
+		p.translate(getStageWidth()/2.0f,getStageHeight()/2.0f);
+		/*
+		 * Now scale.
+		 */
+		p.scale(getZ());
+		/*
+		 * Then translate.
+		 */
+		p.translate(-getX(),-getY());
+	}
+	
 	public void scroll()
 	{
 		/*
@@ -88,24 +107,36 @@ public abstract class MovableCamera extends Camera implements MouseWheelListener
 		}
 	}
 
+	public float getStageWidth()
+	{
+		return p.width;
+	}
+	
+	public float getStageHeight()
+	{
+		return p.height;
+	}
+	
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		this.zTween.stop();
 
-		float rotVal = (float) Math.sqrt(Math.abs(e.getWheelRotation()));
+		float rotVal = (float) Math.abs(e.getWheelRotation());
+		rotVal = Math.min(rotVal, 1);
+//		System.out.println(rotVal);
 //		int rotDir = (int) Math.signum(e.getWheelRotation());
 		int rotDir = (e.getWheelRotation() > 0 ? 1 : -1);
-		float mult = (float) Math.pow(rotVal*.75,rotDir);
+		float mult = (float) Math.pow(rotVal*.75, rotDir);
 		this.zoomBy(mult);
 
-		pt.setLocation(p.mouseX, p.mouseY);
+		pt.setLocation(e.getX(),e.getY());
 		float dx = p.width / 2 - pt.x;
 		float dy = p.height / 2 - pt.y;
 
 		// if endzoom is bigger, we want to make dx smaller.
-		dx *= rotDir * .5;
-		dy *= rotDir * .5;
-
+		dx *= rotDir * .75;
+		dy *= rotDir * .75;
+		
 		this.nudge(dx / getZ(), dy / getZ());
 	}
 

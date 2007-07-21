@@ -1,9 +1,14 @@
 package org.andrewberman.ui.menu;
 
+/**
+ * A <code>VerticalMenu</code> is a menu that lays out and displays its
+ * sub-items in a vertical box. This menu type is especially well-suited for the
+ * drop-down menus that users expect from a context menu or toolbar menu.
+ */
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 
-import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
 
@@ -11,46 +16,22 @@ import processing.core.PApplet;
 import processing.core.PFont;
 
 public class VerticalMenu extends Menu
-{	
+{
 	public VerticalMenu(PApplet app)
 	{
 		super(app);
-		// TODO Auto-generated constructor stub
 	}
 
-	/*
-	 * Values to cache and send off as static to VerticalItemMenu to avoid
-	 * creating objects during each draw cycle.
-	 */
-//	float fontOffset;
-//	float triWidth;
-//	Area tri;
-	
-	protected void drawBefore()
-	{
-//		pg.textFont(menu.style.font);
-//		pg.textSize(menu.style.fontSize);
-//		pg.fill(0);
-	}
-	
 	public MenuItem create(String label)
 	{
 		return new VerticalMenuItem(label);
 	}
-	
-	public void draw()
-	{
-//		VerticalMenuItem.fontOffset = fontOffset;
-//		VerticalMenuItem.triWidth = triWidth;
-//		VerticalMenuItem.tri = tri;
-		super.draw();
-	}
-	
+
 	protected void drawAfter()
 	{
 		VerticalMenuItem.drawChildrenRect(this);
 	}
-	
+
 	public void layout()
 	{
 		/*
@@ -58,15 +39,16 @@ public class VerticalMenu extends Menu
 		 */
 		PFont font = style.font;
 		float fontSize = style.fontSize;
-		float descent = PUtils.getTextDescent(menu.g,font,fontSize,true);
-		float ascent = PUtils.getTextAscent(menu.g,font,fontSize,true);
-		float textHeight = descent+ascent;
-		float itemHeight = textHeight + 2*style.padY;
+		float descent = UIUtils.getTextDescent(menu.buff, font, fontSize, true);
+		float ascent = UIUtils.getTextAscent(menu.buff, font, fontSize, true);
+		float textHeight = descent + ascent;
+		float itemHeight = textHeight + 2 * style.padY;
 		/*
 		 * Calculate the width of the "submenu" triangle shape.
 		 */
 		float innerHeight = textHeight;
-		AffineTransform at = AffineTransform.getScaleInstance(innerHeight/2, innerHeight/2);
+		AffineTransform at = AffineTransform.getScaleInstance(innerHeight / 2,
+				innerHeight / 2);
 		Area a = style.subTriangle.createTransformedArea(at);
 		VerticalMenuItem.tri = a;
 		VerticalMenuItem.triWidth = (float) a.getBounds2D().getWidth();
@@ -77,9 +59,9 @@ public class VerticalMenu extends Menu
 		/*
 		 * Set the width, height and position for the top-level items.
 		 */
-		for (int i=0; i < items.size(); i++)
+		for (int i = 0; i < items.size(); i++)
 		{
-			MenuItem item = (MenuItem)items.get(i);
+			MenuItem item = (MenuItem) items.get(i);
 			if (item instanceof Sizable)
 			{
 				Sizable size = (Sizable) item;
@@ -89,9 +71,9 @@ public class VerticalMenu extends Menu
 			{
 				Positionable pos = (Positionable) item;
 				if (menu == this)
-					pos.setPosition(OFFSET, OFFSET + i*itemHeight);
+					pos.setPosition(x, y + i * itemHeight);
 				else
-					pos.setPosition(x, y + i*itemHeight);
+					pos.setPosition(x, y + i * itemHeight);
 			}
 		}
 		// Trigger the recursive layout for the rest of the menu.

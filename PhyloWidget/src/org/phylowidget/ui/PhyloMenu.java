@@ -1,12 +1,14 @@
 package org.phylowidget.ui;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.menu.RadialMenu;
 import org.andrewberman.ui.menu.VerticalMenu;
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 
 import processing.core.PApplet;
 
-public final class PhyloMenu extends VerticalMenu
+public final class PhyloMenu extends RadialMenu
 {
 	NodeRange curNode;
 	Point nodePt = new Point(0,0);
@@ -37,7 +39,7 @@ public final class PhyloMenu extends VerticalMenu
 	{
 		super.hide();
 //		PhyloWidget.ui.focus.removeFromFocus(this);
-//		PhyloWidget.ui.hideMenu();
+		PhyloWidget.ui.hideMenu();
 	}
 	
 	public void setNodeRange(NodeRange r)

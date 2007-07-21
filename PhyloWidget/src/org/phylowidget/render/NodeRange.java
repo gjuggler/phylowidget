@@ -1,6 +1,7 @@
 package org.phylowidget.render;
 
 import org.andrewberman.sortedlist.ItemI;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.TreeNode;
 
 /**
@@ -12,7 +13,7 @@ import org.phylowidget.tree.TreeNode;
 public final class NodeRange implements ItemI
 {
 	public TreeRenderer render;	
-	public TreeNode node;
+	public PhyloNode node;
 	
 	public int type=0;
 	public static final int NODE = 0;

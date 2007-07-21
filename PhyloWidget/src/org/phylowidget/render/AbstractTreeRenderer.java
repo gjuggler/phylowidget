@@ -75,12 +75,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	 */
 	protected int lastModCount = 0;
 
-
-
 	public AbstractTreeRenderer()
 	{
 		rect = new Rectangle2D.Float(0,0,0,0);
-		font = FontLoader.v12;
+		font = FontLoader.vera;
 	}
 	
 	public void render()
@@ -105,7 +103,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	 * This should only be called when the tree is changed.
 	 *
 	 */
-	public void update()
+	protected void update()
 	{
 		leaves.clear();
 		nodes.clear();
@@ -122,13 +120,13 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	 * This should populate the positions HashMap with the positions
 	 * of all nodes.
 	 */
-	public void layout(){}
+	protected void layout(){}
 	
 	/**
 	 * Draws this renderer's view to the canvas.
 	 *
 	 */
-	public void draw()
+	protected void draw()
 	{
 	}
 	
@@ -143,7 +141,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		return tree;
 	}
 
-	public void setPosition(TreeNode n, float x, float y)
+	protected void setPosition(TreeNode n, float x, float y)
 	{
 		if (n instanceof Positionable)
 		{
@@ -160,7 +158,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		}
 	}
 
-	public Point getInternalPosition(TreeNode n)
+	protected Point getInternalPosition(TreeNode n)
 	{
 		if (n instanceof Positionable)
 		{

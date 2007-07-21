@@ -6,21 +6,27 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
-import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
 
 import processing.core.PFont;
 
+/**
+ * A <code>VerticalMenuItem</code> is the corresponding MenuItem to go along
+ * with a <code>VerticalMenu</code>. Not much else to say about that.
+ * 
+ * @author Greg
+ */
 public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 {
 	static final float shortcutSize = .75f;
-	
+
 	float width, height;
 	float labelWidth, shortcutWidth;
-	float labelOffsetY, shortcutOffsetY;
-	
+	float labelOffsetY;// , shortcutOffsetY;
+
 	static Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
 	static AffineTransform at = AffineTransform.getTranslateInstance(0, 0);
 	static Area tri;
@@ -33,17 +39,17 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 
 	static void drawChildrenRect(MenuItem item)
 	{
-		if (item.items.size() == 0) return;
+		if (item.items.size() == 0 || !item.showingChildren())
+			return;
 		MenuItem firstItem = (MenuItem) item.items.get(0);
 		if (item.showingChildren() && firstItem instanceof VerticalMenuItem)
 		{
 			VerticalMenuItem firstChild = (VerticalMenuItem) item.items.get(0);
-			item.menu.g2.setStroke(item.menu.style.stroke);
-			item.menu.g2.setPaint(item.menu.style.strokeColor);
-			Rectangle2D.Float rect = new Rectangle2D.Float(firstChild.x-item.menu.style.strokeWidth,
-					firstChild.y-item.menu.style.strokeWidth, firstChild.width, firstChild.height
+			item.menu.buff.g2.setPaint(item.menu.style.strokeColor);
+			Rectangle2D.Float rect = new Rectangle2D.Float(firstChild.x,
+					firstChild.y, firstChild.width, firstChild.height
 							* item.items.size());
-			item.menu.g2.draw(rect);
+			item.menu.buff.g2.draw(rect);
 		}
 	}
 
@@ -51,7 +57,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 	{
 		if (isVisible())
 		{
-			Graphics2D g2 = menu.g2;
+			Graphics2D g2 = menu.buff.g2;
 			/*
 			 * Draw the filled-in rectangle.
 			 */
@@ -59,36 +65,32 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 			if (isAncestorOfSelected())
 				g2.setPaint(menu.style.getGradient(y, y + height));
 			else
-				g2.setPaint(menu.style.stateColors[state]);
+				g2.setPaint(menu.style.menuBackground);
 			g2.fill(rect);
 			/*
 			 * Draw the text.
 			 */
-			g2.setFont(menu.style.font.font
-					.deriveFont(menu.style.fontSize));
-			if (isAncestorOfSelected())
-				g2.setPaint(menu.style.selectedTextColor);
-			else
-				g2.setPaint(menu.style.textColor);
-			g2.drawString(label, x+menu.style.padX, y+labelOffsetY);
+			g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize));
+			g2.setPaint(menu.style.textColor);
+			g2.drawString(label, x + menu.style.padX, y + labelOffsetY);
 			/*
 			 * Draw the shortcut text if necessary.
 			 */
 			if (shortcut != null)
 			{
-				g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize*shortcutSize));
-				if (isAncestorOfSelected())
-					g2.setPaint(menu.style.selectedTextColor.brighter(100));
-				else
-					g2.setPaint(menu.style.textColor.brighter(100));
-				g2.drawString(shortcut.label, x+menu.style.padX*2+labelWidth, y+shortcutOffsetY);
+				g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize
+						* shortcutSize));
+				g2.setPaint(menu.style.textColor.brighter(100));
+				g2.drawString(shortcut.label, x + menu.style.padX * 2
+						+ labelWidth, y + labelOffsetY);
 			}
 			/*
 			 * Draw the "subMenu" triangle if necessary.
 			 */
 			if (items.size() > 0)
 			{
-				float triXPos = Math.round(x + width - menu.style.padX - triWidth);
+				float triXPos = Math.round(x + width - menu.style.padX
+						- triWidth);
 				at.setToIdentity();
 				at.translate(triXPos, y + height / 2);
 				Area a2 = tri.createTransformedArea(at);
@@ -105,15 +107,19 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		/*
 		 * Position our text correctly.
 		 */
-		getWidth();
-		float labelAscent = PUtils.getTextAscent(menu.g, menu.style.font, menu.style.fontSize, true);
-		float labelDescent = PUtils.getTextDescent(menu.g, menu.style.font, menu.style.fontSize, true);
-		float labelHeight = labelAscent+labelDescent;
-		labelOffsetY = (height/2 - labelHeight/2) + labelAscent;
-		float shortcutAscent = PUtils.getTextAscent(menu.g, menu.style.font, menu.style.fontSize*shortcutSize, true);
-		float shortcutDescent = PUtils.getTextDescent(menu.g, menu.style.font, menu.style.fontSize*shortcutSize, true);
-		float shortcutHeight = shortcutAscent+shortcutDescent;
-		shortcutOffsetY = (height/2 - shortcutHeight/2) + shortcutAscent;
+		getTextWidth();
+		float labelAscent = UIUtils.getTextAscent(menu.buff, menu.style.font,
+				menu.style.fontSize, true);
+		float labelDescent = UIUtils.getTextDescent(menu.buff, menu.style.font,
+				menu.style.fontSize, true);
+		float labelHeight = labelAscent + labelDescent;
+		labelOffsetY = (height / 2 - labelHeight / 2) + labelAscent;
+		// float shortcutAscent = PUtils.getTextAscent(menu.g, menu.style.font,
+		// menu.style.fontSize*shortcutSize, true);
+		// float shortcutDescent = PUtils.getTextDescent(menu.g,
+		// menu.style.font, menu.style.fontSize*shortcutSize, true);
+		// float shortcutHeight = shortcutAscent+shortcutDescent;
+		// shortcutOffsetY = (height/2 - shortcutHeight/2) + shortcutAscent;
 		/*
 		 * Layout my sub-items.
 		 */
@@ -129,13 +135,13 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 			if (item instanceof Positionable)
 			{
 				Positionable pos = (Positionable) item;
-				pos.setPosition(x+width, y + i*height);
+				pos.setPosition(x + width, y + i * height);
 			}
 		}
 		super.layout();
 	}
 
-	protected float getWidth()
+	protected float getTextWidth()
 	{
 		int numElements = 0;
 		/*
@@ -143,7 +149,8 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		 */
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		labelWidth = PUtils.getTextWidth(menu.g,font, fontSize, label,true);
+		labelWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, label,
+				true);
 		numElements++;
 		/*
 		 * Triangle width (if any).
@@ -159,15 +166,18 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		 */
 		if (shortcut != null)
 		{
-			shortcutWidth = PUtils.getTextWidth(menu.g, font, fontSize*shortcutSize, shortcut.label, true);
+			shortcutWidth = UIUtils.getTextWidth(menu.buff, font, fontSize
+					* shortcutSize, shortcut.label, true);
 			numElements++;
 		}
-		
-		return labelWidth + myTriWidth + shortcutWidth + (numElements+1)*menu.style.padX;
+
+		return labelWidth + myTriWidth + shortcutWidth + (numElements + 1)
+				* menu.style.padX;
 	}
-	
+
 	protected boolean containsPoint(Point p)
 	{
+		if (!isVisible()) return false;
 		if (p.x < x || p.y < y || p.x >= x + width || p.y >= y + height)
 		{
 			return false;
@@ -207,5 +217,15 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 	public float getY()
 	{
 		return y;
+	}
+
+	public float getHeight()
+	{
+		return height;
+	}
+
+	public float getWidth()
+	{
+		return width;
 	}
 }

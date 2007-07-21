@@ -25,7 +25,6 @@ public class Tween
 	public float begin;
 	public float change;
 	public float duration;
-	public boolean useSeconds;
 
 	public Tween(TweenListener listener, TweenFunction function, int type)
 	{
@@ -126,6 +125,8 @@ public class Tween
 
 	public void continueTo(float newF)
 	{
+		if (newF == begin + change)
+			return;
 		if (!isTweening)
 			start();
 		continueTo(newF, this.duration);
@@ -164,25 +165,26 @@ public class Tween
 	{
 		if (isTweening)
 		{
-			if (this.time >= this.duration)
+			if (function.isFinished(time, position, begin, change, duration))
 			{
 				fforward();
 				stop();
 				dispatchEvent(FINISHED);
+//				System.out.println("STOP!"+listener);
 			} else
 			{
 				this.time++;
 				switch (tweenType)
 				{
 					case IN:
-						position = function.easeIn(time, begin, change, duration);
+						position = function.easeIn(time, position, begin, change, duration);
 						break;
 					case OUT:
-						position = function.easeOut(time, begin, change, duration);
+						position = function.easeOut(time, position, begin, change, duration);
 						break;
 					case INOUT:
 						position = function
-								.easeInOut(time, begin, change, duration);
+								.easeInOut(time, position, begin, change, duration);
 						break;
 				}
 				dispatchEvent(UPDATED);

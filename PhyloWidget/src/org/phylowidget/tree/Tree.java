@@ -4,20 +4,23 @@ import java.util.ArrayList;
 
 public class Tree
 {
-
 	private TreeNode root;
 
+	private NodeFactory factory;
+	
 	public boolean editable = true;
 	public int modCount = -1;
 
-	public Tree()
+	public Tree(NodeFactory f)
 	{
-		this.root = new TreeNode("");
+		this.factory = f;
+		this.root = factory.createNode();
 	}
 
-	public Tree(String s)
+	public Tree(NodeFactory f, String s)
 	{
-		this.root = new TreeNode(s);
+		this(f);
+		root.name = s;
 	}
 	
 	public void addSisterNode(TreeNode orig, TreeNode sis)
@@ -25,7 +28,7 @@ public class Tree
 		if (orig.parent == TreeNode.NULL_PARENT)
 		{
 			// Special case: if this is the root node.
-			root = new TreeNode("");
+			root = factory.createNode();
 			root.addChild(orig);
 			root.addChild(sis);
 		} else
@@ -33,7 +36,7 @@ public class Tree
 			// Adds a sister node by creating a new "inner" parent node.
 			TreeNode parent = orig.parent;
 			parent.removeChild(orig);
-			TreeNode newBranch = new TreeNode("");
+			TreeNode newBranch = factory.createNode();
 			newBranch.addChild(orig);
 			newBranch.addChild(sis);
 			parent.addChild(newBranch);
@@ -98,4 +101,18 @@ public class Tree
 	{
 		root = t;
 	}
+	
+	public NodeFactory getFactory()
+	{
+		return factory;
+	}
+	
+	/*
+	 * We shouldn't be allowed to switch node factories during a tree's existence.
+	 */
+//	public void setFactory(NodeFactory fac)
+//	{
+//		System.out.println("Setting factory!");
+//		this.factory = fac;
+//	}
 }

@@ -8,6 +8,15 @@ import java.util.ArrayList;
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
 
+/**
+ * The <code>ShortcutManager</code> class is used to detect keyboard shortcut key events. Although its functionality
+ * is similar to the <code>EventManager</code> class, in order to allow keyboard shortcuts to be activated on a global
+ * level, we need to "shortcut" the EventManager/FocusManager system... get it?
+ * <p>
+ * @author Greg
+ * @see		org.andrewberman.ui.Shortcut
+ * @see		org.andrewberman.ui.EventManager
+ */
 public class ShortcutManager implements KeyListener
 {
 	private PApplet p;
@@ -17,19 +26,17 @@ public class ShortcutManager implements KeyListener
 	
 	int meta = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	
-	public ShortcutManager(PApplet app)
+	private ShortcutManager(PApplet app)
 	{
 		p = app;
 		keys = new ArrayList();
-		instance = this;
+		setup();
 	}
 	
-	public static ShortcutManager loadLazy(PApplet app)
+	public static void lazyLoad(PApplet app)
 	{
 		if (instance == null)
-			return new ShortcutManager(app);
-		else
-			return instance;
+			instance = new ShortcutManager(app);
 	}
 	
 	public void setup()
@@ -49,6 +56,11 @@ public class ShortcutManager implements KeyListener
 		keys.add(key);
 	}
 
+	public void remove(Shortcut key)
+	{
+		keys.remove(key);
+	}
+	
 	public void keyEvent(KeyEvent e)
 	{
 //		System.out.println(e);

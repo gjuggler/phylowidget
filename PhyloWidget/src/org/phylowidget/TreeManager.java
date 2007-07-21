@@ -10,6 +10,7 @@ import org.andrewberman.ui.Point;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.tree.PhyloNodeFactory;
 import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.Tree;
 
@@ -75,7 +76,7 @@ public class TreeManager implements SettableRect
 	
 	public void createTree(String s)
 	{
-		Tree t = new Tree(s);
+		Tree t = new Tree(PhyloNodeFactory.instance(),s);
 		trees.add(t);
 		
 		Cladogram c = new Cladogram();

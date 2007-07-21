@@ -1,6 +1,7 @@
 package org.phylowidget.ui;
 
 import java.awt.Cursor;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -8,11 +9,14 @@ import java.awt.geom.Rectangle2D;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
+import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
+
+import processing.core.PApplet;
 
 public final class HoverHalo implements TweenListener, UIObject
 {
@@ -33,8 +37,11 @@ public final class HoverHalo implements TweenListener, UIObject
 	public boolean hidden = true;
 	public boolean solid = false;
 	
-	public HoverHalo()
+	public HoverHalo(PApplet p)
 	{
+		UIUtils.loadUISinglets(p);
+		EventManager.instance.add(this);
+		
 		aTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f,  .25f, FRAMES);
 		wTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1.5f, 1.1f, FRAMES);
 		hTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1.5f, 1.1f, FRAMES);
@@ -57,7 +64,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		
 		float maxD = 100;
 		Point pt = r.render.getPosition(r.node);
-		PUtils.modelToScreen(pt);
+		UIUtils.modelToScreen(pt);
 		float dist = (float) pt.distance(p.mouseX,p.mouseY);
 		dist = (dist > maxD ? maxD : dist);
 		float alpha = (maxD-dist)/maxD * 255;
@@ -71,10 +78,11 @@ public final class HoverHalo implements TweenListener, UIObject
 		wTween.update();
 		hTween.update();
 		
-//		p.stroke(color,255*aTween.position);
+		p.stroke(color,255*aTween.position);
 		
 		if (solid)
 		{
+			
 //			p.noStroke();
 //			p.fill(color,255);
 			p.stroke(color,255);
@@ -142,32 +150,33 @@ public final class HoverHalo implements TweenListener, UIObject
 		
 	}
 
-	Point mPt = new Point(0,0);
-	public void mouseEvent(MouseEvent e)
+//	Point mPt = new Point(0,0);
+	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		if (hidden) return;
+	
+//		System.out.println("Hover event!");
+		Point pt = model;
 		
 		switch (e.getID())
 		{
 			case (MouseEvent.MOUSE_MOVED):
-				mPt.setLocation(e.getX(),e.getY());
-				PUtils.screenToModel(mPt);
+//				PUtils.screenToModel(mPt);
 				// Node radius is equal to half-width of NodeRange object.
 				NodeRange r = PhyloWidget.ui.nearest;
 				
-				if (containsPoint(r,mPt))
+				if (containsPoint(r,pt))
 				{
-					p.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
 				} else
 				{
-					p.setCursor(Cursor.getDefaultCursor());
-				}		
+					UIUtils.releaseCursor(this, p);
+				}
 				break;
 			case (MouseEvent.MOUSE_PRESSED):
-				mPt.setLocation(e.getX(),e.getY());
-				PUtils.screenToModel(mPt);
+//				PUtils.screenToModel(mPt);
 				NodeRange r2 = PhyloWidget.ui.nearest;
-				if (containsPoint(r2,mPt))
+				if (containsPoint(r2,pt))
 				{
 					PhyloWidget.ui.showMenu(r2);
 				}
@@ -175,6 +184,11 @@ public final class HoverHalo implements TweenListener, UIObject
 		}
 	}
 
+	public void focusEvent(FocusEvent e)
+	{
+		
+	}
+	
 	public boolean containsPoint(NodeRange r, Point pt)
 	{
 		if (r == null) return false;

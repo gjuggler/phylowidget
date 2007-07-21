@@ -1,6 +1,7 @@
 package org.phylowidget.render;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -9,8 +10,9 @@ import java.util.HashMap;
 import org.andrewberman.camera.SettableRect;
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.PUtils;
+import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.TreeNode;
 
 import processing.core.PApplet;
@@ -21,7 +23,6 @@ import processing.core.PImage;
 public final class Cladogram extends AbstractTreeRenderer implements SettableRect
 {
 	protected PApplet p = PhyloWidget.p;
-
 	/**
 	 * A data structure to store the rectangular regions of all nodes.
 	 * Instead of drawing all nodes, we retrieve the nodes whose regions
@@ -33,7 +34,6 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	protected ArrayList ranges = new ArrayList();
 	public static final int NODE = 0;
 	public static final int LABEL = 1;
-	
 	/**
 	 * Another optimization method -- if we're zoomed out so far that rows
 	 * become unreadable (i.e. if rowsize is <= SKIP_THRESH), then start
@@ -41,24 +41,15 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	 */
 	HashMap skipMe = new HashMap();
 	public static final int SKIP_THRESH = 3;
-	
-	/**
-	 * An offscreen PGraphicsJava2D buffer, created during the layout()
-	 * process to cache the text for each node. This should decrease the
-	 * number of calls to Pgraphics.image() during the draw phase, increasing
-	 * rendering speed.
-	 * 
-	 * Note that if we're using native fonts, this should NOT be created.
-	 */
-	protected PImage labels;
-	protected PGraphicsJava2D temp;
-	
 	/**
 	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
 	 * won't stretch to completely fill its enclosing rectangle.
 	 */
 	public boolean keepAspectRatio = true;
-
+	/**
+	 * Fontmetrics for calculating text widths.
+	 */
+	FontMetrics fm;
 	/**
 	 * These variables are set in the calculateSizes() method during every round
 	 * of rendering. Very important!
@@ -85,7 +76,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		super();
 	}
 
-	public void layout()
+	protected void layout()
 	{
 		/**
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
@@ -94,9 +85,11 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		maxDepth = tree.getRoot().getMaxDepth();
 		gutterWidth = 0;
 //		float spaceWidth = font.width(' ') * 3;
+		if (UIUtils.isJava2D(p))
+			fm = UIUtils.getMetrics(p.g, font.font, 1);
 		for (int i = 0; i < leaves.size(); i++)
 		{
-			TreeNode n = (TreeNode) leaves.get(i);
+			PhyloNode n = (PhyloNode) leaves.get(i);
 			/**
 			 * Set the leaf position.
 			 */
@@ -106,12 +99,20 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			/**
 			 * Find the width of this node's label.
 			 */
-			char[] chars = n.getName().toCharArray();
 			float width = 0;//spaceWidth;
-			for (int j = 0; j < chars.length; j++)
+			if (UIUtils.isJava2D(p))
 			{
-				width += font.width(chars[j]);
+				width = fm.stringWidth(n.getName());
+			} else
+			{
+				char[] chars = n.getName().toCharArray();
+	
+				for (int j = 0; j < chars.length; j++)
+				{
+					width += font.width(chars[j]);
+				}
 			}
+			n.unitTextWidth = width;
 			if (width > gutterWidth)
 				gutterWidth = width;
 		}
@@ -126,7 +127,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		ranges.clear();
 		for (int i = 0; i < nodes.size(); i++)
 		{
-			TreeNode n = (TreeNode) nodes.get(i);
+			PhyloNode n = (PhyloNode) nodes.get(i);
 			Point p = getInternalPosition(n);
 			NodeRange r = new NodeRange();
 			r.loX = r.hiX = p.x;
@@ -149,7 +150,6 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			}
 		}
 		list.sortFull();
-		
 	}
 
 	/**
@@ -185,14 +185,20 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	
 	protected ArrayList inRange = new ArrayList();
 	protected boolean sorted = false;
-	public void draw()
+	protected void draw()
 	{
 		TreeNode n;
 		NodeRange r;
-		
+		/*
+		 * Figure out how to size ourselves given the current rect.
+		 */
 		float numRows = leaves.size();
 		float idealRowSize = rect.height / numRows;
 		textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
+		if (UIUtils.isJava2D(p))
+		{
+			fm = UIUtils.getMetrics(p.g,font.font,textSize);
+		}
 		float effectiveWidth = rect.width - gutterWidth * textSize;
 		float numCols = maxDepth;
 		float idealColSize = effectiveWidth / numCols;
@@ -230,7 +236,18 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 					float textHeight = (font.ascent() + font.descent()*2)*textSize;
 					r.loY = ptemp.y - textHeight/2;
 					r.hiY = ptemp.y + textHeight/2;
-					float width = PUtils.getTextWidth(p.g,font,textSize,n.getName(),PhyloWidget.usingNativeFonts);
+					float width = 0;
+//					if (r.node instanceof PhyloNode)
+//					{
+						PhyloNode pn = (PhyloNode) r.node;
+						width = pn.unitTextWidth * textSize;
+//					} else
+//					{
+//						if (UIUtils.isJava2D(p))
+//							width = fm.stringWidth(n.getName());
+//						else
+//							width = UIUtils.getTextWidth(p.g,font,textSize,n.getName(),false);
+//					}
 					r.hiX = r.loX + width;
 					break;
 			}
@@ -277,8 +294,12 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		p.textSize(textSize);
 		p.textAlign(PConstants.LEFT);
 		inRange.clear();
-		list.getInRange(inRange, -p.width / 2, p.width / 2,
-				-p.height / 2, p.height / 2);
+		Rectangle2D.Float test = new Rectangle2D.Float(0,0,p.width,p.height);
+		UIUtils.screenToModel(test);
+		list.getInRange(inRange, test);
+//		list.getInRange(inRange, -p.width / 2, p.width / 2,
+//				-p.height / 2, p.height / 2);
+//		System.out.println(inRange.size());
 		synchronized (tree) {
 			int size = inRange.size();
 			for (int i = 0; i < size; i++)

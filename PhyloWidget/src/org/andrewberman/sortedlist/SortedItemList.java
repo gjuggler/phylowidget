@@ -44,7 +44,7 @@ public final class SortedItemList
 	{
 		for (int i=0; i <= maxIndex; i++)
 		{
-			System.out.println(items[i]);
+//			System.out.println(items[i]);
 		}
 	}
 	

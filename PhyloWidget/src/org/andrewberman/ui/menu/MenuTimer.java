@@ -1,5 +1,16 @@
 package org.andrewberman.ui.menu;
 
+/**
+ * The <code>MenuTimer</code> class, similar to the <code>Blinker</code>
+ * class in the <code>UI</code> package, is a simple implementation of a
+ * re-settable timer, designed to allow a <code>MenuItem</code> to exhibit a
+ * slight delay when opening via a hover gesture. See the <code>MenuItem</code>
+ * class for more info; particularly the <code>setState()</code> method.
+ * 
+ * @author Greg
+ * @see		org.andrewberman.ui.menu.MenuItem
+ * @see		org.andrewberman.ui.Blinker
+ */
 public final class MenuTimer extends Thread
 {
 	private static MenuTimer instance;
@@ -10,7 +21,7 @@ public final class MenuTimer extends Thread
 	static final int delay = 100;
 	boolean unset;
 	boolean startDelay;
-	
+
 	public static MenuTimer instance()
 	{
 		if (instance == null || !instance.isAlive())
@@ -20,48 +31,48 @@ public final class MenuTimer extends Thread
 		}
 		return instance;
 	}
-	
+
 	public void run()
 	{
 		while (!Thread.currentThread().isInterrupted())
 		{
-				synchronized (this)
+			synchronized (this)
+			{
+				if (startDelay)
 				{
-					if (startDelay)
+					startDelay = false;
+					try
 					{
-						startDelay = false;
+						wait(delay);
+					} catch (InterruptedException e)
+					{
+						// System.out.println("Interrupted!");
+						break;
+					}
+				} else
+				{
+					if (parent == null)
 						try
 						{
-							wait(delay);
+							wait();
 						} catch (InterruptedException e)
 						{
-//							System.out.println("Interrupted!");
+							// System.out.println("Interrupted!");
 							break;
 						}
+					else if (unset)
+					{
+						item.hideAllChildren();
+						item = null;
+						parent = null;
 					} else
 					{
-						if (parent == null)
-							try
-							{
-								wait();
-							} catch (InterruptedException e)
-							{
-//								System.out.println("Interrupted!");
-								break;
-							}
-						else if (unset)
-						{
-							item.hideAllChildren();
-							item = null;
-							parent = null;
-						} else
-						{
-							parent.setOpenItem(item);
-							parent = null;
-							item = null;
-						}
+						parent.setOpenItem(item);
+						parent = null;
+						item = null;
 					}
 				}
+			}
 			yield();
 		}
 	}

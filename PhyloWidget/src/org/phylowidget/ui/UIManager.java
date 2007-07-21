@@ -7,72 +7,94 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
-import org.andrewberman.ui.EventDispatcher;
+import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ShortcutManager;
+import org.andrewberman.ui.TextField;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
+import org.andrewberman.ui.menu.Dock;
+import org.andrewberman.ui.menu.DockItem;
+import org.andrewberman.ui.menu.RadialMenu;
+import org.andrewberman.ui.menu.RadialMenuItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.tree.Tree;
+import org.phylowidget.tree.TreeNode;
 
-public final class UIManager implements MouseMotionListener, MouseListener, MouseWheelListener
+public final class UIManager
 {
 	PhyloWidget p = PhyloWidget.p;
 	
 	public FocusManager focus;
-	public EventDispatcher event;
+	public EventManager event;
 	public ShortcutManager keys; 
-	
-	public ArrayList uiObjects = new ArrayList(5);
 	
 	public NodeRange nearest;
 	public Point nearestP;
 	public HoverHalo halo;
 	
+	PhyloMenu radial;
+	
 	public UIManager()
 	{
+		UIUtils.loadUISinglets(p);
 		focus = FocusManager.instance;
-		event = new EventDispatcher(p);
-		keys = new ShortcutManager(p);
+		event = EventManager.instance;
+		keys = ShortcutManager.instance;
 	}
 	
 	public void setup()
 	{
-		focus.setup();
-		event.setup();
-		keys.setup();
+		halo = new HoverHalo(p);
+		halo.show();
 		
 		Toolbar t = new Toolbar(p);
 		t.add("File").add("Save").setAction(this, "doSomething");
 		t.get("Save").setShortcut("control-s");
 		t.get("File").add("Save...");
+		t.get("Save...").add("Where?");
 		t.add("Edit").add("Undo").setShortcut("control-z");
 		t.get("Edit").add("Redo").setShortcut("control-shift-z");
+		t.layout();
 		
-		halo = new HoverHalo();
-		halo.show();
+//		TextField text = new TextField(p);
+//		text.text.insert(0, "Hello, world! How are you today?");
+//		focus.setModalFocus(text);
 		
-		// Keep in mind that the first added is the first drawn.
-		addObject(t);
-//		addObject(halo);
+		Dock dock = new Dock(p);
+		dock.add("Pencil","pencil2.png");
+		dock.add("Line","line.png");
+		dock.add("Magnifier","magnifier.png");
+		dock.add("Points","points.png");
+		dock.add("Connected Lines","connectedlines.png");
+		
+		radial = new PhyloMenu(p);
+//		radial.setPosition(50,50);
+		radial.add("Delete");
+		radial.add("Edit");
+		radial.get("Edit").add(radial.create("Cut",'x'));
+		radial.get("Edit").add(radial.create("Copy",'c'));
+		radial.get("Edit").add(radial.create("Paste",'v'));
+		radial.add("Add");
+		radial.get("Add").add(radial.create("Sister Node",'s'));
+		radial.get("Add").add(radial.create("Child Node",'c'));
+		radial.get("Sister Node").add(radial.create("Whatever node",'w'));
+//		radial.show();
+		
 	}
 	
 	public void doSomething()
 	{
-		PhyloWidget.trees.mutator.randomlyMutateTree();
+//		PhyloWidget.trees.mutator.randomlyMutateTree();
 	}
 	
 	public void update()
 	{
-//		menu.setArc(menu.thetaLo+.05f,menu.thetaHi+.05f);
-		
+		radial.setArc(radial.thetaLo+.01f,radial.thetaHi+.01f);
 		updateNearest();
-		
-		for (int i=0; i < uiObjects.size(); i++)
-		{
-			((UIObject)uiObjects.get(i)).draw();
-		}
 	}
 	
 	public void updateNearest()
@@ -94,8 +116,8 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	{
 		halo.setNodeRange(r);
 		halo.becomeSolid();
-//		menu.setNodeRange(r);
-//		menu.show();
+		radial.setNodeRange(r);
+		radial.show();
 	}
 	
 	public void hideMenu()
@@ -106,9 +128,9 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 	
 	public void addSisterNode()
 	{
-//		NodeRange r = menu.curNode;
-//		Tree t = r.render.getTree();
-//		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
+		NodeRange r = radial.curNode;
+		Tree t = r.render.getTree();
+		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
 		hideMenu();
 	}
 	
@@ -123,34 +145,5 @@ public final class UIManager implements MouseMotionListener, MouseListener, Mous
 //		t.deleteNode(r.node);
 		hideMenu();
 	}
-	
-	//*******************************************************
-	// UTILITY / LISTENER FUNCTIONS
-	//*******************************************************
-	
-	public void addObject(UIObject o)
-	{
-		uiObjects.add(o);
-		event.addListener(o);
-	}
-	
-	public void removeObject(UIObject o)
-	{
-		uiObjects.remove(o);
-		event.removeListener(o);
-	}
-	
-	public void mouseEvent(MouseEvent e)
-	{
-	}
-	
-	public void mouseDragged(MouseEvent e){mouseEvent(e);}
-	public void mouseMoved(MouseEvent e){mouseEvent(e);}
-	public void mouseClicked(MouseEvent e){mouseEvent(e);}
-	public void mouseEntered(MouseEvent e){mouseEvent(e);}
-	public void mouseExited(MouseEvent e){mouseEvent(e);}
-	public void mousePressed(MouseEvent e){mouseEvent(e);}
-	public void mouseReleased(MouseEvent e){mouseEvent(e);}
 
-	public void mouseWheelMoved(MouseWheelEvent e){mouseEvent(e);}
 }

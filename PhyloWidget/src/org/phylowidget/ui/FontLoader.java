@@ -14,13 +14,13 @@ public class FontLoader
 {
 	private static PApplet p = PhyloWidget.p;
 
-	public static PFont v12 = p.loadFont("BitstreamVeraSans-Roman-12.vlw");
+	public static PFont vera = p.loadFont("BitstreamVeraSans-Roman-48.vlw");
 	
 	static {
 		InputStream in = p.openStream("vera.ttf");
 		try
 		{
-			v12.font = Font.createFont(Font.TRUETYPE_FONT, in);
+			vera.font = Font.createFont(Font.TRUETYPE_FONT, in);
 			in.close();
 		} catch (FontFormatException e)
 		{

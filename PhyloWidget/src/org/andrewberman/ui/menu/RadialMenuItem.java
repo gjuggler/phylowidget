@@ -1,248 +1,297 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 
-public final class RadialMenuItem
+import org.andrewberman.ui.Color;
+import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIUtils;
+
+import processing.core.PApplet;
+import processing.core.PFont;
+
+
+public final class RadialMenuItem extends MenuItem
 {
-//	float rLo,rHi,tLo,tHi = 0;
-//	
-//	float rectX,rectY,rectW,rectH = 0;
-//	float textX,textY = 0;
-//	float textWidth, textHeight, pad = 0;
-//	float hintX,hintY = 0;
-//	float fontSize,hintSize = 0;
-//	static Area wedge,bufferWedge,mouseWedge;
-//	
-//	String label;
-//	char hint;
-//	
-//	static StringBuffer sb = new StringBuffer();
-//	static Ellipse2D.Float tempCircle = new Ellipse2D.Float(0,0,0,0);
-//	static Arc2D.Float tempArc = new Arc2D.Float(Arc2D.PIE);
-//	static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(0,0,0,0,0,0);
-//	
-//	AffineTransform buffTransform = AffineTransform.getTranslateInstance(0,0);
-//	AffineTransform mouseTransform = AffineTransform.getTranslateInstance(0,0);
-//	
-//	public RadialMenuItem(Menu menu, String label, char hint, Object object, String function)
-//	{
-//		super(menu, object, function);
-//		this.label = label;
-//		this.hint = hint;
-//	}
-//
-//	public void drawUnder()
-//	{
-//		float r = menu.radius;
-//		roundedRect.setRoundRect(rectX*r, rectY*r, rectW*r, rectH*r,
-//				rectW*r/4, rectW*r/4);
-//		g2.setPaint(rectColor);
-//		g2.fill(roundedRect);
-//		g2.setPaint(rectStrokeColor);
-//		g2.setStroke(rectStroke);
-//		g2.draw(roundedRect);
-//		super.drawUnder();
-//	}
-//	
-//	public void draw()
-//	{
-//		if (this.state == org.andrewberman.ui.menu.HIDDEN) super.draw();
-//		
-//		float r = radius;
-//		
-//		pg.fill(0,menu.alpha);
-//		pg.textFont();
-//		pg.textSize(fontSize*r);
-//		pg.text(label,textX*r,textY*r);
-//	
-//		drawShape();
-//		
-//		pg.fill(0,alpha);
-//		pg.textSize(hintSize*r);
-//		pg.text(hint,hintX*r,hintY*r);
-//		
-//		super.draw();
-//	}
-//	
-//	public void drawShape()
-//	{
-//		bufferWedge = wedge.createTransformedArea(buffTransform);
-//		mouseWedge = wedge.createTransformedArea(mouseTransform);
-//		g2.setPaint(stateColors[state]);
-//		g2.fill(bufferWedge);
-//		g2.setStroke(segmentStroke);
-//		g2.setPaint(strokeColor);
-//		g2.draw(bufferWedge);
-//	}
-//	
-//	public MenuItem createItem(String s, char c, Object o, String f)
-//	{
-//		return new RadialMenuItem(s,c,o,f);
-//	}
-//	
-//	public void layout()
-//	{
-//		this.layout(rLo,rHi,tLo,tHi);
-//	}
-//	
-//	public void layout(float radLo, float radHi, float thLo, float thHi)
-//	{
-//		this.rLo=radLo;
-//		this.rHi=radHi;
-//		this.tLo=thLo;
-//		this.tHi=thHi;
-//		
-//		this.layoutText();
-//		this.createShapes();
-//		
-//		float dTheta = thHi - thLo;
-//		float thetaStep = dTheta / items.size();
-//		for (int i=0; i < items.size(); i++)
-//		{
-//			RadialMenuItem seg = (RadialMenuItem) items.get(i);
-//			float theta = thLo + i*thetaStep;
-//			seg.layout(radHi,radHi+(radHi-radLo),theta,theta+thetaStep);
-//		}
-//	}
-//	
-//	public float radToDeg(float rad)
-//	{
-//		return PApplet.degrees(rad);
-//	}
-//	
-//	public void createShapes()
-//	{
-//		tempCircle.setFrameFromCenter(0,0,rLo,-rLo);
-//		tempArc.setFrame(-rHi,-rHi,2*rHi,2*rHi);
-//		
-//		float degLo = radToDeg(-tLo);
-//		float degHi = radToDeg(-tHi);
-//		
-//		tempArc.setAngleStart(degLo);
-//		tempArc.setAngleExtent(degHi-degLo);
-//		wedge = new Area(tempArc);
-//		Area delete = new Area(tempCircle);
-//		wedge.subtract(delete);
-//	}
-//	
-//	public void setColors()
-//	{
-////		alpha = constrain(alpha,0,255);
-//		baseColor = new Color(230,230,240,menu.alpha);
-//		stateColors[0] = baseColor;
-//		stateColors[1] = Java2DUtils.lightenColor(baseColor,15);
-//		stateColors[2] = Java2DUtils.lightenColor(baseColor,-25);
-//		strokeColor = new Color(0,0,0,menu.alpha);
-//		
-//		segmentStroke = new BasicStroke(radius/20,BasicStroke.CAP_ROUND,
-//				BasicStroke.JOIN_ROUND,radius/2);
-//		rectStroke = segmentStroke;
-//		
-//		int a = (int)PApplet.constrain(230f*((float)menu.alpha/255f),0,255);
-//		rectColor = new Color(255,255,255,a);
-//		rectStrokeColor = new Color(0,0,0,a);
-//	}
-//	
-//	protected Color baseColor;
-//	protected Color[] stateColors = new Color[4];
-//	protected Color strokeColor;
-//	protected Stroke segmentStroke;
-//	
-//	protected Color rectColor;
-//	protected Stroke rectStroke;
-//	protected Color rectStrokeColor;
-//	
-//	
-//	public void layoutText()
-//	{
-//		/*
-//		 * Calculate the sine and cosine, which we'll need to use often.
-//		 */
-//		float theta = (tLo + tHi) / 2;
-////		System.out.println(theta);
-//		float cos = (float) Math.cos(theta);
-//		float sin = (float) Math.sin(theta);
-//		float outerX = cos*(rHi*1.5f);
-//		float outerY = sin*(rHi*1.5f);
-//		
-//		float unitTextHeight = font.ascent()+font.descent();
-//		fontSize = (rHi-rLo)/unitTextHeight * .9f;
-//		float descent = font.descent()*fontSize;
-//		float ascent = font.ascent()*fontSize;
-//		textHeight = fontSize*unitTextHeight;
-//		sb.replace(0, sb.length(), label);
-//		textWidth = 0;
-//		for (int i=0; i < sb.length(); i++)
-//		{
-//			textWidth += font.width(sb.charAt(i)) * fontSize;
-//		}
-//		// Calculate the necessary x and y offsets for the text.
+	public static final float SIZE_DECAY = .9f;
+	
+	float rLo,rHi,tLo,tHi = 0;
+	float radius;
+	
+	float outerX,outerY,innerX,innerY;
+	float rectX,rectY,rectW,rectH;
+	float textX,textY;
+	float textWidth, textHeight, pad;
+	float hintX,hintY;
+	float fontSize,hintSize;
+	Area wedge;
+	
+	char hint;
+	
+	static Ellipse2D.Float tempCircle = new Ellipse2D.Float(0,0,0,0);
+	static Arc2D.Float tempArc = new Arc2D.Float(Arc2D.PIE);
+	static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(0,0,0,0,0,0);
+	
+	public RadialMenuItem(String label, char hint)
+	{
+		super(label);
+		this.hint = hint;
+	}
+	
+	public void drawUnder()
+	{
+		Graphics2D g2 = menu.buff.g2;
+		float r = radius;
+		roundedRect.setRoundRect(rectX, rectY, rectW, rectH,
+				rectH/3, rectH/3);
+		g2.setPaint(Color.white);
+		g2.fill(roundedRect);
+		g2.setPaint(Color.black);
+		g2.setStroke(menu.style.stroke);
+		g2.draw(roundedRect);
+		super.draw();
+	}
+	
+	public void draw()
+	{
+		super.draw();
+		if (!isVisible()) return;
+		if (!showingChildren())
+		{
+			drawUnder();
+			drawText();
+		}
+		drawShape();
+		drawHint();
+	}
+	
+	void drawShape()
+	{
+		/*
+		 * Draw the main wedge shape.
+		 */
+		Graphics2D g2 = menu.buff.g2;
+		if (this.isAncestorOfSelected())
+			g2.setPaint(menu.style.getGradient(Menu.OVER,x-rHi,y-rHi,x+rHi,y+rHi));
+		else
+			g2.setPaint(menu.style.getGradient(state,x-rHi,y-rHi,x+rHi,y+rHi));
+		g2.fill(wedge);
+		g2.setStroke(menu.style.stroke);
+		g2.setPaint(menu.style.strokeColor);
+		
+		g2.draw(wedge);
+		/*
+		 * Draw the sub-items triangle, if necessary
+		 */
+		if (items.size() > 0 && !showingChildren())
+		{
+			float theta = (tLo + tHi)/2;
+	//		AffineTransform at = AffineTransform.getRotateInstance(-radToDeg(theta));
+	//		at.translate(x+outerX,y+outerY);
+			float scale = (rHi-rLo)/2;
+			AffineTransform at = AffineTransform.getTranslateInstance(outerX, outerY);
+			at.scale(scale,scale);
+			at.rotate(theta);
+			Area tri = menu.style.subTriangle;
+			Area newTri = tri.createTransformedArea(at);
+			g2.setPaint(menu.style.strokeColor);
+			g2.fill(newTri);
+		}
+	}
+	
+	void drawText()
+	{
+		Graphics2D g2 = menu.buff.g2;
+		Font f = menu.style.font.font.deriveFont(fontSize);
+		g2.setFont(f);
+		g2.setPaint(menu.style.textColor);
+		g2.drawString(label, textX, textY);
+	}
+	
+	void drawHint()
+	{
+		Graphics2D g2 = menu.buff.g2;
+		Font f = menu.style.font.font.deriveFont(fontSize);
+		f = f.deriveFont(hintSize);
+		g2.setFont(f);
+		g2.setPaint(menu.style.textColor);
+		g2.drawString(String.valueOf(hint), hintX,hintY);
+	}
+	
+	public void layout()
+	{
+		this.layout(rLo,rHi,tLo,tHi);
+	}
+	
+	void layout(float radLo, float radHi, float thLo, float thHi)
+	{
+		this.rLo=radLo;
+		this.rHi=radHi;
+		this.tLo=thLo;
+		this.tHi=thHi;
+		this.radius = radHi;
+		
+		this.layoutText();
+		this.createShapes();
+		
+		float dTheta = thHi - thLo;
+		float thetaStep = dTheta / items.size();
+		for (int i=0; i < items.size(); i++)
+		{
+			RadialMenuItem seg = (RadialMenuItem) items.get(i);
+			seg.setPosition(x, y);
+			float theta = thLo + i*thetaStep;
+			seg.layout(radHi,radHi+(radHi-radLo)*SIZE_DECAY,theta,theta+thetaStep);
+		}
+	}
+	
+	float radToDeg(float rad)
+	{
+		return PApplet.degrees(rad);
+	}
+	
+	void createShapes()
+	{
+		tempCircle.setFrameFromCenter(x,y,x+rLo,y+rLo);
+		tempArc.setFrameFromCenter(x, y, x+rHi, y+rHi);
+		
+		float degLo = radToDeg(-tLo);
+		float degHi = radToDeg(-tHi);
+		tempArc.setAngleStart(degLo);
+		tempArc.setAngleExtent(degHi-degLo);
+		wedge = new Area(tempArc);
+		Area delete = new Area(tempCircle);
+		wedge.subtract(delete);
+	}
+	
+	void layoutText()
+	{
+		/*
+		 * Calculate the sine and cosine, which we'll need to use often.
+		 */
+		float theta = (tLo + tHi) / 2;
+		float cos = (float) Math.cos(theta);
+		float sin = (float) Math.sin(theta);
+		outerX = x+cos*rHi;
+		outerY = y+sin*rHi;
+		innerX = x+cos*rLo;
+		innerY = y+sin*rLo;
+		PFont font = menu.style.font;
+		FontMetrics fm = UIUtils.getMetrics(menu.buff, font.font, 1);
+		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2).getHeight();
+		fontSize = (rHi-rLo)/unitTextHeight * .9f;
+		fm = UIUtils.getMetrics(menu.buff, font.font, fontSize);
+		float descent = fm.getDescent();
+		float ascent = fm.getAscent();
+		
+//		Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
+		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize, label, true);
+//		textHeight = (float) bounds.getHeight();
+//		textWidth = (float) bounds.getWidth();
+		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, label, true);
+		// Calculate the necessary x and y offsets for the text.
+		float outX = x+cos*(rHi+textHeight);
+		float outY = y+sin*(rHi+textHeight);
+		float pad = menu.style.padX;
+		rectW = textWidth+2*pad;
+		rectH = textHeight+2*pad;
+		rectX = outX + cos * rectW / 2 - rectW/2;
+		rectY = outY + sin * rectH / 2 - rectH/2;
+		textX = rectX + pad;
+		textY = rectY + pad + ascent;
 //		textX = cos * textWidth/2;
-////		if (Math.abs(cos) < 0.25) textX = 0;
 //		textX += -textWidth / 2;
 //		textX += outerX;
 //		textY = sin * (textHeight)/2;
-////		float textY = sin * (ascent + descent + 5)/2;
-//		textY += -descent + (ascent + descent)/2;
+//		textY += -descent + (textHeight)/2;
 //		textY += outerY;
-//		
-//		/*
-//		 * Set the background rectangle.
-//		 */
-//		float pad = rHi/5;
+		/*
+		 * Set the background rectangle.
+		 */
+		
 //		rectX = textX-pad;
-//		rectY = textY-ascent-descent/2-pad;
-//		rectW = textWidth+2*pad;
-//		rectH = textHeight+2*pad;
-//		
-//		/*
-//		 * Now, let's handle the hint characters.
-//		 */
-//		float rMid = (rLo + rHi) / 2;
-//		float centerX = cos * rMid;
-//		float centerY = sin * rMid;
-//		
-//		hintSize = fontSize * 1.3f;
-//		float naturalSize = font.size;
-//		float multiplier = hintSize / naturalSize;
-//		int i = font.index(hint);
-//		float charHeight = font.height[i] * multiplier;
-//		float charWidth = font.width[i] * multiplier;
-//		float charDesc = (font.height[i] - font.topExtent[i])*multiplier;
-//		
-//		hintX = centerX - charWidth / 2.0f;
-//		hintY = centerY - charDesc + charHeight / 2.0f;		
-//	}
-//	
-//	public boolean containsPoint(Point p)
+//		rectY = textY + descent - textHeight - pad;
+
+		/*
+		 * Now, let's handle the hint characters.
+		 */
+		float rMid = (rLo + rHi) / 2;
+		float centerX = x+cos * rMid;
+		float centerY = y+sin * rMid;
+		/*
+		 * Measure the character at 1px, then scale up accordingly.
+		 */
+		fm = UIUtils.getMetrics(menu.buff, font.font, 1);
+		String s = String.valueOf(hint);
+		Rectangle2D charBounds = fm.getStringBounds(s, menu.buff.g2);
+		float charHeight = (float) charBounds.getHeight();
+		float charWidth = (float) charBounds.getWidth();
+		float diagonal = PApplet.sqrt(charHeight*charHeight + charWidth*charWidth);
+		hintSize = (rHi-rLo)/diagonal;
+		fm = UIUtils.getMetrics(menu.buff, font.font, hintSize);
+		charBounds = fm.getStringBounds(s, menu.buff.g2);
+		charHeight = (float) charBounds.getHeight();
+		charWidth = (float) charBounds.getWidth();
+		float charDesc = fm.getDescent();
+		
+		hintX = centerX - charWidth / 2.0f;
+		hintY = centerY - charDesc + charHeight / 2.0f;		
+	}
+	
+	protected boolean alreadyContainsChar(char c)
+	{
+		if (hint == c) return true;
+		for (int i=0; i < items.size(); i++)
+		{
+			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+			if (rmi.alreadyContainsChar(c)) return true;
+		}
+		return false;
+	}
+	
+	float getMaxRadius()
+	{
+		if (!isVisible()) return 0;
+		float max = this.rHi;
+		for (int i=0; i < items.size(); i++)
+		{
+			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+			float cur = rmi.getMaxRadius();
+			if (cur > max)
+				max = cur;
+		}
+		return max;
+	}
+	
+	public boolean containsPoint(Point pt)
+	{
+		if (wedge == null) return false;
+		return wedge.contains(pt.x,pt.y);
+	}
+	
+//	public void itemMouseEvent(MouseEvent e, Point pt)
 //	{
-//		if (mouseWedge == null) return false;
-//		return mouseWedge.contains(tempPt.x,tempPt.y);
+//		super.itemMouseEvent(e);
 //	}
-//	
-//	public void mouseEvent(MouseEvent e)
-//	{
-//		tempPt.setLocation(e.getX(),e.getY());
-//		ProcessingUtils.screenToModel(tempPt);
-//		super.mouseEvent(e);
-//		if (containsPoint(tempPt))
-//		{
-//			changeCursor = true;
-//			withinButtons = true;
-//		}
-//	}
-//	
-//	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
-//	{
-//		if (bufferWedge == null) return;
-//		float r = radius;
-//		Rectangle2D.union(rect, bufferWedge.getBounds(), rect);
-//		buff.x = pg.width/2;
-//		buff.y = pg.height/2;
-//		buff.x += rectX*r;
-//		buff.y += rectY*r;
-//		buff.width = rectW*r;
-//		buff.height = rectH*r;
-//		Rectangle2D.union(rect, buff, rect);
-//	}
+	
+	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
+	{
+		if (isVisible())
+		{
+			buff.setRect(wedge.getBounds2D());
+			Rectangle2D.union(rect, buff, rect);
+			buff.setRect(rectX,rectY,rectW,rectH);
+			Rectangle2D.union(rect, buff, rect);
+		}
+		super.getRect(rect, buff);
+	}
 	
 }

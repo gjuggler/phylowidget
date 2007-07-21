@@ -1,6 +1,7 @@
 package org.andrewberman.camera;
 
 import org.andrewberman.tween.Tween;
+import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.tween.TweenQuad;
 
 import processing.core.PApplet;
@@ -36,8 +37,6 @@ public class RectMover extends MovableCamera
 		 * in case some mouse events happen before stuff is finished loading.
 		 */
 		update();
-		
-		super.makeResponsive();
 	}
 
 	public void zoomBy(float factor)
@@ -72,7 +71,7 @@ public class RectMover extends MovableCamera
 	public void update()
 	{
 		/*
-		 * No super.update() because we're updating the tweens on our own.
+		 * No super.update() because we're updating all the necessary tweens on our own.
 		 */
 
 		super.scroll();
@@ -89,7 +88,7 @@ public class RectMover extends MovableCamera
 		r.setRect(-cx * getZ(), -cy * getZ(), w, h);
 	}
 
-	public void updateConvenienceVariables()
+	private void updateConvenienceVariables()
 	{	
 		/*
 		 * Set the convenience variables.
@@ -100,27 +99,27 @@ public class RectMover extends MovableCamera
 		h = hTween.position;
 	}
 	
-	public void constrainToScreen()
+	private void constrainToScreen()
 	{
 		if (!this.constrainToScreen) return;
 		
 		float oX = (w - p.width)/2 - cx*getZ();
-		if (oX <= 0)
+		if (oX < 0)
 		{
 			xTween.continueTo((w - p.width)/2 / getZ());
 			xTween.fforward();
-		} else if (oX >= (w - p.width))
+		} else if (oX > (w - p.width))
 		{
 			xTween.continueTo(-(w - p.width)/2 / getZ());
 			xTween.fforward();
 		}
 		
 		float oY = (h - p.height)/2 - cy*getZ();
-		if (oY <= 0)
+		if (oY < 0)
 		{
 			yTween.continueTo((h - p.height)/2 / getZ());
 			yTween.fforward();
-		} else if (oY >= (h - p.height))
+		} else if (oY > (h - p.height))
 		{
 			yTween.continueTo(-(h - p.height)/2 / getZ());
 			yTween.fforward();

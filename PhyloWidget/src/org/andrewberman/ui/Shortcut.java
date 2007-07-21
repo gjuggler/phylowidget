@@ -1,45 +1,59 @@
 package org.andrewberman.ui;
 
-import java.awt.Toolkit;
+import java.awt.AWTEvent;
 import java.awt.event.KeyEvent;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-
+/**
+ * The <code>Shortcut</code> class holds all the information necessary to
+ * load, represent, and activate a keyboard shortcut.
+ * <p>
+ * The most important and useful method here is the <code>parseString</code>
+ * method, which is a "smarter" version of AWT's built-in
+ * <code>KeyStroke.getKeyStroke(String s)</code> method. While they make you
+ * conform to their annoying formatting rules, this Shortcut class uses a few
+ * simplistic regular expressions to try and parse a string into a keyboard
+ * shortcut. Hopefully it works well for you!
+ * <p>
+ * Similar to the <code>Action</code> class, you probably won't want to use
+ * the <code>Shortcut</code> class on your own unless you're doing something
+ * advanced. Any <code>Menu</code> object that allows keyboard shortcuts
+ * should provide a reasonable <code>add()</code> or <code>create()</code>
+ * method.
+ * <p>
+ * TODO: Add an <code>isEnabled</code> field to the <code>Shortcut</code>
+ * class, so that the user can disable and re-enable shortcuts as desired. The
+ * <code>performAction</code> method should check this field to see whether it
+ * should perform the associated Action.
+ * 
+ * @author Greg
+ * @see org.andrewberman.ui.Action
+ * @see org.andrewberman.ui.ShortcutManager
+ */
 public class Shortcut
 {
 	public Action action;
 	public int keyMask;
 	public int keyCode;
 	public String label;
-	
+
 	static String control = "(control|ctrl|meta|cmd|command|apple)";
 	static String alt = "(alt)";
 	static String shift = "(shift|shft)";
-	
-	static int shortcutMask;
-	
-	static
-	{
-		shortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-		if (shortcutMask == KeyEvent.CTRL_MASK)
-			shortcutMask |= KeyEvent.CTRL_DOWN_MASK;
-		else if (shortcutMask == KeyEvent.ALT_MASK)
-			shortcutMask |= KeyEvent.ALT_DOWN_MASK;
-		else if (shortcutMask == KeyEvent.META_MASK)
-			shortcutMask |= KeyEvent.META_DOWN_MASK;
-	}
-	
+
+	static int shortcutMask = UIUtils.getMetaMask();
+
 	public Shortcut(String s)
 	{
 		ShortcutManager.instance.add(this);
 		parseString(s);
 	}
-	
+
 	public void parseString(String s)
 	{
 		s = s.toLowerCase();
-		StringTokenizer st = new StringTokenizer(s,"+-. ");
+		StringTokenizer st = new StringTokenizer(s, "+-. ");
 		int modifiers = 0;
 		int code = 0;
 		while (st.hasMoreTokens())
@@ -53,13 +67,17 @@ public class Shortcut
 				modifiers = modifiers | KeyEvent.SHIFT_DOWN_MASK;
 			} else
 			{
-//				code = token.charAt(0);
+				// code = token.charAt(0);
 				String keyCodeName = "VK_" + token.toUpperCase();
 				try
 				{
-					code = KeyEvent.class.getField(keyCodeName).getInt(KeyEvent.class);
-				} catch (Exception e){
-					throw new RuntimeException("Error parsing shortcut text. The offending token: "+token);
+					code = KeyEvent.class.getField(keyCodeName).getInt(
+							KeyEvent.class);
+				} catch (Exception e)
+				{
+					throw new RuntimeException(
+							"Error parsing shortcut text. The offending token: "
+									+ token);
 				}
 			}
 		}
@@ -67,17 +85,17 @@ public class Shortcut
 		keyCode = code;
 		label = new String();
 		if (keyMask != 0)
-			label += KeyEvent.getModifiersExText(keyMask)+"+";
+			label += KeyEvent.getModifiersExText(keyMask) + "+";
 		if (keyCode != 0)
 			label += KeyEvent.getKeyText(keyCode);
-//		System.out.println(KeyEvent.getModifiersExText(keyMask));
-//		System.out.println(KeyEvent.getKeyText(keyCode));
+		// System.out.println(KeyEvent.getModifiersExText(keyMask));
+		// System.out.println(KeyEvent.getKeyText(keyCode));
 	}
-	
+
 	public void performAction()
 	{
 		if (action != null)
 			action.performAction();
 	}
-	
+
 }

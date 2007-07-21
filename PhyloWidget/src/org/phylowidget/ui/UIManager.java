@@ -32,11 +32,11 @@ public final class UIManager
 	public EventManager event;
 	public ShortcutManager keys; 
 	
-	public NodeRange nearest;
-	public Point nearestP;
-	public HoverHalo halo;
+	public NearestNodeFinder nearest;
 	
-	PhyloMenu radial;
+	PhyloTextField text;
+	
+	PhyloContextMenu context;
 	
 	public UIManager()
 	{
@@ -47,103 +47,133 @@ public final class UIManager
 	}
 	
 	public void setup()
-	{
-		halo = new HoverHalo(p);
-		halo.show();
+	{	
+		nearest = new NearestNodeFinder(p);
 		
 		Toolbar t = new Toolbar(p);
-		t.add("File").add("Save").setAction(this, "doSomething");
-		t.get("Save").setShortcut("control-s");
-		t.get("File").add("Save...");
-		t.get("Save...").add("Where?");
-		t.add("Edit").add("Undo").setShortcut("control-z");
-		t.get("Edit").add("Redo").setShortcut("control-shift-z");
+		t.add("File");
+		t.get("File").add("New Tree").setAction(this,"newTree").setShortcut("control-n");
+		t.get("File").add("Quit").setAction(this,"quit").setShortcut("alt-f4");
+		t.add("Tree");
+		t.get("Tree").add("Auto-Mutate");
+		t.get("Tree").add("Mutate Once").setAction(this,"mutate").setShortcut("control-m");
+		t.get("Auto-Mutate").add("Mutate Slow").setAction(this,"mutateSlow").setShortcut("control-shift-m");
+		t.get("Auto-Mutate").add("Mutate Fast").setAction(this,"mutateFast").setShortcut("control-alt-m");
+		t.get("Auto-Mutate").add("Stop Mutating").setAction(this,"mutateStop");
+		
+//		t.add("File").add("Save").setAction(this, "doSomething");
+//		t.get("Save").setShortcut("control-s");
+//		t.get("File").add("Save...");
+//		t.get("Save...").add("Where?");
+//		t.add("Edit").add("Undo").setShortcut("control-z");
+//		t.get("Edit").add("Redo").setShortcut("control-shift-z");
 		t.layout();
 		
-//		TextField text = new TextField(p);
-//		text.text.insert(0, "Hello, world! How are you today?");
+		text = new PhyloTextField(p);
+		text.text.insert(0, "Hello, world! How are you today?");
 //		focus.setModalFocus(text);
 		
-		Dock dock = new Dock(p);
-		dock.add("Pencil","pencil2.png");
-		dock.add("Line","line.png");
-		dock.add("Magnifier","magnifier.png");
-		dock.add("Points","points.png");
-		dock.add("Connected Lines","connectedlines.png");
+//		Dock dock = new Dock(p);
+//		dock.add("Pencil","pencil2.png");
+//		dock.add("Line","line.png");
+//		dock.add("Magnifier","magnifier.png");
+//		dock.add("Points","points.png");
+//		dock.add("Connected Lines","connectedlines.png");
 		
-		radial = new PhyloMenu(p);
-//		radial.setPosition(50,50);
-		radial.add("Delete");
-		radial.add("Edit");
-		radial.get("Edit").add(radial.create("Cut",'x'));
-		radial.get("Edit").add(radial.create("Copy",'c'));
-		radial.get("Edit").add(radial.create("Paste",'v'));
-		radial.add("Add");
-		radial.get("Add").add(radial.create("Sister Node",'s'));
-		radial.get("Add").add(radial.create("Child Node",'c'));
-		radial.get("Sister Node").add(radial.create("Whatever node",'w'));
-//		radial.show();
+		context = new PhyloContextMenu(p);
+		context.thetaLo = p.THIRD_PI/2;
+		context.thetaHi = p.TWO_PI+p.THIRD_PI/2;
+		context.add(context.create("Rename",'r')).setAction(this, "renameNode");
+//		context.add(context.create("Edit",'e'));
+//		context.get("Edit").add(context.create("Cut",'x'));
+//		context.get("Edit").add(context.create("Copy",'c'));
+//		context.get("Edit").add(context.create("Paste",'v'));
+		context.add(context.create("Delete",'d'));
+		context.get("Delete").add(context.create("Subtree",'s')).setAction(this, "deleteSubtree");
+		context.get("Delete").add(context.create("This Node",'t')).setAction(this, "deleteNode");
+		context.add(context.create("Add",'a'));
+		context.get("Add").add(context.create("Sister Node",'s')).setAction(this, "addSisterNode");
+		context.get("Add").add(context.create("Child Node",'c')).setAction(this, "addChildNode");
 		
 	}
 	
 	public void doSomething()
 	{
-//		PhyloWidget.trees.mutator.randomlyMutateTree();
+		PhyloWidget.trees.mutator.randomlyMutateTree();
 	}
 	
 	public void update()
 	{
-		radial.setArc(radial.thetaLo+.01f,radial.thetaHi+.01f);
-		updateNearest();
-	}
-	
-	public void updateNearest()
-	{
-		nearest = NearestNodeFinder.nearestNode(p.mouseX, p.mouseY);
-		if (nearest == null)
-		{
-			nearestP = null;
-			return;
-		}
-		nearestP = nearest.render.getPosition(nearest.node);
+//		context.setArc(context.thetaLo+.01f,context.thetaHi+.01f);
 	}
 	
 	//*******************************************************
 	// ACTIONS
 	//*******************************************************
 	
-	public void showMenu(NodeRange r)
+	public void mutate()
 	{
-		halo.setNodeRange(r);
-		halo.becomeSolid();
-		radial.setNodeRange(r);
-		radial.show();
+		PhyloWidget.trees.mutateTree();
 	}
 	
-	public void hideMenu()
+	public void mutateSlow()
 	{
-		halo.setNodeRange(null);
-		halo.restart();
+		PhyloWidget.trees.startMutatingTree(1000);
+	}
+	
+	public void mutateFast()
+	{
+		PhyloWidget.trees.startMutatingTree(100);
+	}
+	
+	public void mutateStop()
+	{
+		PhyloWidget.trees.stopMutatingTree();
+	}
+	
+	public void newTree()
+	{
+		PhyloWidget.trees.clearTrees();
+		PhyloWidget.trees.createTree("PhyloWidget");
+	}
+	
+	public void quit()
+	{
+		p.exit();
+	}
+	
+	public void renameNode()
+	{
+		NodeRange r = context.curNodeRange;
+		text.startEditing(r);
 	}
 	
 	public void addSisterNode()
 	{
-		NodeRange r = radial.curNode;
+		NodeRange r = context.curNodeRange;
 		Tree t = r.render.getTree();
-		t.addSisterNode(r.node, new TreeNode("[Unnamed]"));
-		hideMenu();
+		t.addSisterNode(r.node, t.createNode("[New Sister]"));
 	}
 	
 	public void addChildNode()
 	{
+		NodeRange r = context.curNodeRange;
+		Tree t = r.render.getTree();
+		t.addChildNode(r.node, t.createNode("[New Child]"));
 	}
 	
 	public void deleteNode()
 	{
-//		NodeRange r = menu.curNode;
-//		Tree t = r.render.getTree();
-//		t.deleteNode(r.node);
-		hideMenu();
+		NodeRange r = context.curNodeRange;
+		Tree t = r.render.getTree();
+		t.deleteNode(r.node);
 	}
 
+	public void deleteSubtree()
+	{
+		NodeRange r = context.curNodeRange;
+		Tree t = r.render.getTree();
+		t.deleteSubtree(r.node);
+	}
+	
 }

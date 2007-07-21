@@ -110,6 +110,8 @@ public final class SortedItemList
 		int indexLo = searchRight(target);
 		int indexHi = maxIndex;
 		
+		if (indexLo == -1) return;
+		
 		markInRange(map,indexLo,indexHi);
 	}
 	

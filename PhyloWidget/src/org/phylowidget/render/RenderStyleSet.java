@@ -3,29 +3,41 @@ package org.phylowidget.render;
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.menu.StyleSet;
 
-public class RenderStyleSet extends StyleSet
+public class RenderStyleSet
 {
 
-	public Color hiliteColor;
-	public Color dimColor;
 	public Color regColor;
-	
-	public float hiliteStroke;
-	public float dimStroke;
 	public float regStroke;
+	
+	public Color hoverColor;
+	public float hoverStroke;
+	
+	public Color dimColor;
+	public float dimStroke;
 
+	private static RenderStyleSet defaultSet;
+	
+	public static RenderStyleSet defaultStyle()
+	{
+		if (defaultSet == null)
+		{
+			defaultSet = new RenderStyleSet();
+			defaultSet.loadDefaults();
+		}
+		return defaultSet;
+	}
+	
 	public void loadDefaults()
 	{
-		super.loadDefaults();
 		
 		regColor = new Color(Color.black);
-		dimColor = regColor.brighter(50);
-		hiliteColor = new Color(100,150,255);
-		
-		hiliteStroke = 2f;
-		dimStroke = .5f;
 		regStroke = 1f;
 		
+		dimColor = regColor.brighter(100);
+		dimStroke = .5f;
+		
+		hoverColor = new Color(100,150,255);
+		hoverStroke = 3f;
 	}
 	
 }

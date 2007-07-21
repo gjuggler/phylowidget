@@ -68,7 +68,7 @@ public class ShortcutManager implements KeyListener
 		for (int i=0; i < keys.size(); i++)
 		{
 			Shortcut key = (Shortcut) keys.get(i);
-			boolean modMatch = (e.getModifiers() & key.keyMask) != 0;
+			boolean modMatch = (e.getModifiersEx() == key.keyMask);
 			if (modMatch &&
 					e.getKeyCode() == key.keyCode)
 			{

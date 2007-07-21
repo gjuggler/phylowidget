@@ -53,7 +53,7 @@ public class PhyloWidget extends PApplet
 	public void draw()
 	{
 		background(255);
-//		drawFrameRate();
+		drawFrameRate();
 		translate(width/2,height/2);
 //		theta += 0.001;
 //		rotate(theta);

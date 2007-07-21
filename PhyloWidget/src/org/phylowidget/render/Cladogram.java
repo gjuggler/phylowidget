@@ -8,32 +8,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.andrewberman.camera.SettableRect;
-import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.RenderNode;
 import org.phylowidget.tree.TreeNode;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
 
-public final class Cladogram extends AbstractTreeRenderer implements SettableRect
+public final class Cladogram extends AbstractTreeRenderer implements
+		SettableRect
 {
-	protected PApplet p = PhyloWidget.p;
-	/**
-	 * A data structure to store the rectangular regions of all nodes.
-	 * Instead of drawing all nodes, we retrieve the nodes whose regions
-	 * intersect with the visible rectangle, and then draw. This can
-	 * significantly improve performance when viewing only a portion of
-	 * a large tree.
-	 */
-	protected SortedXYRangeList list = new SortedXYRangeList();
-	protected ArrayList ranges = new ArrayList();
-	public static final int NODE = 0;
-	public static final int LABEL = 1;
 	/**
 	 * Another optimization method -- if we're zoomed out so far that rows
 	 * become unreadable (i.e. if rowsize is <= SKIP_THRESH), then start
@@ -54,15 +44,15 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	 * These variables are set in the calculateSizes() method during every round
 	 * of rendering. Very important!
 	 */
-	protected float rowSize, colSize, textSize = 0;
+	protected float rowSize, colSize;
 
-	protected float dFont = 0;
+	protected float dFont;
 
-	protected int maxDepth = 0;
+	protected int maxDepth;
 	/**
 	 * Radius of the node ellipses.
 	 */
-	protected float dotWidth = 0;
+	protected float dotWidth,rad;
 	/**
 	 * Width of the node label gutter.
 	 */
@@ -70,13 +60,13 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 
 	protected Point ptemp = new Point(0, 0);
 	protected Point ptemp2 = new Point(0, 0);
-	
-	public Cladogram()
+
+	public Cladogram(PGraphics pg)
 	{
-		super();
+		super(pg);
 	}
 
-	protected void layout()
+	public void layout()
 	{
 		/**
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
@@ -84,29 +74,30 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		 */
 		maxDepth = tree.getRoot().getMaxDepth();
 		gutterWidth = 0;
-//		float spaceWidth = font.width(' ') * 3;
-		if (UIUtils.isJava2D(p))
-			fm = UIUtils.getMetrics(p.g, font.font, 1);
+		// float spaceWidth = font.width(' ') * 3;
+		if (UIUtils.isJava2D(canvas))
+			fm = UIUtils.getMetrics(canvas, font.font, 1);
 		for (int i = 0; i < leaves.size(); i++)
 		{
-			PhyloNode n = (PhyloNode) leaves.get(i);
+			RenderNode n = (RenderNode) leaves.get(i);
 			/**
 			 * Set the leaf position.
 			 */
 			float yPos = (float) ((i + .5) / (leaves.size()));
 			float xPos = 1 - (n.getMaxDepth() - .5f) / maxDepth;
-			setPosition(n, xPos, yPos);
+			n.unscaledX = xPos;
+			n.unscaledY = yPos;
 			/**
 			 * Find the width of this node's label.
 			 */
-			float width = 0;//spaceWidth;
-			if (UIUtils.isJava2D(p))
+			float width = 0;// spaceWidth;
+			if (UIUtils.isJava2D(canvas))
 			{
 				width = fm.stringWidth(n.getName());
 			} else
 			{
 				char[] chars = n.getName().toCharArray();
-	
+
 				for (int j = 0; j < chars.length; j++)
 				{
 					width += font.width(chars[j]);
@@ -119,37 +110,8 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		/**
 		 * Now, set the branch positions.
 		 */
-		branchPositions(tree.getRoot());
-		/**
-		 * Create an empty XYRange object for each TreeNode.
-		 */
-		list.clear();
-		ranges.clear();
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			PhyloNode n = (PhyloNode) nodes.get(i);
-			Point p = getInternalPosition(n);
-			NodeRange r = new NodeRange();
-			r.loX = r.hiX = p.x;
-			r.loY = r.hiY = p.y;
-			r.type = NodeRange.NODE;
-			r.node = n;
-			r.render = this;
-			ranges.add(r);
-			list.insert(r, false);
-			if (n.isLeaf())
-			{
-				NodeRange r2 = new NodeRange();
-				r2.loX = r2.hiX = p.x;
-				r2.loY = r2.hiY = p.y + .001f;
-				r2.type = NodeRange.LABEL;
-				r2.node = n;
-				r2.render = this;
-				ranges.add(r2);
-				list.insert(r2,false);
-			}
-		}
-		list.sortFull();
+		branchPositions((RenderNode) tree.getRoot());
+
 	}
 
 	/**
@@ -159,12 +121,12 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 	 * @param n
 	 * @return
 	 */
-	public float branchPositions(TreeNode n)
+	protected float branchPositions(RenderNode n)
 	{
 		if (n.isLeaf())
 		{
 			// If N is a leaf, then it's already been laid out.
-			return getInternalPosition(n).y;
+			return n.unscaledY;
 		} else
 		{
 			// If not:
@@ -173,31 +135,28 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 			float sum = 0;
 			for (int i = 0; i < children.size(); i++)
 			{
-				TreeNode child = (TreeNode) children.get(i);
+				RenderNode child = (RenderNode) children.get(i);
 				sum += branchPositions(child);
 			}
 			float y = (float) sum / (float) children.size();
 			float x = 1 - (n.getMaxDepth() - .5f) / maxDepth;
-			setPosition(n, x, y);
+			n.unscaledX = x;
+			n.unscaledY = y;
 			return y;
 		}
 	}
-	
-	protected ArrayList inRange = new ArrayList();
-	protected boolean sorted = false;
-	protected void draw()
+
+	protected void drawRecalc()
 	{
-		TreeNode n;
-		NodeRange r;
 		/*
 		 * Figure out how to size ourselves given the current rect.
 		 */
 		float numRows = leaves.size();
 		float idealRowSize = rect.height / numRows;
 		textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
-		if (UIUtils.isJava2D(p))
+		if (UIUtils.isJava2D(canvas))
 		{
-			fm = UIUtils.getMetrics(p.g,font.font,textSize);
+			fm = UIUtils.getMetrics(canvas, font.font, textSize);
 		}
 		float effectiveWidth = rect.width - gutterWidth * textSize;
 		float numCols = maxDepth;
@@ -207,6 +166,7 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		if (keepAspectRatio)
 			rowSize = colSize = Math.min(idealRowSize, idealColSize);
 		dotWidth = Math.min(rowSize / 2, textSize / 2);
+		rad = dotWidth/2;
 		scaleX = colSize * numCols;
 		scaleY = rowSize * numRows;
 		dx = (rect.width - scaleX - gutterWidth * textSize - dotWidth) / 2;
@@ -219,158 +179,113 @@ public final class Cladogram extends AbstractTreeRenderer implements SettableRec
 		 */
 		for (int i = 0; i < ranges.size(); i++)
 		{
-			r = (NodeRange) ranges.get(i);
-			n = r.node;
-			getPosition(n, ptemp);
+			NodeRange r = (NodeRange) ranges.get(i);
+			RenderNode n = r.node;
+			n.x = n.unscaledX * scaleX + dx;
+			n.y = n.unscaledY * scaleY + dy;
+			RenderNode parent;
+			if (n.getParent() != TreeNode.NULL_PARENT)
+				parent = (RenderNode) n.getParent();
+			else
+				parent = n;
+			parent.x = parent.unscaledX * scaleX + dx;
+			parent.y = parent.unscaledY * scaleY + dy;
 			switch (r.type)
 			{
-				case (Cladogram.NODE):
-					r.loX = ptemp.x - dotWidth/2;
-					r.hiX = ptemp.x + dotWidth/2;
-					r.loY = ptemp.y - dotWidth/2;
-					r.hiY = ptemp.y + dotWidth/2;	
+				case (AbstractTreeRenderer.NODE):
+					r.loX = Math.min(n.x-rad,parent.x-rad);
+					r.hiX = Math.max(n.x+rad,parent.x+rad);
+					r.loY = Math.min(n.y-rad,parent.y-rad);
+					r.hiY = Math.max(n.y+rad,parent.y+rad);
+//					r.loX = ptemp.x - dotWidth / 2;
+//					r.hiX = ptemp.x + dotWidth / 2;
+//					r.loY = ptemp.y - dotWidth / 2;
+//					r.hiY = ptemp.y + dotWidth / 2;
 					break;
-				case (Cladogram.LABEL):
+				case (AbstractTreeRenderer.LABEL):
 					r.loX = ptemp.x + dotWidth;
-				
-					float textHeight = (font.ascent() + font.descent()*2)*textSize;
-					r.loY = ptemp.y - textHeight/2;
-					r.hiY = ptemp.y + textHeight/2;
+					float textHeight = (font.ascent() + font.descent())
+							* textSize;
+					r.loY = ptemp.y - textHeight / 2;
+					r.hiY = ptemp.y + textHeight / 2;
 					float width = 0;
-//					if (r.node instanceof PhyloNode)
-//					{
-						PhyloNode pn = (PhyloNode) r.node;
-						width = pn.unitTextWidth * textSize;
-//					} else
-//					{
-//						if (UIUtils.isJava2D(p))
-//							width = fm.stringWidth(n.getName());
-//						else
-//							width = UIUtils.getTextWidth(p.g,font,textSize,n.getName(),false);
-//					}
+					width = n.unitTextWidth * textSize;
 					r.hiX = r.loX + width;
 					break;
 			}
 		}
-		/*
-		 * Only sort the list once -- these things aren't moving!
-		 */
-		if (!sorted)
-		{
-			list.sort();
-			sorted = true;
-		}
+//		skipNodes();
+	}
+	
+	protected void skipNodes()
+	{
 		/*
 		 * Skip nodes if the rows are small enough to allow it.
 		 */
 		skipMe.clear();
 		if (rowSize < SKIP_THRESH)
 		{
-			for (int i=0; i < leaves.size(); i++)
+			for (int i = 0; i < leaves.size(); i++)
 			{
-				n = (TreeNode)leaves.get(i);
+				RenderNode n = (RenderNode) leaves.get(i);
 				int asdf = 1;
 				if (rowSize < SKIP_THRESH)
 					asdf = 2;
-				if (rowSize < SKIP_THRESH*.5)
+				if (rowSize < SKIP_THRESH * .5)
 					asdf = 3;
-				if (rowSize < SKIP_THRESH*.25)
+				if (rowSize < SKIP_THRESH * .25)
 					asdf = 4;
-				if (rowSize < SKIP_THRESH*.1)
+				if (rowSize < SKIP_THRESH * .1)
 					asdf = 10;
 				if (i % asdf != 0)
 					skipMe.put(n, null);
 			}
 		}
-		/*
-		 * Draw the nodes that are in range.
-		 */
-		p.fill(0);
-		p.stroke(0);
-		p.strokeWeight(1);
-		drawAllLines();
-		p.noStroke();
-		p.textFont(font);
-		p.textSize(textSize);
-		p.textAlign(PConstants.LEFT);
-		inRange.clear();
-		Rectangle2D.Float test = new Rectangle2D.Float(0,0,p.width,p.height);
-		UIUtils.screenToModel(test);
-		list.getInRange(inRange, test);
-//		list.getInRange(inRange, -p.width / 2, p.width / 2,
-//				-p.height / 2, p.height / 2);
-//		System.out.println(inRange.size());
-		synchronized (tree) {
-			int size = inRange.size();
-			for (int i = 0; i < size; i++)
-			{
-				r = (NodeRange) inRange.get(i);
-				n = r.node;
-				switch (r.type)
-				{
-					case (Cladogram.LABEL):
-						if (!skipMe.containsKey(n))
-							drawLabel(n);
-						break;
-					case (Cladogram.NODE):
-							drawNode(n);
-						break;
-				}
-			}
+	}
+
+	protected void drawNode(RenderNode n)
+	{
+		canvas.ellipse(n.x, n.y, dotWidth, dotWidth);
+	}
+
+	protected void drawLine(RenderNode n)
+	{
+		if (n.getParent() != TreeNode.NULL_PARENT)
+		{
+			RenderNode parent = (RenderNode) n.getParent();
+			canvas.line(n.x-rad, n.y, parent.x, n.y);
+			float retreat = 0;
+			if (n.y < parent.y) retreat = -rad;
+			else retreat = rad;
+			canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 		}
 	}
-
-	public void drawNode(TreeNode n)
+	protected void drawLabel(RenderNode n)
 	{
-		getPosition(n, ptemp);
-		p.ellipse(ptemp.x, ptemp.y, dotWidth, dotWidth);
-	}
-
-	public void drawLabel(TreeNode n)
-	{
-		getPosition(n,ptemp);
 		if (PhyloWidget.usingNativeFonts)
 		{
-			PGraphicsJava2D pgj = (PGraphicsJava2D) p.g;
+			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 			Graphics2D g2 = pgj.g2;
 			g2.setFont(font.font.deriveFont(textSize));
 			g2.setPaint(Color.black);
-			g2.drawString(n.getName(), ptemp.x+dotWidth, ptemp.y+dFont);
+			g2.drawString(n.getName(), n.x + dotWidth, n.y + dFont);
 		} else
-			p.text(n.getName(), ptemp.x+dotWidth, ptemp.y + dFont);
-	}
-	
-	public void drawAllLines()
-	{
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			TreeNode n = (TreeNode) nodes.get(i);
-			drawLine(n);
-		}
+			canvas.text(n.getName(), n.x + dotWidth, n.y + dFont);
 	}
 
-	public void drawLine(TreeNode n)
-	{
-		getPosition(n, ptemp);
-		if (n.getParent() != TreeNode.NULL_PARENT)
-		{
-			getPosition(n.getParent(), ptemp2);
-			p.line(ptemp.x, ptemp.y, ptemp2.x, ptemp.y);
-		}
 
-		if (!n.isLeaf())
-		{
-			ArrayList children = n.getChildren();
-			TreeNode first = (TreeNode) children.get(0);
-			TreeNode last = (TreeNode) children.get(children.size() - 1);
-			float minY = getPosition(first, ptemp2).y;
-			float maxY = getPosition(last, ptemp2).y;
-			p.line(ptemp.x, minY, ptemp.x, maxY);
-		}
+	public float getNodeRadius()
+	{
+		return dotWidth/2;
 	}
 	
-	public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
+	public void positionText(RenderNode n, TextField tf)
 	{
-		list.getInRange(arr, rect);
+		tf.setTextSize(textSize);
+		float tfWidth = UIUtils.getTextWidth(canvas, font, textSize, tf.getText(), true);
+		float textWidth = Math.max(n.unitTextWidth*textSize+5, tfWidth);
+		tf.setWidth(textWidth);
+		tf.setPositionByBaseline(n.x + dotWidth, n.y + dFont);
 	}
+	
 }

@@ -121,7 +121,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 		{
-			System.out.println(FocusManager.instance.getFocusedObject());
+//			System.out.println(FocusManager.instance.getFocusedObject());
 			((UIObject) FocusManager.instance.getFocusedObject())
 				.mouseEvent(e, screen, model);
 		}

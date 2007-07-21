@@ -59,7 +59,10 @@ public class Shortcut
 		while (st.hasMoreTokens())
 		{
 			String token = st.nextToken();
-			if (Pattern.matches(control, token))
+			if (Pattern.matches(alt, token))
+			{
+				modifiers = modifiers | KeyEvent.ALT_DOWN_MASK;
+			} else if (Pattern.matches(control, token))
 			{
 				modifiers = modifiers | shortcutMask;
 			} else if (Pattern.matches(shift, token))
@@ -88,7 +91,8 @@ public class Shortcut
 			label += KeyEvent.getModifiersExText(keyMask) + "+";
 		if (keyCode != 0)
 			label += KeyEvent.getKeyText(keyCode);
-		// System.out.println(KeyEvent.getModifiersExText(keyMask));
+		System.out.println(label);
+//		 System.out.println(KeyEvent.getModifiersExText(keyMask));
 		// System.out.println(KeyEvent.getKeyText(keyCode));
 	}
 

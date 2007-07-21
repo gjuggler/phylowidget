@@ -13,6 +13,7 @@ import org.andrewberman.tween.PropertyTween;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.ui.EventManager;
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIUtils;
@@ -130,7 +131,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * Indicates whether the menu was "just" shown. Should be true only during
 	 * the first <code>mouseEvent</code> cycle seen after this menu is shown.
 	 */
-	boolean justShown = false;
+//	boolean justShown = false;
 	/*
 	 * =============================== GENERAL OPTIONS FOR SUBCLASSES
 	 */
@@ -211,7 +212,12 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * effective when <code>autoDim</code> is true.
 	 */
 	public float fullAlpha = 1f;
-
+	/**
+	 * If set to true, then this menu will grab focus when the show() function is called.
+	 * It will then also release focus when the hide() function is called.
+	 */
+	public boolean focusOnShow = false;
+	
 	public Menu(PApplet app)
 	{
 		super("");
@@ -221,18 +227,25 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		canvas = app;
 		setMenu(this);
 		style = StyleSet.defaultStyle();
-		setOptions(); // Give our subclassers a chance to set their options.
+		/*
+		 * Give our subclasses a chance to set their options before we start initing stuff.
+		 */
+		setOptions();
+		init();
+	}
 
+	private void init()
+	{
 		if (UIUtils.isJava2D(canvas))
 			buff = (PGraphicsJava2D) canvas.g;
 		else if (usesJava2D)
 			createBuffer(START_SIZE, START_SIZE);
 		if (autoDim)
 			aTween = new PropertyTween(this, "alpha",
-					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, dimAlpha,
-					15);
+					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, fullAlpha,
+					15);	
 	}
-
+	
 	protected void setOptions()
 	{
 		// Subclassers should put changes in the boolean options here.
@@ -276,7 +289,9 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		super.show();
 		showChildren();
-		justShown = true;
+//		justShown = true;
+		if (focusOnShow)
+			FocusManager.instance.setFocus(this);
 	}
 
 	public void hide()
@@ -284,7 +299,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		super.hide();
 		hideAllChildren();
 		UIUtils.releaseCursor(this, canvas);
-//		new Error("hey!").printStackTrace();
+		if (focusOnShow)
+			FocusManager.instance.removeFromFocus(this);
 	}
 
 	public boolean isRootMenu()
@@ -501,7 +517,6 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 				hide();
 				break;
 		}
-
 		super.keyEvent(e);
 	}
 
@@ -532,7 +547,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 //						justShown = false;
 //					else
 //					{
-						hide();
+					e.consume();	
+					hide();
 //					}
 					break;
 				case (CLICKAWAY_COLLAPSES):

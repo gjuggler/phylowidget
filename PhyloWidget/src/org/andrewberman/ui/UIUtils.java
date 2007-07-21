@@ -82,11 +82,11 @@ public class UIUtils
 	{
 		int shortcutMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 		if (shortcutMask == KeyEvent.CTRL_MASK)
-			shortcutMask |= KeyEvent.CTRL_DOWN_MASK;
+			shortcutMask = KeyEvent.CTRL_DOWN_MASK;
 		else if (shortcutMask == KeyEvent.ALT_MASK)
-			shortcutMask |= KeyEvent.ALT_DOWN_MASK;
+			shortcutMask = KeyEvent.ALT_DOWN_MASK;
 		else if (shortcutMask == KeyEvent.META_MASK)
-			shortcutMask |= KeyEvent.META_DOWN_MASK;
+			shortcutMask = KeyEvent.META_DOWN_MASK;
 		return shortcutMask;
 	}
 
@@ -164,7 +164,7 @@ public class UIUtils
 	 * Determines whether the indicated <code>PGraphics</code> object is an
 	 * instance of <code>PGraphicsJava2D</code>
 	 * 
-	 * @param p
+	 * @param canvas
 	 *            the <code>PGraphics</code> object to test
 	 * @return true if the <code>PGraphics</code> object is an instance of
 	 *         <code>PGraphicsJava2D</code>

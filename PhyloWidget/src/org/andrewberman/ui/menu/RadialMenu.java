@@ -1,5 +1,7 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -13,7 +15,7 @@ import org.andrewberman.ui.UIUtils;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
-public class RadialMenu extends Menu
+public class RadialMenu extends Menu implements KeyListener
 {
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
@@ -29,6 +31,8 @@ public class RadialMenu extends Menu
 	public RadialMenu(PApplet p)
 	{
 		super(p);
+		
+		p.addKeyListener(this);
 	}
 
 	protected void setOptions()
@@ -181,6 +185,26 @@ public class RadialMenu extends Menu
 		} else
 		{
 			hide();
+		}
+	}
+
+	public void keyPressed(KeyEvent e)
+	{
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+	}
+
+	public void keyTyped(KeyEvent e)
+	{
+		/*
+		 * Pass this on to sub-items.
+		 */
+		for (int i=0; i < items.size(); i++)
+		{
+			RadialMenuItem item = (RadialMenuItem) items.get(i);
+			item.keyHintEvent(e.getKeyChar());
 		}
 	}
 }

@@ -7,10 +7,11 @@ import java.util.ArrayList;
 import org.andrewberman.camera.RectMover;
 import org.andrewberman.camera.SettableRect;
 import org.andrewberman.ui.Point;
+import org.phylowidget.render.AbstractTreeRenderer;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.tree.PhyloNodeFactory;
+import org.phylowidget.tree.RenderNodeFactory;
 import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.Tree;
 
@@ -68,29 +69,47 @@ public class TreeManager implements SettableRect
 		nodesInRange(list,rect);
 	}
 	
-	public Point getPosition(NodeRange r)
+//	public Point getPosition(NodeRange r)
+//	{
+//		TreeRenderer render = r.render;
+//		return render.getPosition(r.node);
+//	}
+	
+	public void clearTrees()
 	{
-		TreeRenderer render = r.render;
-		return render.getPosition(r.node);
+		mutator.stop();
+		renderers.clear();
+		trees.clear();
+	}
+	
+	public void mutateTree()
+	{
+		mutator.randomlyMutateTree();
+	}
+	
+	public void startMutatingTree(int delay)
+	{
+		mutator.stop();
+		mutator = new RandomTreeMutator((Tree) trees.get(0));
+		mutator.delay = delay;
+		mutator.start();
+	}
+	
+	public void stopMutatingTree()
+	{
+		mutator.stop();
 	}
 	
 	public void createTree(String s)
-	{
-		Tree t = new Tree(PhyloNodeFactory.instance(),s);
+	{	
+		Tree t = new Tree(RenderNodeFactory.instance(),s);
 		trees.add(t);
 		
-		Cladogram c = new Cladogram();
+		TreeRenderer c = new Cladogram(p.g);
 		c.setTree(t);
 		renderers.add(c);
 		
 		mutator = new RandomTreeMutator(t);
-		for (int i=0; i < 50; i++)
-		{
-			mutator.randomlyMutateTree();
-		}
-		
-//		mutator.delay = 50;
-//		mutator.start();
 	}
 	
 	/**

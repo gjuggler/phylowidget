@@ -3,6 +3,7 @@ package org.andrewberman.ui.menu;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
@@ -22,6 +23,8 @@ import processing.core.PFont;
 public final class RadialMenuItem extends MenuItem
 {
 	public static final float SIZE_DECAY = .9f;
+	
+	String displayLabel;
 	
 	float rLo,rHi,tLo,tHi = 0;
 	float radius;
@@ -79,7 +82,8 @@ public final class RadialMenuItem extends MenuItem
 		 * Draw the main wedge shape.
 		 */
 		Graphics2D g2 = menu.buff.g2;
-		if (this.isAncestorOfSelected())
+//		this.isAncestorOf(menu.currentlyHovered);
+		if (this.isAncestorOf(menu.currentlyHovered))
 			g2.setPaint(menu.style.getGradient(Menu.OVER,x-rHi,y-rHi,x+rHi,y+rHi));
 		else
 			g2.setPaint(menu.style.getGradient(state,x-rHi,y-rHi,x+rHi,y+rHi));
@@ -113,7 +117,7 @@ public final class RadialMenuItem extends MenuItem
 		Font f = menu.style.font.font.deriveFont(fontSize);
 		g2.setFont(f);
 		g2.setPaint(menu.style.textColor);
-		g2.drawString(label, textX, textY);
+		g2.drawString(displayLabel, textX, textY);
 	}
 	
 	void drawHint()
@@ -193,10 +197,16 @@ public final class RadialMenuItem extends MenuItem
 		float ascent = fm.getAscent();
 		
 //		Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
-		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize, label, true);
+		
+		if (items.size() > 0)
+			displayLabel = label.concat("...");
+		else
+			displayLabel = label;
+		
+		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize, displayLabel, true);
 //		textHeight = (float) bounds.getHeight();
 //		textWidth = (float) bounds.getWidth();
-		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, label, true);
+		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, displayLabel, true);
 		// Calculate the necessary x and y offsets for the text.
 		float outX = x+cos*(rHi+textHeight);
 		float outY = y+sin*(rHi+textHeight);
@@ -277,10 +287,21 @@ public final class RadialMenuItem extends MenuItem
 		return wedge.contains(pt.x,pt.y);
 	}
 	
-//	public void itemMouseEvent(MouseEvent e, Point pt)
-//	{
-//		super.itemMouseEvent(e);
-//	}
+	protected void keyHintEvent(char c)
+	{
+		if (!isVisible()) return;
+		
+		if (Character.toLowerCase(c) == Character.toLowerCase(hint))
+			this.performAction();
+		else
+		{
+			for (int i=0; i < items.size(); i++)
+			{
+				RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+				rmi.keyHintEvent(c);
+			}
+		}
+	}
 	
 	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{

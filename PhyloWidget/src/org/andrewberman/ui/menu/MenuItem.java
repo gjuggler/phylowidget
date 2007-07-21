@@ -73,19 +73,21 @@ public abstract class MenuItem implements Positionable, Sizable
 		this.label = label;
 	}
 
-	public void setAction(Object object, String method)
+	public MenuItem setAction(Object object, String method)
 	{
 		action = new Action(object, method);
 		if (shortcut != null)
 			shortcut.action = action;
+		return this;
 	}
 
-	public void setShortcut(String s)
+	public MenuItem setShortcut(String s)
 	{
 		shortcut = new Shortcut(s);
 		if (action != null)
 			shortcut.action = action;
 		menu.layout();
+		return this;
 	}
 
 	public void setPosition(float x, float y)

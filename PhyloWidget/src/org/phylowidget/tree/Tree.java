@@ -23,6 +23,23 @@ public class Tree
 		root.name = s;
 	}
 	
+	public TreeNode createNode(String s)
+	{
+		TreeNode newNode = factory.createNode();
+		newNode.setName(s);
+		return newNode;
+	}
+	
+	void modMe()
+	{
+		modCount++;
+	}
+	
+	public void recalculateStuff()
+	{
+		root.recalculateStuff();
+	}
+	
 	public void addSisterNode(TreeNode orig, TreeNode sis)
 	{
 		if (orig.parent == TreeNode.NULL_PARENT)
@@ -41,14 +58,27 @@ public class Tree
 			newBranch.addChild(sis);
 			parent.addChild(newBranch);
 		}
-		modCount++;
+		modMe();
+	}
+	
+	public void addChildNode(TreeNode orig, TreeNode child)
+	{
+		orig.addChild(child);
+		modMe();
 	}
 	
 	public void deleteNode(TreeNode node)
 	{
 		if (node.parent == TreeNode.NULL_PARENT)
+		{
+			if (node.children.size() == 1)
+			{
+				TreeNode n = (TreeNode) node.children.get(0);
+				node.removeChild(n);
+				setRoot(n);
+			}
 			return;
-		
+		}
 		TreeNode parent = node.parent;
 		parent.removeChild(node);
 		for (int i=0; i < node.children.size(); i++)
@@ -57,10 +87,27 @@ public class Tree
 			parent.addChild(n);
 		}
 		parent.sortChildren();
-		pruneTree();
-		modCount++;
+//		pruneTree();
+		modMe();
 	}
 
+	public void deleteSubtree(TreeNode node)
+	{
+		if (node.parent == TreeNode.NULL_PARENT)
+		{
+			TreeNode newNode = factory.createNode();
+			newNode.setName("[New Root]");
+			setRoot(newNode);
+		} else
+		{
+			TreeNode parent = node.parent;
+			parent.removeChild(node);
+//			pruneTree();
+			parent.sortChildren();
+		}
+		modMe();
+	}
+	
 	public void pruneTree()
 	{
 		root.prune();
@@ -100,6 +147,7 @@ public class Tree
 	public void setRoot(TreeNode t)
 	{
 		root = t;
+		modMe();
 	}
 	
 	public NodeFactory getFactory()

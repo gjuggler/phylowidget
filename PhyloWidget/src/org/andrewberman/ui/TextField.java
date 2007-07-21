@@ -88,6 +88,7 @@ public class TextField implements Positionable, UIObject
 	int viewLo, viewHi, selLo, selHi;
 	boolean anchorRight;
 	boolean mouseDragging, shiftPressed;
+	protected boolean hidden;
 
 	public StringBuffer text = new StringBuffer();
 
@@ -95,7 +96,7 @@ public class TextField implements Positionable, UIObject
 	 * If set to true, then this textfield will draw itself in "camera"
 	 * coordinates, i.e. it won't reset the camera before it draws itself.
 	 */
-	public boolean useCameraCoordinates = false;
+	public boolean useCameraCoordinates = true;
 
 	public TextField(PApplet p)
 	{
@@ -140,6 +141,16 @@ public class TextField implements Positionable, UIObject
 		return asdf;
 	}
 
+	protected void reset()
+	{
+		anchorRight = false;
+		selLo = selHi = 0;
+		anchorPos = 0;
+		caret = 0;
+		mouseDragging = false;
+		shiftPressed = false;
+	}
+	
 	protected void layout()
 	{
 		/*
@@ -164,6 +175,7 @@ public class TextField implements Positionable, UIObject
 
 	public void draw()
 	{
+		if (hidden) return;
 		calculateViewport();
 		// hint();
 		canvas.pushMatrix();
@@ -186,6 +198,17 @@ public class TextField implements Positionable, UIObject
 		canvas.popMatrix();
 	}
 
+	public void hide()
+	{
+		hidden = true;
+		UIUtils.releaseCursor(this, canvas);
+	}
+	
+	public void show()
+	{
+		hidden = false;
+	}
+	
 	protected void drawToCanvas()
 	{
 		int w = (int) (width + OFFSET * 2);
@@ -378,6 +401,30 @@ public class TextField implements Positionable, UIObject
 		// setPositionByCorner(x,y);
 	}
 
+	public void setPositionByCorner(float x, float y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+
+	public void setPositionByBaseline(float x, float y)
+	{
+		this.x = x - pad;
+		this.y = y - ascent - pad;
+	}
+	
+	public void setTextSize(float textSize)
+	{
+		this.fontSize = textSize;
+		layout();
+	}
+	
+	public void setWidth(float width)
+	{
+		this.width = width;
+		layout();
+	}
+	
 	protected void selectAll()
 	{
 		selAnchor = 0;
@@ -587,6 +634,7 @@ public class TextField implements Positionable, UIObject
 
 	public void keyEvent(KeyEvent e)
 	{
+		if (hidden) return;
 		// System.out.println(e);
 		int code = e.getKeyCode();
 		boolean meta = ((e.getModifiersEx() & metaMask) != 0);
@@ -710,6 +758,8 @@ public class TextField implements Positionable, UIObject
 
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
+		if (hidden) return;
+		
 		Point p1;
 		if (useCameraCoordinates)
 			p1 = model;
@@ -821,5 +871,6 @@ public class TextField implements Positionable, UIObject
 
 		}
 	}
+
 
 }

@@ -19,7 +19,7 @@ import processing.core.PApplet;
 
 public class TreeManager implements SettableRect
 {
-	protected PApplet p = PhyloWidget.p;
+	protected PApplet p;
 	
 	protected static RectMover camera;
 	protected static Rectangle2D.Float cameraRect;
@@ -28,8 +28,9 @@ public class TreeManager implements SettableRect
 
 	public RandomTreeMutator mutator;
 	
-	public TreeManager()
+	public TreeManager(PApplet p)
 	{
+		this.p = p;
 	}
 	
 	public void setup()

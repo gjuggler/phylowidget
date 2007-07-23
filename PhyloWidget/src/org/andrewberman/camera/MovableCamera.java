@@ -151,16 +151,16 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		switch (code)
 		{
 			case (81): // Q
-				this.zoomBy(2);
+//				this.zoomBy(2);
 				break;
 			case (87): // W
-				this.zoomBy(.5f);
+//				this.zoomBy(.5f);
 				break;
 			case (37): // Left
-				this.nudge(-10, 0);
+//				this.nudge(-10, 0);
 				break;
 			case (39): // Right
-				this.nudge(10, 0);
+//				this.nudge(10, 0);
 				break;
 		}
 

@@ -5,11 +5,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.tween.PropertyTween;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Rectangle;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
@@ -26,12 +28,15 @@ public class RadialMenu extends Menu implements KeyListener
 	Ellipse2D.Float outer = new Ellipse2D.Float(0, 0, 0, 0);
 	Ellipse2D.Float max = new Ellipse2D.Float(0, 0, 0, 0);
 
+	Rectangle myRect = new Rectangle(0, 0, 0, 0);
+	Rectangle buffRect = new Rectangle(0, 0, 0, 0);
+
 	AffineTransform buffTransform, mouseTransform;
 
 	public RadialMenu(PApplet p)
 	{
 		super(p);
-		
+
 		p.addKeyListener(this);
 	}
 
@@ -134,7 +139,7 @@ public class RadialMenu extends Menu implements KeyListener
 		 * Set the maxRadius.
 		 */
 		float maxRadius = radius;
-		for (int i=0; i < items.size(); i++)
+		for (int i = 0; i < items.size(); i++)
 		{
 			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
 			float cur = rmi.getMaxRadius();
@@ -143,44 +148,29 @@ public class RadialMenu extends Menu implements KeyListener
 		}
 		return maxRadius;
 	}
-	
-	// public boolean containsPoint(Point pt)
-	// {
-	// outer.setFrameFromCenter(x,y,x-radius,y-radius);
-	// return outer.contains(pt);
-	// }
+
+	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
+	{
+		super.getRect(rect, buff);
+	}
 
 	public void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-
-		float maxRadius = getMaxVisibleRadius();
-		
-		inner.setFrameFromCenter(x, y, x - innerRadius, y - innerRadius);
-		outer.setFrameFromCenter(x, y, x - maxRadius, y - maxRadius);
-		float outerLimit = Math.max(5*radius,maxRadius+25);
-		max.setFrameFromCenter(x, y, x - outerLimit, y - outerLimit);
-		boolean in = inner.contains(pt.x, pt.y);
-		boolean out = outer.contains(pt.x, pt.y);
-		boolean inMax = max.contains(pt.x, pt.y);
-		if (mouseInside)
+//		float maxRadius = getMaxVisibleRadius();
+//		inner.setFrameFromCenter(x, y, x - innerRadius, y - innerRadius);
+//		outer.setFrameFromCenter(x, y, x - maxRadius, y - maxRadius);
+//		float outerLimit = Math.max(5 * radius, maxRadius + 25);
+//		max.setFrameFromCenter(x, y, x - outerLimit, y - outerLimit);
+//		boolean in = inner.contains(pt.x, pt.y);
+//		boolean out = outer.contains(pt.x, pt.y);
+//		boolean inMax = max.contains(pt.x, pt.y);
+		getRect(myRect, buffRect);
+		float dist = myRect.distToPoint(pt);
+		if (dist < 100)
 		{
-			aTween.continueTo(1f);
-			aTween.fforward();
-			return;
-		}
-		if (out)
-		{
-			aTween.continueTo(1f);
-			aTween.fforward();
-		} else if (inMax) // if we're outside the visible boundary.
-		{
-			// Fade out as we move further away.
-			float diff = (float) max.getWidth() / 2 - (float) pt.distance(x, y);
-			float ratio = diff
-					/ ((float) max.getWidth() / 2 - (float) outer.getWidth() / 2);
-			float intDst = (float) Math.min((ratio), 1f);
-			aTween.continueTo(intDst);
+			float normalized = 1f - (dist / 100f);
+			aTween.continueTo(normalized);
 			aTween.fforward();
 		} else
 		{
@@ -201,7 +191,7 @@ public class RadialMenu extends Menu implements KeyListener
 		/*
 		 * Pass this on to sub-items.
 		 */
-		for (int i=0; i < items.size(); i++)
+		for (int i = 0; i < items.size(); i++)
 		{
 			RadialMenuItem item = (RadialMenuItem) items.get(i);
 			item.keyHintEvent(e.getKeyChar());

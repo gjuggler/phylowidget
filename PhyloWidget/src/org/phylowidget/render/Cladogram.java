@@ -153,11 +153,9 @@ public final class Cladogram extends AbstractTreeRenderer implements
 		 */
 		float numRows = leaves.size();
 		float idealRowSize = rect.height / numRows;
+		
+//		float unitTextHeight = UIUtils.getTextHeight(canvas, font, 1f, "PpDdgG[]", true);
 		textSize = Math.min(rect.width / 2 / gutterWidth, idealRowSize);
-		if (UIUtils.isJava2D(canvas))
-		{
-			fm = UIUtils.getMetrics(canvas, font.font, textSize);
-		}
 		float effectiveWidth = rect.width - gutterWidth * textSize;
 		float numCols = maxDepth;
 		float idealColSize = effectiveWidth / numCols;
@@ -165,6 +163,11 @@ public final class Cladogram extends AbstractTreeRenderer implements
 		float colSize = idealColSize;
 		if (keepAspectRatio)
 			rowSize = colSize = Math.min(idealRowSize, idealColSize);
+		if (UIUtils.isJava2D(canvas))
+		{
+			fm = UIUtils.getMetrics(canvas, font.font, textSize);
+		}
+		textSize = Math.min(textSize,rowSize);
 		dotWidth = Math.min(rowSize / 2, textSize / 2);
 		rad = dotWidth/2;
 		scaleX = colSize * numCols;

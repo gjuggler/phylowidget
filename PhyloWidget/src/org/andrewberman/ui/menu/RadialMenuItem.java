@@ -283,8 +283,16 @@ public final class RadialMenuItem extends MenuItem
 	
 	public boolean containsPoint(Point pt)
 	{
-		if (wedge == null) return false;
-		return wedge.contains(pt.x,pt.y);
+		if (!isVisible()) return false;
+//		if (wedge == null) return false;
+		boolean contained = false;
+		
+		if (wedge.contains(pt.x,pt.y))
+			contained = true;
+		Rectangle2D.Float temp = new Rectangle2D.Float(rectX,rectY,rectW,rectH);
+		if (temp.contains(pt.x,pt.y))
+			contained = true;
+		return contained;
 	}
 	
 	protected void keyHintEvent(char c)

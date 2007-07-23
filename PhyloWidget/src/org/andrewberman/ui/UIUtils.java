@@ -40,6 +40,8 @@ public class UIUtils
 	static Object cursorOwner;
 	static int curCursor;
 
+	static PApplet papplet;
+
 	/**
 	 * Calls the <code>lazyLoad()</code> method on all of the relevant
 	 * "singlet" classes that are required for the correct functioning of all UI
@@ -56,9 +58,13 @@ public class UIUtils
 	 */
 	public static void loadUISinglets(PApplet p)
 	{
-		FocusManager.lazyLoad(p);
-		EventManager.lazyLoad(p);
-		ShortcutManager.lazyLoad(p);
+		if (papplet != p)
+		{
+			FocusManager.lazyLoad(p);
+			EventManager.lazyLoad(p);
+			ShortcutManager.lazyLoad(p);
+			papplet = p;
+		}
 	}
 
 	/**
@@ -417,8 +423,8 @@ public class UIUtils
 	public static void screenToModel(Rectangle2D.Float rect)
 	{
 		/*
-		 * Strategy: Go through all points in the rectangle, transforming
-		 * each point into model coordinates. Then, find the smallest completely
+		 * Strategy: Go through all points in the rectangle, transforming each
+		 * point into model coordinates. Then, find the smallest completely
 		 * bounding rectangle in model space. Not simple, but it should work.
 		 */
 		tPoint.x = rect.x;
@@ -434,27 +440,27 @@ public class UIUtils
 		transform(modelviewInv, tPoint);
 		float x2 = tPoint.x;
 		float y2 = tPoint.y;
-		
+
 		tPoint.x = rect.x + rect.width;
 		tPoint.y = rect.y + rect.height;
 		transform(camera, tPoint);
 		transform(modelviewInv, tPoint);
 		float x3 = tPoint.x;
 		float y3 = tPoint.y;
-		
+
 		tPoint.x = rect.x;
 		tPoint.y = rect.y + rect.height;
 		transform(camera, tPoint);
 		transform(modelviewInv, tPoint);
 		float x4 = tPoint.x;
 		float y4 = tPoint.y;
-		
-		float loX = PApplet.min(new float[]{x1,x2,x3,x4});
-		float loY = PApplet.min(new float[]{y1,y2,y3,y4});
-		float hiX = PApplet.max(new float[]{x1,x2,x3,x4});
-		float hiY = PApplet.max(new float[]{y1,y2,y3,y4});
-		
-		rect.setFrameFromDiagonal(loX,loY,hiX,hiY);
+
+		float loX = PApplet.min(new float[] { x1, x2, x3, x4 });
+		float loY = PApplet.min(new float[] { y1, y2, y3, y4 });
+		float hiX = PApplet.max(new float[] { x1, x2, x3, x4 });
+		float hiY = PApplet.max(new float[] { y1, y2, y3, y4 });
+
+		rect.setFrameFromDiagonal(loX, loY, hiX, hiY);
 	}
 
 	/**
@@ -484,22 +490,26 @@ public class UIUtils
 		transform(modelview, pt);
 		transform(cameraInv, pt);
 	}
-	
+
 	/**
 	 * Convenience method for <code>resetMatrix(PGraphics pg)</code>.
-	 * @param p a PApplet instance
+	 * 
+	 * @param p
+	 *            a PApplet instance
 	 */
 	public static void resetMatrix(PApplet p)
 	{
 		resetMatrix(p.g);
 	}
-	
+
 	/**
-	 * Calls the correct method to reset the matrix of a PGraphics instance.
-	 * The main reason for this is that PGraphicsJava2D requires <code>resetMatrix()</code>,
-	 * while P3D and OpenGL require a <code>camera()</code> method, which Java2D unfortunately
-	 * doesn't implement. Should we really have to do the same thing in two different ways? Probably not,
-	 * But this seems to work well enough...
+	 * Calls the correct method to reset the matrix of a PGraphics instance. The
+	 * main reason for this is that PGraphicsJava2D requires
+	 * <code>resetMatrix()</code>, while P3D and OpenGL require a
+	 * <code>camera()</code> method, which Java2D unfortunately doesn't
+	 * implement. Should we really have to do the same thing in two different
+	 * ways? Probably not, But this seems to work well enough...
+	 * 
 	 * @param pg
 	 */
 	public static void resetMatrix(PGraphics pg)

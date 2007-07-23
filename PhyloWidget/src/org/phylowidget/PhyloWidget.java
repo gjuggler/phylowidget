@@ -39,10 +39,12 @@ public class PhyloWidget extends PApplet
 		this.size(500,500);
 		frameRate(30f);
 		
+		p = this;
+		
 		// Creates, manages, and renders trees.
-		trees = new TreeManager();
+		trees = new TreeManager(this);
 		// Creates and manages UI elements.
-		ui = new UIManager();
+		ui = new UIManager(this);
 		
 		trees.setup();
 		ui.setup();
@@ -53,7 +55,7 @@ public class PhyloWidget extends PApplet
 	public void draw()
 	{
 		background(255);
-		drawFrameRate();
+//		drawFrameRate();
 		translate(width/2,height/2);
 //		theta += 0.001;
 //		rotate(theta);

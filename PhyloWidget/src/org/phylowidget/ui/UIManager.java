@@ -24,9 +24,11 @@ import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.Tree;
 import org.phylowidget.tree.TreeNode;
 
+import processing.core.PApplet;
+
 public final class UIManager
 {
-	PhyloWidget p = PhyloWidget.p;
+	PApplet p;
 	
 	public FocusManager focus;
 	public EventManager event;
@@ -38,8 +40,9 @@ public final class UIManager
 	
 	PhyloContextMenu context;
 	
-	public UIManager()
+	public UIManager(PApplet p)
 	{
+		this.p = p;
 		UIUtils.loadUISinglets(p);
 		focus = FocusManager.instance;
 		event = EventManager.instance;

@@ -44,10 +44,10 @@ public class FocusManager implements FocusListener
 	
 	public static void lazyLoad(PApplet p)
 	{
-		if (instance == null)
-		{
+//		if (instance == null)
+//		{
 			instance = new FocusManager(p);
-		}
+//		}
 	}
 	
 	public boolean setFocus(Object o)

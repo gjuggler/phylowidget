@@ -91,7 +91,7 @@ public class Shortcut
 			label += KeyEvent.getModifiersExText(keyMask) + "+";
 		if (keyCode != 0)
 			label += KeyEvent.getKeyText(keyCode);
-		System.out.println(label);
+//		System.out.println(label);
 //		 System.out.println(KeyEvent.getModifiersExText(keyMask));
 		// System.out.println(KeyEvent.getKeyText(keyCode));
 	}

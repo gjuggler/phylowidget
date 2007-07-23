@@ -56,7 +56,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public static void lazyLoad(PApplet p)
 	{
-		if (instance == null)
+//		if (instance == null)
 			instance = new EventManager(p);
 	}
 

@@ -35,7 +35,7 @@ public class ShortcutManager implements KeyListener
 	
 	public static void lazyLoad(PApplet app)
 	{
-		if (instance == null)
+//		if (instance == null)
 			instance = new ShortcutManager(app);
 	}
 	

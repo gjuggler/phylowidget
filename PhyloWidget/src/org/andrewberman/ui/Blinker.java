@@ -45,7 +45,7 @@ public class Blinker extends Thread
 	
 	public void run()
 	{
-		while (this.isAlive())
+		while (!Thread.currentThread().isInterrupted())
 		{
 			try
 			{
@@ -62,10 +62,11 @@ public class Blinker extends Thread
 				}
 			} catch (InterruptedException e)
 			{
-				e.printStackTrace();
-				return;
+//				e.printStackTrace();
+				break;
 			}
 		}
+		yield();
 	}
 
 	public synchronized void setState(boolean state)

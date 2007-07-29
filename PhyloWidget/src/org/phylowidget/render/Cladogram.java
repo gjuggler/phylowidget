@@ -21,8 +21,7 @@ import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
 
-public final class Cladogram extends AbstractTreeRenderer implements
-		SettableRect
+public final class Cladogram extends AbstractTreeRenderer
 {
 	/**
 	 * Another optimization method -- if we're zoomed out so far that rows
@@ -61,9 +60,9 @@ public final class Cladogram extends AbstractTreeRenderer implements
 	protected Point ptemp = new Point(0, 0);
 	protected Point ptemp2 = new Point(0, 0);
 
-	public Cladogram(PGraphics pg)
+	public Cladogram()
 	{
-		super(pg);
+		super();
 	}
 
 	public void layout()
@@ -174,8 +173,8 @@ public final class Cladogram extends AbstractTreeRenderer implements
 		scaleY = rowSize * numRows;
 		dx = (rect.width - scaleX - gutterWidth * textSize - dotWidth) / 2;
 		dy = (rect.height - scaleY) / 2;
-		dx += rect.getCenterX() - rect.width / 2;
-		dy += rect.getCenterY() - rect.height / 2;
+		dx += rect.getX();
+		dy += rect.getY();
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 		/*
 		 * Update all the XYRange objects.
@@ -190,33 +189,32 @@ public final class Cladogram extends AbstractTreeRenderer implements
 			if (n.getParent() != TreeNode.NULL_PARENT)
 				parent = (RenderNode) n.getParent();
 			else
+			{
 				parent = n;
-			parent.x = parent.unscaledX * scaleX + dx;
-			parent.y = parent.unscaledY * scaleY + dy;
+				parent.x = parent.unscaledX * scaleX + dx;
+				parent.y = parent.unscaledY * scaleY + dy;
+			}
 			switch (r.type)
 			{
-				case (AbstractTreeRenderer.NODE):
+				case (Abstract.NODE):
 					r.loX = Math.min(n.x-rad,parent.x-rad);
 					r.hiX = Math.max(n.x+rad,parent.x+rad);
 					r.loY = Math.min(n.y-rad,parent.y-rad);
 					r.hiY = Math.max(n.y+rad,parent.y+rad);
-//					r.loX = ptemp.x - dotWidth / 2;
-//					r.hiX = ptemp.x + dotWidth / 2;
-//					r.loY = ptemp.y - dotWidth / 2;
-//					r.hiY = ptemp.y + dotWidth / 2;
 					break;
-				case (AbstractTreeRenderer.LABEL):
-					r.loX = ptemp.x + dotWidth;
+				case (Abstract.LABEL):
+					r.loX = n.x + dotWidth;
 					float textHeight = (font.ascent() + font.descent())
 							* textSize;
-					r.loY = ptemp.y - textHeight / 2;
-					r.hiY = ptemp.y + textHeight / 2;
+					r.loY = n.y - textHeight / 2;
+					r.hiY = n.y + textHeight / 2;
 					float width = 0;
 					width = n.unitTextWidth * textSize;
 					r.hiX = r.loX + width;
 					break;
 			}
 		}
+		list.sort();
 //		skipNodes();
 	}
 	

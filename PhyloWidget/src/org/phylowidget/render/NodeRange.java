@@ -18,8 +18,6 @@ public final class NodeRange implements ItemI
 	public int type=0;
 	public static final int NODE = 0;
 	public static final int LABEL = 1;
-//	public static final int LINE_UP = 2;
-//	public static final int LINE_ACROSS = 3;
 
 	public float loX, hiX, loY, hiY = 0;
 	public static final int LO_X = 0;

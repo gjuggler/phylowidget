@@ -54,7 +54,8 @@ import processing.core.PGraphicsJava2D;
  * 
  * @author Greg
  */
-public class TextField implements Positionable, UIObject
+public class TextField extends AbstractUIObject implements Positionable,
+		UIObject
 {
 	static final int LEFT = -1;
 	static final int RIGHT = 1;
@@ -150,7 +151,7 @@ public class TextField implements Positionable, UIObject
 		mouseDragging = false;
 		shiftPressed = false;
 	}
-	
+
 	protected void layout()
 	{
 		/*
@@ -175,7 +176,8 @@ public class TextField implements Positionable, UIObject
 
 	public void draw()
 	{
-		if (hidden) return;
+		if (hidden)
+			return;
 		calculateViewport();
 		// hint();
 		canvas.pushMatrix();
@@ -203,21 +205,21 @@ public class TextField implements Positionable, UIObject
 		hidden = true;
 		UIUtils.releaseCursor(this, canvas);
 	}
-	
+
 	public void show()
 	{
 		hidden = false;
 	}
-	
+
 	protected void drawToCanvas()
 	{
 		int w = (int) (width + OFFSET * 2);
 		int h = (int) (height + OFFSET * 2);
-//		canvas.pushMatrix();
-//		resetMatrix();
-		canvas.image(pg, (int)(x - OFFSET), (int)(y - OFFSET), w, h,
-				0, 0, w, h);
-//		canvas.popMatrix();
+		// canvas.pushMatrix();
+		// resetMatrix();
+		canvas.image(pg, (int) (x - OFFSET), (int) (y - OFFSET), w, h, 0, 0, w,
+				h);
+		// canvas.popMatrix();
 	}
 
 	protected void resetMatrix()
@@ -282,7 +284,7 @@ public class TextField implements Positionable, UIObject
 		if (blinker.isOn && FocusManager.instance.isFocused(this)
 				&& selHi - selLo == 0)
 		{
-//			System.out.println("Heyoo");
+			// System.out.println("Heyoo");
 			pg.g2.setStroke(style.stroke);
 			pg.g2.setPaint(Color.black);
 			int caretX = (int) (x + pad + getPosForIndex(caret));
@@ -327,7 +329,8 @@ public class TextField implements Positionable, UIObject
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_OFF);
 	}
 
 	protected void unhint()
@@ -412,19 +415,19 @@ public class TextField implements Positionable, UIObject
 		this.x = x - pad;
 		this.y = y - ascent - pad;
 	}
-	
+
 	public void setTextSize(float textSize)
 	{
 		this.fontSize = textSize;
 		layout();
 	}
-	
+
 	public void setWidth(float width)
 	{
 		this.width = width;
 		layout();
 	}
-	
+
 	protected void selectAll()
 	{
 		selAnchor = 0;
@@ -544,6 +547,7 @@ public class TextField implements Positionable, UIObject
 			anchorPos = 0;
 
 		blinker.reset();
+		fireEvent(UIEvent.TEXT_CARET);
 	}
 
 	protected void insert(String s, int pos)
@@ -551,12 +555,14 @@ public class TextField implements Positionable, UIObject
 		text.insert(pos, s);
 		moveChar(s.length());
 		// textChanged();
+		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
 	protected void insertCharAt(char c, int pos)
 	{
 		text.insert(pos, c);
 		moveChar(1);
+		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
 	protected void backspaceAt(int pos)
@@ -566,6 +572,7 @@ public class TextField implements Positionable, UIObject
 			return;
 		text.deleteCharAt(pos - 1);
 		moveChar(-1);
+		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
 	protected void deleteAt(int pos)
@@ -575,6 +582,7 @@ public class TextField implements Positionable, UIObject
 			return;
 		text.deleteCharAt(pos);
 		moveChar(0);
+		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
 	protected void deleteSelection()
@@ -585,12 +593,14 @@ public class TextField implements Positionable, UIObject
 		// // moveCaretTo.
 		moveCaretTo(selLo);
 		clearSelection();
+		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
 	protected void clearSelection()
 	{
 		selHi = selLo = caret;
 		selAnchor = caret;
+		fireEvent(UIEvent.TEXT_SELECTION);
 	}
 
 	protected void cut()
@@ -634,14 +644,15 @@ public class TextField implements Positionable, UIObject
 
 	public void keyEvent(KeyEvent e)
 	{
-		if (hidden) return;
+		if (hidden)
+			return;
 		// System.out.println(e);
 		int code = e.getKeyCode();
 		boolean meta = ((e.getModifiersEx() & metaMask) != 0);
 		boolean alt = ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) == KeyEvent.ALT_DOWN_MASK);
 		boolean shift = ((e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) == KeyEvent.SHIFT_DOWN_MASK);
 		shiftPressed = shift;
-		
+
 		/*
 		 * Do some stuff to appease the OSX junkies.
 		 */
@@ -752,14 +763,15 @@ public class TextField implements Positionable, UIObject
 
 	protected boolean withinInnerRect(Point pt)
 	{
-		buffRect.setRect(x+pad, y+pad, width, height);
+		buffRect.setRect(x + pad, y + pad, width, height);
 		return buffRect.contains(pt);
 	}
 
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
-		if (hidden) return;
-		
+		if (hidden)
+			return;
+
 		Point p1;
 		if (useCameraCoordinates)
 			p1 = model;
@@ -871,6 +883,4 @@ public class TextField implements Positionable, UIObject
 
 		}
 	}
-
-
 }

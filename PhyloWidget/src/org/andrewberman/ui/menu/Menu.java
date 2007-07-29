@@ -8,6 +8,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 
 import org.andrewberman.tween.PropertyTween;
 import org.andrewberman.tween.Tween;
@@ -16,8 +17,10 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ShortcutManager;
+import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PApplet;
@@ -85,6 +88,10 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 
 	public StyleSet style;
 
+	/**
+	 * Our UIListeners.
+	 */
+	protected ArrayList listeners = new ArrayList(1);
 	/**
 	 * The current "canvas" PApplet object.
 	 */
@@ -292,6 +299,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 //		justShown = true;
 		if (focusOnShow)
 			FocusManager.instance.setFocus(this);
+		fireEvent(UIEvent.MENU_SHOWN);
 	}
 
 	public void hide()
@@ -301,6 +309,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		UIUtils.releaseCursor(this, canvas);
 		if (focusOnShow)
 			FocusManager.instance.removeFromFocus(this);
+		fireEvent(UIEvent.MENU_HIDDEN);
 	}
 
 	public boolean isRootMenu()
@@ -642,4 +651,28 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 
 	}
 
+	/*
+	 * No multipler inheritance, so I had to copy this boilerplate
+	 * code from AbstractUIObject instead of inheriting it. Crap!
+	 */
+	
+	public void addListener(UIListener o)
+	{
+		listeners.add(o);
+	}
+	
+	public void removeListener(UIListener o)
+	{
+		listeners.remove(o);
+	}
+	
+	public void fireEvent(int id)
+	{
+		UIEvent e = new UIEvent(this,id);
+		for (int i=0; i < listeners.size(); i++)
+		{
+			((UIListener)listeners.get(i)).uiEvent(e);
+		}
+	}
+	
 }

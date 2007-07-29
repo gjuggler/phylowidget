@@ -5,9 +5,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Action;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
@@ -365,6 +367,7 @@ public abstract class MenuItem implements Positionable, Sizable
 			menuTriggerLogic();
 		} else
 		{
+			menu.fireEvent(UIEvent.MENU_ACTIONPERFORMED);
 			if (menu.hideOnAction)
 				menu.hide();
 			if (action != null)
@@ -551,7 +554,7 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
-	protected void keyEvent(KeyEvent e)
+	public void keyEvent(KeyEvent e)
 	{
 		for (int i = 0; i < items.size(); i++)
 		{

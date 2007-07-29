@@ -14,6 +14,7 @@ import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RenderNodeFactory;
 import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.Tree;
+import org.phylowidget.ui.Navigator;
 
 import processing.core.PApplet;
 
@@ -25,7 +26,8 @@ public class TreeManager implements SettableRect
 	protected static Rectangle2D.Float cameraRect;
 	protected ArrayList trees;
 	protected ArrayList renderers;
-
+	
+//	public Navigator nav;
 	public RandomTreeMutator mutator;
 	
 	public TreeManager(PApplet p)
@@ -40,6 +42,8 @@ public class TreeManager implements SettableRect
 		cameraRect = new Rectangle2D.Float(0,0,0,0);
 		camera = new RectMover(p,this);
 		camera.fillScreen();
+		
+//		nav = new Navigator(p);
 	}
 	
 	public void update()
@@ -49,8 +53,7 @@ public class TreeManager implements SettableRect
 		for (int i=0; i < renderers.size(); i++)
 		{
 			TreeRenderer r = (TreeRenderer)renderers.get(i);
-			r.setRect(cameraRect.x+cameraRect.width/2,cameraRect.y+cameraRect.height/2,cameraRect.width,cameraRect.height);
-			r.render();
+			r.render(p.g, cameraRect.x,cameraRect.y,cameraRect.width,cameraRect.height);
 		}
 	}
 	
@@ -106,9 +109,11 @@ public class TreeManager implements SettableRect
 		Tree t = new Tree(RenderNodeFactory.instance(),s);
 		trees.add(t);
 		
-		TreeRenderer c = new Cladogram(p.g);
+		TreeRenderer c = new Cladogram();
 		c.setTree(t);
 		renderers.add(c);
+		
+//		nav.setRenderer(c);
 		
 		mutator = new RandomTreeMutator(t);
 	}
@@ -116,10 +121,10 @@ public class TreeManager implements SettableRect
 	/**
 	 * Method to respond to our rectangle camera mover thingy.
 	 */
-	public void setRect(float cx, float cy, float w, float h)
+	public void setRect(float x, float y, float w, float h)
 	{
 		if (cameraRect != null)
-			cameraRect.setFrameFromCenter(cx, cy, cx - w/2, cy - h/2);
+			cameraRect.setFrame(x,y,w,h);
 	}
 	
 	public static Rectangle2D.Float getVisibleRect()

@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
+import org.andrewberman.ui.UIEvent;
 import org.phylowidget.render.NodeRange;
 
 import processing.core.PApplet;
@@ -14,6 +15,7 @@ public class PhyloTextField extends TextField
 {
 
 	NodeRange curRange;
+	String oldName;
 	
 	public PhyloTextField(PApplet p)
 	{
@@ -31,6 +33,7 @@ public class PhyloTextField extends TextField
 	protected void startEditing(NodeRange r)
 	{
 		curRange = r;
+		oldName = r.node.getName();
 		reset();
 		hide();
 		text.replace(0, text.length(), r.node.getName());
@@ -48,14 +51,29 @@ public class PhyloTextField extends TextField
 	void hideAndCommit()
 	{
 		hide();
-		curRange.node.setName(getText());
-		curRange.render.layout();
 	}
 	
 	void hideAndReject()
 	{
 		hide();
+		setName(oldName);
 		// Don't set the text.
+	}
+	
+	void setName(String s)
+	{
+		curRange.node.setName(s);
+		curRange.render.layout();
+	}
+	
+	public void fireEvent(int id)
+	{
+		super.fireEvent(id);
+		
+		if (id == UIEvent.TEXT_VALUE)
+		{
+			setName(getText());
+		}
 	}
 	
 	public void keyEvent(KeyEvent e)

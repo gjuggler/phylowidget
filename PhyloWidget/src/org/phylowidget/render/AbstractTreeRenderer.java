@@ -34,6 +34,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 
 	public static final int LABEL = 1;
 
+	protected PApplet p;
 	protected PGraphics canvas;
 
 	/**
@@ -104,16 +105,17 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 
 	protected boolean sorted = false;
 
-	public AbstractTreeRenderer(PGraphics pg)
+	public AbstractTreeRenderer()
 	{
-		canvas = pg;
 		rect = new Rectangle2D.Float(0, 0, 0, 0);
 		font = FontLoader.vera;
 		style = RenderStyleSet.defaultStyle();
 	}
 
-	public void render()
+	public void render(PGraphics canvas, float x, float y, float w, float h)
 	{
+		this.canvas = canvas;
+		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
 		synchronized (tree)
@@ -165,8 +167,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		{
 			RenderNode n = (RenderNode) nodes.get(i);
 			NodeRange r = new NodeRange();
-			r.loX = r.hiX = n.unscaledX;
-			r.loY = r.hiY = n.unscaledY;
+			r.loX = n.unscaledX;
+			r.hiX = n.unscaledX + .001f;
+			r.loY = n.unscaledY;
+			r.hiY = n.unscaledY + .001f;
 			r.type = NodeRange.NODE;
 			r.node = n;
 			r.render = this;
@@ -186,7 +190,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		}
 		list.sortFull();
 	}
-
+	
 	/**
 	 * Draws this renderer's view to the canvas.
 	 */
@@ -219,7 +223,8 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 		float hoverWidth = style.hoverStroke * getNodeRadius()/10;
 		hoverWidth = Math.max(hoverWidth, 3);
 		hoverWidth *= HoverHalo.hoverMult;
-		
+//		float regWidth = 1f;
+//		float hoverWidth = 3f;
 		int size = inRange.size();
 		for (int i = 0; i < size; i++)
 		{
@@ -227,10 +232,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 			RenderNode n = r.node;
 			switch (r.type)
 			{
-				case (AbstractTreeRenderer.LABEL):
+				case (Abstract.LABEL):
 					drawLabel(n);
 					break;
-				case (AbstractTreeRenderer.NODE):
+				case (Abstract.NODE):
 					canvas.strokeWeight(1f);
 					if (n.hovered)
 					{					
@@ -304,11 +309,6 @@ public abstract class AbstractTreeRenderer implements TreeRenderer
 	public Tree getTree()
 	{
 		return tree;
-	}
-
-	public void setRect(float cx, float cy, float w, float h)
-	{
-		rect.setFrameFromCenter(cx, cy, cx - w / 2, cy - h / 2);
 	}
 	
 	public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)

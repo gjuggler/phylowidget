@@ -21,7 +21,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 	Point2D.Float pt = new Point2D.Float(0, 0);
 	protected int NUDGE_DISTANCE;
 	protected float NUDGE_SCALE;
-
+	
 	protected boolean mouseInside = false;
 	public boolean enableSideScrolling = true;
 	

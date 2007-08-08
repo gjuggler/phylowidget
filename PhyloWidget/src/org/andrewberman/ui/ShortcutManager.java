@@ -51,6 +51,13 @@ public class ShortcutManager implements KeyListener
 		}
 	}
 
+	public Shortcut createShortcut(String s)
+	{
+		Shortcut sh = new Shortcut(s);
+		add(sh);
+		return sh;
+	}
+	
 	public void add(Shortcut key)
 	{
 		keys.add(key);
@@ -68,12 +75,8 @@ public class ShortcutManager implements KeyListener
 		for (int i=0; i < keys.size(); i++)
 		{
 			Shortcut key = (Shortcut) keys.get(i);
-			boolean modMatch = (e.getModifiersEx() == key.keyMask);
-			if (modMatch &&
-					e.getKeyCode() == key.keyCode)
-			{
+			if (key.matchesKeyEvent(e))
 				key.performAction();
-			}
 		}
 	}
 	

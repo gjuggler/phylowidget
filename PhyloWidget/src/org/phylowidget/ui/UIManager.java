@@ -37,8 +37,8 @@ public final class UIManager
 	public NearestNodeFinder nearest;
 	
 	PhyloTextField text;
-	
 	PhyloContextMenu context;
+	PhyloToolDock dock;
 	
 	public UIManager(PApplet p)
 	{
@@ -76,13 +76,6 @@ public final class UIManager
 		text.text.insert(0, "Hello, world! How are you today?");
 //		focus.setModalFocus(text);
 		
-//		Dock dock = new Dock(p);
-//		dock.add("Pencil","pencil2.png");
-//		dock.add("Line","line.png");
-//		dock.add("Magnifier","magnifier.png");
-//		dock.add("Points","points.png");
-//		dock.add("Connected Lines","connectedlines.png");
-		
 		context = new PhyloContextMenu(p);
 		context.thetaLo = p.THIRD_PI/2;
 		context.thetaHi = p.TWO_PI+p.THIRD_PI/2;
@@ -97,6 +90,8 @@ public final class UIManager
 		context.add(context.create("Add",'a'));
 		context.get("Add").add(context.create("Sister Node",'s')).setAction(this, "addSisterNode");
 		context.get("Add").add(context.create("Child Node",'c')).setAction(this, "addChildNode");
+		
+		dock = new PhyloToolDock(p);
 		
 	}
 	

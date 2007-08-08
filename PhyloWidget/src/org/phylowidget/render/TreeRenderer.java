@@ -118,8 +118,9 @@ public interface TreeRenderer
 
 		protected boolean sorted = false;
 
-		public Abstract()
+		public Abstract(PApplet p)
 		{
+			this.p = p;
 			rect = new Rectangle2D.Float(0, 0, 0, 0);
 			font = FontLoader.vera;
 			style = RenderStyleSet.defaultStyle();
@@ -135,7 +136,7 @@ public interface TreeRenderer
 			{
 				if (tree.modCount != lastModCount)
 				{
-					tree.recalculateStuff();
+//					tree.recalculateStuff();
 					update();
 					lastModCount = tree.modCount;
 				}

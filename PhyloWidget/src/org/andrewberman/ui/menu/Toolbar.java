@@ -242,12 +242,12 @@ public class Toolbar extends Menu
 
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
+		super.getRect(rect, buff);
 		if (isVisible())
 		{
 			buff.setRect(x, y, width, height);
 			Rectangle2D.union(rect, buff, rect);
 		}
-		super.getRect(rect, buff);
 	}
 
 	protected void itemMouseEvent(MouseEvent e, Point pt)
@@ -259,8 +259,7 @@ public class Toolbar extends Menu
 
 	protected boolean containsPoint(Point pt)
 	{
-		buffRect.setRect(0, 0, width, height);
-
+		buffRect.setRect(x, y, width, height);
 		return buffRect.contains(pt);
 	}
 }

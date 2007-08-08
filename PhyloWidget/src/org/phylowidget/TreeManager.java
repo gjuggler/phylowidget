@@ -6,15 +6,12 @@ import java.util.ArrayList;
 
 import org.andrewberman.camera.RectMover;
 import org.andrewberman.camera.SettableRect;
-import org.andrewberman.ui.Point;
-import org.phylowidget.render.AbstractTreeRenderer;
 import org.phylowidget.render.Cladogram;
-import org.phylowidget.render.NodeRange;
+import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.tree.RenderNodeFactory;
 import org.phylowidget.tree.RandomTreeMutator;
+import org.phylowidget.tree.RenderNodeFactory;
 import org.phylowidget.tree.Tree;
-import org.phylowidget.ui.Navigator;
 
 import processing.core.PApplet;
 
@@ -22,7 +19,7 @@ public class TreeManager implements SettableRect
 {
 	protected PApplet p;
 	
-	protected static RectMover camera;
+	public static RectMover camera;
 	protected static Rectangle2D.Float cameraRect;
 	protected ArrayList trees;
 	protected ArrayList renderers;
@@ -109,7 +106,7 @@ public class TreeManager implements SettableRect
 		Tree t = new Tree(RenderNodeFactory.instance(),s);
 		trees.add(t);
 		
-		TreeRenderer c = new Cladogram();
+		TreeRenderer c = new DiagonalCladogram(p);
 		c.setTree(t);
 		renderers.add(c);
 		

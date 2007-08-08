@@ -46,7 +46,7 @@ public class Shortcut
 
 	public Shortcut(String s)
 	{
-		ShortcutManager.instance.add(this);
+//		ShortcutManager.instance.add(this);
 		parseString(s);
 	}
 
@@ -96,6 +96,16 @@ public class Shortcut
 		// System.out.println(KeyEvent.getKeyText(keyCode));
 	}
 
+	public boolean matchesKeyEvent(KeyEvent e)
+	{
+		boolean modMatch = (e.getModifiersEx() == keyMask);
+		if (modMatch &&
+				e.getKeyCode() == keyCode)
+			return true;
+		else
+			return false;
+	}
+	
 	public void performAction()
 	{
 		if (action != null)

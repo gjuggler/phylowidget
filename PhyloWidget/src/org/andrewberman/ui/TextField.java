@@ -54,8 +54,7 @@ import processing.core.PGraphicsJava2D;
  * 
  * @author Greg
  */
-public class TextField extends AbstractUIObject implements Positionable,
-		UIObject
+public class TextField extends AbstractUIObject implements Positionable
 {
 	static final int LEFT = -1;
 	static final int RIGHT = 1;
@@ -98,6 +97,12 @@ public class TextField extends AbstractUIObject implements Positionable,
 	 * coordinates, i.e. it won't reset the camera before it draws itself.
 	 */
 	public boolean useCameraCoordinates = true;
+	/**
+	 * If set to true, then this text field will always have its text anchored
+	 * to the left. If you're constantly resizing the text field to fit the text
+	 * and don't want it looking funky, set this to true.
+	 */
+	public boolean alwaysAnchorLeft = false;
 
 	public TextField(PApplet p)
 	{
@@ -541,6 +546,15 @@ public class TextField extends AbstractUIObject implements Positionable,
 			anchorRight = true;
 		}
 
+		/*
+		 * A quick hack to allow the alwaysAnchorLeft override to work.
+		 */
+		if (alwaysAnchorLeft)
+		{
+			anchorRight = false;
+			anchorPos = 0;
+		}
+
 		if (anchorPos > text.length())
 			anchorPos = text.length();
 		else if (anchorPos < 0)
@@ -737,6 +751,10 @@ public class TextField extends AbstractUIObject implements Positionable,
 				else
 					moveChar(dir);
 			}
+			if (!Character.isISOControl(e.getKeyChar()))
+			{
+				e.consume();
+			}
 		} else if (e.getID() == KeyEvent.KEY_TYPED)
 		{
 			char c = e.getKeyChar();
@@ -751,6 +769,11 @@ public class TextField extends AbstractUIObject implements Positionable,
 				if (selHi - selLo != 0)
 					deleteSelection();
 				insertCharAt(c, caret);
+				/*
+				 * Consume the event so the ToolManager doesn't dispatch the
+				 * event to any tools.
+				 */
+				e.consume();
 			}
 		}
 	}

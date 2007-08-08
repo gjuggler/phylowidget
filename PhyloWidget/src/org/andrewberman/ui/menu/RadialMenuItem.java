@@ -295,18 +295,20 @@ public final class RadialMenuItem extends MenuItem
 		return contained;
 	}
 	
-	protected void keyHintEvent(char c)
+	protected void keyHintEvent(KeyEvent e)
 	{
 		if (!isVisible()) return;
-		
+		char c = (char)e.getKeyChar();
 		if (Character.toLowerCase(c) == Character.toLowerCase(hint))
+		{
 			this.performAction();
-		else
+			e.consume();
+		} else
 		{
 			for (int i=0; i < items.size(); i++)
 			{
 				RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-				rmi.keyHintEvent(c);
+				rmi.keyHintEvent(e);
 			}
 		}
 	}

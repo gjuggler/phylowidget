@@ -6,6 +6,7 @@ import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PGraphicsJava2D;
@@ -49,6 +50,28 @@ public class DockItem extends MenuItem implements TweenListener
 
 		if (icon != null)
 		{
+			/*
+			 * Figure out the correctly scaled size of the icon.
+			 */
+			float pad = menu.style.padX;
+			float effectiveW = width - pad*2;
+			float effectiveH = height - pad*2;
+			float xOffset = pad;
+			float yOffset = pad;
+			float w = 0;
+			float h = 0;
+			if (icon.width < icon.height)
+			{
+				h = effectiveH;
+				w = icon.width * h / icon.height;
+				xOffset = (effectiveW-w) / 2 + pad;
+			} else
+			{
+				w = effectiveW;
+				h = icon.height * w / icon.width;
+				yOffset = (effectiveH-h) / 2 + pad;
+			}
+//			menu.canvas.rect(x, y, width, height);
 			if (UIUtils.isJava2D(menu.canvas))
 			{
 				/*
@@ -57,7 +80,7 @@ public class DockItem extends MenuItem implements TweenListener
 				 * 
 				 * NOTE: the tint() function is VERY slow with Java2D, so don't use it!
 				 */
-				menu.canvas.image(icon, x, y, width, height);
+				menu.canvas.image(icon, x+xOffset, y+yOffset, w, h);
 			} else
 			{
 				/*
@@ -66,7 +89,8 @@ public class DockItem extends MenuItem implements TweenListener
 				 */
 				int alf = (int) (menu.alpha * 255);
 				menu.canvas.tint(255, alf);
-				menu.canvas.image(icon, x, y, width, height);
+//				float pad = menu.style.padX;
+//				menu.canvas.image(icon, x+pad, y+pad, width-2*pad, height-2*pad);
 				menu.canvas.noTint();
 			}
 		}
@@ -85,15 +109,16 @@ public class DockItem extends MenuItem implements TweenListener
 		tween.continueTo(w);
 	}
 
-	// public void itemMouseEvent(MouseEvent e, Point pt)
-	// {
-	// if (containsPoint(pt))
-	// mouseInside = true;
-	// else
-	// mouseInside = false;
-	// super.itemMouseEvent(e,pt);
-	// }
-
+	public void setState(int state)
+	{
+		if (state == this.state) return;
+		super.setState(state);
+		if (state == MenuItem.DOWN)
+		{
+			this.menu.fireEvent(UIEvent.DOCK_ITEM_SELECTED);
+		}
+	}
+	
 	protected void performAction()
 	{
 		super.performAction();

@@ -15,6 +15,7 @@ import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
@@ -58,7 +59,7 @@ public class Dock extends Menu
 	/**
 	 * The amount by which the icons "bulge" when approached.
 	 */
-	public float bulgeAmount = .7f;
+	public float bulgeAmount = .75f;
 	/**
 	 * The "rolloff" factor for the icons' bulge. Play around with it to find a
 	 * value that you like.
@@ -163,7 +164,7 @@ public class Dock extends Menu
 	{
 		// Docks never hide.
 	}
-
+	
 	float mousePos()
 	{
 		return rotation.getMousePos(mousePt);
@@ -181,6 +182,12 @@ public class Dock extends Menu
 		layout();
 	}
 
+	public void setWidth(float newWidth)
+	{
+		origWidth = newWidth;
+		layout();
+	}
+	
 	public void setInset(float inset)
 	{
 		this.inset = inset;
@@ -193,6 +200,14 @@ public class Dock extends Menu
 		layout();
 	}
 
+	public DockItem getSelectedItem()
+	{
+		if (lastPressed == null)
+			return null;
+		else
+			return (DockItem)lastPressed;
+	}
+	
 	public void drawBefore()
 	{
 		layout();
@@ -237,7 +252,7 @@ public class Dock extends Menu
 			canvas.endShape();
 		}
 
-		if (currentlyHovered != null && currentlyHovered != this)
+		if (currentlyHovered != null)
 		{
 			MenuItem i = currentlyHovered;
 			float ascent = UIUtils.getTextAscent(menu.canvas.g,
@@ -297,7 +312,7 @@ public class Dock extends Menu
 			pg.fill(menu.canvas.color(c.getRed(), c.getGreen(), c.getBlue(),
 					alpha));
 
-			float height = i.getHeight() / 15;
+			float height = i.getWidth() / 8;
 			switch (rotation.rot)
 			{
 				case (LEFT):

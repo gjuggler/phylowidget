@@ -22,9 +22,9 @@ public class TreeNode implements Comparable
 	 * Cached values. Each of these needs to be percolated upwards when a part
 	 * of the tree below this node is altered.
 	 */
-	protected int numLeaves = 1;
-	protected int numDescendants = 1;
-	protected int maxDepth = 1;
+	protected int numLeaves = 0;
+	protected int numDescendants = 0;
+	protected int maxDepth = 0;
 	protected float maxHeight = 0;
 
 	/**
@@ -82,13 +82,13 @@ public class TreeNode implements Comparable
 	
 	int calcMaxDepth()
 	{
-		if (children.size() == 0)
+		if (isLeaf())
 		{
-			maxDepth = 1;
+			maxDepth = 0;
 			return maxDepth;
 		} else
 		{
-			int max = 1;
+			int max = 0;
 			for (int i=0; i < children.size(); i++)
 			{
 				TreeNode n = (TreeNode) children.get(i);
@@ -124,7 +124,7 @@ public class TreeNode implements Comparable
 	
 	int calcNumDescendants()
 	{
-		int sum = 1;
+		int sum = 0;
 		for (int i=0; i < children.size(); i++)
 		{
 			TreeNode n = (TreeNode)children.get(i);
@@ -143,6 +143,8 @@ public class TreeNode implements Comparable
 			TreeNode n = (TreeNode)children.get(i);
 			sum += n.calcNumLeaves();
 		}
+		numLeaves = sum;
+//		System.out.println(name + " " +sum);
 		return sum;
 	}
 	

@@ -7,7 +7,6 @@ import org.andrewberman.tween.TweenQuad;
 
 public abstract class Camera implements TweenListener
 {
-
 	protected Tween xTween;
 	protected Tween yTween;
 	protected Tween zTween;
@@ -47,6 +46,11 @@ public abstract class Camera implements TweenListener
 		zTween.continueTo(zTween.getFinish() * factor);
 	}
 
+	public void zoomTo(float z)
+	{
+		zTween.continueTo(z);
+	}
+	
 	public void nudge(float dx, float dy)
 	{
 		nudgeTo(xTween.getFinish() + dx, yTween.getFinish() + dy);
@@ -58,6 +62,20 @@ public abstract class Camera implements TweenListener
 		yTween.continueTo(y);
 	}
 
+	public void skipTo(float x, float y)
+	{
+		nudgeTo(x,y);
+		xTween.fforward();
+		yTween.fforward();
+	}
+	
+	public void fforward()
+	{
+		xTween.fforward();
+		yTween.fforward();
+		zTween.fforward();
+	}
+	
 	/*
 	 * These methods should be overridden with something that makes sense.
 	 */

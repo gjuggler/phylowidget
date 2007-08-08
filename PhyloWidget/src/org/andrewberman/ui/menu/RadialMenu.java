@@ -17,7 +17,7 @@ import org.andrewberman.ui.UIUtils;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
-public class RadialMenu extends Menu implements KeyListener
+public class RadialMenu extends Menu
 {
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
@@ -36,8 +36,6 @@ public class RadialMenu extends Menu implements KeyListener
 	public RadialMenu(PApplet p)
 	{
 		super(p);
-
-		p.addKeyListener(this);
 	}
 
 	protected void setOptions()
@@ -157,14 +155,14 @@ public class RadialMenu extends Menu implements KeyListener
 	public void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-//		float maxRadius = getMaxVisibleRadius();
-//		inner.setFrameFromCenter(x, y, x - innerRadius, y - innerRadius);
-//		outer.setFrameFromCenter(x, y, x - maxRadius, y - maxRadius);
-//		float outerLimit = Math.max(5 * radius, maxRadius + 25);
-//		max.setFrameFromCenter(x, y, x - outerLimit, y - outerLimit);
-//		boolean in = inner.contains(pt.x, pt.y);
-//		boolean out = outer.contains(pt.x, pt.y);
-//		boolean inMax = max.contains(pt.x, pt.y);
+		// float maxRadius = getMaxVisibleRadius();
+		// inner.setFrameFromCenter(x, y, x - innerRadius, y - innerRadius);
+		// outer.setFrameFromCenter(x, y, x - maxRadius, y - maxRadius);
+		// float outerLimit = Math.max(5 * radius, maxRadius + 25);
+		// max.setFrameFromCenter(x, y, x - outerLimit, y - outerLimit);
+		// boolean in = inner.contains(pt.x, pt.y);
+		// boolean out = outer.contains(pt.x, pt.y);
+		// boolean inMax = max.contains(pt.x, pt.y);
 		getRect(myRect, buffRect);
 		float dist = myRect.distToPoint(pt);
 		if (dist < 100)
@@ -178,23 +176,20 @@ public class RadialMenu extends Menu implements KeyListener
 		}
 	}
 
-	public void keyPressed(KeyEvent e)
+	public void keyEvent(KeyEvent e)
 	{
-	}
-
-	public void keyReleased(KeyEvent e)
-	{
-	}
-
-	public void keyTyped(KeyEvent e)
-	{
+		if (!isVisible()) return;
 		/*
 		 * Pass this on to sub-items.
 		 */
-		for (int i = 0; i < items.size(); i++)
+		if (e.getID() == KeyEvent.KEY_TYPED)
 		{
-			RadialMenuItem item = (RadialMenuItem) items.get(i);
-			item.keyHintEvent(e.getKeyChar());
+			for (int i = 0; i < items.size(); i++)
+			{
+				RadialMenuItem item = (RadialMenuItem) items.get(i);
+				item.keyHintEvent(e);
+			}
 		}
+		e.consume();
 	}
 }

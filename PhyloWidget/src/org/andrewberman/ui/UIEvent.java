@@ -15,7 +15,7 @@ public class UIEvent extends AWTEvent
 	public static final int MENU_HIDDEN = 4;
 	public static final int MENU_ACTIONPERFORMED = 7;
 	
-	public static final int DOCK_SELECTED = 8;
+	public static final int DOCK_ITEM_SELECTED = 8;
 	public static final int DOCK_ACTIVATED = 9;
 	public static final int DOCK_DEACTIVATED = 10;
 	

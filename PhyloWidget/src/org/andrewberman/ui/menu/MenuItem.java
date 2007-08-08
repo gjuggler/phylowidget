@@ -9,6 +9,7 @@ import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Action;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
@@ -85,7 +86,8 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	public MenuItem setShortcut(String s)
 	{
-		shortcut = new Shortcut(s);
+		shortcut = ShortcutManager.instance.createShortcut(s);
+//		shortcut = new Shortcut(s);
 		if (action != null)
 			shortcut.action = action;
 		menu.layout();

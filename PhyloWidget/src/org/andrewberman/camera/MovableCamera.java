@@ -21,16 +21,20 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 	Point2D.Float pt = new Point2D.Float(0, 0);
 	protected int NUDGE_DISTANCE;
 	protected float NUDGE_SCALE;
-	
+
 	protected boolean mouseInside = false;
-	public boolean enableSideScrolling = true;
-	
+	/**
+	 * If set to true, then this camera will start scrolling when the mouse is
+	 * close to the edge of the screen.
+	 */
+	public boolean enableSideScrolling = false;
+
 	public MovableCamera(PApplet p)
 	{
 		super();
 		this.p = p;
 		makeResponsive();
-		
+
 		NUDGE_DISTANCE = p.width / 5;
 		NUDGE_SCALE = 10f / (float) NUDGE_DISTANCE;
 	}
@@ -64,7 +68,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		 * Translate by half the stage width and height to re-center the stage
 		 * at (0,0).
 		 */
-		p.translate(getStageWidth()/2.0f,getStageHeight()/2.0f);
+		p.translate(getStageWidth() / 2.0f, getStageHeight() / 2.0f);
 		/*
 		 * Now scale.
 		 */
@@ -72,15 +76,16 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		/*
 		 * Then translate.
 		 */
-		p.translate(-getX(),-getY());
+		p.translate(-getX(), -getY());
 	}
-	
+
 	public void scroll()
 	{
 		/*
 		 * Handle the edge scrolling.
 		 */
-		if (mouseInside && enableSideScrolling && !FocusManager.instance.isModal())
+		if (mouseInside && enableSideScrolling
+				&& !FocusManager.instance.isModal())
 		{
 			pt.setLocation(p.mouseX, p.mouseY);
 			float zoomMultiplier = NUDGE_SCALE / getZ();
@@ -102,7 +107,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 			}
 			if (dy != 0 || dx != 0)
 			{
-				this.nudge(dx*zoomMultiplier, dy*zoomMultiplier);
+				this.nudge(dx * zoomMultiplier, dy * zoomMultiplier);
 			}
 		}
 	}
@@ -111,32 +116,32 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 	{
 		return p.width;
 	}
-	
+
 	public float getStageHeight()
 	{
 		return p.height;
 	}
-	
+
 	public void mouseWheelMoved(MouseWheelEvent e)
 	{
 		this.zTween.stop();
 
 		float rotVal = (float) Math.abs(e.getWheelRotation());
 		rotVal = Math.min(rotVal, 1);
-//		System.out.println(rotVal);
-//		int rotDir = (int) Math.signum(e.getWheelRotation());
+		// System.out.println(rotVal);
+		// int rotDir = (int) Math.signum(e.getWheelRotation());
 		int rotDir = (e.getWheelRotation() > 0 ? 1 : -1);
-		float mult = (float) Math.pow(rotVal*.75, rotDir);
+		float mult = (float) Math.pow(rotVal * .75, rotDir);
 		this.zoomBy(mult);
 
-		pt.setLocation(e.getX(),e.getY());
+		pt.setLocation(e.getX(), e.getY());
 		float dx = p.width / 2 - pt.x;
 		float dy = p.height / 2 - pt.y;
 
 		// if endzoom is bigger, we want to make dx smaller.
 		dx *= rotDir * .75;
 		dy *= rotDir * .75;
-		
+
 		this.nudge(dx / getZ(), dy / getZ());
 	}
 
@@ -145,22 +150,22 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		// Only want keypresses here.
 		if (e.getID() != KeyEvent.KEY_PRESSED)
 			return;
-//		System.out.println(e);
+		// System.out.println(e);
 
 		int code = e.getKeyCode();
 		switch (code)
 		{
 			case (81): // Q
-//				this.zoomBy(2);
+			// this.zoomBy(2);
 				break;
 			case (87): // W
-//				this.zoomBy(.5f);
+			// this.zoomBy(.5f);
 				break;
 			case (37): // Left
-//				this.nudge(-10, 0);
+			// this.nudge(-10, 0);
 				break;
 			case (39): // Right
-//				this.nudge(10, 0);
+			// this.nudge(10, 0);
 				break;
 		}
 
@@ -181,9 +186,9 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 				mouseInside = true;
 				break;
 			case (MouseEvent.MOUSE_PRESSED):
-//				Point2D.Float pt = new Point2D.Float(e.getX(), e.getY());
-//				ProcessingUtils.screenToModel(p, pt);
-//				System.out.println(pt);
+				// Point2D.Float pt = new Point2D.Float(e.getX(), e.getY());
+				// ProcessingUtils.screenToModel(p, pt);
+				// System.out.println(pt);
 				break;
 		}
 	}

@@ -33,6 +33,7 @@ public class Tree
 	void modMe()
 	{
 		modCount++;
+		recalculateStuff();
 	}
 	
 	public void recalculateStuff()

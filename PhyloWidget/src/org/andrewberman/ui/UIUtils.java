@@ -4,6 +4,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.font.FontRenderContext;
@@ -12,11 +13,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.MemoryImageSource;
 
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
+import processing.core.PImage;
 import processing.core.PMatrix;
 
 /**
@@ -38,10 +41,17 @@ public class UIUtils
 	private static Point tPoint = new Point(0, 0);
 
 	static Object cursorOwner;
-	static int curCursor;
+	static Cursor baseCursor = Cursor.getDefaultCursor();
+	static PApplet p;
 
-	static PApplet papplet;
-
+	public static Image PImageToImage(PImage image)
+	{
+//		image.loadPixels();
+		Image newImage = p.createImage(new MemoryImageSource(image.width, image.height,
+                image.pixels, 0, image.width));
+		return newImage;
+	}
+	
 	/**
 	 * Calls the <code>lazyLoad()</code> method on all of the relevant
 	 * "singlet" classes that are required for the correct functioning of all UI
@@ -56,14 +66,15 @@ public class UIUtils
 	 * @see org.andrewberman.ui.FocusManager
 	 * @see org.andrewberman.ui.ShortcutManager
 	 */
-	public static void loadUISinglets(PApplet p)
+	public static void loadUISinglets(PApplet app)
 	{
-		if (papplet != p)
+		if (p != app)
 		{
+			p = app;
 			FocusManager.lazyLoad(p);
 			EventManager.lazyLoad(p);
 			ShortcutManager.lazyLoad(p);
-			papplet = p;
+			ToolManager.lazyLoad(p);
 		}
 	}
 
@@ -118,9 +129,21 @@ public class UIUtils
 	{
 		if (cursorOwner != o)
 			return;
-		p.setCursor(Cursor.getDefaultCursor());
+		cursorOwner = null;
+		p.setCursor(baseCursor);
 	}
 
+	/**
+	 *  Sets the base cursor. Generally called by ToolManager.
+	 * @param c
+	 */
+	public static void setBaseCursor(Cursor c)
+	{
+		baseCursor = c;
+		if (cursorOwner == null)
+			p.setCursor(baseCursor);
+	}
+	
 	/**
 	 * Sets the displayed cursor. This method effectively registers the Object
 	 * <code>o</code> as the "owner" of the cursor from this point on. This
@@ -147,7 +170,6 @@ public class UIUtils
 	 */
 	public static void setCursor(Object o, PApplet p, int cursor)
 	{
-		curCursor = cursor;
 		cursorOwner = o;
 		p.setCursor(Cursor.getPredefinedCursor(cursor));
 	}

@@ -31,6 +31,11 @@ public final class Point extends Point2D.Float
 		super(x, y);
 	}
 
+	public Object clone()
+	{
+		return new Point(x,y);
+	}
+	
 	public Point translate(float dx, float dy)
 	{
 		this.setLocation(dx + x, dy + y);

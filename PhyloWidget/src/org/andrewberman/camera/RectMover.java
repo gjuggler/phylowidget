@@ -46,6 +46,12 @@ public class RectMover extends MovableCamera
 		zoomCenterTo(cx, cy, newW, newH);
 	}
 
+	public void zoomTo(float z)
+	{
+		hTween.continueTo(p.width * z, FRAMES);
+		wTween.continueTo(p.height * z, FRAMES);
+	}
+	
 	/**
 	 * cx and cy are the CENTER coordinates of this TreeMover, in order to make
 	 * it more closely resemble a camera.
@@ -58,6 +64,13 @@ public class RectMover extends MovableCamera
 		hTween.continueTo((float) h, FRAMES);
 	}
 
+	public void fforward()
+	{
+		super.fforward();
+		wTween.fforward();
+		hTween.fforward();
+	}
+	
 	public void fillScreen()
 	{
 		zoomCenterTo(0, 0, p.width, p.height);

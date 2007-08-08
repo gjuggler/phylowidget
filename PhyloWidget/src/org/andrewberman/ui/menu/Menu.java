@@ -129,7 +129,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	/**
 	 * References to a few relevant MenuItems.
 	 */
-	MenuItem currentlyHovered, lastPressed, lastHovered;
+	protected MenuItem currentlyHovered, lastPressed, lastHovered;
 	/**
 	 * The current alpha value for this menu.
 	 */
@@ -518,6 +518,11 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	// super.getRect(rect, buff);
 	// }
 
+	public void setState(int state)
+	{
+		// Do nothing.
+	}
+	
 	public void keyEvent(KeyEvent e)
 	{
 		switch (e.getKeyCode())

@@ -38,10 +38,10 @@ import processing.opengl.PGraphicsOpenGL;
  * </ul>
  * 
  * @author Greg
- * @see		org.andrewberman.ui.ifaces.UIObject
- * @see		org.andrewberman.ui.FocusManager
- * @see		org.andrewberman.ui.ShortcutManager
- * @see		org.andrewberman.ui.UIUtils
+ * @see org.andrewberman.ui.ifaces.UIObject
+ * @see org.andrewberman.ui.FocusManager
+ * @see org.andrewberman.ui.ShortcutManager
+ * @see org.andrewberman.ui.UIUtils
  */
 public final class EventManager implements MouseListener, MouseMotionListener,
 		MouseWheelListener, KeyListener
@@ -56,13 +56,16 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public static void lazyLoad(PApplet p)
 	{
-//		if (instance == null)
+		// TODO: I had the "instance == null" commented out... but why? Let's
+		// leave it in...
+		if (instance == null)
 			instance = new EventManager(p);
 	}
 
 	private EventManager(PApplet p)
 	{
 		this.p = p;
+		ToolManager.lazyLoad(p);
 		setup();
 	}
 
@@ -101,15 +104,18 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	public void draw()
 	{
 		UIUtils.setMatrix(p);
-//		System.out.println(p.frameCount);
-//		System.out.println(delegates.size());
-		
-		for (int i=0; i < delegates.size(); i++)
+
+		for (int i = 0; i < delegates.size(); i++)
 		{
-			((UIObject)delegates.get(i)).draw();
+			((UIObject) delegates.get(i)).draw();
 		}
+		
+		/*
+		 * Do any drawing of the current tool.
+		 */
+		ToolManager.instance.draw();
 	}
-	
+
 	public void mouseEvent(MouseEvent e)
 	{
 		screen.setLocation(e.getX(), e.getY());
@@ -121,32 +127,60 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 		{
-//			System.out.println(FocusManager.instance.getFocusedObject());
-			((UIObject) FocusManager.instance.getFocusedObject())
-				.mouseEvent(e, screen, model);
+			// System.out.println(FocusManager.instance.getFocusedObject());
+			((UIObject) FocusManager.instance.getFocusedObject()).mouseEvent(e,
+					screen, model);
 		}
 		/*
-		 * Then, if the focus isn't modal and the object wasn't consumed, continue
-		 * sending the mouse event to the other uiobjects.
+		 * If the FocusManager is in a modal state, return without further
+		 * dispatching.
 		 */
-		if (!FocusManager.instance.isModal() && !e.isConsumed())
+		if (FocusManager.instance.isModal())
+			return;
+		/*
+		 * Now, send it to the ToolManager.
+		 */
+		if (!e.isConsumed())
 		{
-			for (int i = delegates.size()-1; i >= 0; i--)
+			ToolManager.instance.mouseEvent(e, screen, model);
+		}
+		/*
+		 * Then, if the focus isn't modal and the object wasn't consumed,
+		 * continue sending the mouse event to the other uiobjects.
+		 */
+		if (!e.isConsumed())
+		{
+			for (int i = delegates.size() - 1; i >= 0; i--)
 			{
 				UIObject ui = (UIObject) delegates.get(i);
 				if (ui == FocusManager.instance.getFocusedObject())
 					continue;
 				ui.mouseEvent(e, screen, model);
-				if (e.isConsumed()) break;
+				if (e.isConsumed())
+					break;
 			}
 		}
 	}
 
 	public void keyEvent(KeyEvent e)
 	{
-		// Only send key events to focused object no matter what!
+		/*
+		 * We only send keyboard events to the focused object.
+		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 			((UIObject) FocusManager.instance.getFocusedObject()).keyEvent(e);
+		/*
+		 * If modal, return early.
+		 */
+		if (FocusManager.instance.isModal())
+			return;
+		/*
+		 * Lastly, dispatch to the tool manager if not consumed.
+		 */
+		if (!e.isConsumed())
+		{
+			ToolManager.instance.keyEvent(e);
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)

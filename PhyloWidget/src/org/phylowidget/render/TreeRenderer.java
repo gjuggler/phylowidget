@@ -118,6 +118,8 @@ public interface TreeRenderer
 
 		protected boolean sorted = false;
 
+		protected boolean needsLayout;
+		
 		public Abstract(PApplet p)
 		{
 			this.p = p;
@@ -134,11 +136,11 @@ public interface TreeRenderer
 				return;
 			synchronized (tree)
 			{
-				if (tree.modCount != lastModCount)
+				if (tree.modCount != lastModCount || needsLayout)
 				{
-//					tree.recalculateStuff();
 					update();
 					lastModCount = tree.modCount;
+					needsLayout = false;
 				}
 				draw();
 			}
@@ -154,17 +156,21 @@ public interface TreeRenderer
 			nodes.clear();
 			tree.getAll(leaves, nodes);
 
-			layout();
+			doTheLayout();
 			createEmptyNodeRanges();
 		}
 
+		final public void layout()
+		{
+			needsLayout = true;
+		}
+		
 		/**
 		 * Calculate the layout of the nodes within this renderer. Only called when
 		 * the tree structure is changed, so it's okay for this to be a relatively
-		 * expensive operation. This should populate the positions HashMap with the
-		 * positions of all nodes.
+		 * expensive operation.
 		 */
-		public void layout()
+		protected void doTheLayout()
 		{
 		}
 
@@ -174,7 +180,6 @@ public interface TreeRenderer
 		 */
 		protected void createEmptyNodeRanges()
 		{
-
 			list.clear();
 			ranges.clear();
 			for (int i = 0; i < nodes.size(); i++)

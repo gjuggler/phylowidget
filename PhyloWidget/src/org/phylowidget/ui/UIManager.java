@@ -57,6 +57,8 @@ public final class UIManager
 		t.add("File");
 		t.get("File").add("New Tree").setAction(this,"newTree").setShortcut("control-n");
 		t.get("File").add("Quit").setAction(this,"quit").setShortcut("alt-f4");
+		t.add("View").add("Cladogram").setAction(PhyloWidget.trees,"cladogramRender");
+		t.get("View").add("Diagonal").setAction(PhyloWidget.trees,"diagonalRender");
 		t.add("Tree");
 		t.get("Tree").add("Auto-Mutate");
 		t.get("Tree").add("Mutate Once").setAction(this,"mutate").setShortcut("control-m");

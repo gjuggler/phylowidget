@@ -34,6 +34,7 @@ public class Tree
 	{
 		modCount++;
 		recalculateStuff();
+		sortAllChildren();
 	}
 	
 	public void recalculateStuff()
@@ -87,8 +88,6 @@ public class Tree
 			TreeNode n = (TreeNode)node.children.get(i);
 			parent.addChild(n);
 		}
-		parent.sortChildren();
-//		pruneTree();
 		modMe();
 	}
 
@@ -99,14 +98,14 @@ public class Tree
 			TreeNode newNode = factory.createNode();
 			newNode.setName("[New Root]");
 			setRoot(newNode);
+			modMe();
 		} else
 		{
 			TreeNode parent = node.parent;
 			parent.removeChild(node);
-//			pruneTree();
-			parent.sortChildren();
+			modMe();
 		}
-		modMe();
+		
 	}
 	
 	public void pruneTree()

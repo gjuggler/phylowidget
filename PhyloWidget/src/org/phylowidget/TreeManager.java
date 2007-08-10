@@ -12,6 +12,7 @@ import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RandomTreeMutator;
 import org.phylowidget.tree.RenderNodeFactory;
 import org.phylowidget.tree.Tree;
+import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
@@ -23,7 +24,7 @@ public class TreeManager implements SettableRect
 	protected static Rectangle2D.Float cameraRect;
 	protected ArrayList trees;
 	protected ArrayList renderers;
-	
+
 //	public Navigator nav;
 	public RandomTreeMutator mutator;
 	
@@ -39,6 +40,10 @@ public class TreeManager implements SettableRect
 		cameraRect = new Rectangle2D.Float(0,0,0,0);
 		camera = new RectMover(p,this);
 		camera.fillScreen();
+		
+//		TreeIO.parseNewick("(A:3.33,(C:3,B:2):5)");
+		TreeIO.parseNewick("(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);");
+//		TreeIO.parseNewick("(,(),)");
 		
 //		nav = new Navigator(p);
 	}
@@ -70,12 +75,6 @@ public class TreeManager implements SettableRect
 		nodesInRange(list,rect);
 	}
 	
-//	public Point getPosition(NodeRange r)
-//	{
-//		TreeRenderer render = r.render;
-//		return render.getPosition(r.node);
-//	}
-	
 	public void clearTrees()
 	{
 		mutator.stop();
@@ -105,14 +104,25 @@ public class TreeManager implements SettableRect
 	{	
 		Tree t = new Tree(RenderNodeFactory.instance(),s);
 		trees.add(t);
-		
-		TreeRenderer c = new DiagonalCladogram(p);
-		c.setTree(t);
-		renderers.add(c);
-		
-//		nav.setRenderer(c);
-		
+		diagonalRender();
 		mutator = new RandomTreeMutator(t);
+	}
+	
+	public void diagonalRender()
+	{
+		setRenderer(new DiagonalCladogram(p));
+	}
+
+	public void cladogramRender()
+	{
+		setRenderer(new Cladogram(p));
+	}
+	
+	void setRenderer(TreeRenderer r)
+	{
+		renderers.clear();
+		r.setTree((Tree) trees.get(0));
+		renderers.add(r);
 	}
 	
 	/**

@@ -1,66 +1,143 @@
 package org.phylowidget.tree;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import nexus.NexusBlockParser;
-import nexus.NexusFileFormat;
-import nexus.NexusFileListener;
-import nexus.ParseException;
+import org.andrewberman.sortedlist.ItemI;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.WeightedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
-public class TreeIO extends NexusFileListener.Abstract
+import sun.security.provider.certpath.Vertex;
+
+import nexus.TreesBlock;
+
+public class TreeIO
 {
 
-	private static TreeIO instance = new TreeIO();
-	
-	public static void parseNewickString(String s)
+	public static void parseNewick(String s)
 	{
-		StringReader sr = new StringReader(s);
-//		BufferedReader br = new BufferedReader(sr);
-		try
+		if (s.indexOf(';') == -1)
+			s = s + ';';
+		// biojavax parser still sucks, so let's roll our own.
+		System.out.println("input: " + s);
+		StringBuffer sb = new StringBuffer(s);
+
+		/*
+		 * Some state-maintaining variables.
+		 */
+
+		/**
+		 * Contains an Integer of the number of items for each depth level.
+		 */
+		int[] countForDepth = new int[10];
+		/**
+		 * The current depth level being parsed.
+		 */
+		int curDepth = 0;
+
+		/*
+		 * Parse into a series of tokens, each with a full taxon label and depth
+		 * information as well as its preceding separator. EX: (A:3 or ,(C:3 or
+		 * )int:1
+		 */
+		// String pre = "(([,]{0,1}[\\(\\)&&[^,]]{0,1}){1}";
+		String pre = "((,\\(){0,1}(\\(){0,1}(\\)){0,1}(,){0,1}";
+		// String pre = "([\\(\\)[,]]{1,2}";
+		String mid = "[^,\\(\\)]*)";
+		String post = "[,\\(\\);]{1}";
+
+		Pattern p = Pattern.compile(pre + mid + post);
+		Matcher m = p.matcher(sb);
+		int findStart = 0;
+		while (m.find(findStart))
 		{
-			NexusFileFormat.parseReader(instance, sr);
-		} catch (Exception e)
+			/*
+			 * If we're not at the end of the string, kick the regex matcher
+			 * back one char because the character matched in the "post" part of
+			 * the regex string might be important for the next node's token.
+			 */
+			if (m.end() < sb.length())
+			{
+				findStart = m.end() - 1;
+			} else
+				findStart = m.end();
+
+			String token = m.group(1);
+			System.out.println(token);
+
+			boolean open = token.indexOf('(') != -1;
+			boolean close = token.indexOf(')') != -1;
+			token = token.replaceAll("[\\(\\)]", "");
+			/*
+			 * Parse the name and depth, if they exist.
+			 */
+			// System.out.println(curDepth + " " + countForDepth[curDepth]);
+			/*
+			 * Add one to the stack count for our current depth.
+			 */
+			if (open)
+			{
+				/*
+				 * We're parsing at the next highest depth now.
+				 */
+				curDepth++;
+				/*
+				 * Grow the int array if necessary.
+				 */
+				if (curDepth >= countForDepth.length)
+				{
+					int[] newArr = new int[countForDepth.length << 2];
+					System.arraycopy(countForDepth, 0, newArr, 0,
+							countForDepth.length);
+					countForDepth = newArr;
+				}
+			} else if (close)
+			{
+				/*
+				 * Pop out the nodes added at this depth, create an internal
+				 * node, and connect them all together.
+				 */
+
+				curDepth--;
+			}
+			/*
+			 * Add one onto the node count for the current depth.
+			 */
+			countForDepth[curDepth]++;
+		}
+
+		for (int i = 0; i < countForDepth.length; i++)
 		{
-			// Do nothing yet.
+			System.out.println(countForDepth[i]);
 		}
 	}
 
-	protected void beginFileComment()
+	public static DirectedGraph rootedGraph(AbstractBaseGraph g)
 	{
-		// TODO Auto-generated method stub
-		
+		SimpleDirectedWeightedGraph dir = new SimpleDirectedWeightedGraph(
+				DefaultWeightedEdge.class);
+
+		return null;
 	}
 
-	protected void blockEnded(NexusBlockParser blockParser)
+	public static Tree graphToTree(Graph graph)
 	{
-		// TODO Auto-generated method stub
-		
+		Set vertices = graph.vertexSet();
+
+		Iterator i = vertices.iterator();
+		while (i.hasNext())
+		{
+			Vertex v = (Vertex) i.next();
+		}
+		return null;
 	}
 
-	protected void endFileComment()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	protected void fileCommentText(String comment)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void endFile()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void startFile()
-	{
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

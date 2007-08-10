@@ -62,8 +62,6 @@ public class TreesBlock extends NexusBlock.Abstract {
 
 	private WeightedGraph weighted =  new SimpleWeightedGraph(DefaultWeightedEdge.class);
 
-
-
 	/**
 	 * A simple representation of a Newick tree as a single string.
 	 */
@@ -457,7 +455,9 @@ public class TreesBlock extends NexusBlock.Abstract {
 			}else if ( tokens[i].equals("(") || tokens[i].equals(" ") ){    
 				// ignore "(" or " "
 			}else if(tokens[i].equals(")")){	  
-			 	//pop 3 elements if you see ")"					
+			 	//pop 3 elements if you see ")"		
+				// TODO: Find a smarter way to pop the number of elements between the enclosing parens,
+				// so we can deal with polytomies.
 				try{
 					s_temp3 = stack.pop();    
 					v3 = s_temp3.toString(); 

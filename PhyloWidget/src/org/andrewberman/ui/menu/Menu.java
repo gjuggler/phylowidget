@@ -199,11 +199,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * constituent sub-MenuItems is selected. I am the walrus.
 	 */
 	protected boolean useHandCursor = true;
-	/**
-	 * If true, this menu will hide itself when one of its component MenuItems
-	 * has its action performed. If false, it will remain open.
-	 */
-	protected boolean hideOnAction = true;
+
+//	protected boolean hideOnAction = true;
 	/**
 	 * If true, this menu will dim to loAlpha if the mouse is not inside the
 	 * menu or any of its sub-items.

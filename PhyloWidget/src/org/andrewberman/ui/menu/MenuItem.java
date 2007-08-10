@@ -64,6 +64,12 @@ public abstract class MenuItem implements Positionable, Sizable
 	boolean mouseInside;
 	boolean hidden = true;
 
+	/**
+	 * If true, this menu item will hide itself when its action is performed. If
+	 * false, it will remain open.
+	 */
+	public static boolean hideOnAction = true;
+
 	MenuItem()
 	{
 		this("[Unnamed MenuItem]");
@@ -87,7 +93,7 @@ public abstract class MenuItem implements Positionable, Sizable
 	public MenuItem setShortcut(String s)
 	{
 		shortcut = ShortcutManager.instance.createShortcut(s);
-//		shortcut = new Shortcut(s);
+		// shortcut = new Shortcut(s);
 		if (action != null)
 			shortcut.action = action;
 		menu.layout();
@@ -370,7 +376,7 @@ public abstract class MenuItem implements Positionable, Sizable
 		} else
 		{
 			menu.fireEvent(UIEvent.MENU_ACTIONPERFORMED);
-			if (menu.hideOnAction)
+			if (hideOnAction)
 				menu.hide();
 			if (action != null)
 				action.performAction();

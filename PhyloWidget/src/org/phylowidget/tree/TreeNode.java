@@ -8,7 +8,7 @@ public class TreeNode implements Comparable
 	private static int serialSeed = 0;
 
 	protected String name;
-	public Integer serial;
+	public int serial;
 
 	/**
 	 * Bread-and-butter fields for the TreeNode class.
@@ -22,7 +22,7 @@ public class TreeNode implements Comparable
 	 * Cached values. Each of these needs to be percolated upwards when a part
 	 * of the tree below this node is altered.
 	 */
-	protected int numLeaves = 0;
+	protected int numLeaves = 1;
 	protected int numDescendants = 0;
 	protected int maxDepth = 0;
 	protected float maxHeight = 0;
@@ -41,9 +41,11 @@ public class TreeNode implements Comparable
 	 */
 //	public static boolean usePercolate = false;
 
+	public static boolean autoLadderize = true;
+	
 	public TreeNode()
 	{
-		serial = new Integer(serialSeed++);
+		serial = serialSeed++;
 	}
 
 	public TreeNode(String s)
@@ -144,42 +146,8 @@ public class TreeNode implements Comparable
 			sum += n.calcNumLeaves();
 		}
 		numLeaves = sum;
-//		System.out.println(name + " " +sum);
 		return sum;
 	}
-	
-//	public synchronized void percolateUp()
-//	{
-//		if (!usePercolate) return;
-//		if (parent == NULL_PARENT)
-//			return;
-//		parent.percolate(NUM_LEAVES, numLeaves);
-//		parent.percolate(NUM_DESCENDANTS, numDescendants);
-//		parent.percolate(MAX_DEPTH, maxDepth);
-//	}
-
-//	public synchronized void percolate(int type, int val)
-//	{
-//		if (!usePercolate) return;
-//		switch (type)
-//		{
-//			case (NUM_LEAVES):
-//				numLeaves += val;
-//				if (parent != NULL_PARENT)
-//					parent.percolate(type, val);
-//				break;
-//			case (NUM_DESCENDANTS):
-//				numDescendants += val;
-//				if (parent != NULL_PARENT)
-//					parent.percolate(type, val);
-//				break;
-//			case (MAX_DEPTH):
-//				maxDepth = Math.max(maxDepth, val + 1);
-//				if (parent != NULL_PARENT)
-//					parent.percolate(type, maxDepth);
-//				break;
-//		}
-//	}
 
 	public synchronized void addChild(TreeNode child)
 	{
@@ -188,28 +156,13 @@ public class TreeNode implements Comparable
 		{
 			child.parent = this;
 		}
-//		child.percolateUp();
-		sortChildren();
+		if (autoLadderize)
+			sortChildren();
 	}
 
 	public synchronized void removeChild(TreeNode child)
 	{
 		children.remove(child);
-//		if (usePercolate)
-//		{
-//			percolate(NUM_LEAVES, -child.numLeaves);
-//			percolate(NUM_DESCENDANTS, -child.numDescendants);
-//			// Reset and re-calculate the max height and depth.
-//			maxDepth = 0;
-//			maxHeight = 0;
-//			for (int i = 0; i < children.size(); i++)
-//			{
-//				TreeNode c = (TreeNode) children.get(i);
-//				maxDepth = Math.max(c.maxDepth + 1, maxDepth);
-//				maxHeight = Math.max(c.maxHeight + c.height, maxHeight);
-//			}
-//			percolate(MAX_DEPTH, maxDepth);
-//		}
 	}
 
 	public synchronized void prune()
@@ -240,7 +193,7 @@ public class TreeNode implements Comparable
 			((TreeNode) children.get(i)).prune();
 		}
 	}
-
+	
 	public synchronized void sortChildren()
 	{
 		Collections.sort(children);
@@ -308,6 +261,8 @@ public class TreeNode implements Comparable
 		TreeNode b = (TreeNode) o;
 		int mySize = this.numDescendants;
 		int hisSize = b.numDescendants;
+//		int mySize = this.numLeaves;
+//		int hisSize = b.numLeaves;
 		if (mySize < hisSize)
 			return -1;
 		else if (mySize > hisSize)

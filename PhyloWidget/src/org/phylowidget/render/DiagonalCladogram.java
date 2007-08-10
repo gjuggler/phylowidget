@@ -15,6 +15,7 @@ public class DiagonalCladogram extends Cladogram
 		super(p);
 		
 		this.keepAspectRatio = true;
+		this.dotMult = 0.25f;
 	}
 	
 	protected float branchPositions(RenderNode n)
@@ -41,17 +42,27 @@ public class DiagonalCladogram extends Cladogram
 		 * Find the max depth of each child, and project where the "lower" child
 		 * would be in the y axis if it were at that higher depth.
 		 */
-//		System.out.println(n.getName() + " " + loChild.getMaxDepth() + " " +hiChild.getMaxDepth());
-		int mDepth = Math.max(loChild.getMaxDepth(),hiChild.getMaxDepth());
-//		System.out.println("depth:"+n.getMaxDepth()+"  desc:"+n.getNumDescendants()+"  leaves:"+n.getNumLeaves());
-		float loChildNewY = loChild.unscaledY + (mDepth - loChild.getMaxDepth())/maxDepth*leaves.size();
-		float hiChildNewY = hiChild.unscaledY - (mDepth - hiChild.getMaxDepth())/maxDepth*leaves.size();
+		float stepSize = 1f / (leaves.size());
+		float loLeaves = loChild.getNumLeaves()-1;
+		float hiLeaves = hiChild.getNumLeaves()-1;
+		float mLeaves = Math.max(loLeaves,hiLeaves);
+		System.out.println("md:"+mLeaves);
+//		System.out.println("LOW usy:"+loChild.unscaledY+"   md:"+loChild.getMaxDepth());
+//		System.out.println("HI usy:"+hiChild.unscaledY+"   md:"+hiChild.getMaxDepth());
+		float loChildNewY = loChild.unscaledY + (mLeaves - loLeaves)*stepSize/2;
+		float hiChildNewY = hiChild.unscaledY - (mLeaves - hiLeaves)*stepSize/2;
 		n.unscaledY = (loChildNewY + hiChildNewY)/2;
-//		n.unscaledX = 1 - (float)n.getNumLeaves() / ((float)leaves.size());
-		n.unscaledX = 1 - (float)n.getMaxDepth() / (float)maxDepth;
+		n.unscaledX = 1 - ((float)n.getNumLeaves()-1) / ((float)leaves.size());
+//		n.unscaledX = 1 - (float)n.getMaxDepth() / (float)maxDepth / 2f;
 		return 0;
 	}
 
+	protected void doTheLayout()
+	{
+		super.doTheLayout();
+		numCols = numRows / 2;
+	}
+	
 	protected void drawLine(RenderNode n)
 	{
 		if (n.getParent() != TreeNode.NULL_PARENT)
@@ -67,5 +78,4 @@ public class DiagonalCladogram extends Cladogram
 //			canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 		}
 	}
-	
 }

@@ -258,7 +258,7 @@ public class TextField extends AbstractUIObject implements Positionable
 		pg.g2.setClip(clipRect);
 		pg.g2.setFont(pFont.font.deriveFont(fontSize));
 		pg.g2.setPaint(style.textColor);
-		synchronized (text)
+		synchronized (this)
 		{
 			pg.g2.drawString(text.substring(viewLo, viewHi), x + pad + offsetX,
 					y + pad + offsetY);
@@ -277,7 +277,7 @@ public class TextField extends AbstractUIObject implements Positionable
 			pg.g2.fill(clipRect);
 			pg.g2.setClip(clipRect);
 			pg.g2.setPaint(style.textColor.inverse());
-			synchronized (text)
+			synchronized (this)
 			{
 				pg.g2.drawString(text.substring(lo, hi), x + pad + loX, y + pad
 						+ offsetY);

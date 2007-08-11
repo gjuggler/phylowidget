@@ -20,9 +20,9 @@ import org.andrewberman.ui.menu.RadialMenu;
 import org.andrewberman.ui.menu.RadialMenuItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.oldtree.Tree;
+import org.phylowidget.oldtree.TreeNode;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.Tree;
-import org.phylowidget.tree.TreeNode;
 
 import processing.core.PApplet;
 
@@ -94,7 +94,6 @@ public final class UIManager
 		context.get("Add").add(context.create("Child Node",'c')).setAction(this, "addChildNode");
 		
 		dock = new PhyloToolDock(p);
-		
 	}
 	
 	public void doSomething()
@@ -151,29 +150,29 @@ public final class UIManager
 	public void addSisterNode()
 	{
 		NodeRange r = context.curNodeRange;
-		Tree t = r.render.getTree();
-		t.addSisterNode(r.node, t.createNode("[New Sister]"));
+//		Tree t = r.render.getTree();
+//		t.addSisterNode(r.node, t.createNode("[New Sister]"));
 	}
 	
 	public void addChildNode()
 	{
 		NodeRange r = context.curNodeRange;
-		Tree t = r.render.getTree();
-		t.addChildNode(r.node, t.createNode("[New Child]"));
+//		Tree t = r.render.getTree();
+//		t.addChildNode(r.node, t.createNode("[New Child]"));
 	}
 	
 	public void deleteNode()
 	{
 		NodeRange r = context.curNodeRange;
-		Tree t = r.render.getTree();
-		t.deleteNode(r.node);
+//		Tree t = r.render.getTree();
+//		t.deleteNode(r.node);
 	}
 
 	public void deleteSubtree()
 	{
 		NodeRange r = context.curNodeRange;
-		Tree t = r.render.getTree();
-		t.deleteSubtree(r.node);
+//		Tree t = r.render.getTree();
+//		t.deleteSubtree(r.node);
 	}
 	
 }

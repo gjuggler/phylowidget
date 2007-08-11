@@ -3,18 +3,16 @@ package org.phylowidget;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.andrewberman.camera.RectMover;
 import org.andrewberman.camera.SettableRect;
+import org.phylowidget.oldtree.RandomTreeMutator;
+import org.phylowidget.oldtree.Tree;
+import org.phylowidget.oldtree.TreeIO;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.tree.RandomTreeMutator;
-import org.phylowidget.tree.RenderNodeFactory;
-import org.phylowidget.tree.Tree;
-import org.phylowidget.tree.TreeIO;
+import org.phylowidget.temp.PhyloTreeGraph;
 
 import processing.core.PApplet;
 
@@ -43,11 +41,7 @@ public class TreeManager implements SettableRect
 		camera = new RectMover(p, this);
 		camera.fillScreen();
 
-		// String s = "(Hello,(,,),)";
-		// String s = "(A:3.33,(C:3,B:2):5)";
-		// String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
-		String s = "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
-		TreeIO.parseNewick(s);
+
 
 		// Pattern p = Pattern.compile("(duck|buck)");
 		// StringBuffer sb = new StringBuffer("My duck is worth a buck.");
@@ -113,12 +107,19 @@ public class TreeManager implements SettableRect
 		mutator.stop();
 	}
 
-	public void createTree(String s)
+	public void createTree(String rootLabel)
 	{
-		Tree t = new Tree(RenderNodeFactory.instance(), s);
-		trees.add(t);
+//		PhyloTreeGraph ptg = new PhyloTreeGraph("PhyloWidget");
+//		trees.add(ptg);
+		 String s = "(,(,,),)";
+//		String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
+		// String s = "(A:3.33,(C:3,B:2):5)";
+//		 String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
+
+//		String s = "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
+		trees.add(TreeIO.parseNewick(s));
 		diagonalRender();
-		mutator = new RandomTreeMutator(t);
+//		mutator = new RandomTreeMutator(t);
 	}
 
 	public void diagonalRender()
@@ -134,7 +135,7 @@ public class TreeManager implements SettableRect
 	void setRenderer(TreeRenderer r)
 	{
 		renderers.clear();
-		r.setTree((Tree) trees.get(0));
+		r.setTree((PhyloTreeGraph) trees.get(0));
 		renderers.add(r);
 	}
 

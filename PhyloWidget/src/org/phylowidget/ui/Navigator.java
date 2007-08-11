@@ -6,11 +6,9 @@ import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.tree.RenderNode;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -53,9 +51,9 @@ public class Navigator implements UIObject
 	public void draw()
 	{
 		if (render == null) return;
-		if (lastTreeMod != render.getTree().modCount)
+		if (lastTreeMod != render.getTree().getModCount())
 		{
-			lastTreeMod = render.getTree().modCount;
+			lastTreeMod = render.getTree().getModCount();
 			buff.beginDraw();
 			buff.background(255,0);
 			render.render(buff, 0, 0, buff.width, buff.height);

@@ -9,8 +9,8 @@ import java.util.HashMap;
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
-import org.phylowidget.tree.RenderNode;
-import org.phylowidget.tree.Tree;
+import org.phylowidget.temp.NewRenderNode;
+import org.phylowidget.temp.PhyloTreeGraph;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.HoverHalo;
 
@@ -26,15 +26,15 @@ public interface TreeRenderer
 	
 	public void layout();
 	
-	public void setTree(Tree t);
+	public void setTree(PhyloTreeGraph t);
 	
-	public Tree getTree();
+	public PhyloTreeGraph getTree();
 	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 	
 	public float getNodeRadius();
 	
-	public void positionText(RenderNode node, TextField text);
+	public void positionText(NewRenderNode node, TextField text);
 
 	/**
 	 * The abstract tree renderer class.
@@ -59,7 +59,7 @@ public interface TreeRenderer
 		/**
 		 * The tree that will be rendered.
 		 */
-		protected Tree tree;
+		protected PhyloTreeGraph tree;
 
 		/**
 		 * Font to be used to draw the nodes.
@@ -136,10 +136,10 @@ public interface TreeRenderer
 				return;
 			synchronized (tree)
 			{
-				if (tree.modCount != lastModCount || needsLayout)
+				if (tree.getModCount() != lastModCount || needsLayout)
 				{
 					update();
-					lastModCount = tree.modCount;
+					lastModCount = tree.getModCount();
 					needsLayout = false;
 				}
 				draw();
@@ -154,7 +154,7 @@ public interface TreeRenderer
 		{
 			leaves.clear();
 			nodes.clear();
-			tree.getAll(leaves, nodes);
+			tree.getAll(tree.getRoot(),leaves, nodes);
 
 			doTheLayout();
 			createEmptyNodeRanges();
@@ -184,7 +184,7 @@ public interface TreeRenderer
 			ranges.clear();
 			for (int i = 0; i < nodes.size(); i++)
 			{
-				RenderNode n = (RenderNode) nodes.get(i);
+				NewRenderNode n = (NewRenderNode) nodes.get(i);
 				NodeRange r = new NodeRange();
 				r.loX = n.unscaledX;
 				r.hiX = n.unscaledX + .001f;
@@ -195,7 +195,7 @@ public interface TreeRenderer
 				r.render = this;
 				ranges.add(r);
 				list.insert(r, false);
-				if (n.isLeaf())
+				if (tree.isLeaf(n))
 				{
 					NodeRange r2 = new NodeRange();
 					r2.loX = r2.hiX = n.unscaledX;
@@ -248,7 +248,7 @@ public interface TreeRenderer
 			for (int i = 0; i < size; i++)
 			{
 				NodeRange r = (NodeRange) inRange.get(i);
-				RenderNode n = r.node;
+				NewRenderNode n = r.node;
 				switch (r.type)
 				{
 					case (Abstract.LABEL):
@@ -307,25 +307,25 @@ public interface TreeRenderer
 		{
 		}
 
-		protected void drawLabel(RenderNode n)
+		protected void drawLabel(NewRenderNode n)
 		{
 		}
 
-		protected void drawNode(RenderNode n)
+		protected void drawNode(NewRenderNode n)
 		{
 		}
 
-		protected void drawLine(RenderNode n)
+		protected void drawLine(NewRenderNode n)
 		{
 		}
 		
-		public void setTree(Tree t)
+		public void setTree(PhyloTreeGraph t)
 		{
 			tree = t;
-			this.lastModCount = t.modCount - 1;
+			this.lastModCount = t.getModCount() - 1;
 		}
 
-		public Tree getTree()
+		public PhyloTreeGraph getTree()
 		{
 			return tree;
 		}

@@ -45,8 +45,8 @@ public class PhyloToolDock extends Dock
 		};
 
 		this.add(ARROW, "dock/arrow.png");
-		this.add(ZOOM, "dock/zoom.png");
 		this.add(SCROLL, "dock/move.png");
+		this.add(ZOOM, "dock/zoom.png");
 
 		setWidth(30);
 		this.dimAlpha = 0.6f;

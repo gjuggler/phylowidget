@@ -13,7 +13,7 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.RenderNode;
+import org.phylowidget.temp.NewRenderNode;
 
 import processing.core.PApplet;
 
@@ -67,7 +67,7 @@ public class NearestNodeFinder implements UIObject
 		for (int i=0; i < hits.size(); i++)
 		{
 			NodeRange r = (NodeRange)hits.get(i);
-			RenderNode n = r.node;
+			NewRenderNode n = r.node;
 //			float cx = (r.loX + r.hiX) / 2;
 //			float cy = (r.loY + r.hiY) / 2;
 			

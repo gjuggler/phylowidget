@@ -23,7 +23,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.oldtree.Tree;
 import org.phylowidget.oldtree.TreeNode;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.temp.RootedTreeGraph;
+import org.phylowidget.tree.RootedTreeGraph;
 
 import processing.core.PApplet;
 

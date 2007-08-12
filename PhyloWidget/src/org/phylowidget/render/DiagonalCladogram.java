@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.phylowidget.oldtree.TreeNode;
-import org.phylowidget.temp.PhyloNode;
+import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 

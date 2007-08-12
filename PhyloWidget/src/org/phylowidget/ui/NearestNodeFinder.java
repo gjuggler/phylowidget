@@ -13,7 +13,7 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.temp.PhyloNode;
+import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 

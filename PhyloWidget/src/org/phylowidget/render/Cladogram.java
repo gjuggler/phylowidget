@@ -10,7 +10,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.temp.PhyloNode;
+import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;

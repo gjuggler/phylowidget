@@ -10,9 +10,9 @@ import org.phylowidget.oldtree.Tree;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.temp.RootedTreeGraph;
-import org.phylowidget.temp.RandomTreeMutator;
-import org.phylowidget.temp.TreeIO;
+import org.phylowidget.tree.RandomTreeMutator;
+import org.phylowidget.tree.RootedTreeGraph;
+import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 

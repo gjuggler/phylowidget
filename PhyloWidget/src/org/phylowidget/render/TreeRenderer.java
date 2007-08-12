@@ -11,8 +11,8 @@ import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.VertexSetListener;
-import org.phylowidget.temp.PhyloNode;
-import org.phylowidget.temp.RootedTreeGraph;
+import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.RootedTreeGraph;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.HoverHalo;
 

@@ -10,7 +10,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.temp.NewRenderNode;
+import org.phylowidget.temp.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
@@ -90,7 +90,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		 */
 		for (int i = 0; i < leaves.size(); i++)
 		{
-			NewRenderNode n = (NewRenderNode) leaves.get(i);
+			PhyloNode n = (PhyloNode) leaves.get(i);
 			/*
 			 * Set the leaf position of this node.
 			 */
@@ -140,7 +140,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		numCols = tree.getMaxDepth();
 	}
 
-	void leafPosition(NewRenderNode n, int index)
+	void leafPosition(PhyloNode n, int index)
 	{
 		/**
 		 * Set the leaf position.
@@ -153,7 +153,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		n.unscaledY = yPos;
 	}
 
-	float nodeXPosition(NewRenderNode n)
+	float nodeXPosition(PhyloNode n)
 	{
 		if (useWeightedEdges)
 			return (float) n.heightToRoot / (float) tree.getMaxHeight();
@@ -168,7 +168,7 @@ public class Cladogram extends TreeRenderer.Abstract
 	 * @param n
 	 * @return
 	 */
-	protected float branchPositions(NewRenderNode n)
+	protected float branchPositions(PhyloNode n)
 	{
 		if (tree.isLeaf(n))
 		{
@@ -182,7 +182,7 @@ public class Cladogram extends TreeRenderer.Abstract
 			float sum = 0;
 			for (int i = 0; i < children.size(); i++)
 			{
-				NewRenderNode child = (NewRenderNode) children.get(i);
+				PhyloNode child = (PhyloNode) children.get(i);
 				sum += branchPositions(child);
 			}
 			float y = (float) sum / (float) children.size();
@@ -255,12 +255,12 @@ public class Cladogram extends TreeRenderer.Abstract
 		for (int i = 0; i < ranges.size(); i++)
 		{
 			NodeRange r = (NodeRange) ranges.get(i);
-			NewRenderNode n = r.node;
+			PhyloNode n = r.node;
 			n.x = n.unscaledX * scaleX + dx;
 			n.y = n.unscaledY * scaleY + dy;
-			NewRenderNode parent;
+			PhyloNode parent;
 			if (tree.parentOf(n) != null)
-				parent = (NewRenderNode) tree.parentOf(n);
+				parent = (PhyloNode) tree.parentOf(n);
 			else
 			{
 				parent = n;
@@ -299,7 +299,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		{
 			for (int i = 0; i < leaves.size(); i++)
 			{
-				NewRenderNode n = (NewRenderNode) leaves.get(i);
+				PhyloNode n = (PhyloNode) leaves.get(i);
 				int asdf = 1;
 				if (rowSize < SKIP_THRESH)
 					asdf = 2;
@@ -315,16 +315,16 @@ public class Cladogram extends TreeRenderer.Abstract
 		}
 	}
 
-	protected void drawNode(NewRenderNode n)
+	protected void drawNode(PhyloNode n)
 	{
 		canvas.ellipse(n.x, n.y, dotWidth, dotWidth);
 	}
 
-	protected void drawLine(NewRenderNode n)
+	protected void drawLine(PhyloNode n)
 	{
 		if (tree.parentOf(n) != null)
 		{
-			NewRenderNode parent = (NewRenderNode) tree.parentOf(n);
+			PhyloNode parent = (PhyloNode) tree.parentOf(n);
 			canvas.line(n.x - rad, n.y, parent.x, n.y);
 			float retreat = 0;
 			if (n.y < parent.y)
@@ -335,7 +335,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		}
 	}
 
-	protected void drawLabel(NewRenderNode n)
+	protected void drawLabel(PhyloNode n)
 	{
 		p.pushMatrix();
 		p.translate(n.x + dotWidth, n.y);
@@ -357,7 +357,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		return dotWidth / 2;
 	}
 
-	public void positionText(NewRenderNode n, TextField tf)
+	public void positionText(PhyloNode n, TextField tf)
 	{
 		tf.setTextSize(textSize);
 		float tfWidth = UIUtils.getTextWidth(canvas, font, textSize, tf

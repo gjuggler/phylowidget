@@ -9,8 +9,10 @@ import java.util.HashMap;
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
-import org.phylowidget.temp.NewRenderNode;
-import org.phylowidget.temp.PhyloTreeGraph;
+import org.jgrapht.event.GraphVertexChangeEvent;
+import org.jgrapht.event.VertexSetListener;
+import org.phylowidget.temp.PhyloNode;
+import org.phylowidget.temp.RootedTreeGraph;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.HoverHalo;
 
@@ -26,22 +28,22 @@ public interface TreeRenderer
 	
 	public void layout();
 	
-	public void setTree(PhyloTreeGraph t);
+	public void setTree(RootedTreeGraph t);
 	
-	public PhyloTreeGraph getTree();
+	public RootedTreeGraph getTree();
 	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 	
 	public float getNodeRadius();
 	
-	public void positionText(NewRenderNode node, TextField text);
+	public void positionText(PhyloNode node, TextField text);
 
 	/**
 	 * The abstract tree renderer class.
 	 * 
 	 * @author Greg Jordan
 	 */
-	abstract class Abstract implements TreeRenderer
+	abstract class Abstract implements TreeRenderer, VertexSetListener
 	{
 		public static final int NODE = 0;
 
@@ -59,7 +61,7 @@ public interface TreeRenderer
 		/**
 		 * The tree that will be rendered.
 		 */
-		protected PhyloTreeGraph tree;
+		protected RootedTreeGraph tree;
 
 		/**
 		 * Font to be used to draw the nodes.
@@ -83,10 +85,10 @@ public interface TreeRenderer
 		protected ArrayList leaves = new ArrayList();
 
 		/**
-		 * Stores positions for all nodes (internal and leaf nodes). Key = TreeNode
-		 * Value = org.andrewberman.util.Point Positions should range from 0 to 1 in
-		 * the x and y directions. During rendering, these values will be multiplied
-		 * accordingly to fill the enclosing rectangle.
+		 * Stores positions for all nodes (internal and leaf nodes). Key =
+		 * TreeNode Value = org.andrewberman.util.Point Positions should range
+		 * from 0 to 1 in the x and y directions. During rendering, these values
+		 * will be multiplied accordingly to fill the enclosing rectangle.
 		 */
 		protected HashMap positions = new HashMap();
 
@@ -97,22 +99,16 @@ public interface TreeRenderer
 		protected float scaleX, scaleY = 0;
 
 		/**
-		 * A data structure to store the rectangular regions of all nodes. Instead
-		 * of drawing all nodes, we retrieve the nodes whose regions intersect with
-		 * the visible rectangle, and then draw. This can significantly improve
-		 * performance when viewing only a portion of a large tree.
+		 * A data structure to store the rectangular regions of all nodes.
+		 * Instead of drawing all nodes, we retrieve the nodes whose regions
+		 * intersect with the visible rectangle, and then draw. This can
+		 * significantly improve performance when viewing only a portion of a
+		 * large tree.
 		 */
 		protected SortedXYRangeList list = new SortedXYRangeList();
 
 		protected ArrayList ranges = new ArrayList();
 		protected float dx, dy = 0;
-
-		/**
-		 * Tracks the last modification count at which this renderer was
-		 * synchronized with its tree. This allows us to only recalculate positions
-		 * when the tree structure actually changes.
-		 */
-		protected int lastModCount = 0;
 
 		protected ArrayList inRange = new ArrayList();
 
@@ -136,10 +132,9 @@ public interface TreeRenderer
 				return;
 			synchronized (tree)
 			{
-				if (tree.getModCount() != lastModCount || needsLayout)
+				if (needsLayout)
 				{
 					update();
-					lastModCount = tree.getModCount();
 					needsLayout = false;
 				}
 				draw();
@@ -147,8 +142,8 @@ public interface TreeRenderer
 		}
 
 		/**
-		 * Updates this renderer's internal representation of the tree. This should
-		 * only be called when the tree is changed.
+		 * Updates this renderer's internal representation of the tree. This
+		 * should only be called when the tree is changed.
 		 */
 		protected void update()
 		{
@@ -166,17 +161,18 @@ public interface TreeRenderer
 		}
 		
 		/**
-		 * Calculate the layout of the nodes within this renderer. Only called when
-		 * the tree structure is changed, so it's okay for this to be a relatively
-		 * expensive operation.
+		 * Calculate the layout of the nodes within this renderer. Only called
+		 * when the tree structure is changed, so it's okay for this to be a
+		 * relatively expensive operation.
 		 */
 		protected void doTheLayout()
 		{
 		}
 
 		/**
-		 * This method creates an empty NodeRange object for each node in the tree,
-		 * and an empty NodeRange object of type LABEL for each leaf in the tree.
+		 * This method creates an empty NodeRange object for each node in the
+		 * tree, and an empty NodeRange object of type LABEL for each leaf in
+		 * the tree.
 		 */
 		protected void createEmptyNodeRanges()
 		{
@@ -184,7 +180,7 @@ public interface TreeRenderer
 			ranges.clear();
 			for (int i = 0; i < nodes.size(); i++)
 			{
-				NewRenderNode n = (NewRenderNode) nodes.get(i);
+				PhyloNode n = (PhyloNode) nodes.get(i);
 				NodeRange r = new NodeRange();
 				r.loX = n.unscaledX;
 				r.hiX = n.unscaledX + .001f;
@@ -236,19 +232,20 @@ public interface TreeRenderer
 			UIUtils.screenToModel(screenRect);
 			list.getInRange(inRange, screenRect);
 			/*
-			 * Set up some rendering constants so we don't recalculate within the loop.
+			 * Set up some rendering constants so we don't recalculate within
+			 * the loop.
 			 */
 			float regWidth = style.regStroke * getNodeRadius()/10;
 			float hoverWidth = style.hoverStroke * getNodeRadius()/10;
 			hoverWidth = Math.max(hoverWidth, 3);
 			hoverWidth *= HoverHalo.hoverMult;
-//			float regWidth = 1f;
-//			float hoverWidth = 3f;
+// float regWidth = 1f;
+// float hoverWidth = 3f;
 			int size = inRange.size();
 			for (int i = 0; i < size; i++)
 			{
 				NodeRange r = (NodeRange) inRange.get(i);
-				NewRenderNode n = r.node;
+				PhyloNode n = r.node;
 				switch (r.type)
 				{
 					case (Abstract.LABEL):
@@ -298,7 +295,8 @@ public interface TreeRenderer
 		
 		/**
 		 * This method is where subclasses should perform any calculations that
-		 * should be performed during each draw() cycle prior to the actual drawing.
+		 * should be performed during each draw() cycle prior to the actual
+		 * drawing.
 		 * <p>
 		 * Things such as: updating the node ranges, recalculating offsets and
 		 * sizes, etc. etc.
@@ -307,25 +305,47 @@ public interface TreeRenderer
 		{
 		}
 
-		protected void drawLabel(NewRenderNode n)
+		protected void drawLabel(PhyloNode n)
 		{
 		}
 
-		protected void drawNode(NewRenderNode n)
+		protected void drawNode(PhyloNode n)
 		{
 		}
 
-		protected void drawLine(NewRenderNode n)
+		protected void drawLine(PhyloNode n)
 		{
 		}
 		
-		public void setTree(PhyloTreeGraph t)
+		public void setTree(RootedTreeGraph t)
 		{
+			if (tree != null)
+				tree.removeVertexSetListener(this);
 			tree = t;
-			this.lastModCount = t.getModCount() - 1;
+			tree.addVertexSetListener(this);
 		}
 
-		public PhyloTreeGraph getTree()
+		/**
+	     * Notifies that a vertex has been added to the tree.
+	     *
+	     * @param e the vertex event.
+	     */
+	    public void vertexAdded(GraphVertexChangeEvent e)
+	    {
+	    	needsLayout = true;
+	    }
+
+	    /**
+	     * Notifies that a vertex has been removed from the tree.
+	     *
+	     * @param e the vertex event.
+	     */
+	    public void vertexRemoved(GraphVertexChangeEvent e)
+	    {
+	    	needsLayout = true;
+	    }
+		
+		public RootedTreeGraph getTree()
 		{
 			return tree;
 		}

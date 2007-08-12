@@ -1,19 +1,16 @@
-package org.phylowidget.oldtree;
+package org.phylowidget.temp;
 
 import java.util.Stack;
 
 import org.jgrapht.WeightedGraph;
-import org.phylowidget.temp.NewRenderNode;
-import org.phylowidget.temp.PhyloTreeGraph;
-import org.phylowidget.temp.TreeFactory;
 
 public class TreeIO
 {
 
-	public static PhyloTreeGraph parseNewick(String s)
+	public static RootedTreeGraph parseNewick(String s)
 	{
-		PhyloTreeGraph g = TreeFactory.createGraph();
-		NewRenderNode root = null;
+		RootedTreeGraph g = new RootedTreeGraph();
+		PhyloNode root = null;
 		/*
 		 * Pre-process the string as a whole.
 		 */
@@ -52,7 +49,7 @@ public class TreeIO
 		 */
 		StringBuffer temp = new StringBuffer();
 		String curLabel = new String();
-		double curLength = 0;
+		double curLength = 1;
 		for (int i = 0; i < sb.length(); i++)
 		{
 			char c = sb.charAt(i);
@@ -91,11 +88,12 @@ public class TreeIO
 					} else
 					{
 						curLabel = temp.toString();
+						curLabel = curLabel.replace('_', ' ');
 					}
 					if (curLabel.length() == 0)
 						curLabel = nodeCount + " " + curLength;
 					// Create a vertex for the current label and length.
-					NewRenderNode curNode = new NewRenderNode(curLabel);
+					PhyloNode curNode = new PhyloNode(curLabel);
 					g.addVertex(curNode);
 					if (c == ';')
 					{
@@ -107,7 +105,7 @@ public class TreeIO
 						for (int j = 0; j < countForDepth[curDepth]; j++)
 						{
 							// Pop out the child node and connect to the parent.
-							NewRenderNode child = (NewRenderNode) vertices
+							PhyloNode child = (PhyloNode) vertices
 									.pop();
 							child.childIndex = j;
 							Double lengthToChild = (Double) lengths.pop();
@@ -142,6 +140,7 @@ public class TreeIO
 			} else if (c == ':')
 			{
 				curLabel = temp.toString();
+				curLabel = curLabel.replace('_', ' ');
 				temp.replace(0, temp.length(), "");
 				parsingNumber = true;
 			} else

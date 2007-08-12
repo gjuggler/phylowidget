@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.phylowidget.oldtree.TreeNode;
-import org.phylowidget.temp.NewRenderNode;
+import org.phylowidget.temp.PhyloNode;
 
 import processing.core.PApplet;
 
@@ -22,7 +22,7 @@ public class DiagonalCladogram extends Cladogram
 		this.dotMult = 0.25f;
 	}
 
-	protected float branchPositions(NewRenderNode n)
+	protected float branchPositions(PhyloNode n)
 	{
 		if (tree.isLeaf(n))
 			// If N is a leaf, then it's already been laid out.
@@ -33,7 +33,7 @@ public class DiagonalCladogram extends Cladogram
 		List children = tree.childrenOf(n);
 		for (int i = 0; i < children.size(); i++)
 		{
-			NewRenderNode child = (NewRenderNode) children.get(i);
+			PhyloNode child = (PhyloNode) children.get(i);
 			branchPositions(child);
 		}
 		Collections.sort(children);
@@ -41,8 +41,8 @@ public class DiagonalCladogram extends Cladogram
 		 * Now, let's put on our thinking caps and try to lay ourselves out
 		 * correctly.
 		 */
-		NewRenderNode loChild = (NewRenderNode) children.get(0);
-		NewRenderNode hiChild = (NewRenderNode) children
+		PhyloNode loChild = (PhyloNode) children.get(0);
+		PhyloNode hiChild = (PhyloNode) children
 				.get(children.size() - 1);
 		/*
 		 * Find the max depth of each child, and project where the "lower" child
@@ -52,11 +52,7 @@ public class DiagonalCladogram extends Cladogram
 		float loLeaves = tree.getNumLeaves(loChild);
 		float hiLeaves = tree.getNumLeaves(hiChild);
 		float mLeaves = Math.max(loLeaves, hiLeaves);
-		System.out.println("md:" + mLeaves);
-		// System.out.println("LOW usy:"+loChild.unscaledY+"
-		// md:"+loChild.getMaxDepth());
-		// System.out.println("HI usy:"+hiChild.unscaledY+"
-		// md:"+hiChild.getMaxDepth());
+//		System.out.println("md:" + mLeaves);
 		float loChildNewY = loChild.unscaledY + (mLeaves - loLeaves) * stepSize
 				/ 2;
 		float hiChildNewY = hiChild.unscaledY - (mLeaves - hiLeaves) * stepSize
@@ -75,11 +71,11 @@ public class DiagonalCladogram extends Cladogram
 		numCols = numRows / 2;
 	}
 
-	protected void drawLine(NewRenderNode n)
+	protected void drawLine(PhyloNode n)
 	{
 		if (tree.parentOf(n) != null)
 		{
-			NewRenderNode parent = (NewRenderNode) tree.parentOf(n);
+			PhyloNode parent = (PhyloNode) tree.parentOf(n);
 			List list = tree.childrenOf(parent);
 			Collections.sort(list);
 			int index = list.indexOf(n);
@@ -93,10 +89,10 @@ public class DiagonalCladogram extends Cladogram
 				 */
 				// First, find the max number of leaves for any of the child
 				// nodes.
-				 NewRenderNode withMostLeaves = n;
+				 PhyloNode withMostLeaves = n;
 				for (int i = 0; i < list.size(); i++)
 				{
-					NewRenderNode child = (NewRenderNode) list.get(i);
+					PhyloNode child = (PhyloNode) list.get(i);
 					if (child.numEnclosedLeaves > withMostLeaves.numEnclosedLeaves)
 						withMostLeaves = child;
 				}

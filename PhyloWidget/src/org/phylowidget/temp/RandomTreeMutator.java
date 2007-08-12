@@ -1,4 +1,4 @@
-package org.phylowidget.oldtree;
+package org.phylowidget.temp;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -14,6 +14,8 @@ import java.util.Random;
 //import javax.xml.stream.XMLStreamReader;
 
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.oldtree.Tree;
+import org.phylowidget.oldtree.TreeNode;
 
 public class RandomTreeMutator implements Runnable
 {
@@ -78,7 +80,7 @@ public class RandomTreeMutator implements Runnable
 			int i = random.nextInt(allNodes.size());
 			TreeNode n = (TreeNode) allNodes.get(i);
 			TreeNode newNode = tree.getFactory().createNode();
-			newNode.name = taxonName;
+			newNode.setName(taxonName);
 			tree.addSisterNode(n,newNode);
 		}
 		mutations++;

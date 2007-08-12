@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 
-public class NewRenderNode implements Comparable
+public class PhyloNode implements Comparable
 {
-	NewRenderNode parent;
+	PhyloNode parent;
 	public String label;
 	public float unscaledX,unscaledY;
 	public float x,y;
@@ -20,7 +20,7 @@ public class NewRenderNode implements Comparable
 	public float heightToRoot;
 	public int numEnclosedLeaves;
 	
-	public NewRenderNode(String label)
+	public PhyloNode(String label)
 	{
 		this.label = label;
 	}
@@ -47,16 +47,16 @@ public class NewRenderNode implements Comparable
 		label = s;
 	}
 	
-	public NewRenderNode getParent()
+	public PhyloNode getParent()
 	{
 		return parent;
 	}
 	
 	public int compareTo(Object o)
 	{
-		if (o instanceof NewRenderNode)
+		if (o instanceof PhyloNode)
 		{
-			NewRenderNode that = (NewRenderNode) o;
+			PhyloNode that = (PhyloNode) o;
 			float a = this.unscaledY;
 			float b = that.unscaledY;
 			if (a < b)

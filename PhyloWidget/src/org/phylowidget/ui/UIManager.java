@@ -23,6 +23,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.oldtree.Tree;
 import org.phylowidget.oldtree.TreeNode;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.temp.RootedTreeGraph;
 
 import processing.core.PApplet;
 
@@ -171,6 +172,8 @@ public final class UIManager
 	public void deleteSubtree()
 	{
 		NodeRange r = context.curNodeRange;
+		RootedTreeGraph g = r.render.getTree();
+		g.reroot(r.node);
 //		Tree t = r.render.getTree();
 //		t.deleteSubtree(r.node);
 	}

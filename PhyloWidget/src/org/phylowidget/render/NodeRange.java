@@ -1,7 +1,7 @@
 package org.phylowidget.render;
 
 import org.andrewberman.sortedlist.ItemI;
-import org.phylowidget.temp.NewRenderNode;
+import org.phylowidget.temp.PhyloNode;
 
 /**
  * NodeRange is an implementation of ItemI, to be used by PhyloWidget
@@ -12,7 +12,7 @@ import org.phylowidget.temp.NewRenderNode;
 public final class NodeRange implements ItemI
 {
 	public TreeRenderer render;	
-	public NewRenderNode node;
+	public PhyloNode node;
 	
 	public int type=0;
 	public static final int NODE = 0;

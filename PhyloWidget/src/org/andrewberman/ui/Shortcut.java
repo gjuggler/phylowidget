@@ -1,6 +1,5 @@
 package org.andrewberman.ui;
 
-import java.awt.AWTEvent;
 import java.awt.event.KeyEvent;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;

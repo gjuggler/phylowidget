@@ -16,7 +16,6 @@ import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;

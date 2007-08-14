@@ -6,13 +6,14 @@ import java.util.ArrayList;
 
 import org.andrewberman.camera.RectMover;
 import org.andrewberman.camera.SettableRect;
-import org.phylowidget.oldtree.Tree;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
+import org.phylowidget.render.Phylogram;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RandomTreeMutator;
-import org.phylowidget.tree.RootedTreeGraph;
+import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
+import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
 
@@ -97,7 +98,7 @@ public class TreeManager implements SettableRect
 	public void startMutatingTree(int delay)
 	{
 		mutator.stop();
-		mutator = new RandomTreeMutator((Tree) trees.get(0));
+//		mutator = new RandomTreeMutator((Tree) trees.get(0));
 		mutator.delay = delay;
 		mutator.start();
 	}
@@ -113,13 +114,15 @@ public class TreeManager implements SettableRect
 //		trees.add(ptg);
 //		 String s = "(,(,,),)";
 //		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
-//		String s = "(((a,b),c),(d,e));";
+		String s = "((a,b),c);";
 //		String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
 //		 String s = "(A:3.33,(C:3,B:2):5)";
 //		 String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
 
-		String s = "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
-		trees.add(TreeIO.parseNewick(s));
+//		String s = "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
+		
+		PhyloTree tree = new PhyloTree();
+		trees.add(TreeIO.parseNewick(tree, s));
 		diagonalRender();
 //		mutator = new RandomTreeMutator(t);
 	}
@@ -134,10 +137,15 @@ public class TreeManager implements SettableRect
 		setRenderer(new Cladogram(p));
 	}
 
+	public void phylogramRender()
+	{
+		setRenderer(new Phylogram(p));
+	}
+	
 	void setRenderer(TreeRenderer r)
 	{
 		renderers.clear();
-		r.setTree((RootedTreeGraph) trees.get(0));
+		r.setTree((RootedTree) trees.get(0));
 		renderers.add(r);
 	}
 

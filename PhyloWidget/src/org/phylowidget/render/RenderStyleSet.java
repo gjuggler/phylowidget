@@ -1,7 +1,6 @@
 package org.phylowidget.render;
 
 import org.andrewberman.ui.Color;
-import org.andrewberman.ui.menu.StyleSet;
 
 public class RenderStyleSet
 {
@@ -15,6 +14,9 @@ public class RenderStyleSet
 	public Color dimColor;
 	public float dimStroke;
 
+	public Color copyColor;
+	public float copyStroke;
+	
 	private static RenderStyleSet defaultSet;
 	
 	public static RenderStyleSet defaultStyle()
@@ -38,6 +40,9 @@ public class RenderStyleSet
 		
 		hoverColor = new Color(100,150,255);
 		hoverStroke = 3f;
+		
+		copyColor = new Color(255,0,0);
+		copyStroke = 3f;
 	}
 	
 }

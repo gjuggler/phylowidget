@@ -6,11 +6,12 @@ import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.List;
 
+import org.andrewberman.tween.Tween;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
@@ -60,21 +61,34 @@ public class Cladogram extends TreeRenderer.Abstract
 	public static float dotMult = 0.5f;
 
 	/**
+	 * Transformations required to go from the stored position to the actual
+	 * position. Should be set at the beginning of each draw.
+	 */
+	protected float				scaleX, scaleY = 0;
+	protected float				dx, dy = 0;
+	
+	/**
 	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
 	 * won't stretch to completely fill its enclosing rectangle.
 	 */
-	public boolean keepAspectRatio = true;
+	public boolean keepAspectRatio;
 	/**
 	 * If set to true, then this cladogram will layout things according to
 	 * height instead of depth, i.e. phylogram vs. cladogram.
 	 */
-	public boolean useWeightedEdges = true;
+	public boolean useBranchLengths;
 
 	public Cladogram(PApplet p)
 	{
 		super(p);
 	}
-
+	
+	protected void setOptions()
+	{
+		keepAspectRatio = true;
+		useBranchLengths = false;
+	}
+	
 	protected void doTheLayout()
 	{
 		/*
@@ -132,7 +146,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		/*
 		 * Now, set the branch positions.
 		 */
-		branchPositions(tree.getRoot());
+		branchPositions((PhyloNode)tree.getRoot());
 		/*
 		 * Set the numRows and numCols variables.
 		 */
@@ -140,25 +154,25 @@ public class Cladogram extends TreeRenderer.Abstract
 		numCols = tree.getMaxDepth();
 	}
 
-	void leafPosition(PhyloNode n, int index)
+	protected void leafPosition(PhyloNode n, int index)
 	{
 		/**
 		 * Set the leaf position.
 		 */
 		float yPos = ((float) (index + .5f) / (float) (leaves.size()));
 		float xPos = 1;
-		if (useWeightedEdges)
+		if (useBranchLengths)
 			xPos = nodeXPosition(n);
-		n.unscaledX = xPos;
-		n.unscaledY = yPos;
+		n.setUnscaledPosition(xPos, yPos);
 	}
 
-	float nodeXPosition(PhyloNode n)
+	protected float nodeXPosition(PhyloNode n)
 	{
-		if (useWeightedEdges)
-			return (float) n.heightToRoot / (float) tree.getMaxHeight();
+//		System.out.println("nxp "+useBranchLengths);
+		if (useBranchLengths)
+			return (float) tree.heightToRoot(n) / (float) tree.getMaxHeight();
 		else
-			return (float) n.depthToRoot / (float) tree.getMaxDepth();
+			return (float) tree.depthToRoot(n) / (float) tree.getMaxDepth();
 	}
 
 	/**
@@ -173,7 +187,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		if (tree.isLeaf(n))
 		{
 			// If N is a leaf, then it's already been laid out.
-			return n.unscaledY;
+			return n.getTargetY();
 		} else
 		{
 			// If not:
@@ -185,12 +199,11 @@ public class Cladogram extends TreeRenderer.Abstract
 				PhyloNode child = (PhyloNode) children.get(i);
 				sum += branchPositions(child);
 			}
-			float y = (float) sum / (float) children.size();
-			float x = 0;
-			x = nodeXPosition(n);
-			n.unscaledX = x;
-			n.unscaledY = y;
-			return y;
+			float yPos = (float) sum / (float) children.size();
+			float xPos = 0;
+			xPos = nodeXPosition(n);
+			n.setUnscaledPosition(xPos, yPos);
+			return yPos;
 		}
 	}
 
@@ -198,14 +211,14 @@ public class Cladogram extends TreeRenderer.Abstract
 
 	protected void drawRecalc()
 	{
-		// if (forward)
-		// textRotation += 0.02f;
-		// else
-		// textRotation -= 0.02f;
-		// if (textRotation < -PApplet.HALF_PI)
-		// forward = true;
-		// if (textRotation > PApplet.HALF_PI)
-		// forward = false;
+//		 if (forward)
+//		 textRotation += 0.02f;
+//		 else
+//		 textRotation -= 0.02f;
+//		 if (textRotation < -PApplet.HALF_PI)
+//		 forward = true;
+//		 if (textRotation > PApplet.HALF_PI)
+//		 forward = false;
 
 		/*
 		 * Figure out the ideal row size.
@@ -256,6 +269,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		{
 			NodeRange r = (NodeRange) ranges.get(i);
 			PhyloNode n = r.node;
+			n.update();
 			n.x = n.unscaledX * scaleX + dx;
 			n.y = n.unscaledY * scaleY + dy;
 			PhyloNode parent;

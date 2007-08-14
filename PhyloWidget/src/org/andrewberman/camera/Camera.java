@@ -1,7 +1,6 @@
 package org.andrewberman.camera;
 
 import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.tween.TweenListener;
 import org.andrewberman.tween.TweenQuad;
 

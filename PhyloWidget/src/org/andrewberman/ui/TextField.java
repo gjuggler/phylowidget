@@ -10,12 +10,10 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.ui.ifaces.Positionable;
-import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.menu.StyleSet;
 
 import processing.core.PApplet;
 import processing.core.PFont;
-import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
 /**

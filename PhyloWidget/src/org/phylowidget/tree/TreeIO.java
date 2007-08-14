@@ -3,14 +3,14 @@ package org.phylowidget.tree;
 import java.util.Stack;
 
 import org.jgrapht.WeightedGraph;
+import org.phylowidget.ui.PhyloNode;
 
 public class TreeIO
 {
 
-	public static RootedTreeGraph parseNewick(String s)
+	public static RootedTree parseNewick(RootedTree tree, String s)
 	{
-		RootedTreeGraph g = new RootedTreeGraph();
-		PhyloNode root = null;
+		Object root = null;
 		/*
 		 * Pre-process the string as a whole.
 		 */
@@ -91,10 +91,11 @@ public class TreeIO
 						curLabel = curLabel.replace('_', ' ');
 					}
 					if (curLabel.length() == 0)
-						curLabel = nodeCount + " " + curLength;
+						curLabel = String.valueOf(nodeCount);// + " " +
+					// curLength;
 					// Create a vertex for the current label and length.
-					PhyloNode curNode = new PhyloNode(curLabel);
-					g.addVertex(curNode);
+					Object curNode = tree.createNode(curLabel);
+					tree.addVertex(curNode);
 					if (c == ';')
 					{
 						// Can't forget to store which node is the root!
@@ -105,14 +106,13 @@ public class TreeIO
 						for (int j = 0; j < countForDepth[curDepth]; j++)
 						{
 							// Pop out the child node and connect to the parent.
-							PhyloNode child = (PhyloNode) vertices
-									.pop();
-							child.childIndex = j;
-							Double lengthToChild = (Double) lengths.pop();
-							g.addEdge(curNode, child);
-							Object o = g.getEdge(curNode, child);
-							((WeightedGraph) g).setEdgeWeight(o, lengthToChild
-									.doubleValue());
+							PhyloNode child = (PhyloNode) vertices.pop();
+							double length = ((Double) lengths.pop())
+									.doubleValue();
+							if (!tree.containsEdge(curNode,child))
+								tree.addEdge(curNode, child);
+							Object o = tree.getEdge(curNode, child);
+							((WeightedGraph) tree).setEdgeWeight(o, length);
 						}
 						// Flush out the depth counter for the current depth.
 						countForDepth[curDepth] = 0;
@@ -148,8 +148,8 @@ public class TreeIO
 				temp.append(c);
 			}
 		}
-		System.out.println(g);
-		g.setRoot(root);
-		return g;
+		// System.out.println(tree);
+		tree.setRoot(root);
+		return tree;
 	}
 }

@@ -13,13 +13,12 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 
 public class NearestNodeFinder implements UIObject
 {
-	private PApplet p;
+//	private PApplet p;
 	
 	public static final float RADIUS = 100f;
 	
@@ -32,7 +31,7 @@ public class NearestNodeFinder implements UIObject
 	
 	public NearestNodeFinder(PApplet p)
 	{
-		this.p = p;
+//		this.p = p;
 		UIUtils.loadUISinglets(p);
 		
 		EventManager.instance.add(this);

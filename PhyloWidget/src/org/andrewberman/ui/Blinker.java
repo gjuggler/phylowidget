@@ -2,8 +2,6 @@ package org.andrewberman.ui;
 
 import java.util.ArrayList;
 
-import org.andrewberman.ui.menu.MenuTimer;
-
 /**
  * The <code>Blinker</code> object is a simple thread that simply blinks on and off,
  * in a (hopefully) fairly computationally cheap fashion. It is used by the <code>

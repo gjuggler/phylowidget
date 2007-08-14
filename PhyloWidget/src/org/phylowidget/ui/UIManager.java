@@ -1,31 +1,16 @@
 package org.phylowidget.ui;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.util.ArrayList;
-
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ShortcutManager;
-import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.UIObject;
-import org.andrewberman.ui.menu.Dock;
-import org.andrewberman.ui.menu.DockItem;
-import org.andrewberman.ui.menu.RadialMenu;
-import org.andrewberman.ui.menu.RadialMenuItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.oldtree.Tree;
-import org.phylowidget.oldtree.TreeNode;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.RootedTreeGraph;
+import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 
 public final class UIManager
 {
@@ -58,7 +43,8 @@ public final class UIManager
 		t.add("File");
 		t.get("File").add("New Tree").setAction(this,"newTree").setShortcut("control-n");
 		t.get("File").add("Quit").setAction(this,"quit").setShortcut("alt-f4");
-		t.add("View").add("Cladogram").setAction(PhyloWidget.trees,"cladogramRender");
+		t.add("View").add("Phylogram").setAction(PhyloWidget.trees,"phylogramRender");
+		t.get("View").add("Cladogram").setAction(PhyloWidget.trees,"cladogramRender");
 		t.get("View").add("Diagonal").setAction(PhyloWidget.trees,"diagonalRender");
 		t.add("Tree");
 		t.get("Tree").add("Auto-Mutate");
@@ -67,26 +53,18 @@ public final class UIManager
 		t.get("Auto-Mutate").add("Mutate Fast").setAction(this,"mutateFast").setShortcut("control-alt-m");
 		t.get("Auto-Mutate").add("Stop Mutating").setAction(this,"mutateStop");
 		
-//		t.add("File").add("Save").setAction(this, "doSomething");
-//		t.get("Save").setShortcut("control-s");
-//		t.get("File").add("Save...");
-//		t.get("Save...").add("Where?");
-//		t.add("Edit").add("Undo").setShortcut("control-z");
-//		t.get("Edit").add("Redo").setShortcut("control-shift-z");
 		t.layout();
 		
 		text = new PhyloTextField(p);
-		text.text.insert(0, "Hello, world! How are you today?");
-//		focus.setModalFocus(text);
 		
 		context = new PhyloContextMenu(p);
-		context.thetaLo = p.THIRD_PI/2;
-		context.thetaHi = p.TWO_PI+p.THIRD_PI/2;
-		context.add(context.create("Rename",'r')).setAction(this, "renameNode");
-//		context.add(context.create("Edit",'e'));
-//		context.get("Edit").add(context.create("Cut",'x'));
-//		context.get("Edit").add(context.create("Copy",'c'));
-//		context.get("Edit").add(context.create("Paste",'v'));
+//		context.thetaLo = PConstants.THIRD_PI/2;
+//		context.thetaHi = PConstants.TWO_PI+PConstants.THIRD_PI/2;
+		context.add(context.create("Reroot",'r')).setAction(this, "rerootNode");
+		context.add(context.create("Edit",'e'));
+		context.get("Edit").add(context.create("Cut",'x'));
+		context.get("Edit").add(context.create("Copy",'c'));
+		context.get("Edit").add(context.create("Paste",'v'));
 		context.add(context.create("Delete",'d'));
 		context.get("Delete").add(context.create("Subtree",'s')).setAction(this, "deleteSubtree");
 		context.get("Delete").add(context.create("This Node",'t')).setAction(this, "deleteNode");
@@ -148,23 +126,29 @@ public final class UIManager
 		text.startEditing(r);
 	}
 	
+	public void rerootNode()
+	{
+		NodeRange r = context.curNodeRange;
+		r.render.getTree().reroot(r.node);
+	}
+	
 	public void addSisterNode()
 	{
 		NodeRange r = context.curNodeRange;
-//		Tree t = r.render.getTree();
-//		t.addSisterNode(r.node, t.createNode("[New Sister]"));
+		RootedTree tree = r.render.getTree();
+		tree.addSisterNode(r.node);
 	}
 	
 	public void addChildNode()
 	{
-		NodeRange r = context.curNodeRange;
+//		NodeRange r = context.curNodeRange;
 //		Tree t = r.render.getTree();
 //		t.addChildNode(r.node, t.createNode("[New Child]"));
 	}
 	
 	public void deleteNode()
 	{
-		NodeRange r = context.curNodeRange;
+//		NodeRange r = context.curNodeRange;
 //		Tree t = r.render.getTree();
 //		t.deleteNode(r.node);
 	}
@@ -172,7 +156,7 @@ public final class UIManager
 	public void deleteSubtree()
 	{
 		NodeRange r = context.curNodeRange;
-		RootedTreeGraph g = r.render.getTree();
+		RootedTree g = r.render.getTree();
 		g.reroot(r.node);
 //		Tree t = r.render.getTree();
 //		t.deleteSubtree(r.node);

@@ -1,10 +1,7 @@
 package org.phylowidget;
 
 import java.awt.RenderingHints;
-import java.awt.event.FocusEvent;
 
-import org.andrewberman.camera.MovableCamera;
-import org.andrewberman.ui.UIUtils;
 import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.UIManager;
 

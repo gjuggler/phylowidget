@@ -1,7 +1,5 @@
 package org.andrewberman.ui;
 
-import java.awt.AWTEvent;
-import java.awt.Event;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;

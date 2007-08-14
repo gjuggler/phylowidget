@@ -5,26 +5,16 @@ import java.awt.RenderingHints;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import org.andrewberman.tween.PropertyTween;
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenListener;
-import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.Positionable;
-import org.andrewberman.ui.ifaces.Sizable;
-import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.ui.FontLoader;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
 
 /**
  * The <code>Dock</code> class is a close approximation of Apple's infamous

@@ -1,7 +1,5 @@
 package org.andrewberman.ui.menu;
 
-import java.awt.Graphics2D;
-
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.tween.TweenListener;
@@ -9,7 +7,6 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 
-import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
 
 /**

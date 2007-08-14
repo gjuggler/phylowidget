@@ -4,7 +4,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
@@ -52,7 +51,7 @@ public final class RadialMenuItem extends MenuItem
 	public void drawUnder()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		float r = radius;
+//		float r = radius;
 		roundedRect.setRoundRect(rectX, rectY, rectW, rectH,
 				rectH/3, rectH/3);
 		g2.setPaint(Color.white);
@@ -193,7 +192,7 @@ public final class RadialMenuItem extends MenuItem
 		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2).getHeight();
 		fontSize = (rHi-rLo)/unitTextHeight * .9f;
 		fm = UIUtils.getMetrics(menu.buff, font.font, fontSize);
-		float descent = fm.getDescent();
+//		float descent = fm.getDescent();
 		float ascent = fm.getAscent();
 		
 //		Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);

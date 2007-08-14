@@ -8,7 +8,6 @@ import java.awt.geom.Rectangle2D.Float;
 
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.ifaces.Positionable;
-import org.andrewberman.ui.ifaces.Sizable;
 
 /**
  * The <code>ToolbarItem</code> class is a MenuItem that belongs to a Toolbar

@@ -186,7 +186,6 @@ public final class HoverHalo implements TweenListener, UIObject
 		switch (e.getID())
 		{
 			case (MouseEvent.MOUSE_MOVED):
-				// Node radius is equal to half-width of NodeRange object.
 				if (containsPoint(r, pt))
 				{
 					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);

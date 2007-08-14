@@ -9,17 +9,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-//import javax.xml.stream.XMLInputFactory;
-//import javax.xml.stream.XMLStreamConstants;
-//import javax.xml.stream.XMLStreamReader;
+import javax.swing.tree.TreeNode;
 
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.oldtree.Tree;
-import org.phylowidget.oldtree.TreeNode;
+
 
 public class RandomTreeMutator implements Runnable
 {
-	private Tree tree;
+
+	private RootedTree tree;
 	private Thread wrapper;
 	private java.util.Random random;
 	private static String DEFAULT_NAME = "PhyloWidget";
@@ -28,7 +26,7 @@ public class RandomTreeMutator implements Runnable
 	
 	public int mutations = 0;
 	
-	public RandomTreeMutator(Tree t) {
+	public RandomTreeMutator(RootedTree t) {
 		tree = t;
 		random = new Random();
 		
@@ -76,12 +74,9 @@ public class RandomTreeMutator implements Runnable
 		synchronized (tree)
 		{
 			allNodes.clear();
-			tree.getAllNodes(allNodes);
+			tree.getAll(tree.getRoot(), null, allNodes);
 			int i = random.nextInt(allNodes.size());
-			TreeNode n = (TreeNode) allNodes.get(i);
-			TreeNode newNode = tree.getFactory().createNode();
-			newNode.setName(taxonName);
-			tree.addSisterNode(n,newNode);
+			// TODO: finish me up.
 		}
 		mutations++;
 	}
@@ -143,7 +138,7 @@ public class RandomTreeMutator implements Runnable
 		return taxonName;
 	}
 	
-	public void setTree(Tree t) {
+	public void setTree(RootedTree t) {
 		tree = t;
 	}
 	

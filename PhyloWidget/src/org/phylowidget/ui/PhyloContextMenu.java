@@ -2,8 +2,6 @@ package org.phylowidget.ui;
 
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.menu.RadialMenu;
-import org.andrewberman.ui.menu.VerticalMenu;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 
 import processing.core.PApplet;

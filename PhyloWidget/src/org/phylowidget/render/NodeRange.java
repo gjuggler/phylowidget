@@ -1,7 +1,7 @@
 package org.phylowidget.render;
 
 import org.andrewberman.sortedlist.ItemI;
-import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.ui.PhyloNode;
 
 /**
  * NodeRange is an implementation of ItemI, to be used by PhyloWidget

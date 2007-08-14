@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Action;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;

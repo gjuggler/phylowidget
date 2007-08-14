@@ -1,18 +1,13 @@
 package org.andrewberman.ui.menu;
 
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
-import org.andrewberman.tween.PropertyTween;
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Rectangle;
-import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
 import processing.core.PConstants;

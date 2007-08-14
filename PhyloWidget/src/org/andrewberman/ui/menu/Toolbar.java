@@ -7,12 +7,9 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import org.andrewberman.tween.PropertyTween;
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.FocusManager;
-import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
 

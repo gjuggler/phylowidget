@@ -43,7 +43,7 @@ public class ToolbarItem extends MenuItem
 			/*
 			 * Set the correct fill gradient
 			 */
-			if (showingChildren())
+			if (isShowingChildren())
 			{
 				g2.setPaint(menu.style
 						.getGradient(MenuItem.DOWN, y, y + height));
@@ -55,14 +55,14 @@ public class ToolbarItem extends MenuItem
 			/*
 			 * Only perform the fill if the mood is right.
 			 */
-			if (state != MenuItem.UP || showingChildren())
+			if (getState() != MenuItem.UP || isShowingChildren())
 			{
 				g2.fill(roundRect);
 			}
 			/*
 			 * Draw the rounded rectangle outline.
 			 */
-			if (state != MenuItem.UP || showingChildren())
+			if (getState() != MenuItem.UP || isShowingChildren())
 			{
 				RenderingHints rh = menu.buff.g2.getRenderingHints();
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,

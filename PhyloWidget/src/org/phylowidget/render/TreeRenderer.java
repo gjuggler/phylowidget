@@ -39,7 +39,7 @@ public interface TreeRenderer
 	public float getNodeRadius();
 
 	public void positionText(PhyloNode node, TextField text);
-	
+
 	/**
 	 * The abstract tree renderer class.
 	 * 
@@ -47,43 +47,43 @@ public interface TreeRenderer
 	 */
 	abstract class Abstract implements TreeRenderer, GraphListener
 	{
-		public static final int		NODE	= 0;
-		public static final int		LABEL	= 1;
+		public static final int NODE = 0;
+		public static final int LABEL = 1;
 
-		protected PApplet			p;
-		protected PGraphics			canvas;
+		protected PApplet p;
+		protected PGraphics canvas;
 
 		/**
 		 * The rectangle that defines the area in which this renderer will draw
 		 * itself.
 		 */
-		public Rectangle2D.Float	rect;
+		public Rectangle2D.Float rect;
 
 		/**
 		 * The tree that will be rendered.
 		 */
-		protected RootedTree		tree;
+		protected RootedTree tree;
 
 		/**
 		 * Font to be used to draw the nodes.
 		 */
-		protected PFont				font;
-		protected float				textSize;
+		protected PFont font;
+		protected float textSize;
 
 		/**
 		 * Styles for rendering the tree.
 		 */
-		RenderStyleSet				style;
+		RenderStyleSet style;
 
 		/**
 		 * All nodes in the associated tree.
 		 */
-		protected ArrayList			nodes	= new ArrayList();
+		protected ArrayList nodes = new ArrayList();
 
 		/**
 		 * Leaf nodes in the associated tree.
 		 */
-		protected ArrayList			leaves	= new ArrayList();
+		protected ArrayList leaves = new ArrayList();
 
 		/**
 		 * A data structure to store the rectangular regions of all nodes.
@@ -92,15 +92,15 @@ public interface TreeRenderer
 		 * significantly improve performance when viewing only a portion of a
 		 * large tree.
 		 */
-		protected SortedXYRangeList	list	= new SortedXYRangeList();
+		protected SortedXYRangeList list = new SortedXYRangeList();
 
-		protected ArrayList			ranges	= new ArrayList();
+		protected ArrayList ranges = new ArrayList();
 
-		protected ArrayList			inRange	= new ArrayList();
+		protected ArrayList inRange = new ArrayList();
 
-		protected boolean			sorted	= false;
+		protected boolean sorted = false;
 
-		protected boolean			needsLayout;
+		protected boolean needsLayout;
 
 		public Abstract(PApplet p)
 		{
@@ -231,12 +231,7 @@ public interface TreeRenderer
 			 * Set up some rendering constants so we don't recalculate within
 			 * the loop.
 			 */
-			float regWidth = style.regStroke * getNodeRadius() / 10;
-			float hoverWidth = style.hoverStroke * getNodeRadius() / 10;
-			hoverWidth = Math.max(hoverWidth, 3);
-			hoverWidth *= HoverHalo.hoverMult;
-			// float regWidth = 1f;
-			// float hoverWidth = 3f;
+			baseStroke = getNodeRadius() / 10f;
 			int size = inRange.size();
 			for (int i = 0; i < size; i++)
 			{
@@ -245,23 +240,16 @@ public interface TreeRenderer
 				switch (r.type)
 				{
 					case (Abstract.LABEL):
+						canvas.fill(colorForNode(n));
 						drawLabel(n);
 						break;
 					case (Abstract.NODE):
-						canvas.strokeWeight(1f);
-						if (n.hovered)
-						{
-							canvas.stroke(style.hoverColor.getRGB());
-							canvas.strokeWeight(hoverWidth);
-							drawLine(n);
-						} else
-						{
-							canvas.stroke(style.regColor.getRGB());
-							canvas.strokeWeight(regWidth);
-							drawLine(n);
-						}
+						canvas.strokeWeight(strokeForNode(n));
+						canvas.stroke(colorForNode(n));
+						drawLine(n);
 						canvas.noStroke();
-						canvas.fill(style.regColor.getRGB());
+						canvas.fill(colorForNode(n));
+						// canvas.fill(style.regColor.getRGB());
 						drawNode(n);
 						break;
 				}
@@ -269,11 +257,38 @@ public interface TreeRenderer
 			unhint();
 		}
 
+		float baseStroke;
+
+		float strokeForNode(PhyloNode n)
+		{
+			float stroke = baseStroke;
+			if (n.hovered)
+				stroke *= style.hoverStroke * HoverHalo.hoverMult;
+			else
+			{
+				switch (n.getState())
+				{
+					case (PhyloNode.CUT):
+						stroke *= style.dimStroke;
+						break;
+					case (PhyloNode.COPY):
+						stroke *= style.copyStroke;
+						break;
+					case (PhyloNode.NONE):
+					default:
+						stroke *= style.regStroke;
+						break;
+				}
+			}
+			return stroke;
+		}
+
 		int colorForNode(PhyloNode n)
 		{
 			if (n.hovered)
 				return style.hoverColor.getRGB();
-			else {
+			else
+			{
 				switch (n.getState())
 				{
 					case (PhyloNode.CUT):
@@ -286,8 +301,8 @@ public interface TreeRenderer
 				}
 			}
 		}
-		
-		RenderingHints	oldRH;
+
+		RenderingHints oldRH;
 
 		void hint()
 		{
@@ -370,12 +385,12 @@ public interface TreeRenderer
 		{
 			needsLayout = true;
 		}
-		
+
 		public void edgeRemoved(GraphEdgeChangeEvent e)
 		{
 			needsLayout = true;
 		}
-		
+
 		public RootedTree getTree()
 		{
 			return tree;
@@ -383,12 +398,11 @@ public interface TreeRenderer
 
 		public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
 		{
-			synchronized (tree)
+			synchronized (list)
 			{
 				list.getInRange(arr, rect);
 			}
 		}
-
 	}
 
 }

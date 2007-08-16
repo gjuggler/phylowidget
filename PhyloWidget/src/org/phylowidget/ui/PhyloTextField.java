@@ -39,10 +39,10 @@ public class PhyloTextField extends TextField implements HintListener
 	protected void startEditing(NodeRange r)
 	{
 		curRange = r;
-		oldName = r.node.getName();
+		oldName = r.node.getLabel();
 		reset();
 		// hide();
-		text.replace(0, text.length(), r.node.getName());
+		text.replace(0, text.length(), r.node.getLabel());
 		// r.render.positionText(r.node, this);
 		show();
 		FocusManager.instance.setModalFocus(this);
@@ -71,7 +71,7 @@ public class PhyloTextField extends TextField implements HintListener
 	{
 		synchronized (this)
 		{
-			curRange.node.setName(s);
+			curRange.node.setLabel(s);
 			curRange.render.layout();
 		}
 	}

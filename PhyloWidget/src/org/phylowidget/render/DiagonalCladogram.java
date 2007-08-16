@@ -3,6 +3,7 @@ package org.phylowidget.render;
 import java.util.Collections;
 import java.util.List;
 
+import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
@@ -21,7 +22,7 @@ public class DiagonalCladogram extends Cladogram
 		keepAspectRatio = true;
 		useBranchLengths = false;
 	}
-	
+
 	protected float branchPositions(PhyloNode n)
 	{
 		if (tree.isLeaf(n))
@@ -41,8 +42,8 @@ public class DiagonalCladogram extends Cladogram
 		 * Now, let's put on our thinking caps and try to lay ourselves out
 		 * correctly.
 		 */
-		PhyloNode loChild = (PhyloNode) getMinNode(children);
-		PhyloNode hiChild = (PhyloNode) getMaxNode(children);
+		PhyloNode loChild = (PhyloNode) Collections.min(children);
+		PhyloNode hiChild = (PhyloNode) Collections.max(children);
 		/*
 		 * Find the max depth of each child, and project where the "lower" child
 		 * would be in the y axis if it were at that higher depth.
@@ -59,49 +60,19 @@ public class DiagonalCladogram extends Cladogram
 		float unscaledY = (loChildNewY + hiChildNewY) / 2;
 		float unscaledX = nodeXPosition(n);
 		n.setUnscaledPosition(unscaledX, unscaledY);
-		// n.unscaledX = (float)(n.numEnclosedLeaves / (float)leaves.size();
-		// n.unscaledX = 1 - (float)n.getMaxDepth() / (float)maxDepth / 2f;
 		return 0;
 	}
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-		return 1 - (float) (tree.numEnclosedLeaves(n) - 1)
-		/ (float) (leaves.size());
+		return xPosForNumEnclosedLeaves(tree.numEnclosedLeaves(n));
 	}
-	
-	Object getMinNode(List l)
+
+	float xPosForNumEnclosedLeaves(int numLeaves)
 	{
-		float minY = Integer.MAX_VALUE;
-		int minIndex = 0;
-		for (int i = 0; i < l.size(); i++)
-		{
-			PhyloNode child = (PhyloNode) l.get(i);
-			if (child.getTargetY() < minY)
-			{
-				minY = child.getTargetY();
-				minIndex = i;
-			}
-		}
-		return l.get(minIndex);
+		return 1 - (float) (numLeaves - 1) / (float) leaves.size();
 	}
-	
-	Object getMaxNode(List l)
-	{
-		float maxY = Integer.MIN_VALUE;
-		int maxIndex = 0;
-		for (int i = 0; i < l.size(); i++)
-		{
-			PhyloNode child = (PhyloNode) l.get(i);
-			if (child.getTargetY() > maxY)
-			{
-				maxY = child.getTargetY();
-				maxIndex = i;
-			}
-		}
-		return l.get(maxIndex);
-	}
-	
+
 	protected void doTheLayout()
 	{
 		super.doTheLayout();
@@ -114,42 +85,25 @@ public class DiagonalCladogram extends Cladogram
 		{
 			PhyloNode parent = (PhyloNode) tree.parentOf(n);
 			List list = tree.childrenOf(parent);
-			// Collections.sort(list);
-			// int index = list.indexOf(n);
-			float minY = n.getTargetY(), maxY = n.getTargetY();
-			for (int i = 0; i < list.size(); i++)
-			{
-				PhyloNode child = (PhyloNode) list.get(i);
-				if (child.getTargetY() > maxY)
-					maxY = child.getTargetY();
-				else if (child.getTargetY() < minY)
-					minY = child.getTargetY();
-			}
-			if (n.getTargetY() != maxY && n.getTargetY() != minY)
+			Collections.sort(list);
+			int index = list.indexOf(n);
+			if (index != 0 && index != list.size() - 1)
 			{
 				/*
-				 * If we get here, then this node is in the middle of a
-				 * polytomy. Let's do something interesting, a la
+				 * This block is only seen by nodes that are "stuck in the
+				 * middle" of a polytomy.Maybe we should we do something a la:
+				 * 
 				 * http://www.slipperorchids.info/taxonomy/cladogram.jpg
+				 * 
+				 * I tried this already, but such solutions don't tend to scale
+				 * up well with large polytomies.
 				 */
-				// First, find the max number of leaves for any of the child
-				// nodes.
-//				System.out.println(n);
-				PhyloNode withMostLeaves = n;
-				for (int i = 0; i < list.size(); i++)
-				{
-					PhyloNode child = (PhyloNode) list.get(i);
-					if (tree.numEnclosedLeaves(child) > tree
-							.numEnclosedLeaves(n))
-						withMostLeaves = child;
-				}
-//				System.out.println("   ml:" + withMostLeaves);
-				canvas.line(n.x, n.y, withMostLeaves.x, parent.y);
-				canvas.line(withMostLeaves.x, parent.y, parent.x, parent.y);
-			} else
-			{
-				canvas.line(n.x, n.y, parent.x, parent.y);
 			}
+			float retreatX = getRetreat();
+			float retreatY = getRetreat();
+			if (parent.y > n.y)
+				retreatY = -retreatY;
+			canvas.line(n.x, n.y, parent.x + retreatX, parent.y + retreatY);
 			// canvas.line(n.x - rad, n.y, parent.x, n.y);
 			// float retreat = 0;
 			// if (n.y < parent.y)
@@ -158,5 +112,12 @@ public class DiagonalCladogram extends Cladogram
 			// retreat = rad;
 			// canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 		}
+	}
+
+	float sqrt2 = (float) Math.sqrt(2);
+
+	protected float getRetreat()
+	{
+		return getNodeRadius() * sqrt2/2;
 	}
 }

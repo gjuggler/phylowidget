@@ -9,9 +9,16 @@ public class CachedRootedTree extends RootedTree
 {
 	private static final long serialVersionUID = 1L;
 
-	int maxDepth;
-	float maxHeight;
+	private int modCount;
+	
+	private int maxDepth;
+	private float maxHeight;
 
+	public Object createVertex(Object o)
+	{
+		return new CachedVertex(o);
+	}
+	
 	synchronized void calculateStuff()
 	{
 		if (root == null)

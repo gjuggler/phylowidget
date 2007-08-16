@@ -109,7 +109,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		} else
 		{
 			p.noFill();
-			p.stroke(40, 120, 240, alpha);
+			p.stroke(40, 120, 240, 255);
 			p.strokeWeight(Math.max(rect.width / 20, 3));
 		}
 		float w = wTween.position * rect.width;
@@ -222,14 +222,4 @@ public final class HoverHalo implements TweenListener, UIObject
 		float y = pt.y - tempPt.y;
 		return (x * x + y * y < radius * radius);
 	}
-
-	public synchronized void setNodeRange(NodeRange r)
-	{
-		this.curNode = r;
-	}
-	// public void setRect(float cx, float cy, float w, float h)
-	// {
-	// rect.setFrameFromCenter(cx, cy, cx - w/2, cy - h/2);
-	// }
-
 }

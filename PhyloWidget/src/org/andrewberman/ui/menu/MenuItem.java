@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.andrewberman.ui.Action;
 import org.andrewberman.ui.Point;
@@ -37,6 +38,7 @@ public abstract class MenuItem implements Positionable, Sizable
 	public static final int UP = 0;
 	public static final int OVER = 1;
 	public static final int DOWN = 2;
+	public static final int DISABLED = 3;
 
 	public static final int LAYOUT_BELOW = 0;
 	public static final int LAYOUT_RIGHT = 1;
@@ -191,12 +193,17 @@ public abstract class MenuItem implements Positionable, Sizable
 		return true;
 	}
 
+	public boolean isEnabled()
+	{
+		return true;
+	}
+
 	/**
 	 * Returns whether this MenuItem is showing its children or not.
 	 * 
 	 * @return true if any of this MenuItem's children are showing.
 	 */
-	public boolean showingChildren()
+	public boolean isShowingChildren()
 	{
 		for (int i = 0; i < items.size(); i++)
 		{
@@ -321,7 +328,7 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	protected void toggleChildren()
 	{
-		final boolean showingChildren = showingChildren();
+		final boolean showingChildren = isShowingChildren();
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem) items.get(i);
@@ -369,6 +376,8 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	protected void performAction()
 	{
+		if (!isEnabled())
+			return; // Do nothing if disabled.
 		if (items.size() > 0)
 		{
 			menuTriggerLogic();
@@ -396,7 +405,7 @@ public abstract class MenuItem implements Positionable, Sizable
 			{
 				if (parent != null)
 				{
-					if (showingChildren())
+					if (isShowingChildren())
 						parent.setOpenItem(null);
 					else
 						parent.setOpenItem(this);
@@ -517,6 +526,14 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
+	int getState()
+	{
+		if (!isEnabled())
+			return DISABLED;
+		else
+			return state;
+	}
+
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
 		boolean containsPoint = containsPoint(tempPt);
@@ -568,5 +585,48 @@ public abstract class MenuItem implements Positionable, Sizable
 			MenuItem seg = (MenuItem) items.get(i);
 			seg.keyEvent(e);
 		}
+	}
+
+	public String toString()
+	{
+		return label;
+	}
+
+	class VisibleDepthComparator implements Comparator
+	{
+		public int compare(Object o1, Object o2)
+		{
+			MenuItem i1 = (MenuItem) o1;
+			MenuItem i2 = (MenuItem) o2;
+
+			int d1 = maxDepth(i1);
+			int d2 = maxDepth(i2);
+
+			if (d1 > d2)
+				return -1;
+			if (d1 < d2)
+				return 1;
+			return 0;
+		}
+
+		int maxDepth(MenuItem item)
+		{
+			int max = 0;
+			if (!item.isShowingChildren())
+			{
+				max = 0;
+			} else
+			{
+				for (int i = 0; i < item.items.size(); i++)
+				{
+					MenuItem child = (MenuItem) item.items.get(i);
+					int childDepth = maxDepth(child);
+					if (childDepth + 1 > max)
+						max = childDepth + 1;
+				}
+			}
+			return max;
+		}
+
 	}
 }

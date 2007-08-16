@@ -35,9 +35,9 @@ public abstract class ZoomTool extends Tool
 			 * Update the zoom factor and set the new zoom level.
 			 */
 			float zoomDist = downPoint.y - curPoint.y;
-//			System.out.println(zoomDist);
+//			System.out.println(zoomDist + "  " + zoomFactor);
 			zoomFactor *= (1 + zoomDist / 100 / 10);
-			cam.zoomTo(zoomFactor);
+//			cam.zoomTo(zoomFactor);
 			/*
 			 * Update the new center point and set it. This calculation gets a
 			 * little annoying; just trust me here.
@@ -51,7 +51,9 @@ public abstract class ZoomTool extends Tool
 			// new distances from down point to center.
 			float newX = downCameraX + dx - dx * zoomRatio;
 			float newY = downCameraY + dy - dy * zoomRatio;
+			cam.zoomTo(zoomFactor);
 			cam.nudgeTo(newX, newY);
+			
 			cam.fforward();
 		}
 	}
@@ -74,5 +76,4 @@ public abstract class ZoomTool extends Tool
 		}
 		return zoomCursor;
 	}
-
 }

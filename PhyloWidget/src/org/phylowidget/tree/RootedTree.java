@@ -1,8 +1,10 @@
 package org.phylowidget.tree;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,16 +13,12 @@ import java.util.Stack;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DirectedNeighborIndex;
-import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.phylowidget.PhyloWidget;
 
 public class RootedTree extends ListenableDirectedWeightedGraph
 {
-	private static final long	serialVersionUID	= 1L;
 
 	/**
 	 * This object helps cache the sets of predecessor and successor neighbors
@@ -30,34 +28,42 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * to "false" by overriding the setOptions() method and setting it false in
 	 * there.
 	 */
-	DirectedNeighborIndex		neighbors;
-	Object						root;
+	DirectedNeighborIndex neighbors;
 
-	ArrayList					tempList			= new ArrayList(3);
+	/**
+	 * The current root of this rooted tree.
+	 */
+	Object root;
+
+	HashMap sorting;
+	static final Integer REVERSE = new Integer(-1);
+	static final Integer FORWARD = new Integer(1);
+	public Comparator sorter = new EnclosedLeavesComparator(-1);
 
 	/*
 	 * ****** OPTIONS ******
 	 */
-	boolean						useNeighborIndex;
+	boolean useNeighborIndex;
 
-	public RootedTree(String rootLabel)
+	public RootedTree(Object newRoot)
 	{
 		this();
 		/*
 		 * When we're given a label in the constructor, make a new root node out
 		 * of it.
 		 */
-		Object o = addNode(rootLabel);
-		root = o;
+		Object o = createAndAddVertex(newRoot);
+		setRoot(o);
 	}
 
 	public RootedTree()
 	{
-//		super(new SimpleDirectedWeightedGraph(DefaultWeightedEdge.class));
+		// super(new SimpleDirectedWeightedGraph(DefaultWeightedEdge.class));
 		super(DefaultWeightedEdge.class);
 		setOptions();
 		if (useNeighborIndex)
 			createNeighborIndex();
+		sorting = new HashMap();
 	}
 
 	void createNeighborIndex()
@@ -91,16 +97,16 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * @param label
 	 * @return
 	 */
-	public Object createNode(String label)
+	public Object createVertex(Object o)
 	{
-		return label;
+		return new DefaultVertex(o);
 	}
 
-	public Object addNode(String label)
+	public Object createAndAddVertex(Object o)
 	{
-		Object o = createNode(label);
-		addVertex(o);
-		return o;
+		Object newV = createVertex(o);
+		addVertex(newV);
+		return newV;
 	}
 
 	public boolean isLeaf(Object vertex)
@@ -110,18 +116,26 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 
 	public List childrenOf(Object vertex)
 	{
+		List l;
 		if (useNeighborIndex)
 		{
-			ArrayList l = new ArrayList();
+			l = new ArrayList();
 			l.addAll(neighbors.successorsOf(vertex));
-			return l;
 		} else
-			return Graphs.successorListOf(this, vertex);
+			l = Graphs.successorListOf(this, vertex);
+		// Sort the resulting list.
+		Collections.sort(l, sorter);
+		if (sorting.containsKey(vertex))
+		{
+			Integer i = (Integer) sorting.get(vertex);
+			if (i == REVERSE)
+				Collections.reverse(l);
+		}
+		return l;
 	}
 
 	public Object parentOf(Object child)
 	{
-		// System.out.println(child+" contains:"+this.containsVertex(child));
 		// Special case: this vertex has no parents, i.e. it is the root.
 		if (inDegreeOf(child) == 0)
 			return null;
@@ -143,13 +157,15 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return enclosedLeaves(vertex).size();
 	}
 
-	public int depthToRoot(Object vertex)
+	int depthToVertex(Object vertex, Object target)
 	{
 		int depth = 0;
-		while (vertex != root)
+		while (vertex != target)
 		{
 			depth += 1;
 			vertex = parentOf(vertex);
+			if (vertex == root)
+				return depth;
 		}
 		return depth;
 	}
@@ -170,17 +186,39 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return height;
 	}
 
-	// Set childrenSetOf(Object vertex)
-	// {
-	// Set s;
-	// if (useNeighborIndex)
-	// s = neighbors.successorsOf(vertex);
-	// else
-	// {
-	// Graphs.get
-	// }
-	// return s;
-	// }
+	public int getMaxDepthToLeaf(Object vertex)
+	{
+		int maxDepth = 0;
+		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
+		while (bfi.hasNext())
+		{
+			Object o = bfi.next();
+			if (isLeaf(o))
+			{
+				int curDepth = depthToVertex(o, vertex);
+				if (curDepth > maxDepth)
+					maxDepth = curDepth;
+			}
+		}
+		return maxDepth;
+	}
+
+	public double getMaxHeightToLeaf()
+	{
+		double maxHeight = 0;
+		BreadthFirstIterator bfi = new BreadthFirstIterator(this, root);
+		while (bfi.hasNext())
+		{
+			Object o = bfi.next();
+			if (isLeaf(o))
+			{
+				double curHeight = heightToRoot(o);
+				if (curHeight > maxHeight)
+					maxHeight = curHeight;
+			}
+		}
+		return maxHeight;
+	}
 
 	/**
 	 * A method for retrieving all nodes below a given vertex in a tree. The
@@ -191,7 +229,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * @param leaves
 	 * @param nodes
 	 */
-	public void getAll(Object vertex, List leaves, List nodes)
+	public synchronized void getAll(Object vertex, List leaves, List nodes)
 	{
 		Stack s = new Stack();
 		s.push(vertex);
@@ -210,24 +248,9 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			if (nodes != null)
 				nodes.add(v);
 		}
-
-		// BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
-		// while (bfi.hasNext())
-		// {
-		// Object n = bfi.next();
-		// if (isLeaf(n) && leaves != null)
-		// leaves.add(n);
-		// if (nodes != null)
-		// nodes.add(n);
-		// }
 	}
 
-	/**
-	 * 
-	 * @param vertex
-	 * @return
-	 */
-	List enclosedNodes(Object vertex)
+	private List enclosedVertices(Object vertex)
 	{
 		ArrayList l = new ArrayList();
 		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
@@ -238,7 +261,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return l;
 	}
 
-	List enclosedLeaves(Object vertex)
+	private List enclosedLeaves(Object vertex)
 	{
 		ArrayList l = new ArrayList();
 		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
@@ -251,45 +274,90 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return l;
 	}
 
-	public int getMaxDepth()
+	public synchronized void deleteSubtree(Object vertex)
 	{
-		int maxDepth = 0;
-		BreadthFirstIterator bfi = new BreadthFirstIterator(this, root);
-		while (bfi.hasNext())
+		if (vertex == getRoot())
 		{
-			Object o = bfi.next();
-			if (isLeaf(o))
-			{
-				int curDepth = depthToRoot(o);
-				if (curDepth > maxDepth)
-					maxDepth = curDepth;
-			}
+			Object newRoot = createAndAddVertex("[new root]");
+			setRoot(newRoot);
 		}
-		return maxDepth;
+		List nodes = enclosedVertices(vertex);
+		removeAllVertices(nodes);
 	}
-
-	public double getMaxHeight()
+	
+	public synchronized void deleteNode(Object vertex)
 	{
-		double maxHeight = 0;
-		BreadthFirstIterator bfi = new BreadthFirstIterator(this, root);
-		while (bfi.hasNext())
+		if (parentOf(vertex) != null)
 		{
-			Object o = bfi.next();
-			if (isLeaf(o))
+			Object parent = parentOf(vertex);
+			double weightToParent = getEdgeWeight(getEdge(parent,vertex));
+			List children = childrenOf(vertex);
+			for (int i=0; i < children.size(); i++)
 			{
-				double curHeight = heightToRoot(o);
-				if (curHeight > maxHeight)
-					maxHeight = curHeight;
+				Object child = children.get(i);
+				double weight = getEdgeWeight(getEdge(vertex,child));
+				Object edge = addEdge(parent, child);
+				setEdgeWeight(edge, weightToParent+weight);
+			}
+			removeVertex(vertex);
+		} else
+		{
+			// Do nothing -- how would I delete the root node?
+		}
+	}
+	
+	public RootedTree cloneSubtree(Object vertex)
+	{
+		RootedTree newTree;
+		try
+		{
+			Constructor c = this.getClass().getConstructor(new Class[] {});
+			newTree = (RootedTree) c.newInstance(new Object[] {});
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
+		/*
+		 * The basic idea here is to go through the current subtree, and
+		 * basically mirror the same actions in the new tree, creating vertices
+		 * and edges as needed.
+		 */
+		Stack myStack = new Stack(); // One for me...
+		Stack newStack = new Stack(); // One for you.
+		// Initialize the traversal with the designated start vertex.
+		myStack.push(vertex);
+		Object newRoot = newTree.createAndAddVertex(vertex);
+		newTree.setRoot(newRoot);
+		newStack.push(newRoot);
+		while (!myStack.isEmpty())
+		{
+			Object parent = myStack.pop();
+			Object newParent = newStack.pop();
+			List list = childrenOf(parent);
+			for (int i = 0; i < list.size(); i++)
+			{
+				Object thisChild = list.get(i);
+				myStack.push(thisChild);
+				double thisWeight = getEdgeWeight(getEdge(parent, thisChild));
+				// Now do the same (while creating stuff) for the cloned tree.
+				Object newChild = newTree.createAndAddVertex(thisChild);
+				newStack.push(newChild);
+				Object e = newTree.addEdge(newParent, newChild);
+				newTree.setEdgeWeight(e, thisWeight);
 			}
 		}
-		return maxHeight;
+		return newTree;
 	}
 
 	public synchronized void reroot(Object pivot)
-	{	
-//		System.out.println("Rerooting tree...");
-//		System.out.println("Step 1...");
-//		System.out.println(this);
+	{
+		// System.out.println("Rerooting tree...");
+		// System.out.println("Step 1...");
+		// System.out.println(this);
+		System.out.println(containsVertex("dog"));
+
 		if (pivot == root || parentOf(pivot) == root)
 			return;
 		/**
@@ -336,18 +404,18 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 		removeVertex(root);
 		// Remove the root vertex and all its touching edges.
-//		System.out.println("Step 2...");
-//		System.out.println(this);
+		// System.out.println("Step 2...");
+		// System.out.println(this);
 		// STEP 2: Create the new root.
 		//
 		// Add the new root vertex.
-		Object newRoot = addNode("newroot");
+		Object newRoot = createAndAddVertex("newroot");
 		// Capture the length of the edge above the pivot vertex.
 		insertNodeBetween(parentOf(pivot), pivot, newRoot);
 		root = newRoot;
 
-//		System.out.println("Step 3...");
-//		System.out.println(this);
+		// System.out.println("Step 3...");
+		// System.out.println(this);
 		// STEP 3: Re-orient all edges, branching out from the root edge.
 		//
 		// Iterate over an undirected version of this graph, so we can "go
@@ -394,11 +462,69 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			}
 			seen.put(curNode, stupidInt);
 		}
-		// Finally, recreate the neighbor index if necessary.
-//		if (useNeighborIndex)
-//			createNeighborIndex();
-//		System.out.println("Done!");
-//		System.out.println(this);
+	}
+
+	public void flipChildren(Object parent)
+	{
+		// If we've already stored a sorting value, then toggle it.
+		if (sorting.containsKey(parent))
+		{
+			Object o = sorting.get(parent);
+			if (o == REVERSE)
+				sorting.put(parent, FORWARD);
+			else
+				sorting.put(parent, REVERSE);
+		} else
+		{
+			// Otherwise, this vertex is already implicitly forward sorted.
+			// Switch it to reverse.
+			sorting.put(parent, REVERSE);
+		}
+	}
+
+	public void reverseAllChildren(Object vertex)
+	{
+		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
+		while (bfi.hasNext())
+		{
+			Object o = bfi.next();
+			flipChildren(o);
+		}
+	}
+
+	public void ladderizeSubtree(Object vertex)
+	{
+		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
+		while (bfi.hasNext())
+		{
+			Object o = bfi.next();
+			sorting.put(o, FORWARD);
+		}
+	}
+
+	/**
+	 * Removes "elbowed" nodes from the subtree below the given vertex. An
+	 * elbowed node is defined as a node that has a single parent and a single
+	 * child.
+	 * 
+	 * @param vertex
+	 *            the node at which to begin culling
+	 */
+	public synchronized void cullElbowsBelow(Object vertex)
+	{
+		ArrayList list = new ArrayList();
+		getAll(vertex, null, list);
+		for (int i = 0; i < list.size(); i++)
+		{
+			Object o = list.get(i);
+			if (parentOf(o) != null && childrenOf(o).size() == 1)
+			{
+				Object parent = parentOf(o);
+				Object child = childrenOf(o).get(0);
+				removeVertex(o);
+				addEdge(parent, child);
+			}
+		}
 	}
 
 	/**
@@ -409,14 +535,27 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * 
 	 * @param v
 	 */
-	public void addSisterNode(Object v)
+	public Object addSisterNode(Object v)
 	{
 		Object curParent = parentOf(v);
-		Object newParent = addNode("[new parent]");
-		insertNodeBetween(curParent, v, newParent);
-		Object newSister = addNode("[new sister]");
-		addEdge(newParent,newSister);
-		addEdge(newParent,v);
+		Object newParent = createAndAddVertex("[new parent]");
+		Object newSister = createAndAddVertex("[new sister]");
+		if (v == getRoot())
+		{
+			setRoot(newParent);
+		} else
+		{
+			insertNodeBetween(curParent, v, newParent);
+		}
+		addEdge(newParent, newSister);
+		addEdge(newParent, v);
+		return newSister;
+	}
+
+	public void addChildNode(Object v)
+	{
+		Object newNode = createAndAddVertex("[new child]");
+		addEdge(v, newNode);
 	}
 
 	/**
@@ -428,16 +567,15 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 *            the child node (edge target)
 	 * @param insertMe
 	 */
-	void insertNodeBetween(Object a, Object b, Object insertMe)
+	public void insertNodeBetween(Object a, Object b, Object insertMe)
 	{
 		Object e = getEdge(a, b);
 		double weight = getEdgeWeight(e);
-		removeEdge(a,b);
-		removeEdge(a,b);
 		Object newToB = addEdge(insertMe, b);
 		setEdgeWeight(newToB, weight / 2);
-		Object aToNew = addEdge(a, insertMe);
+		Object aToNew = addEdge(a, insertMe); //
 		setEdgeWeight(aToNew, weight / 2);
+		removeEdge(a, b);
 	}
 
 	public Object getRoot()
@@ -448,5 +586,45 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	public void setRoot(Object newRoot)
 	{
 		root = newRoot;
+	}
+
+	class EnclosedLeavesComparator implements Comparator
+	{
+		int dir;
+
+		public EnclosedLeavesComparator(int dir)
+		{
+			this.dir = dir;
+		}
+
+		public int compare(Object o1, Object o2)
+		{
+			int a = numEnclosedLeaves(o1);
+			int b = numEnclosedLeaves(o2);
+
+			if (dir == 1)
+			{
+				if (a > b)
+					return 1;
+				else if (a < b)
+					return -1;
+				else
+					return 0;
+			} else
+			{
+				if (a > b)
+					return -1;
+				else if (a < b)
+					return 1;
+				else
+					return 0;
+			}
+		}
+
+		public boolean equals(Object o1, Object o2)
+		{
+			return (compare(o1, o1) == 0);
+		}
+
 	}
 }

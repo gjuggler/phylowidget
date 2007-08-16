@@ -3,12 +3,10 @@ package org.phylowidget.ui;
 import org.andrewberman.tween.Tween;
 import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.tween.TweenListener;
+import org.phylowidget.tree.DefaultVertex;
 
-
-public class PhyloNode implements Comparable
+public class PhyloNode extends  DefaultVertex implements Comparable
 {
-	PhyloNode parent;
-	String label;
 	public float unscaledX,unscaledY;
 	public float x,y;
 	public float unitTextWidth;
@@ -19,16 +17,16 @@ public class PhyloNode implements Comparable
 	public static final int CUT = 1;
 	public static final int COPY = 2;
 	
-	static TweenFriction fric = TweenFriction.tween(0.2f);
+	static TweenFriction fric = TweenFriction.tween(0.3f);
 	
-	static final float MULT = 10000f;
+	static final float mult = 10000f;
 	
 	public Tween xTween;
 	public Tween yTween;
 	
-	public PhyloNode(String label)
+	public PhyloNode(Object o)
 	{
-		this.label = label;
+		super(o);
 		xTween = new Tween(null,fric,Tween.OUT,0f,0f,0f);
 		yTween = new Tween(null,fric,Tween.OUT,0f,0f,0f);
 	}
@@ -37,24 +35,24 @@ public class PhyloNode implements Comparable
 	{
 		xTween.update();
 		yTween.update();
-		unscaledX = xTween.getPosition()/MULT;
-		unscaledY = yTween.getPosition()/MULT;
+		unscaledX = xTween.getPosition()/mult;
+		unscaledY = yTween.getPosition()/mult;
 	}
 	
 	public void setUnscaledPosition(float x, float y)
 	{
-		xTween.continueTo(x*MULT);
-		yTween.continueTo(y*MULT);
+		xTween.continueTo(x*mult);
+		yTween.continueTo(y*mult);
 	}
 	
 	public float getTargetX()
 	{
-		return xTween.getFinish()/MULT;
+		return xTween.getFinish()/mult;
 	}
 	
 	public float getTargetY()
 	{
-		return yTween.getFinish()/MULT;
+		return yTween.getFinish()/mult;
 	}
 	
 	public String toString()
@@ -62,19 +60,14 @@ public class PhyloNode implements Comparable
 		return label;
 	}
 	
-	public String getName()
+	public String getLabel()
 	{
 		return label;
 	}
 	
-	public void setName(String s)
+	public void setLabel(String s)
 	{
 		label = s;
-	}
-	
-	public PhyloNode getParent()
-	{
-		return parent;
 	}
 	
 	public int compareTo(Object o)
@@ -82,8 +75,8 @@ public class PhyloNode implements Comparable
 		if (o instanceof PhyloNode)
 		{
 			PhyloNode that = (PhyloNode) o;
-			float a = this.unscaledY;
-			float b = that.unscaledY;
+			float a = this.getTargetY();
+			float b = that.getTargetY();
 			if (a < b)
 				return -1;
 			else if (a > b)

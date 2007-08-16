@@ -39,10 +39,10 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 
 	static void drawChildrenRect(MenuItem item)
 	{
-		if (item.items.size() == 0 || !item.showingChildren())
+		if (item.items.size() == 0 || !item.isShowingChildren())
 			return;
 		MenuItem firstItem = (MenuItem) item.items.get(0);
-		if (item.showingChildren() && firstItem instanceof VerticalMenuItem)
+		if (item.isShowingChildren() && firstItem instanceof VerticalMenuItem)
 		{
 			VerticalMenuItem firstChild = (VerticalMenuItem) item.items.get(0);
 			item.menu.buff.g2.setPaint(item.menu.style.strokeColor);

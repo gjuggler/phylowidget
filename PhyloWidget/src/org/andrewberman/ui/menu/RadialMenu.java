@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Rectangle;
@@ -19,14 +21,12 @@ public class RadialMenu extends Menu
 	float innerRadius = 10;
 	float radius = 30;
 
-	Ellipse2D.Float inner = new Ellipse2D.Float(0, 0, 0, 0);
-	Ellipse2D.Float outer = new Ellipse2D.Float(0, 0, 0, 0);
-	Ellipse2D.Float max = new Ellipse2D.Float(0, 0, 0, 0);
-
 	Rectangle myRect = new Rectangle(0, 0, 0, 0);
 	Rectangle buffRect = new Rectangle(0, 0, 0, 0);
 
 	AffineTransform buffTransform, mouseTransform;
+
+	protected int maxLevelOpen;
 
 	public RadialMenu(PApplet p)
 	{
@@ -40,12 +40,6 @@ public class RadialMenu extends Menu
 		clickToggles = true;
 		autoDim = true;
 		useCameraCoordinates = true;
-	}
-
-	public void setPosition(float x, float y)
-	{
-		super.setPosition(x, y);
-		layout();
 	}
 
 	public void setRadius(float r)
@@ -123,23 +117,35 @@ public class RadialMenu extends Menu
 			float curTheta = start + i * thetaStep;
 			seg.layout(innerRadius, radius, curTheta, curTheta + thetaStep);
 		}
+		findMaxLevelOpen();
+	}
+
+	public void findMaxLevelOpen()
+	{
+		MenuItem item = this;
+		maxLevelOpen = 0;
+		boolean shouldContinue = true;
+		while (shouldContinue)
+		{
+			maxLevelOpen++;
+			shouldContinue = false;
+			for (int i = 0; i < item.items.size(); i++)
+			{
+				MenuItem item2 = (MenuItem) item.items.get(i);
+				if (item2.isShowingChildren())
+				{
+					item = item2;
+					shouldContinue = true;
+					break;
+				}
+			}
+		}
 
 	}
 
-	float getMaxVisibleRadius()
+	public void draw()
 	{
-		/*
-		 * Set the maxRadius.
-		 */
-		float maxRadius = radius;
-		for (int i = 0; i < items.size(); i++)
-		{
-			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-			float cur = rmi.getMaxRadius();
-			if (cur > maxRadius)
-				maxRadius = cur;
-		}
-		return maxRadius;
+		super.draw();
 	}
 
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
@@ -147,22 +153,25 @@ public class RadialMenu extends Menu
 		super.getRect(rect, buff);
 	}
 
+	public void setPosition(float x, float y)
+	{
+		this.x = x;
+		this.y = y;
+		layout();
+	}
+
 	public void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-		// float maxRadius = getMaxVisibleRadius();
-		// inner.setFrameFromCenter(x, y, x - innerRadius, y - innerRadius);
-		// outer.setFrameFromCenter(x, y, x - maxRadius, y - maxRadius);
-		// float outerLimit = Math.max(5 * radius, maxRadius + 25);
-		// max.setFrameFromCenter(x, y, x - outerLimit, y - outerLimit);
-		// boolean in = inner.contains(pt.x, pt.y);
-		// boolean out = outer.contains(pt.x, pt.y);
-		// boolean inMax = max.contains(pt.x, pt.y);
+		myRect.setRect(x, y, 0, 0);
+		myRect.setRect(x, y, 0, 0);
 		getRect(myRect, buffRect);
 		float dist = myRect.distToPoint(pt);
-		if (dist < 100)
+		float fadeDist = Math.max(myRect.width, myRect.height) / 3;
+		fadeDist = Math.max(fadeDist, radius);
+		if (dist < fadeDist)
 		{
-			float normalized = 1f - (dist / 100f);
+			float normalized = 1f - (dist / fadeDist);
 			aTween.continueTo(normalized);
 			aTween.fforward();
 		} else
@@ -173,16 +182,19 @@ public class RadialMenu extends Menu
 
 	public void keyEvent(KeyEvent e)
 	{
-		if (!isVisible()) return;
-		/*
-		 * Pass this on to sub-items.
-		 */
+		if (!isVisible())
+			return;
 		if (e.getID() == KeyEvent.KEY_TYPED)
 		{
-			for (int i = 0; i < items.size(); i++)
+			ArrayList temp = (ArrayList) items.clone();
+			Collections.sort(temp, new VisibleDepthComparator());
+			for (int i = 0; i < temp.size(); i++)
 			{
-				RadialMenuItem item = (RadialMenuItem) items.get(i);
-				item.keyHintEvent(e);
+				if (!e.isConsumed())
+				{
+					RadialMenuItem item = (RadialMenuItem) temp.get(i);
+					item.keyHintEvent(e);
+				}
 			}
 		}
 		e.consume();

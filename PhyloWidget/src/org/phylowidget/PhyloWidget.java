@@ -2,7 +2,9 @@ package org.phylowidget;
 
 import java.awt.RenderingHints;
 
+import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.FontLoader;
+import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.UIManager;
 
 import processing.core.PApplet;
@@ -45,14 +47,14 @@ public class PhyloWidget extends PApplet
 		
 		trees.setup();
 		ui.setup();
-		trees.createTree("PhyloWidget");
+		trees.setTree(new PhyloTree("PhyloWidget"));
 	}
 
 	float theta = 0;
 	public void draw()
 	{
 		background(255);
-//		drawFrameRate();
+		drawFrameRate();
 		translate(width/2,height/2);
 //		theta += 0.001;
 //		rotate(theta);
@@ -100,6 +102,13 @@ public class PhyloWidget extends PApplet
 		{
 			openGL = true;
 		}
+	}
+	
+	public void loadNewick(String s)
+	{
+		System.out.println(s);
+		trees.setTree(TreeIO.parseNewickString(new PhyloTree(),s));
+		System.out.println("Created!");
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

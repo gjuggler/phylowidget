@@ -12,6 +12,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.TreeManager;
 import org.phylowidget.render.NodeRange;
 
 import processing.core.PApplet;
@@ -20,7 +21,7 @@ public class NearestNodeFinder implements UIObject
 {
 //	private PApplet p;
 	
-	public static final float RADIUS = 100f;
+	public static final float RADIUS = 50f;
 	
 	Point2D.Float pt = new Point2D.Float(0,0);
 	Rectangle2D.Float rect = new Rectangle2D.Float(0,0,0,0);
@@ -45,12 +46,15 @@ public class NearestNodeFinder implements UIObject
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		// Let's send screen coordintaes to the update() function.
-		update(screen.x,screen.y,RADIUS);
+		update(screen.x,screen.y);
 	}
 	
-	void update(float x, float y, float rad)
+	void update(float x, float y)
 	{
 		if (PhyloWidget.trees == null) return;
+		
+		float ratio = TreeManager.getVisibleRect().width / PhyloWidget.p.width;
+		float rad = RADIUS * ratio;
 		
 		pt.setLocation(x,y);
 		rect.x = pt.x - rad;
@@ -61,19 +65,17 @@ public class NearestNodeFinder implements UIObject
 		UIUtils.screenToModel(rect);
 		hits.clear();
 		PhyloWidget.trees.nodesInRange(hits, rect);
+		
 		nearestDist = Float.MAX_VALUE;
 		NodeRange temp = null;
 		for (int i=0; i < hits.size(); i++)
 		{
 			NodeRange r = (NodeRange)hits.get(i);
-			PhyloNode n = r.node;
-//			float cx = (r.loX + r.hiX) / 2;
-//			float cy = (r.loY + r.hiY) / 2;
-			
+			PhyloNode n = r.node;	
 			switch (r.type)
 			{
 				case (NodeRange.NODE):
-					float dist = (float) pt.distanceSq(n.x,n.y);
+					float dist = (float) pt.distance(n.x,n.y);
 					if (dist < nearestDist)
 					{
 						temp = r;
@@ -82,20 +84,8 @@ public class NearestNodeFinder implements UIObject
 					break;
 			}
 		}
-		nearest = temp;
-		/*
-		 * I'm gonna let the HoverHalo object take care of node highlighting.
-		 */
-//		if (temp == null)
-//		{
-//			if (nearest != null)
-//				nearest.node.hovered = false;
-//			nearest = null;
-//		} else
-//		{
-//			nearest = temp;
-//			nearest.node.hovered = true;
-//		}
+		if (temp != null)
+			nearest = temp;
 	}
 
 	public void focusEvent(FocusEvent e)

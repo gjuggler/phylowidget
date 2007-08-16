@@ -42,17 +42,7 @@ public class TreeManager implements SettableRect
 		camera = new RectMover(p, this);
 		camera.fillScreen();
 
-
-
-		// Pattern p = Pattern.compile("(duck|buck)");
-		// StringBuffer sb = new StringBuffer("My duck is worth a buck.");
-		// Matcher m = p.matcher(sb);
-		// while (m.find())
-		// {
-		// System.out.println(m.group());
-		// }
-
-		// nav = new Navigator(p);
+		cladogramRender();
 	}
 
 	public void update()
@@ -76,18 +66,11 @@ public class TreeManager implements SettableRect
 		}
 	}
 
-	public void nodesInPoint(ArrayList list, Point2D.Float pt)
+	public void nodesTouchingPoint(ArrayList list, Point2D.Float pt)
 	{
 		Rectangle2D.Float rect = new Rectangle2D.Float();
 		rect.setFrame(pt.x, pt.y, 0, 0);
 		nodesInRange(list, rect);
-	}
-
-	public void clearTrees()
-	{
-		mutator.stop();
-		renderers.clear();
-		trees.clear();
 	}
 
 	public void mutateTree()
@@ -98,7 +81,7 @@ public class TreeManager implements SettableRect
 	public void startMutatingTree(int delay)
 	{
 		mutator.stop();
-//		mutator = new RandomTreeMutator((Tree) trees.get(0));
+		mutator = new RandomTreeMutator((RootedTree) trees.get(0));
 		mutator.delay = delay;
 		mutator.start();
 	}
@@ -108,23 +91,32 @@ public class TreeManager implements SettableRect
 		mutator.stop();
 	}
 
-	public void createTree(String rootLabel)
+	public RootedTree getTree()
 	{
-//		PhyloTreeGraph ptg = new PhyloTreeGraph("PhyloWidget");
-//		trees.add(ptg);
-//		 String s = "(,(,,),)";
-//		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
-		String s = "((a,b),c);";
-//		String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
-//		 String s = "(A:3.33,(C:3,B:2):5)";
-//		 String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
+		if (trees.size() == 0)
+			return null;
+		return (RootedTree) trees.get(0);
+	}
 
-//		String s = "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
-		
-		PhyloTree tree = new PhyloTree();
-		trees.add(TreeIO.parseNewick(tree, s));
-		diagonalRender();
-//		mutator = new RandomTreeMutator(t);
+	public TreeRenderer getRenderer()
+	{
+		return (TreeRenderer) renderers.get(0);
+	}
+
+	public void setTree(RootedTree tree)
+	{
+		// String s = "(,(,,),)";
+		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
+		// String s = "((a,b),c);";
+		// String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
+		// String s = "(A:3.33,(C:3,B:2):5)";
+		// String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
+		// String s =
+		// "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
+		trees.clear();
+		trees.add(tree);
+		getRenderer().setTree(tree);
+		mutator = new RandomTreeMutator(tree);
 	}
 
 	public void diagonalRender()
@@ -141,11 +133,12 @@ public class TreeManager implements SettableRect
 	{
 		setRenderer(new Phylogram(p));
 	}
-	
+
 	void setRenderer(TreeRenderer r)
 	{
 		renderers.clear();
-		r.setTree((RootedTree) trees.get(0));
+		if (getTree() != null)
+			r.setTree(getTree());
 		renderers.add(r);
 	}
 

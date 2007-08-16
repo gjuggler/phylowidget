@@ -31,37 +31,37 @@ public class StyleSet
 	/*
 	 * Basic colors and strokes.
 	 */
-	public Stroke stroke;
-	public Stroke noStroke;
-	public float strokeWidth;
-	public Color strokeColor;
+	public Stroke			stroke;
+	public Stroke			noStroke;
+	public float			strokeWidth;
+	public Color			strokeColor;
 	/*
 	 * Menu-specific stuff.
 	 */
-	public Color[] stateColors;
-	public Color menuBackground;
-	public Color menuGradLo;
-	public Color menuGradHi;
+	public Color[]			stateColors;
+	public Color			menuBackground;
+	public Color			menuGradLo;
+	public Color			menuGradHi;
 	/*
 	 * Text stuff.
 	 */
-	public PFont font;
-	public float fontSize;
-	public Color textColor;
-	public Color selectionColor;
+	public PFont			font;
+	public float			fontSize;
+	public Color			textColor;
+	public Color			selectionColor;
 	/*
 	 * "Layout" stuff
 	 */
-	public float padY;
-	public float padX;
-	public float margin;
+	public float			padY;
+	public float			padX;
+	public float			margin;
 	/*
 	 * Shape stuff.
 	 */
-	public Area subTriangle;
-	public float roundOff;
+	public Area				subTriangle;
+	public float			roundOff;
 
-	private static StyleSet defaultSet;
+	private static StyleSet	defaultSet;
 
 	public StyleSet()
 	{
@@ -92,11 +92,12 @@ public class StyleSet
 		 * Menu-specific colors.
 		 */
 		menuBackground = new Color(245, 245, 255);
-		stateColors = new Color[3];
+		stateColors = new Color[4];
 		Color baseState = new Color(220, 230, 255);
 		stateColors[MenuItem.UP] = baseState;
 		stateColors[MenuItem.OVER] = baseState.brighter(20);
 		stateColors[MenuItem.DOWN] = baseState.darker(20);
+		stateColors[MenuItem.DISABLED] = baseState.darker(50);
 		menuGradLo = new Color(245, 245, 255);
 		menuGradHi = new Color(190, 210, 245);
 		/*
@@ -127,49 +128,40 @@ public class StyleSet
 
 	public Paint getGradient(float lo, float hi)
 	{
-		return new GradientPaint(0, lo, menuGradLo, 0, hi,
-				menuGradHi, true);
+		return new GradientPaint(0, lo, menuGradLo, 0, hi, menuGradHi, true);
 	}
 
 	public Paint getGradient(float loX, float loY, float hiX, float hiY)
 	{
-		return new GradientPaint(loX,loY,menuGradHi.brighter(60),hiX,hiY,menuGradHi,true);
+		return new GradientPaint(loX, loY, menuGradHi.brighter(60), hiX, hiY,
+				menuGradHi, true);
 	}
-	
-	public Paint getGradient(int state, float loX, float loY, float hiX, float hiY)
+
+	public Paint getGradient(int state, float loX, float loY, float hiX,
+			float hiY)
 	{
 		switch (state)
 		{
 			case (MenuItem.UP):
-				return new GradientPaint(loX,loY, menuGradLo, hiX,hiY, menuGradHi
-						, true);
+				return new GradientPaint(loX, loY, menuGradLo, hiX, hiY,
+						menuGradHi, true);
 			case (MenuItem.OVER):
-				return new GradientPaint(loX,loY, menuGradLo.brighter(15), hiX,hiY, menuGradHi
-						.brighter(15), true);
+				return new GradientPaint(loX, loY, menuGradLo.brighter(15),
+						hiX, hiY, menuGradHi.brighter(15), true);
 			case (MenuItem.DOWN):
-				return new GradientPaint(loX,loY, menuGradLo.darker(15), hiX,hiY, menuGradHi
-						.darker(15), true);
+				return new GradientPaint(loX, loY, menuGradLo.darker(15), hiX,
+						hiY, menuGradHi.darker(15), true);
+			case (MenuItem.DISABLED):
+				return new GradientPaint(loX, loY, stateColors[MenuItem.DISABLED], hiX,
+						hiY, stateColors[MenuItem.DISABLED]);
+
 			default:
 				return Color.black;
 		}
 	}
-	
+
 	public Paint getGradient(int state, float lo, float hi)
 	{
-		return getGradient(state,0,lo,0,hi);
-//		switch (state)
-//		{
-//			case (MenuItem.UP):
-//				return new GradientPaint(0, lo, menuGradLo, 0, hi, menuGradHi
-//						, true);
-//			case (MenuItem.OVER):
-//				return new GradientPaint(0, lo, menuGradLo.brighter(15), 0, hi, menuGradHi
-//						.brighter(15), true);
-//			case (MenuItem.DOWN):
-//				return new GradientPaint(0, lo, menuGradLo.darker(30), 0, hi, menuGradHi
-//						.darker(30), true);
-//			default:
-//				return Color.black;
-//		}
+		return getGradient(state, 0, lo, 0, hi);
 	}
 }

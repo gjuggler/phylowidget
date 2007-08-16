@@ -23,11 +23,13 @@ public class RectMover extends MovableCamera
 
 	protected boolean constrainToScreen = true;
 	
+	final float border = 200;
+	
 	public RectMover(PApplet app, SettableRect r)
 	{
 		super(app);
 		this.r = r;
-
+		
 		wTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
 		hTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
 
@@ -47,8 +49,8 @@ public class RectMover extends MovableCamera
 
 	public void zoomTo(float z)
 	{
-		hTween.continueTo(p.width * z, FRAMES);
-		wTween.continueTo(p.height * z, FRAMES);
+		wTween.continueTo(p.width * z);
+		hTween.continueTo(p.height * z);
 	}
 	
 	/**
@@ -57,10 +59,10 @@ public class RectMover extends MovableCamera
 	 */
 	public void zoomCenterTo(float cx, float cy, float w, float h)
 	{
-		xTween.continueTo((float) cx, FRAMES);
-		yTween.continueTo((float) cy, FRAMES);
-		wTween.continueTo((float) w, FRAMES);
-		hTween.continueTo((float) h, FRAMES);
+		xTween.continueTo((float) cx);
+		yTween.continueTo((float) cy);
+		wTween.continueTo((float) w);
+		hTween.continueTo((float) h);
 	}
 
 	public void fforward()
@@ -116,25 +118,28 @@ public class RectMover extends MovableCamera
 	{
 		if (!this.constrainToScreen) return;
 		
-		float oX = (w - p.width)/2 - cx*getZ();
+		float effectiveWidth = Math.max(10,p.width - border);
+		float effectiveHeight = Math.max(10,p.height - border);
+		
+		float oX = (w - effectiveWidth)/2 - cx*getZ();
 		if (oX < 0)
 		{
-			xTween.continueTo((w - p.width)/2 / getZ());
+			xTween.continueTo((w - effectiveWidth)/2 / getZ());
 			xTween.fforward();
-		} else if (oX > (w - p.width))
+		} else if (oX > (w - effectiveWidth))
 		{
-			xTween.continueTo(-(w - p.width)/2 / getZ());
+			xTween.continueTo(-(w - effectiveWidth)/2 / getZ());
 			xTween.fforward();
 		}
 		
-		float oY = (h - p.height)/2 - cy*getZ();
+		float oY = (h - effectiveHeight)/2 - cy*getZ();
 		if (oY < 0)
 		{
-			yTween.continueTo((h - p.height)/2 / getZ());
+			yTween.continueTo((h - effectiveHeight)/2 / getZ());
 			yTween.fforward();
-		} else if (oY > (h - p.height))
+		} else if (oY > (h - effectiveHeight))
 		{
-			yTween.continueTo(-(h - p.height)/2 / getZ());
+			yTween.continueTo(-(h - effectiveHeight)/2 / getZ());
 			yTween.fforward();
 		}
 		
@@ -142,12 +147,12 @@ public class RectMover extends MovableCamera
 		/**
 		 * Make the rectangle never shrink below the stage size.
 		 */
-		if (w < p.width || h < p.height)
+		if (w < effectiveWidth || h < effectiveHeight)
 		{
 			xTween.continueTo(0);
 			yTween.continueTo(0);
-			wTween.continueTo(p.width);
-			hTween.continueTo(p.height);
+			wTween.continueTo(effectiveWidth);
+			hTween.continueTo(effectiveHeight);
 			xTween.fforward();
 			yTween.fforward();
 			wTween.fforward();

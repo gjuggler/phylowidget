@@ -43,13 +43,13 @@ public final class PhyloContextMenu extends RadialMenu
 	{
 		super.show();
 		setNodeRange(r);
-		hover.hide();
+//		hover.hide();
 	}
 	
 	public void hide()
 	{
 		super.hide();
-		hover.show();
+//		hover.show();
 		curNodeRange.node.hovered = false;
 	}
 	

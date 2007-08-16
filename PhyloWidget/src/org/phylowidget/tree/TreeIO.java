@@ -1,5 +1,12 @@
 package org.phylowidget.tree;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
 import java.util.Stack;
 
 import org.jgrapht.WeightedGraph;
@@ -8,7 +15,48 @@ import org.phylowidget.ui.PhyloNode;
 public class TreeIO
 {
 
-	public static RootedTree parseNewick(RootedTree tree, String s)
+	public static RootedTree parseFile(File f)
+	{
+		try
+		{
+			URI uri = f.toURI();
+			URL url = uri.toURL();
+			InputStream is = url.openStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			return parseReader(br);
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static RootedTree parseReader(BufferedReader br)
+	{
+		String line;
+		StringBuffer buff = new StringBuffer();
+		try
+		{
+			while ((line = br.readLine()) != null)
+			{
+				buff.append(line);
+			}
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		return parseNewickString(buff.toString());
+	}
+	
+	static RootedTree parseNewickString(String s)
+	{
+		return parseNewickString(new RootedTree(), s);
+	}
+	
+	public static RootedTree parseNewickString(RootedTree tree, String s)
 	{
 		Object root = null;
 		/*
@@ -94,7 +142,7 @@ public class TreeIO
 						curLabel = String.valueOf(nodeCount);// + " " +
 					// curLength;
 					// Create a vertex for the current label and length.
-					Object curNode = tree.createNode(curLabel);
+					Object curNode = tree.createVertex(curLabel);
 					tree.addVertex(curNode);
 					if (c == ';')
 					{
@@ -151,5 +199,12 @@ public class TreeIO
 		// System.out.println(tree);
 		tree.setRoot(root);
 		return tree;
+	}
+	
+	public static String createNewickString(RootedTree tree)
+	{
+		
+		
+		return null;
 	}
 }

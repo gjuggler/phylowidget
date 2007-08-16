@@ -18,7 +18,7 @@ public final class MenuTimer extends Thread
 	MenuItem item;
 	MenuItem parent;
 	MenuItem lastSet;
-	static final int delay = 100;
+	static final int delay = 150;
 	boolean unset;
 	boolean startDelay;
 

@@ -258,14 +258,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
 	}
-
-	public void setPosition(float x, float y)
-	{
-		this.x = x;
-		this.y = y;
-		layout(); // TODO: Should this be here? For now, I'm leaving it in.
-	}
-
+	
 	public float getX()
 	{
 		return x;

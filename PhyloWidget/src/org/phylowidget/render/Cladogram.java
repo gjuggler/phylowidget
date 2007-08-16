@@ -117,11 +117,11 @@ public class Cladogram extends TreeRenderer.Abstract
 			{
 				// width = fm.stringWidth(n.getName());
 				width = (float) fm
-						.getStringBounds(n.getName(), p.getGraphics())
+						.getStringBounds(n.getLabel(), p.getGraphics())
 						.getWidth() / 100f;
 			} else
 			{
-				char[] chars = n.getName().toCharArray();
+				char[] chars = n.getLabel().toCharArray();
 
 				for (int j = 0; j < chars.length; j++)
 				{
@@ -132,7 +132,7 @@ public class Cladogram extends TreeRenderer.Abstract
 			if (width > gutterWidth)
 			{
 				gutterWidth = width;
-				biggestString = n.getName();
+				biggestString = n.getLabel();
 			}
 		}
 		/*
@@ -151,7 +151,7 @@ public class Cladogram extends TreeRenderer.Abstract
 		 * Set the numRows and numCols variables.
 		 */
 		numRows = leaves.size();
-		numCols = tree.getMaxDepth();
+		numCols = tree.getMaxDepthToLeaf(tree.getRoot());
 	}
 
 	protected void leafPosition(PhyloNode n, int index)
@@ -168,11 +168,13 @@ public class Cladogram extends TreeRenderer.Abstract
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-//		System.out.println("nxp "+useBranchLengths);
 		if (useBranchLengths)
-			return (float) tree.heightToRoot(n) / (float) tree.getMaxHeight();
+			return (float) tree.heightToRoot(n) / (float) tree.getMaxHeightToLeaf();
 		else
-			return (float) tree.depthToRoot(n) / (float) tree.getMaxDepth();
+		{
+			float md = 1 - (float) tree.getMaxDepthToLeaf(n) / (float) tree.getMaxDepthToLeaf(tree.getRoot());
+			return md;
+		}
 	}
 
 	/**
@@ -269,7 +271,6 @@ public class Cladogram extends TreeRenderer.Abstract
 		{
 			NodeRange r = (NodeRange) ranges.get(i);
 			PhyloNode n = r.node;
-			n.update();
 			n.x = n.unscaledX * scaleX + dx;
 			n.y = n.unscaledY * scaleY + dy;
 			PhyloNode parent;
@@ -282,6 +283,7 @@ public class Cladogram extends TreeRenderer.Abstract
 			switch (r.type)
 			{
 				case (Abstract.NODE):
+					n.update();
 					r.loX = Math.min(n.x - rad, parent.x - rad);
 					r.hiX = Math.max(n.x + rad, parent.x + rad);
 					r.loY = Math.min(n.y - rad, parent.y - rad);
@@ -340,11 +342,9 @@ public class Cladogram extends TreeRenderer.Abstract
 		{
 			PhyloNode parent = (PhyloNode) tree.parentOf(n);
 			canvas.line(n.x - rad, n.y, parent.x, n.y);
-			float retreat = 0;
+			float retreat = getRetreat();
 			if (n.y < parent.y)
-				retreat = -rad;
-			else
-				retreat = rad;
+				retreat = -retreat;
 			canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 		}
 	}
@@ -360,9 +360,9 @@ public class Cladogram extends TreeRenderer.Abstract
 			Graphics2D g2 = pgj.g2;
 			g2.setFont(font.font.deriveFont(textSize));
 			g2.setPaint(Color.black);
-			g2.drawString(n.getName(), 0, 0 + dFont);
+			g2.drawString(n.getLabel(), 0, 0 + dFont);
 		} else
-			canvas.text(n.getName(), n.x + dotWidth, n.y + dFont);
+			canvas.text(n.getLabel(), n.x + dotWidth, n.y + dFont);
 		p.popMatrix();
 	}
 
@@ -371,6 +371,11 @@ public class Cladogram extends TreeRenderer.Abstract
 		return dotWidth / 2;
 	}
 
+	protected float getRetreat()
+	{
+		return getNodeRadius();
+	}
+	
 	public void positionText(PhyloNode n, TextField tf)
 	{
 		tf.setTextSize(textSize);

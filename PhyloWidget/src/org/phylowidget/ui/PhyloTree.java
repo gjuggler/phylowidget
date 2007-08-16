@@ -6,33 +6,21 @@ import org.phylowidget.tree.RootedTree;
 public class PhyloTree extends RootedTree
 {
 	private static final long serialVersionUID = 1L;
+	
+	public PhyloTree(Object o)
+	{
+		super(o);
+	}
+	
+	public PhyloTree()
+	{
+		super();
+	}
 
-	PhyloNode clipboardNode;
-	
-	public Object createNode(String label)
+	public Object createVertex(Object o)
 	{
-		return new PhyloNode(label);
+		return new PhyloNode(o);
 	}
 	
-	public void cut(PhyloNode cutMe)
-	{
-		clipboardNode = cutMe;
-		setStateRecursive(cutMe,PhyloNode.CUT);
-	}
 	
-	public void copy(PhyloNode copyMe)
-	{
-		clipboardNode = copyMe;
-		setStateRecursive(copyMe,PhyloNode.COPY);
-	}
-	
-	void setStateRecursive(PhyloNode base, int state)
-	{
-		BreadthFirstIterator bfi = new BreadthFirstIterator(this,base);
-		while (bfi.hasNext())
-		{
-			PhyloNode n = (PhyloNode) bfi.next();
-			n.setState(state);
-		}
-	}
 }

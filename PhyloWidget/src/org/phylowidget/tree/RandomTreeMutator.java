@@ -12,47 +12,50 @@ import java.util.Random;
 import javax.swing.tree.TreeNode;
 
 import org.phylowidget.PhyloWidget;
-
+import org.phylowidget.ui.PhyloNode;
 
 public class RandomTreeMutator implements Runnable
 {
 
-	private RootedTree tree;
-	private Thread wrapper;
-	private java.util.Random random;
-	private static String DEFAULT_NAME = "PhyloWidget";
-	
-	public int delay = 1000;
-	
-	public int mutations = 0;
-	
-	public RandomTreeMutator(RootedTree t) {
+	private RootedTree			tree;
+	private Thread				wrapper;
+	private java.util.Random	random;
+	private static String		DEFAULT_NAME	= "PhyloWidget";
+
+	public int					delay			= 1000;
+
+	public int					mutations		= 0;
+
+	public RandomTreeMutator(RootedTree t)
+	{
 		tree = t;
 		random = new Random();
-		
-//		InputStream is = new FileInputStream("taxonomy.txt");
+
+		// InputStream is = new FileInputStream("taxonomy.txt");
 		InputStream is = PhyloWidget.p.openStream("taxonomy.txt");
 		InputStreamReader read = new InputStreamReader(is);
 		in = new BufferedReader(read);
 	}
-	
+
 	public void start()
 	{
 		wrapper = new Thread(this);
 		wrapper.setName("PhyloWidget-tree-mutator");
-		wrapper.start();	
+		wrapper.start();
 	}
-	
+
 	public void run()
 	{
 		Thread thisThread = null;
-		try {
+		try
+		{
 			thisThread = Thread.currentThread();
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 		while (wrapper == thisThread)
-		{		
+		{
 			try
 			{
 				Thread.sleep(delay);
@@ -65,45 +68,52 @@ public class RandomTreeMutator implements Runnable
 		}
 	}
 
-	private ArrayList allNodes = new ArrayList(100);
-	public void randomlyMutateTree() {
+	private ArrayList	allNodes	= new ArrayList(100);
+
+	public synchronized void randomlyMutateTree()
+	{
 		String taxonName = DEFAULT_NAME;
-//		taxonName = getRemoteNCBITaxon();
+		// taxonName = getRemoteNCBITaxon();
 		taxonName = getLocalNCBITaxon();
-		
-		synchronized (tree)
-		{
+//		synchronized (tree)
+//		{
 			allNodes.clear();
 			tree.getAll(tree.getRoot(), null, allNodes);
 			int i = random.nextInt(allNodes.size());
-			// TODO: finish me up.
-		}
-		mutations++;
+			Object vertex = allNodes.get(i);
+			PhyloNode sis = (PhyloNode) tree.addSisterNode(vertex);
+			sis.setLabel(taxonName);
+			mutations++;
+//		}
 	}
-	
-	private String getRemoteNCBITaxon() {
+
+	private String getRemoteNCBITaxon()
+	{
 		// Retreive a random taxon name from NCBI:
 		final int taxID = random.nextInt(100000);
 		String taxonName = DEFAULT_NAME;
-		
+
 		URL url;
 		try
 		{
-//			url = new URL("http://www.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id="+String.valueOf(taxID));
-//			final XMLInputFactory f = XMLInputFactory.newInstance();
-//			final XMLStreamReader r = f.createXMLStreamReader(url.openStream());
-//			while (r.hasNext())
-//			{
-//				if (r.getEventType() == XMLStreamConstants.START_ELEMENT)
-//				{
-//					if (r.getAttributeCount() > 0 && r.getAttributeValue(0).equals("ScientificName"))
-//					{
-//						r.next();
-//						taxonName = r.getText();
-//					}
-//				}
-//				r.next();
-//			}
+			// url = new
+			// URL("http://www.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id="+String.valueOf(taxID));
+			// final XMLInputFactory f = XMLInputFactory.newInstance();
+			// final XMLStreamReader r =
+			// f.createXMLStreamReader(url.openStream());
+			// while (r.hasNext())
+			// {
+			// if (r.getEventType() == XMLStreamConstants.START_ELEMENT)
+			// {
+			// if (r.getAttributeCount() > 0 &&
+			// r.getAttributeValue(0).equals("ScientificName"))
+			// {
+			// r.next();
+			// taxonName = r.getText();
+			// }
+			// }
+			// r.next();
+			// }
 		} catch (final Exception e)
 		{
 			e.printStackTrace();
@@ -111,11 +121,13 @@ public class RandomTreeMutator implements Runnable
 		}
 		return taxonName;
 	}
-	
-	BufferedReader in;
-	public String getLocalNCBITaxon() {
+
+	BufferedReader	in;
+
+	public String getLocalNCBITaxon()
+	{
 		String taxonName = DEFAULT_NAME;
-		
+
 		try
 		{
 			String s = in.readLine();
@@ -137,13 +149,15 @@ public class RandomTreeMutator implements Runnable
 		}
 		return taxonName;
 	}
-	
-	public void setTree(RootedTree t) {
+
+	public void setTree(RootedTree t)
+	{
 		tree = t;
 	}
-	
-	public void stop() {
+
+	public void stop()
+	{
 		wrapper = null;
 	}
-	
+
 }

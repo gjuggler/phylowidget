@@ -35,14 +35,14 @@ public class RenderStyleSet
 		regColor = new Color(Color.black);
 		regStroke = 1f;
 		
-		dimColor = regColor.brighter(100);
-		dimStroke = .5f;
+		dimColor = regColor.brighter(200);
+		dimStroke = 4f;
 		
 		hoverColor = new Color(100,150,255);
 		hoverStroke = 3f;
 		
 		copyColor = new Color(255,0,0);
-		copyStroke = 3f;
+		copyStroke = 4f;
 	}
 	
 }

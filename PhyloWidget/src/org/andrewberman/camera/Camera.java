@@ -1,8 +1,8 @@
 package org.andrewberman.camera;
 
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenListener;
-import org.andrewberman.tween.TweenQuad;
+import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenListener;
+import org.andrewberman.ui.tween.TweenQuad;
 
 public abstract class Camera implements TweenListener
 {

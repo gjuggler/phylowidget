@@ -51,7 +51,7 @@ public class Action
 		{
 			try
 			{
-				m = o.getClass().getMethod(s, null);
+				m = o.getClass().getMethod(s, new Class[]{});
 			} catch (SecurityException e)
 			{
 				e.printStackTrace();
@@ -66,7 +66,7 @@ public class Action
 	{
 		try
 		{
-			m.invoke(o, null);
+			m.invoke(o, new Object[]{});
 		} catch (Exception e)
 		{
 			e.printStackTrace();

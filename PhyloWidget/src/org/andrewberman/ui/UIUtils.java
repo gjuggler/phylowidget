@@ -69,6 +69,7 @@ public class UIUtils
 		if (p != app)
 		{
 			p = app;
+			FontLoader.lazyLoad(p);
 			FocusManager.lazyLoad(p);
 			EventManager.lazyLoad(p);
 			ShortcutManager.lazyLoad(p);

@@ -8,7 +8,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 
 import org.andrewberman.ui.Color;
-import org.phylowidget.ui.FontLoader;
+import org.andrewberman.ui.FontLoader;
 
 import processing.core.PFont;
 
@@ -104,7 +104,7 @@ public class StyleSet
 		 * Text stuff.
 		 */
 		fontSize = 12;
-		font = FontLoader.vera;
+		font = FontLoader.instance.vera;
 		font.font = font.font.deriveFont(fontSize);
 		textColor = new Color(0, 0, 0);
 		selectionColor = new Color(40, 40, 255);

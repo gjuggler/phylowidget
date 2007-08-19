@@ -2,8 +2,8 @@ package org.phylowidget;
 
 import java.awt.RenderingHints;
 
+import org.andrewberman.ui.FontLoader;
 import org.phylowidget.tree.TreeIO;
-import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.UIManager;
 
@@ -54,7 +54,7 @@ public class PhyloWidget extends PApplet
 	public void draw()
 	{
 		background(255);
-		drawFrameRate();
+//		drawFrameRate();
 		translate(width/2,height/2);
 //		theta += 0.001;
 //		rotate(theta);
@@ -77,7 +77,7 @@ public class PhyloWidget extends PApplet
 	public void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(FontLoader.vera);
+		textFont(FontLoader.instance.vera);
 		fill(0);
 		text(String.valueOf(round(frameRate*10)/10.0), 5, height-10);	
 	}

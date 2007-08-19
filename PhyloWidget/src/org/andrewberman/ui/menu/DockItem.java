@@ -1,11 +1,11 @@
 package org.andrewberman.ui.menu;
 
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenFriction;
-import org.andrewberman.tween.TweenListener;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenFriction;
+import org.andrewberman.ui.tween.TweenListener;
 
 import processing.core.PImage;
 

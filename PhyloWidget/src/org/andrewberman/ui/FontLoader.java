@@ -1,4 +1,4 @@
-package org.phylowidget.ui;
+package org.andrewberman.ui;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -12,11 +12,24 @@ import processing.core.PFont;
 
 public class FontLoader
 {
-	private static PApplet p = PhyloWidget.p;
-
-	public static PFont vera = p.loadFont("BitstreamVeraSans-Roman-48.vlw");
+	private PApplet p;
 	
-	static {
+	public PFont vera;
+	
+	static public FontLoader instance;
+	
+	
+	public static void lazyLoad(PApplet p2)
+	{
+		if (instance == null)
+			instance = new FontLoader(p2);
+	}
+
+	public FontLoader(PApplet p)
+	{
+		this.p = p;
+		
+		vera = p.loadFont("data/BitstreamVeraSans-Roman-48.vlw");
 		InputStream in = p.openStream("vera.ttf");
 		try
 		{

@@ -6,10 +6,10 @@ import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.List;
 
-import org.andrewberman.tween.Tween;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.tween.Tween;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 

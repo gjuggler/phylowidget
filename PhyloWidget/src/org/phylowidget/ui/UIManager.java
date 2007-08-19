@@ -7,12 +7,10 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.menu.RadialMenuItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.net.JSObjectCrap;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
 
 public final class UIManager
 {

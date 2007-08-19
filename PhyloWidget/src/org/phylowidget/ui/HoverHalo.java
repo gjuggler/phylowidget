@@ -6,14 +6,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenListener;
-import org.andrewberman.tween.TweenQuad;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
+import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenListener;
+import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderStyleSet;

@@ -9,9 +9,9 @@ import java.awt.geom.RoundRectangle2D;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FocusManager;
+import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
-import org.phylowidget.ui.FontLoader;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -287,7 +287,7 @@ public class Dock extends Menu
 			menu.canvas.fill(menu.canvas.color(c.getRed(), c.getGreen(), c
 					.getBlue(), alpha));
 			// menu.canvas.fill(0,alpha);
-			menu.canvas.textFont(FontLoader.vera);
+			menu.canvas.textFont(FontLoader.instance.vera);
 			menu.canvas.textSize(24);
 			menu.canvas.text(i.label, tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);

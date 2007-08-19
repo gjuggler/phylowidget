@@ -1,8 +1,8 @@
 package org.phylowidget.ui;
 
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenFriction;
-import org.andrewberman.tween.TweenListener;
+import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenFriction;
+import org.andrewberman.ui.tween.TweenListener;
 import org.phylowidget.tree.DefaultVertex;
 
 public class PhyloNode extends  DefaultVertex implements Comparable

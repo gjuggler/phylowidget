@@ -56,14 +56,13 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		// TODO: I had the "instance == null" commented out... but why? Let's
 		// leave it in...
-		if (instance == null)
+//		if (instance == null)
 			instance = new EventManager(p);
 	}
 
-	private EventManager(PApplet p)
+	public EventManager(PApplet p)
 	{
 		this.p = p;
-		ToolManager.lazyLoad(p);
 		setup();
 	}
 
@@ -86,6 +85,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		/*
 		 * Register ourselves with the PApplet to be drawn every frame.
 		 */
+		System.out.println(this);
+		System.out.println(this.getClass());
 		p.registerDraw(this);
 	}
 

@@ -24,7 +24,7 @@ import java.io.IOException;
  * @see		java.awt.datatransfer.ClipboardOwner
  * @see		java.lang.SecurityManager
  */
-class StringClipboard implements ClipboardOwner
+public class StringClipboard implements ClipboardOwner
 {
 	public static StringClipboard instance;
 	private Clipboard clip;
@@ -93,5 +93,10 @@ class StringClipboard implements ClipboardOwner
 			}
 		}
 		return new String("");
+	}
+	
+	public Clipboard getClipboard()
+	{
+		return clip;
 	}
 }

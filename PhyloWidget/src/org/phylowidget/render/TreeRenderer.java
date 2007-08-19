@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
+import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -14,7 +15,6 @@ import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.VertexSetListener;
 import org.phylowidget.tree.RootedTree;
-import org.phylowidget.ui.FontLoader;
 import org.phylowidget.ui.HoverHalo;
 import org.phylowidget.ui.PhyloNode;
 
@@ -106,7 +106,7 @@ public interface TreeRenderer
 		{
 			this.p = p;
 			rect = new Rectangle2D.Float(0, 0, 0, 0);
-			font = FontLoader.vera;
+			font = FontLoader.instance.vera;
 			style = RenderStyleSet.defaultStyle();
 			setOptions();
 		}

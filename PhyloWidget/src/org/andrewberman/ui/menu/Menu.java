@@ -10,9 +10,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import org.andrewberman.tween.PropertyTween;
-import org.andrewberman.tween.Tween;
-import org.andrewberman.tween.TweenFriction;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
@@ -21,6 +18,9 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.ifaces.UIObject;
+import org.andrewberman.ui.tween.PropertyTween;
+import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenFriction;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;

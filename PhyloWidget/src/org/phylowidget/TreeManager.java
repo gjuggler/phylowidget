@@ -4,8 +4,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import org.andrewberman.camera.RectMover;
-import org.andrewberman.camera.SettableRect;
+import org.andrewberman.ui.camera.RectMover;
+import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.Phylogram;

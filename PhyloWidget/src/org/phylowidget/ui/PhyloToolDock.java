@@ -1,9 +1,9 @@
 package org.phylowidget.ui;
 
-import org.andrewberman.camera.Camera;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.ToolManager;
 import org.andrewberman.ui.UIEvent;
+import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.menu.Dock;
 import org.andrewberman.ui.tools.ScrollTool;
 import org.andrewberman.ui.tools.Tool;

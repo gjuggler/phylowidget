@@ -3,9 +3,9 @@ package org.andrewberman.ui.tools;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 
-import org.andrewberman.camera.Camera;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
 

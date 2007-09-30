@@ -2,10 +2,10 @@ package org.phylowidget.ui;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
-import org.andrewberman.ui.tween.TweenListener;
-import org.phylowidget.tree.DefaultVertex;
+import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.CachedVertex;
 
-public class PhyloNode extends  DefaultVertex implements Comparable
+public class PhyloNode extends CachedVertex implements Comparable
 {
 	public float unscaledX,unscaledY;
 	public float x,y;
@@ -17,7 +17,7 @@ public class PhyloNode extends  DefaultVertex implements Comparable
 	public static final int CUT = 1;
 	public static final int COPY = 2;
 	
-	static TweenFriction fric = TweenFriction.tween(0.3f);
+	static TweenFriction fric = TweenFriction.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
 	
 	static final float mult = 10000f;
 	

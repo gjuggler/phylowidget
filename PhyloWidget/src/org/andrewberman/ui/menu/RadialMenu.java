@@ -18,9 +18,11 @@ public class RadialMenu extends Menu
 {
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
-	float innerRadius = 10;
-	float radius = 30;
+	float innerRadius;
+	float radius;
 
+	private VisibleDepthComparator visComp = new VisibleDepthComparator();
+	
 	Rectangle myRect = new Rectangle(0, 0, 0, 0);
 	Rectangle buffRect = new Rectangle(0, 0, 0, 0);
 
@@ -35,11 +37,15 @@ public class RadialMenu extends Menu
 
 	protected void setOptions()
 	{
+		super.setOptions();
+		
+		setRadii(10,30);
 		clickAwayBehavior = Menu.CLICKAWAY_HIDES;
 		hoverNavigable = false;
 		clickToggles = true;
 		autoDim = true;
 		useCameraCoordinates = true;
+		modalFocus = true;
 	}
 
 	public void setRadius(float r)
@@ -92,7 +98,10 @@ public class RadialMenu extends Menu
 
 	public RadialMenuItem create(String s, char c)
 	{
-		return new RadialMenuItem(s, c);
+		RadialMenuItem rmi = new RadialMenuItem();
+		rmi.setName(s);
+		rmi.setHint(c);
+		return rmi;
 	}
 
 	public void setArc(float thetaLo, float thetaHi)
@@ -187,7 +196,7 @@ public class RadialMenu extends Menu
 		if (e.getID() == KeyEvent.KEY_TYPED)
 		{
 			ArrayList temp = (ArrayList) items.clone();
-			Collections.sort(temp, new VisibleDepthComparator());
+			Collections.sort(temp, visComp);
 			for (int i = 0; i < temp.size(); i++)
 			{
 				if (!e.isConsumed())

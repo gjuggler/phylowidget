@@ -25,6 +25,7 @@ public final class PhyloContextMenu extends RadialMenu
 	{
 		super.setOptions();
 		this.focusOnShow = true;
+		this.setRadii(10, 28);
 	}
 	
 	public void draw()

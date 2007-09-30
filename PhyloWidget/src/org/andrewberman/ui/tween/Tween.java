@@ -18,7 +18,7 @@ public class Tween
 	public static final int INOUT = 2;
 	
 	public boolean isTweening;
-	public int tweenType; // 0 = in, 1 = out, 2 = inout
+	public int tweenType; // use the IN/OUT/INOUT static variables with this.
 
 	public float position;
 	public float time;

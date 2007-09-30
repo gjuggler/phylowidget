@@ -9,6 +9,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PApplet;
@@ -46,6 +47,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 {
 	private PApplet p;
 	private ArrayList delegates = new ArrayList(5);
+	private UIObject toolManager;
+	public Camera toolCamera;
 
 	public static EventManager instance;
 
@@ -56,8 +59,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		// TODO: I had the "instance == null" commented out... but why? Let's
 		// leave it in...
-//		if (instance == null)
-			instance = new EventManager(p);
+		// if (instance == null)
+		instance = new EventManager(p);
 	}
 
 	public EventManager(PApplet p)
@@ -85,8 +88,6 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		/*
 		 * Register ourselves with the PApplet to be drawn every frame.
 		 */
-		System.out.println(this);
-		System.out.println(this.getClass());
 		p.registerDraw(this);
 	}
 
@@ -95,6 +96,16 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		delegates.add(o);
 	}
 
+	public void setToolManager(UIObject o)
+	{
+		toolManager = o;
+	}
+
+	public void setCamera(Camera c)
+	{
+		toolCamera = c;
+	}
+	
 	public void remove(UIObject o)
 	{
 		delegates.remove(o);
@@ -108,11 +119,12 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		{
 			((UIObject) delegates.get(i)).draw();
 		}
-		
+
 		/*
 		 * Do any drawing of the current tool.
 		 */
-		ToolManager.instance.draw();
+		if (toolManager != null)
+			toolManager.draw();
 	}
 
 	public void mouseEvent(MouseEvent e)
@@ -122,7 +134,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		UIUtils.screenToModel(model);
 
 		/*
-		 * First, send the event directly to the focus object.
+		 * First, send the event directly to the focused object.
 		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 		{
@@ -141,23 +153,21 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (!e.isConsumed())
 		{
-			ToolManager.instance.mouseEvent(e, screen, model);
+			if (toolManager != null)
+				toolManager.mouseEvent(e, screen, model);
 		}
 		/*
 		 * Then, if the focus isn't modal and the object wasn't consumed,
 		 * continue sending the mouse event to the other uiobjects.
 		 */
-		if (!e.isConsumed())
+		for (int i = delegates.size() - 1; i >= 0; i--)
 		{
-			for (int i = delegates.size() - 1; i >= 0; i--)
-			{
-				UIObject ui = (UIObject) delegates.get(i);
-				if (ui == FocusManager.instance.getFocusedObject())
-					continue;
-				ui.mouseEvent(e, screen, model);
-				if (e.isConsumed())
-					break;
-			}
+			if (e.isConsumed())
+				break;
+			UIObject ui = (UIObject) delegates.get(i);
+			if (ui == FocusManager.instance.getFocusedObject())
+				continue;
+			ui.mouseEvent(e, screen, model);
 		}
 	}
 
@@ -178,7 +188,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (!e.isConsumed())
 		{
-			ToolManager.instance.keyEvent(e);
+			if (toolManager != null)
+				toolManager.keyEvent(e);
 		}
 	}
 

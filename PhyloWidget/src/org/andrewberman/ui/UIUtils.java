@@ -73,7 +73,6 @@ public class UIUtils
 			FocusManager.lazyLoad(p);
 			EventManager.lazyLoad(p);
 			ShortcutManager.lazyLoad(p);
-			ToolManager.lazyLoad(p);
 		}
 	}
 

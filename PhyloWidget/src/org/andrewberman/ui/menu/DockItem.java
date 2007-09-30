@@ -25,22 +25,29 @@ public class DockItem extends MenuItem implements TweenListener
 {
 	Tween tween;
 	PImage icon;
+	
+	String iconFile;
 
-	// float subX,subY;
-	// float textX,textY;
-
-	public DockItem(String label)
+	public DockItem()
 	{
-		super(label);
+		super();
 		tween = new Tween(this, TweenFriction.tween, Tween.OUT, 0, 0, 6);
 	}
 
-	public void setFile(String file)
+	public void setIcon(String file)
 	{
+		iconFile = file;
 		if (menu != null && menu.canvas != null)
-			icon = menu.canvas.loadImage(file);
+			icon = menu.canvas.loadImage(iconFile);
 	}
 
+	public void setMenu(Menu menu)
+	{
+		super.setMenu(menu);
+		if (icon == null)
+			setIcon(iconFile);
+	}
+	
 	public void draw()
 	{
 		tween.update();
@@ -77,7 +84,9 @@ public class DockItem extends MenuItem implements TweenListener
 				 * 
 				 * NOTE: the tint() function is VERY slow with Java2D, so don't use it!
 				 */
+				menu.canvas.smooth();
 				menu.canvas.image(icon, x+xOffset, y+yOffset, w, h);
+				menu.canvas.noSmooth();
 			} else
 			{
 				/*
@@ -87,7 +96,7 @@ public class DockItem extends MenuItem implements TweenListener
 				int alf = (int) (menu.alpha * 255);
 				menu.canvas.tint(255, alf);
 //				float pad = menu.style.padX;
-//				menu.canvas.image(icon, x+pad, y+pad, width-2*pad, height-2*pad);
+				menu.canvas.image(icon, x+pad, y+pad, width-2*pad, height-2*pad);
 				menu.canvas.noTint();
 			}
 		}
@@ -104,22 +113,6 @@ public class DockItem extends MenuItem implements TweenListener
 	public void setSize(float w, float h)
 	{
 		tween.continueTo(w);
-	}
-
-	public void setState(int state)
-	{
-		if (state == this.state) return;
-		super.setState(state);
-		if (state == MenuItem.DOWN)
-		{
-			this.menu.fireEvent(UIEvent.DOCK_ITEM_SELECTED);
-		}
-	}
-	
-	protected void performAction()
-	{
-		super.performAction();
-		// isSelected = true;
 	}
 
 	public void tweenEvent(Tween source, int eventType)

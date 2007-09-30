@@ -4,11 +4,17 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.menu.MenuIO;
+import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.RadialMenuItem;
+import org.andrewberman.ui.menu.ToolDock;
+import org.andrewberman.ui.menu.ToolDockItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.TreeManager;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
@@ -25,7 +31,7 @@ public final class UIManager
 
 	PhyloTextField text;
 	PhyloContextMenu context;
-	PhyloToolDock dock;
+	ToolDock dock;
 
 	public UIManager(PApplet p)
 	{
@@ -40,12 +46,14 @@ public final class UIManager
 	{
 		nearest = new NearestNodeFinder(p);
 
+		MenuIO.loadFromXML(p,"menus.xml");
+		
 		Toolbar t = new Toolbar(p);
 		t.add("File");
 		t.get("File").add("New Tree").setAction(this, "newTree").setShortcut(
 				"control-n");
-		t.get("File").add("Output Tree").setAction(this, "saveTree").setShortcut(
-				"Control-s");
+		t.get("File").add("Output Tree").setAction(this, "saveTree")
+				.setShortcut("Control-s");
 		t.add("View").add("Phylogram").setAction(PhyloWidget.trees,
 				"phylogramRender");
 		t.get("View").add("Cladogram").setAction(PhyloWidget.trees,
@@ -55,16 +63,16 @@ public final class UIManager
 		t.get("View").add("Zoom to full").setAction(this, "zoomToFull")
 				.setShortcut("control-1");
 		t.add("Tree");
-		t.get("Tree").add("Auto-Mutator");
-		t.get("Auto-Mutator").add("Mutate Once").setAction(this, "mutate")
-				.setShortcut("control-m");
-		t.get("Auto-Mutator").add("Mutate Slow").setAction(this, "mutateSlow");
-		t.get("Auto-Mutator").add("Mutate Fast").setAction(this, "mutateFast");
-		t.get("Auto-Mutator").add("Stop Mutating")
-				.setAction(this, "mutateStop").setShortcut("control-shift-m");
+		MenuItem auto = t.get("Tree").add("Mutator (for fun!)");
+		auto.add("Mutate Once").setAction(this, "mutate").setShortcut(
+				"control-m");
+		auto.add("Mutate Slow").setAction(this, "mutateSlow");
+		auto.add("Mutate Fast").setAction(this, "mutateFast");
+		auto.add("Stop Mutating").setAction(this, "mutateStop").setShortcut(
+				"control-shift-m");
 		t.get("Tree").add("Ladderize All").setAction(this, "ladderizeTree")
 				.setShortcut("control-l");
-		t.get("Tree").add("Cull Elbow Vertices").setAction(this, "cullElbows")
+		t.get("Tree").add("Remove \"Elbows\"").setAction(this, "cullElbows")
 				.setShortcut("control-e");
 		t.layout();
 
@@ -89,7 +97,7 @@ public final class UIManager
 				"cutNode");
 		context.get("Edit").add(context.create("Copy", 'c')).setAction(this,
 				"copyNode");
-		RadialMenuItem rmi = new RadialMenuItem("Paste", 'v')
+		RadialMenuItem rmi = new RadialMenuItem()
 		{
 			public boolean isEnabled()
 			{
@@ -100,7 +108,10 @@ public final class UIManager
 				return true;
 			}
 		};
+		rmi.setName("Paste");
+		rmi.setHint('v');
 		context.get("Edit").add(rmi).setAction(this, "pasteNode");
+		
 		context.get("Edit").add(context.create("Cancel", 'n')).setAction(this,
 				"clearClipboard");
 		// Delete
@@ -114,7 +125,10 @@ public final class UIManager
 		context.get("Add").add(context.create("Child node", 'c')).setAction(
 				this, "addChildNode");
 
-		dock = new PhyloToolDock(p);
+		dock = new ToolDock(p);
+		dock.add(dock.create("Arrow","Arrow","dock/arrow.png")).setShortcut("a");
+		dock.add(dock.create("Scroll","Scroll","dock/scroll.png")).setShortcut("s");
+		dock.add(dock.create("Zoom","Zoom","dock/zoom.png")).setShortcut("z");
 	}
 
 	public void update()
@@ -137,7 +151,7 @@ public final class UIManager
 
 	public void zoomToFull()
 	{
-		PhyloWidget.trees.camera.zoomCenterTo(0, 0, p.width, p.height);
+		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
 	}
 
 	public void mutate()
@@ -163,11 +177,18 @@ public final class UIManager
 	public void newTree()
 	{
 		PhyloWidget.trees.setTree(new PhyloTree("PhyloWidget"));
+		PhyloWidget.trees
+				.setTree(TreeIO
+						.parseNewickString(
+								new PhyloTree(),
+								// "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);"));
+								"(Bovine,(Hylobates:0.36079,(Pongo:0.33636,(G._Gorilla:0.17147, (P._paniscus:0.19268,H._sapiens:0.11927):0.08386):0.06124):0.15057), Rodent);"));
 	}
 
 	public void saveTree()
 	{
-		
+		String s = TreeIO.createNewickString(PhyloWidget.trees.getTree());
+		System.out.println(s);
 	}
 
 	public void renameNode()
@@ -189,6 +210,12 @@ public final class UIManager
 		r.render.layout();
 	}
 
+	public void reverseTree()
+	{
+		RootedTree t = PhyloWidget.trees.getTree();
+		t.reverseAllChildren(t.getRoot());
+	}
+
 	public void reverseChildren()
 	{
 		NodeRange r = context.curNodeRange;
@@ -200,7 +227,8 @@ public final class UIManager
 	{
 		NodeRange r = context.curNodeRange;
 		RootedTree tree = r.render.getTree();
-		tree.addSisterNode(r.node);
+		PhyloNode sis = (PhyloNode) tree.createAndAddVertex("");
+		tree.addSisterNode(r.node, sis);
 	}
 
 	public void addChildNode()
@@ -260,4 +288,19 @@ public final class UIManager
 		tree.cullElbowsBelow(tree.getRoot());
 	}
 
+	
+	public void phylogramRender()
+	{
+		PhyloWidget.trees.phylogramRender();
+	}
+	
+	public void cladogramRender()
+	{
+		PhyloWidget.trees.cladogramRender();
+	}
+	
+	public void diagonalRender()
+	{
+		PhyloWidget.trees.diagonalRender();
+	}
 }

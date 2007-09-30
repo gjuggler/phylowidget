@@ -31,7 +31,7 @@ public class DiagonalCladogram extends Cladogram
 		/*
 		 * Do the children first.
 		 */
-		List children = tree.childrenOf(n);
+		List children = tree.getChildrenOf(n);
 		for (int i = 0; i < children.size(); i++)
 		{
 			PhyloNode child = (PhyloNode) children.get(i);
@@ -49,8 +49,8 @@ public class DiagonalCladogram extends Cladogram
 		 * would be in the y axis if it were at that higher depth.
 		 */
 		float stepSize = 1f / (leaves.size());
-		float loLeaves = tree.numEnclosedLeaves(loChild);
-		float hiLeaves = tree.numEnclosedLeaves(hiChild);
+		float loLeaves = tree.getNumEnclosedLeaves(loChild);
+		float hiLeaves = tree.getNumEnclosedLeaves(hiChild);
 		float mLeaves = Math.max(loLeaves, hiLeaves);
 		// System.out.println("md:" + mLeaves);
 		float loChildNewY = loChild.getTargetY() + (mLeaves - loLeaves)
@@ -65,7 +65,7 @@ public class DiagonalCladogram extends Cladogram
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-		return xPosForNumEnclosedLeaves(tree.numEnclosedLeaves(n));
+		return xPosForNumEnclosedLeaves(tree.getNumEnclosedLeaves(n));
 	}
 
 	float xPosForNumEnclosedLeaves(int numLeaves)
@@ -81,10 +81,10 @@ public class DiagonalCladogram extends Cladogram
 
 	protected void drawLine(PhyloNode n)
 	{
-		if (tree.parentOf(n) != null)
+		if (tree.getParentOf(n) != null)
 		{
-			PhyloNode parent = (PhyloNode) tree.parentOf(n);
-			List list = tree.childrenOf(parent);
+			PhyloNode parent = (PhyloNode) tree.getParentOf(n);
+			List list = tree.getChildrenOf(parent);
 			Collections.sort(list);
 			int index = list.indexOf(n);
 			if (index != 0 && index != list.size() - 1)

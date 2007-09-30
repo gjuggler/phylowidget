@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 import org.andrewberman.ui.Action;
@@ -46,6 +47,8 @@ public abstract class MenuItem implements Positionable, Sizable
 	public static final int LAYOUT_ABOVE = 3;
 	int layoutRule;
 
+	static ZDepthComparator zComp;
+
 	static MenuTimer timer;
 
 	public Menu menu;
@@ -56,9 +59,17 @@ public abstract class MenuItem implements Positionable, Sizable
 	Shortcut shortcut;
 	public String label;
 	ArrayList items;
+	/**
+	 * The same items as above, but z-sorted for hit detection and drawing
+	 * purposes.
+	 */
+	ArrayList zSortedItems;
+	boolean needsZSort;
 
 	protected float x, y;
 	protected float width, height;
+
+	private int z;
 
 	int state = UP;
 	boolean clickedInside;
@@ -73,16 +84,17 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	MenuItem()
 	{
-		this("[Unnamed MenuItem]");
-	}
-
-	MenuItem(String label)
-	{
-		timer = MenuTimer.instance();
+		setName(new String());
 		items = new ArrayList(2);
-		this.label = label;
+		zSortedItems = new ArrayList(2);
+		timer = MenuTimer.instance();
 	}
 
+	public void setName(String name)
+	{
+		this.label = name;
+	}
+	
 	public MenuItem setAction(Object object, String method)
 	{
 		action = new Action(object, method);
@@ -136,11 +148,29 @@ public abstract class MenuItem implements Positionable, Sizable
 	public MenuItem add(MenuItem seg)
 	{
 		items.add(seg);
+		zSortedItems.add(seg);
+		zSort();
 		seg.setParent(this);
 		seg.setMenu(menu);
 		if (menu != null)
 			menu.layout();
 		return seg;
+	}
+
+	public void remove(MenuItem item)
+	{
+		items.remove(item);
+		zSortedItems.remove(item);
+		zSort();
+		if (menu != null)
+			menu.layout();
+	}
+
+	private void zSort()
+	{
+		if (zComp == null)
+			zComp = new ZDepthComparator();
+		Collections.sort(zSortedItems, zComp);
 	}
 
 	public MenuItem add(String newLabel)
@@ -218,9 +248,14 @@ public abstract class MenuItem implements Positionable, Sizable
 	 */
 	public void draw()
 	{
-		for (int i = 0; i < items.size(); i++)
+		if (needsZSort)
 		{
-			MenuItem seg = (MenuItem) items.get(i);
+			zSort();
+			needsZSort = false;
+		}
+		for (int i = 0; i < zSortedItems.size(); i++)
+		{
+			MenuItem seg = (MenuItem) zSortedItems.get(i);
 			seg.draw();
 		}
 	}
@@ -490,12 +525,25 @@ public abstract class MenuItem implements Positionable, Sizable
 		mouseInside = false;
 		if (this.isVisible())
 			visibleMouseEvent(e, tempPt);
-		for (int i = 0; i < items.size(); i++)
+		for (int i = zSortedItems.size()-1; i >= 0; i--)
 		{
-			MenuItem item = (MenuItem) items.get(i);
+			MenuItem item = (MenuItem) zSortedItems.get(i);
+			if (e.isConsumed())
+				continue;
 			item.itemMouseEvent(e, tempPt);
 			if (item.mouseInside)
 				mouseInside = true;
+		}
+		if (mouseInside && getZ() == 0)
+		{
+			setZ(1);
+			if (parent != null)
+				parent.needsZSort = true;
+		} else if (!mouseInside && getZ() == 1)
+		{
+			setZ(0);
+			if (parent != null)
+				parent.needsZSort = true;
 		}
 	}
 
@@ -560,9 +608,10 @@ public abstract class MenuItem implements Positionable, Sizable
 					clickedInside = false;
 			case MouseEvent.MOUSE_DRAGGED:
 				if (/* clickedInside && */containsPoint)
+				{
 					setState(MenuItem.DOWN);
-				// else if (containsPoint) this.state = MenuItem.OVER;
-				else
+					// else if (containsPoint) this.state = MenuItem.OVER;
+				} else
 					setState(MenuItem.UP);
 				break;
 			case MouseEvent.MOUSE_RELEASED:
@@ -587,13 +636,42 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
+	public int getZ()
+	{
+		return z;
+	}
+
+	public void setZ(int z)
+	{
+		this.z = z;
+	}
+
 	public String toString()
 	{
 		return label;
 	}
 
-	class VisibleDepthComparator implements Comparator
+	class ZDepthComparator implements Comparator
 	{
+		public int compare(Object o1, Object o2)
+		{
+			MenuItem i1 = (MenuItem) o1;
+			MenuItem i2 = (MenuItem) o2;
+
+			int z1 = i1.getZ();
+			int z2 = i2.getZ();
+
+			if (z1 > z2)
+				return 1;
+			if (z1 < z2)
+				return -1;
+			return 0;
+		}
+	}
+
+	static class VisibleDepthComparator implements Comparator
+	{
+
 		public int compare(Object o1, Object o2)
 		{
 			MenuItem i1 = (MenuItem) o1;

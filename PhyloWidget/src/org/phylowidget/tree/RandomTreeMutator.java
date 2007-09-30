@@ -81,8 +81,8 @@ public class RandomTreeMutator implements Runnable
 			tree.getAll(tree.getRoot(), null, allNodes);
 			int i = random.nextInt(allNodes.size());
 			Object vertex = allNodes.get(i);
-			PhyloNode sis = (PhyloNode) tree.addSisterNode(vertex);
-			sis.setLabel(taxonName);
+			PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
+			tree.addSisterNode(vertex,sis);
 			mutations++;
 //		}
 	}

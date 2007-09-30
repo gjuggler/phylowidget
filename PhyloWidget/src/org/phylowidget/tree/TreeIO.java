@@ -7,9 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
+import org.jgrapht.traverse.DepthFirstIterator;
 import org.phylowidget.ui.PhyloNode;
 
 public class TreeIO
@@ -32,7 +36,7 @@ public class TreeIO
 			return null;
 		}
 	}
-	
+
 	public static RootedTree parseReader(BufferedReader br)
 	{
 		String line;
@@ -50,12 +54,12 @@ public class TreeIO
 		}
 		return parseNewickString(buff.toString());
 	}
-	
+
 	static RootedTree parseNewickString(String s)
 	{
 		return parseNewickString(new RootedTree(), s);
 	}
-	
+
 	public static RootedTree parseNewickString(RootedTree tree, String s)
 	{
 		Object root = null;
@@ -65,11 +69,21 @@ public class TreeIO
 		if (s.indexOf(';') == -1)
 			s = s + ';';
 		System.out.println("input: " + s);
+		/*
+		 * String buffer which we'll be parsing from.
+		 */
 		StringBuffer sb = new StringBuffer(s);
 		/*
 		 * Contains an Integer of the number of items for each depth level.
 		 */
 		int[] countForDepth = new int[1];
+		/*
+		 * A hashtable recording the first (i.e. first in order) child for each
+		 * node. This will be used after parsing is complete to reconstitute the
+		 * correct sorting order of nodes and leaves. key = parent node value =
+		 * first child node
+		 */
+		HashMap firstChildren = new HashMap();
 		/*
 		 * The current depth level being parsed.
 		 */
@@ -135,11 +149,13 @@ public class TreeIO
 						curLength = Double.parseDouble(temp.toString());
 					} else
 					{
+						// Do I need this stuff here? YUP.
 						curLabel = temp.toString();
 						curLabel = curLabel.replace('_', ' ');
+						curLabel = curLabel.trim();
 					}
-					if (curLabel.length() == 0)
-						curLabel = String.valueOf(nodeCount);// + " " +
+//					if (curLabel.length() == 0)
+//						curLabel = String.valueOf(nodeCount);// + " " +
 					// curLength;
 					// Create a vertex for the current label and length.
 					Object curNode = tree.createVertex(curLabel);
@@ -151,13 +167,14 @@ public class TreeIO
 					}
 					if (innerNode)
 					{
+						Object child = null;
 						for (int j = 0; j < countForDepth[curDepth]; j++)
 						{
 							// Pop out the child node and connect to the parent.
-							PhyloNode child = (PhyloNode) vertices.pop();
+							child = vertices.pop();
 							double length = ((Double) lengths.pop())
 									.doubleValue();
-							if (!tree.containsEdge(curNode,child))
+							if (!tree.containsEdge(curNode, child))
 								tree.addEdge(curNode, child);
 							Object o = tree.getEdge(curNode, child);
 							((WeightedGraph) tree).setEdgeWeight(o, length);
@@ -165,6 +182,8 @@ public class TreeIO
 						// Flush out the depth counter for the current depth.
 						countForDepth[curDepth] = 0;
 						curDepth--;
+						// Keep track of which element was first.
+						firstChildren.put(curNode, child);
 					}
 					// Push onto the stack and keep count.
 					vertices.push(curNode);
@@ -189,6 +208,7 @@ public class TreeIO
 			{
 				curLabel = temp.toString();
 				curLabel = curLabel.replace('_', ' ');
+				curLabel = curLabel.trim();
 				temp.replace(0, temp.length(), "");
 				parsingNumber = true;
 			} else
@@ -196,15 +216,63 @@ public class TreeIO
 				temp.append(c);
 			}
 		}
-		// System.out.println(tree);
 		tree.setRoot(root);
+
+		/*
+		 * Now, to recreate the newick file's node sorting. We previously
+		 * recorded the "first" child node for each parent node, which we'll now
+		 * use to determine whether we want to sort that node in forward or reverse.
+		 */
+		BreadthFirstIterator dfi = new BreadthFirstIterator(tree,tree.getRoot());
+		while (dfi.hasNext())
+		{
+			Object p = dfi.next();
+			if (!tree.isLeaf(p))
+			{
+				tree.sorting.put(p, RootedTree.REVERSE);
+				List l = tree.getChildrenOf(p);
+				if (l.get(0) != firstChildren.get(p))
+					tree.sorting.put(p, RootedTree.FORWARD);
+			}
+		}
 		return tree;
 	}
-	
+
 	public static String createNewickString(RootedTree tree)
 	{
-		
-		
-		return null;
+		StringBuffer sb = new StringBuffer();
+		outputVertex(tree, sb, tree.getRoot());
+		return sb.toString();
 	}
+
+	private static void outputVertex(RootedTree tree, StringBuffer sb, Object v)
+	{
+		/*
+		 * Ok, I was gonna make this one iterative instead of recursive (like
+		 * the parser), but it's just too annoying. So maybe on reeeeally large
+		 * trees, this will result in heap problems? Oh, well...
+		 */
+		if (!tree.isLeaf(v))
+		{
+			sb.append('(');
+			List l = tree.getChildrenOf(v);
+			for (int i = 0; i < l.size(); i++)
+			{
+				outputVertex(tree, sb, l.get(i));
+				if (i != l.size() - 1)
+					sb.append(',');
+			}
+			sb.append(')');
+		}
+		if (v.toString().length() != 0)
+			sb.append(v.toString());
+		Object p = tree.getParentOf(v);
+		if (p != null)
+		{
+			double ew = tree.getEdgeWeight(tree.getEdge(p, v));
+			if (ew != 1.0)
+				sb.append(":" + Double.toString(ew));
+		}
+	}
+
 }

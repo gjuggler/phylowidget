@@ -68,13 +68,16 @@ public class Dock extends Menu
 	 * directions, so you'd best give it a little extra <code>offset</code>
 	 * just to be safe!
 	 */
-	public boolean autoCenter = true;
+	public boolean autoCenter;
 
 	/**
 	 * If set to true, then a triangle will be drawn on the last clicked item.
 	 * If false, no triangles. Simple!
 	 */
-	public boolean triangleOnSelected = true;
+	public boolean triangleOnSelected;
+	
+	public boolean consumeWhenActive;
+	
 
 	public Dock(PApplet app)
 	{
@@ -95,6 +98,8 @@ public class Dock extends Menu
 
 	protected void setOptions()
 	{
+		super.setOptions();
+		
 		useCameraCoordinates = false;
 		clickAwayBehavior = CLICKAWAY_COLLAPSES;
 		hoverNavigable = false;
@@ -104,11 +109,15 @@ public class Dock extends Menu
 		hideOnAction = true;
 		usesJava2D = false;
 		autoDim = true;
+
+		autoCenter = true;
+		triangleOnSelected = true;
+		consumeWhenActive = true;
 	}
 
 	public void layout()
 	{
-		mousePt.setLocation(canvas.mouseX,canvas.mouseY);
+		mousePt.setLocation(canvas.mouseX, canvas.mouseY);
 		if (useCameraCoordinates)
 			UIUtils.screenToModel(mousePt);
 		float mousePos = mousePos();
@@ -152,9 +161,9 @@ public class Dock extends Menu
 
 	public void hide()
 	{
-		// Docks never hide.
+		// My docks never hide. Subclasses may want to change this, though.
 	}
-	
+
 	float mousePos()
 	{
 		return rotation.getMousePos(mousePt);
@@ -177,7 +186,7 @@ public class Dock extends Menu
 		origWidth = newWidth;
 		layout();
 	}
-	
+
 	public void setInset(float inset)
 	{
 		this.inset = inset;
@@ -195,9 +204,9 @@ public class Dock extends Menu
 		if (lastPressed == null)
 			return null;
 		else
-			return (DockItem)lastPressed;
+			return (DockItem) lastPressed;
 	}
-	
+
 	public void drawBefore()
 	{
 		layout();
@@ -244,6 +253,7 @@ public class Dock extends Menu
 
 		if (currentlyHovered != null)
 		{
+//			 System.out.println("Hello!");
 			MenuItem i = currentlyHovered;
 			float ascent = UIUtils.getTextAscent(menu.canvas.g,
 					menu.style.font, 24, false);
@@ -349,6 +359,7 @@ public class Dock extends Menu
 
 	public void keyEvent(KeyEvent e)
 	{
+		super.keyEvent(e);
 	}
 
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
@@ -371,7 +382,11 @@ public class Dock extends Menu
 			}
 		}
 		super.mouseEvent(e, screen, model);
-		// layout();
+		
+		if (isActivated && consumeWhenActive)
+		{
+//			e.consume();
+		}
 	}
 
 	public boolean containsPoint(Point pt)
@@ -399,18 +414,28 @@ public class Dock extends Menu
 
 	public MenuItem create(String label)
 	{
-		return new DockItem(label);
+		DockItem di = new DockItem();
+		di.setName(label);
+		return di;
 	}
-
-	public DockItem add(String label, String iconFile)
+	
+	public MenuItem add(MenuItem addMe)
 	{
-		DockItem addMe = new DockItem(label);
-		add(addMe);
-		addMe.setFile(iconFile);
+		super.add(addMe);
 		show();
 		return addMe;
 	}
 	
+	public DockItem add(String label, String iconFile)
+	{
+		DockItem addMe = new DockItem();
+		addMe.setName(label);
+		addMe.setIcon(iconFile);
+		add(addMe);
+		show();
+		return addMe;
+	}
+
 	class DockRotationHandler
 	{
 		int rot = LEFT;

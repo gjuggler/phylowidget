@@ -37,12 +37,12 @@ public class Toolbar extends Menu
 	/**
 	 * If set to true, the toolbar will take up the entire width of the PApplet.
 	 */
-	public boolean fullWidth = false;
+	public boolean fullWidth;
 	/**
 	 * If true, this option will cause the menu to grab modal focus from the
 	 * FocusManager upon opening.
 	 */
-	public boolean isModal = true;
+	public boolean isModal;
 
 	public Toolbar(PApplet app)
 	{
@@ -53,6 +53,7 @@ public class Toolbar extends Menu
 
 	protected void setOptions()
 	{
+		super.setOptions();
 		/*
 		 * Override some default options from the Menu class.
 		 */
@@ -63,6 +64,9 @@ public class Toolbar extends Menu
 		actionOnMouseDown = true;
 		useHandCursor = true;
 		autoDim = true;
+		
+		fullWidth = false;
+		isModal = true;
 		/*
 		 * Do some automatic positioning.
 		 */
@@ -135,7 +139,9 @@ public class Toolbar extends Menu
 
 	public MenuItem create(String label)
 	{
-		return new ToolbarItem(label);
+		ToolbarItem ti = new ToolbarItem();
+		ti.setName(label);
+		return ti;
 	}
 
 	public MenuItem add(MenuItem item)

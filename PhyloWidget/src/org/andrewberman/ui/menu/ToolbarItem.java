@@ -28,11 +28,6 @@ public class ToolbarItem extends MenuItem
 	float textOffsetX;
 	float textOffsetY;
 
-	public ToolbarItem(String label)
-	{
-		super(label);
-	}
-
 	public void draw()
 	{
 		if (isVisible())

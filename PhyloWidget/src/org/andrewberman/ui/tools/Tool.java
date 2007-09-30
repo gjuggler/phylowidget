@@ -9,8 +9,8 @@ import java.awt.event.MouseEvent;
 import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.ToolManager;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -19,19 +19,26 @@ public class Tool extends AbstractUIObject
 {
 	PApplet p;
 	
+	Camera camera;
+	
 	Shortcut shortcut;
 	Point downPoint, curPoint;
 	boolean mousePressed, mouseDragging;
 	
 	public Tool(PApplet p)
 	{
-		ToolManager.lazyLoad(p);
-		ToolManager.instance.registerTool(this);
+//		ToolManager.lazyLoad(p);
+//		ToolManager.instance.registerTool(this);
 		
 		this.p = p;
 		
 		downPoint = new Point(0,0);
 		curPoint = new Point(0,0);
+	}
+	
+	public void setShortcut(String s)
+	{
+		shortcut = new Shortcut(s);
 	}
 	
 	public Shortcut getShortcut()
@@ -42,6 +49,16 @@ public class Tool extends AbstractUIObject
 	public Cursor getCursor()
 	{
 		return Cursor.getDefaultCursor();
+	}
+	
+	public Camera getCamera()
+	{
+		return camera;
+	}
+	
+	public void setCamera(Camera c)
+	{
+		camera = c;
 	}
 	
 	public static Cursor createCursor(PApplet p, String filename, int offsetX, int offsetY)

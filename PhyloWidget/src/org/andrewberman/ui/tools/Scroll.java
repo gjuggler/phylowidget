@@ -9,28 +9,28 @@ import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
 
-public abstract class ScrollTool extends Tool
+public class Scroll extends Tool
 {
 	Cursor cursor;
 	
-	public ScrollTool(PApplet p)
+	public Scroll(PApplet p)
 	{
 		super(p);
 		
 		shortcut = new Shortcut("s");
 	}
 	
-	public abstract Camera getCamera();
-	
 	public void draw()
 	{
 		if (mouseDragging)
 		{
-			float factor = 20;
+			float factor = 10;
 			float dx = curPoint.x - downPoint.x;
 			dx /= factor;
 			float dy = curPoint.y - downPoint.y;
 			dy /= factor;
+			dx /= getCamera().getZ();
+			dy /= getCamera().getZ();
 			getCamera().nudge(dx,dy);
 		}
 	}

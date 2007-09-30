@@ -3,6 +3,7 @@ package org.phylowidget;
 import java.awt.RenderingHints;
 
 import org.andrewberman.ui.FontLoader;
+import org.phylowidget.net.TreeUpdater;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.UIManager;
@@ -21,11 +22,16 @@ public class PhyloWidget extends PApplet
 	
 	public static int WIDTH = 400;
 	public static int HEIGHT = 400;
+	
+	public static float FRAMERATE = 40;
+	public static float TWEEN_FACTOR = 30f / FRAMERATE; 
 
 	public static boolean usingNativeFonts;
 	public static boolean openGL;
 	
 	public boolean stopCreatedThreads = false;
+	
+	private TreeUpdater updater;
 	
 	public PhyloWidget()
 	{
@@ -36,7 +42,7 @@ public class PhyloWidget extends PApplet
 	public void setup()
 	{
 		this.size(500,500);
-		frameRate(30f);
+		frameRate(FRAMERATE);
 		
 		p = this;
 		
@@ -44,6 +50,7 @@ public class PhyloWidget extends PApplet
 		trees = new TreeManager(this);
 		// Creates and manages UI elements.
 		ui = new UIManager(this);
+		updater = new TreeUpdater();
 		
 		trees.setup();
 		ui.setup();
@@ -106,9 +113,8 @@ public class PhyloWidget extends PApplet
 	
 	public void loadNewick(String s)
 	{
-		System.out.println(s);
-		trees.setTree(TreeIO.parseNewickString(new PhyloTree(),s));
-		System.out.println("Created!");
+//		System.out.println(s);
+		updater.triggerUpdate(s);
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

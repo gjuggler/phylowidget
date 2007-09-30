@@ -24,7 +24,9 @@ public class VerticalMenu extends Menu
 
 	public MenuItem create(String label)
 	{
-		return new VerticalMenuItem(label);
+		VerticalMenuItem vmi = new VerticalMenuItem();
+		vmi.setName(label);
+		return vmi;
 	}
 
 	protected void drawAfter()

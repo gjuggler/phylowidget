@@ -32,11 +32,6 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 	static Area tri;
 	static float triWidth;
 
-	public VerticalMenuItem(String label)
-	{
-		super(label);
-	}
-
 	static void drawChildrenRect(MenuItem item)
 	{
 		if (item.items.size() == 0 || !item.isShowingChildren())

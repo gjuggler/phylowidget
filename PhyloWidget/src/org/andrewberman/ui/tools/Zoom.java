@@ -9,7 +9,7 @@ import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
 
-public abstract class ZoomTool extends Tool
+public class Zoom extends Tool
 {
 	Cursor zoomCursor;
 	
@@ -17,14 +17,12 @@ public abstract class ZoomTool extends Tool
 	float downZoom, zoomFactor;
 	float downCameraX, downCameraY;
 
-	public ZoomTool(PApplet p)
+	public Zoom(PApplet p)
 	{
 		super(p);
 		
 		shortcut = new Shortcut("z");
 	}
-
-	public abstract Camera getCamera();
 
 	public void draw()
 	{

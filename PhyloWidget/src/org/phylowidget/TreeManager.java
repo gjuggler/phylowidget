@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.render.Cladogram;
@@ -41,7 +42,11 @@ public class TreeManager implements SettableRect
 		cameraRect = new Rectangle2D.Float(0, 0, 0, 0);
 		camera = new RectMover(p, this);
 		camera.fillScreen();
-
+		/*
+		 * We need to let the ToolManager know our current Camera object.
+		 */
+//		EventManager.lazyLoad(p);
+		EventManager.instance.setCamera(camera);
 		cladogramRender();
 	}
 
@@ -106,7 +111,7 @@ public class TreeManager implements SettableRect
 	public void setTree(RootedTree tree)
 	{
 		// String s = "(,(,,),)";
-		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
+//		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
 		// String s = "((a,b),c);";
 		// String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
 		// String s = "(A:3.33,(C:3,B:2):5)";

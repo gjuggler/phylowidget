@@ -68,13 +68,13 @@ public class TreeClipboard
 		Graphs.addGraph(destTree, clone);
 
 		// Insert the clone's root vertex into the midpoint above destNode.
-		if (destTree.parentOf(destNode) == null)
+		if (destTree.getParentOf(destNode) == null)
 		{
 			destTree.addEdge(destNode, clone.getRoot());
 		} else
 		{
 			Object internalVertex = destTree.createAndAddVertex("[internal vertex]");
-			destTree.insertNodeBetween(destTree.parentOf(destNode), destNode,
+			destTree.insertNodeBetween(destTree.getParentOf(destNode), destNode,
 					internalVertex);
 			destTree.addEdge(internalVertex, clone.getRoot());
 		}

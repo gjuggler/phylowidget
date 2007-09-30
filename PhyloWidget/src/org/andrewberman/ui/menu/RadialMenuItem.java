@@ -4,16 +4,20 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.menu.MenuItem.ZDepthComparator;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -42,12 +46,16 @@ public class RadialMenuItem extends MenuItem
 	static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(0,
 			0, 0, 0, 0, 0);
 
-	public RadialMenuItem(String label, char hint)
+	public RadialMenuItem()
 	{
-		super(label);
+		super();
+	}
+	
+	public void setHint(char hint)
+	{
 		this.hint = hint;
 	}
-
+	
 	public void drawUnder()
 	{
 		Graphics2D g2 = menu.buff.g2;
@@ -189,7 +197,7 @@ public class RadialMenuItem extends MenuItem
 		 */
 		float tMid = (tHi + tLo) / 2;
 		float dTheta = tHi - tLo;
-		dTheta *= items.size() * .5f;
+		dTheta *= items.size() * .4f;
 		layoutSubItems(rLo, rHi, tMid - dTheta / 2, tMid + dTheta / 2);
 	}
 
@@ -339,7 +347,7 @@ public class RadialMenuItem extends MenuItem
 		}
 		return max;
 	}
-
+	
 	public boolean containsPoint(Point pt)
 	{
 		if (!isVisible())
@@ -375,6 +383,13 @@ public class RadialMenuItem extends MenuItem
 		}
 	}
 
+	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
+	{
+		super.visibleMouseEvent(e, tempPt);
+		if (getState() == MenuItem.OVER)
+			e.consume();
+	}
+	
 	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
 		if (isVisible())

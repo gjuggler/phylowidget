@@ -81,7 +81,7 @@ import processing.core.PGraphicsJava2D;
 public abstract class Menu extends MenuItem implements UIObject, Positionable
 {
 	public static final int START_SIZE = 50;
-	
+
 	int offsetX = 0;
 	int offsetY = 0;
 
@@ -137,7 +137,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * Indicates whether the menu was "just" shown. Should be true only during
 	 * the first <code>mouseEvent</code> cycle seen after this menu is shown.
 	 */
-//	boolean justShown = false;
+	// boolean justShown = false;
 	/*
 	 * =============================== GENERAL OPTIONS FOR SUBCLASSES
 	 */
@@ -155,7 +155,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * menu without going through the effort of making a new subclass and
 	 * overriding the <code>setOptions</code> method.
 	 */
-	public boolean useCameraCoordinates = true;
+	public boolean useCameraCoordinates;
 	/**
 	 * This parameter signals that the sub-classing menu is going to draw itself
 	 * using Java2D. As such, if the base canvas isn't Java2D, then we will draw
@@ -163,28 +163,28 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * If this value is set to FALSE, then the <code>Menu</code> will always
 	 * draw directly to the on-screen PGraphics canvas. Schweet!
 	 */
-	protected boolean usesJava2D = true;
+	protected boolean usesJava2D;
 	/**
 	 * If true, a mouse hover will expand a menu item. If false, a menu item
 	 * requires a click to expand.
 	 */
-	protected boolean hoverNavigable = true;
+	protected boolean hoverNavigable;
 	/**
 	 * If true, a click will hide a submenu as well as show it. This option
 	 * works best when set to the OPPOSITE of the above hoverNavigable option.
 	 */
-	protected boolean clickToggles = false;
+	protected boolean clickToggles;
 	/**
 	 * If true, only one of this MenuItem's submenus will be allowed to be shown
 	 * at once. Generally best left set to true.
 	 */
-	protected boolean singletNavigation = true;
+	protected boolean singletNavigation;
 	/**
 	 * If true, this menu's items will act like a "menu" and open up on the
 	 * mouse down event, as opposed to the more "button"-like behavior of
 	 * opening on the mouse up event.
 	 */
-	protected boolean actionOnMouseDown = false;
+	protected boolean actionOnMouseDown;
 	/**
 	 * Defines the behavior of a click that occurs outside the bounds of the
 	 * menu and all of its sub-menus).
@@ -197,14 +197,14 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 * If true, this Menu will change to the hand cursor when one of its
 	 * constituent sub-MenuItems is selected. I am the walrus.
 	 */
-	protected boolean useHandCursor = true;
+	protected boolean useHandCursor;
 
-//	protected boolean hideOnAction = true;
+	// protected boolean hideOnAction = true;
 	/**
 	 * If true, this menu will dim to loAlpha if the mouse is not inside the
 	 * menu or any of its sub-items.
 	 */
-	protected boolean autoDim = false;
+	protected boolean autoDim;
 	/**
 	 * The "dim" alpha value to drop to. Only effective when
 	 * <code>autodim</code> is true.
@@ -216,22 +216,29 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	 */
 	public float fullAlpha = 1f;
 	/**
-	 * If set to true, then this menu will grab focus when the show() function is called.
-	 * It will then also release focus when the hide() function is called.
+	 * If set to true, then this menu will grab focus when the show() function
+	 * is called. It will then also release focus when the hide() function is
+	 * called.
 	 */
-	public boolean focusOnShow = false;
-	
+	public boolean focusOnShow;
+	/**
+	 * If set to true, then this menu grabs modal focus when opened.
+	 */
+	public boolean modalFocus;
+	public boolean consumeEvents;
+
 	public Menu(PApplet app)
 	{
-		super("");
-		label = this.getClass().getName();
+		super();
+		setName(this.getClass().getName());
 		UIUtils.loadUISinglets(app);
 		EventManager.instance.add(this); // Add ourselves to EventManager.
 		canvas = app;
 		setMenu(this);
 		style = StyleSet.defaultStyle();
 		/*
-		 * Give our subclasses a chance to set their options before we start initing stuff.
+		 * Give our subclasses a chance to set their options before we start
+		 * initing stuff.
 		 */
 		setOptions();
 		init();
@@ -246,11 +253,24 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		if (autoDim)
 			aTween = new PropertyTween(this, "alpha",
 					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, fullAlpha,
-					15);	
+					15);
 	}
-	
+
 	protected void setOptions()
-	{
+	{	
+		useCameraCoordinates = true;
+		usesJava2D = true;
+		hoverNavigable = true;
+		clickToggles = false;
+		singletNavigation = true;
+		actionOnMouseDown = false;
+		clickAwayBehavior = CLICKAWAY_HIDES;
+		useHandCursor = true;
+		autoDim = false;
+		focusOnShow = false;
+		modalFocus = false;
+		consumeEvents = true;
+
 		// Subclassers should put changes in the boolean options here.
 	}
 
@@ -258,7 +278,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
 	}
-	
+
 	public float getX()
 	{
 		return x;
@@ -285,8 +305,10 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		super.show();
 		showChildren();
-//		justShown = true;
-		if (focusOnShow)
+		// justShown = true;
+		if (modalFocus)
+			FocusManager.instance.setModalFocus(this);
+		else if (focusOnShow)
 			FocusManager.instance.setFocus(this);
 		fireEvent(UIEvent.MENU_SHOWN);
 	}
@@ -296,7 +318,9 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		super.hide();
 		hideAllChildren();
 		UIUtils.releaseCursor(this, canvas);
-		if (focusOnShow)
+		if (modalFocus)
+			FocusManager.instance.removeFromFocus(this);
+		else if (focusOnShow)
 			FocusManager.instance.removeFromFocus(this);
 		fireEvent(UIEvent.MENU_HIDDEN);
 	}
@@ -348,7 +372,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 			 */
 			canvas.pushMatrix();
 			resetMatrix(canvas.g);
-//			canvas.translate(x, y);
+			// canvas.translate(x, y);
 			hint();
 			drawBefore();
 			super.draw(); // Draw all the sub segments.
@@ -364,7 +388,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 			 */
 			canvas.pushMatrix();
 			resetMatrix(canvas.g);
-//			canvas.translate(x, y);
+			// canvas.translate(x, y);
 			drawBefore();
 			super.draw();
 			drawAfter();
@@ -380,9 +404,9 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 			hint();
 			buff.beginDraw();
 			buff.background(255, 0);
-			buff.translate(-x,-y);
-			buff.translate(-offsetX,-offsetY);
-//			buff.translate(offsetX, offsetX);
+			buff.translate(-x, -y);
+			buff.translate(-offsetX, -offsetY);
+			// buff.translate(offsetX, offsetX);
 			drawBefore();
 			super.draw(); // Draws all of the sub segments.
 			drawAfter();
@@ -399,12 +423,13 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		origComp = buff.g2.getComposite();
 		buff.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		 buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-		 RenderingHints.VALUE_ANTIALIAS_ON);
-		 buff.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-		 RenderingHints.VALUE_STROKE_PURE);
-//		 buff.g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
-//		 buff.g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		buff.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+				RenderingHints.VALUE_STROKE_PURE);
+		// buff.g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+		// buff.g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+		// RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		// buff.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 		// RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
 		buff.g2.setComposite(AlphaComposite.getInstance(
@@ -436,64 +461,62 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 
 	protected void drawToCanvas()
 	{
-		int w = (int) (rect.width + PAD*2);
-		int h = (int) (rect.height + PAD*2);
+		int w = (int) (rect.width + PAD * 2);
+		int h = (int) (rect.height + PAD * 2);
 		canvas.pushMatrix();
 		resetMatrix(canvas.g);
-		canvas.image(buff, x+offsetX, y+offsetY, w,
-				h, 0, 0, w, h);
+		canvas.image(buff, x + offsetX, y + offsetY, w, h, 0, 0, w, h);
 		canvas.popMatrix();
-		
+
 		/*
-		 * Draw some debug rectangles:
-		 *  - Red: bounding rectangle for the menu.
-		 *  - Green: size of the buffer PGraphics
-		 *  - Blue: the area actually copied from the buffer to the drawing canvas.
+		 * Draw some debug rectangles: - Red: bounding rectangle for the menu. -
+		 * Green: size of the buffer PGraphics - Blue: the area actually copied
+		 * from the buffer to the drawing canvas.
 		 */
-//		canvas.noFill();
-//		canvas.stroke(255,0,0);
-//		canvas.rect(rect.x, rect.y, rect.width, rect.height);
-//		canvas.stroke(0,255,0);
-//		canvas.rect(x+offsetX,y+offsetY,buff.width,buff.height);
-//		canvas.stroke(0,0,255);
-//		canvas.rect(x+offsetX,y+offsetY,w,h);
+		// canvas.noFill();
+		// canvas.stroke(255,0,0);
+		// canvas.rect(rect.x, rect.y, rect.width, rect.height);
+		// canvas.stroke(0,255,0);
+		// canvas.rect(x+offsetX,y+offsetY,buff.width,buff.height);
+		// canvas.stroke(0,0,255);
+		// canvas.rect(x+offsetX,y+offsetY,w,h);
 	}
 
 	static final int PAD = 10;
-	
+
 	protected void resizeBuffer()
 	{
 		rect.setFrame(x, y, 0, 0);
 		buffRect.setFrame(x, y, 0, 0);
 		getRect(rect, buffRect);
-		
+
 		float dX = 0;
 		float dY = 0;
-//		if (rect.x - (x+offsetX) < PAD)
-			dX = rect.x - (x + offsetX + PAD);
-//		if (rect.y - (y+offsetY) < PAD)
-			dY = rect.y - (y + offsetY + PAD);
-		
+		// if (rect.x - (x+offsetX) < PAD)
+		dX = rect.x - (x + offsetX + PAD);
+		// if (rect.y - (y+offsetY) < PAD)
+		dY = rect.y - (y + offsetY + PAD);
+
 		offsetX += dX;
 		offsetY += dY;
-		
+
 		int newWidth = buff.width;
 		int newHeight = buff.height;
 		boolean resizeMe = false;
-		if (rect.width > buff.width - PAD*2)
+		if (rect.width > buff.width - PAD * 2)
 		{
-			newWidth = (int) (rect.width + PAD*2);
+			newWidth = (int) (rect.width + PAD * 2);
 			resizeMe = true;
 		}
-		if (rect.height > buff.height - PAD*2)
+		if (rect.height > buff.height - PAD * 2)
 		{
-			newHeight = (int) (rect.height + PAD*2);
+			newHeight = (int) (rect.height + PAD * 2);
 			resizeMe = true;
 		}
-		
+
 		if (resizeMe)
 		{
-			createBuffer(newWidth,newHeight);
+			createBuffer(newWidth, newHeight);
 		}
 	}
 
@@ -511,7 +534,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	{
 		// Do nothing.
 	}
-	
+
 	public void keyEvent(KeyEvent e)
 	{
 		switch (e.getKeyCode())
@@ -535,7 +558,7 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		 * accordingly.
 		 */
 		mousePt.setLocation(useMe);
-//		mousePt.translate(-x, -y);
+		// mousePt.translate(-x, -y);
 		/*
 		 * Send the mouse events through the tree of sub-items.
 		 */
@@ -546,13 +569,13 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 			switch (clickAwayBehavior)
 			{
 				case (CLICKAWAY_HIDES):
-//					if (justShown)
-//						justShown = false;
-//					else
-//					{
-					e.consume();	
+					// if (justShown)
+					// justShown = false;
+					// else
+					// {
+					e.consume();
 					hide();
-//					}
+					// }
 					break;
 				case (CLICKAWAY_COLLAPSES):
 					setOpenItem(null);
@@ -578,9 +601,8 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	protected void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-		if (mouseInside)
+		if (mouseInside && consumeEvents)
 		{
-//			System.out.println(this+"   is consuming!");
 			e.consume();
 		}
 		if (autoDim)
@@ -646,27 +668,27 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 	}
 
 	/*
-	 * No multipler inheritance, so I had to copy this boilerplate
-	 * code from AbstractUIObject instead of inheriting it. Crap!
+	 * No multipler inheritance, so I had to copy this boilerplate code from
+	 * AbstractUIObject instead of inheriting it. Crap!
 	 */
-	
+
 	public void addListener(UIListener o)
 	{
 		listeners.add(o);
 	}
-	
+
 	public void removeListener(UIListener o)
 	{
 		listeners.remove(o);
 	}
-	
+
 	public void fireEvent(int id)
 	{
-		UIEvent e = new UIEvent(this,id);
-		for (int i=0; i < listeners.size(); i++)
+		UIEvent e = new UIEvent(this, id);
+		for (int i = 0; i < listeners.size(); i++)
 		{
-			((UIListener)listeners.get(i)).uiEvent(e);
+			((UIListener) listeners.get(i)).uiEvent(e);
 		}
 	}
-	
+
 }

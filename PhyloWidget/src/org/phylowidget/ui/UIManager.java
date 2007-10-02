@@ -1,9 +1,12 @@
 package org.phylowidget.ui;
 
+import java.util.ArrayList;
+
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuIO;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.RadialMenuItem;
@@ -18,7 +21,7 @@ import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
-public final class UIManager
+public final class UIManager implements TreeActions, NodeActions
 {
 	PApplet p;
 
@@ -46,89 +49,18 @@ public final class UIManager
 	{
 		nearest = new NearestNodeFinder(p);
 
-		MenuIO.loadFromXML(p,"menus.xml");
+		ArrayList menus = MenuIO.loadFromXML(p,"menus.xml",this);
 		
-		Toolbar t = new Toolbar(p);
-		t.add("File");
-		t.get("File").add("New Tree").setAction(this, "newTree").setShortcut(
-				"control-n");
-		t.get("File").add("Output Tree").setAction(this, "saveTree")
-				.setShortcut("Control-s");
-		t.add("View").add("Phylogram").setAction(PhyloWidget.trees,
-				"phylogramRender");
-		t.get("View").add("Cladogram").setAction(PhyloWidget.trees,
-				"cladogramRender");
-		t.get("View").add("Diagonalogram").setAction(PhyloWidget.trees,
-				"diagonalRender");
-		t.get("View").add("Zoom to full").setAction(this, "zoomToFull")
-				.setShortcut("control-1");
-		t.add("Tree");
-		MenuItem auto = t.get("Tree").add("Mutator (for fun!)");
-		auto.add("Mutate Once").setAction(this, "mutate").setShortcut(
-				"control-m");
-		auto.add("Mutate Slow").setAction(this, "mutateSlow");
-		auto.add("Mutate Fast").setAction(this, "mutateFast");
-		auto.add("Stop Mutating").setAction(this, "mutateStop").setShortcut(
-				"control-shift-m");
-		t.get("Tree").add("Ladderize All").setAction(this, "ladderizeTree")
-				.setShortcut("control-l");
-		t.get("Tree").add("Remove \"Elbows\"").setAction(this, "cullElbows")
-				.setShortcut("control-e");
-		t.layout();
-
-		text = new PhyloTextField(p);
-
-		context = new PhyloContextMenu(p);
-		context.add(context.create("Add", 'a'));
-		context.add(context.create("Delete", 'd'));
-		context.add(context.create("Edit", 'e'));
-		context.add(context.create("Vertex", 'v'));
-		// Tree
-		context.get("Vertex").add(context.create("Reroot", 'r')).setAction(
-				this, "rerootNode");
-		context.get("Vertex").add(context.create("Flip children", 'f'))
-				.setAction(this, "flipChildren");
-		context.get("Vertex").add(context.create("Reverse subtree", 'e'))
-				.setAction(this, "reverseChildren");
-		context.get("Vertex").add(context.create("Rename", 'n')).setAction(
-				this, "renameNode");
-		// Edit
-		context.get("Edit").add(context.create("Cut", 'x')).setAction(this,
-				"cutNode");
-		context.get("Edit").add(context.create("Copy", 'c')).setAction(this,
-				"copyNode");
-		RadialMenuItem rmi = new RadialMenuItem()
+		for (int i=0; i < menus.size(); i++)
 		{
-			public boolean isEnabled()
+			Menu menu = (Menu) menus.get(i);
+			if (menu.getClass() == PhyloContextMenu.class)
 			{
-				if (clipboard.isEmpty())
-					return false;
-				// if (context.curNodeRange.node.getState() != PhyloNode.NONE)
-				// return false;
-				return true;
+				context = (PhyloContextMenu)menu;
 			}
-		};
-		rmi.setName("Paste");
-		rmi.setHint('v');
-		context.get("Edit").add(rmi).setAction(this, "pasteNode");
+		}
 		
-		context.get("Edit").add(context.create("Cancel", 'n')).setAction(this,
-				"clearClipboard");
-		// Delete
-		context.get("Delete").add(context.create("Subtree", 's')).setAction(
-				this, "deleteSubtree");
-		context.get("Delete").add(context.create("This node", 't')).setAction(
-				this, "deleteNode");
-		// Add
-		context.get("Add").add(context.create("Sister node", 's')).setAction(
-				this, "addSisterNode");
-		context.get("Add").add(context.create("Child node", 'c')).setAction(
-				this, "addChildNode");
-
-		dock = new ToolDock(p);
-		dock.add(dock.create("Arrow","Arrow","dock/arrow.png")).setShortcut("a");
-		dock.add(dock.create("Scroll","Scroll","dock/scroll.png")).setShortcut("s");
-		dock.add(dock.create("Zoom","Zoom","dock/zoom.png")).setShortcut("z");
+		text = new PhyloTextField(p);
 	}
 
 	public void update()
@@ -145,16 +77,114 @@ public final class UIManager
 		PhyloWidget.trees.getRenderer().layout();
 	}
 
+	public Object curNode()
+	{
+		return curRange().node;
+	}
+	
+	public NodeRange curRange()
+	{
+		return context.curNodeRange;
+	}
+	
+	
+	/*
+	 * Node actions.
+	 */
+	
+	
+	public void editBranchLength()
+	{
+		//TODO.
+	}
+	
+	public void editName()
+	{
+		text.startEditing(curRange());
+	}
+
+	public void reroot()
+	{
+		NodeRange r = curRange();
+		r.render.getTree().reroot(curNode());
+	}
+
+	public void switchChildren()
+	{
+		NodeRange r = curRange();
+		r.render.getTree().flipChildren(curNode());
+		r.render.layout();
+	}
+
+	public void flipSubtree()
+	{
+		NodeRange r = curRange();
+		r.render.getTree().reverseAllChildren(curNode());
+		r.render.layout();
+	}
+
+	public void addSister()
+	{
+		NodeRange r = curRange();
+		RootedTree tree = r.render.getTree();
+		PhyloNode sis = (PhyloNode) tree.createAndAddVertex("");
+		tree.addSisterNode(curNode(), sis);
+	}
+
+	public void addChild()
+	{
+		NodeRange r = curRange();
+		RootedTree tree = r.render.getTree();
+		tree.addChildNode(curNode());
+	}
+
+	public void cutNode()
+	{
+		NodeRange r = curRange();
+		clipboard.cut(r.render.getTree(), r.node);
+	}
+
+	public void copyNode()
+	{
+		NodeRange r = curRange();
+		clipboard.copy(r.render.getTree(), r.node);
+	}
+
+	public void pasteNode()
+	{
+		NodeRange r = curRange();
+		clipboard.paste(r.render.getTree(), r.node);
+	}
+
+	public void clearClipboard()
+	{
+		clipboard.clearClipboard();
+	}
+
+	public void deleteNode()
+	{
+		NodeRange r = curRange();
+		RootedTree g = r.render.getTree();
+		g.deleteNode(curNode());
+	}
+
+	public void deleteSubtree()
+	{
+		NodeRange r = curRange();
+		RootedTree g = r.render.getTree();
+		g.deleteSubtree(curNode());
+	}
+
 	// *******************************************************
 	// ACTIONS
 	// *******************************************************
-
+	
 	public void zoomToFull()
 	{
 		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
 	}
 
-	public void mutate()
+	public void mutateOnce()
 	{
 		PhyloWidget.trees.mutateTree();
 	}
@@ -169,11 +199,15 @@ public final class UIManager
 		PhyloWidget.trees.startMutatingTree(100);
 	}
 
-	public void mutateStop()
+	public void stopMutating()
 	{
 		PhyloWidget.trees.stopMutatingTree();
 	}
 
+	/*
+	 * Tree Actions.
+	 */
+	
 	public void newTree()
 	{
 		PhyloWidget.trees.setTree(new PhyloTree("PhyloWidget"));
@@ -185,121 +219,43 @@ public final class UIManager
 								"(Bovine,(Hylobates:0.36079,(Pongo:0.33636,(G._Gorilla:0.17147, (P._paniscus:0.19268,H._sapiens:0.11927):0.08386):0.06124):0.15057), Rodent);"));
 	}
 
-	public void saveTree()
+	public void outputTree()
 	{
 		String s = TreeIO.createNewickString(PhyloWidget.trees.getTree());
 		System.out.println(s);
 	}
 
-	public void renameNode()
-	{
-		NodeRange r = context.curNodeRange;
-		text.startEditing(r);
-	}
-
-	public void rerootNode()
-	{
-		NodeRange r = context.curNodeRange;
-		r.render.getTree().reroot(r.node);
-	}
-
-	public void flipChildren()
-	{
-		NodeRange r = context.curNodeRange;
-		r.render.getTree().flipChildren(r.node);
-		r.render.layout();
-	}
-
-	public void reverseTree()
+	public void flipTree()
 	{
 		RootedTree t = PhyloWidget.trees.getTree();
 		t.reverseAllChildren(t.getRoot());
 	}
 
-	public void reverseChildren()
-	{
-		NodeRange r = context.curNodeRange;
-		r.render.getTree().reverseAllChildren(r.node);
-		r.render.layout();
-	}
-
-	public void addSisterNode()
-	{
-		NodeRange r = context.curNodeRange;
-		RootedTree tree = r.render.getTree();
-		PhyloNode sis = (PhyloNode) tree.createAndAddVertex("");
-		tree.addSisterNode(r.node, sis);
-	}
-
-	public void addChildNode()
-	{
-		NodeRange r = context.curNodeRange;
-		RootedTree tree = r.render.getTree();
-		tree.addChildNode(r.node);
-	}
-
-	public void cutNode()
-	{
-		NodeRange r = context.curNodeRange;
-		clipboard.cut(r.render.getTree(), r.node);
-	}
-
-	public void copyNode()
-	{
-		NodeRange r = context.curNodeRange;
-		clipboard.copy(r.render.getTree(), r.node);
-	}
-
-	public void pasteNode()
-	{
-		NodeRange r = context.curNodeRange;
-		clipboard.paste(r.render.getTree(), r.node);
-	}
-
-	public void clearClipboard()
-	{
-		clipboard.clearClipboard();
-	}
-
-	public void deleteNode()
-	{
-		NodeRange r = context.curNodeRange;
-		RootedTree g = r.render.getTree();
-		g.deleteNode(r.node);
-	}
-
-	public void deleteSubtree()
-	{
-		NodeRange r = context.curNodeRange;
-		RootedTree g = r.render.getTree();
-		g.deleteSubtree(r.node);
-	}
-
-	public void ladderizeTree()
+	public void sortTree()
 	{
 		RootedTree tree = getCurTree();
 		tree.ladderizeSubtree(tree.getRoot());
 		layout();
 	}
 
-	public void cullElbows()
+	public void removeElbows()
 	{
 		RootedTree tree = getCurTree();
 		tree.cullElbowsBelow(tree.getRoot());
 	}
 
 	
-	public void phylogramRender()
+	public void phyloView()
 	{
 		PhyloWidget.trees.phylogramRender();
 	}
 	
-	public void cladogramRender()
+	public void cladoView()
 	{
 		PhyloWidget.trees.cladogramRender();
 	}
 	
-	public void diagonalRender()
+	public void diagonalView()
 	{
 		PhyloWidget.trees.diagonalRender();
 	}

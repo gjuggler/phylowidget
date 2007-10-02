@@ -24,7 +24,7 @@ import processing.core.PFont;
 
 public class RadialMenuItem extends MenuItem
 {
-	public static final float SIZE_DECAY = .8f;
+	public static final float SIZE_DECAY = .9f;
 
 	String displayLabel;
 
@@ -50,12 +50,12 @@ public class RadialMenuItem extends MenuItem
 	{
 		super();
 	}
-	
-	public void setHint(char hint)
+
+	public void setHint(String hint)
 	{
-		this.hint = hint;
+		this.hint = hint.charAt(0);
 	}
-	
+
 	public void drawUnder()
 	{
 		Graphics2D g2 = menu.buff.g2;
@@ -197,7 +197,14 @@ public class RadialMenuItem extends MenuItem
 		 */
 		float tMid = (tHi + tLo) / 2;
 		float dTheta = tHi - tLo;
-		dTheta *= items.size() * .4f;
+		/*
+		 * Sub-item sizing: Ensure that sub-items' thetas are constrained within a certain
+		 * range.
+		 */
+		float minTheta = PApplet.QUARTER_PI / 2f * items.size();
+		float maxTheta = Math.min(PApplet.HALF_PI*1.5f,dTheta);
+		
+		dTheta = PApplet.constrain(dTheta, minTheta, maxTheta);
 		layoutSubItems(rLo, rHi, tMid - dTheta / 2, tMid + dTheta / 2);
 	}
 
@@ -347,7 +354,7 @@ public class RadialMenuItem extends MenuItem
 		}
 		return max;
 	}
-	
+
 	public boolean containsPoint(Point pt)
 	{
 		if (!isVisible())
@@ -364,10 +371,17 @@ public class RadialMenuItem extends MenuItem
 		}
 		return contained;
 	}
-
+	
 	protected void keyHintEvent(KeyEvent e)
 	{
 		if (!isVisible())
+			return;
+		for (int i = 0; i < items.size(); i++)
+		{
+			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+			rmi.keyHintEvent(e);
+		}
+		if (e.isConsumed())
 			return;
 		char c = (char) e.getKeyChar();
 		if (Character.toLowerCase(c) == Character.toLowerCase(hint))
@@ -375,11 +389,6 @@ public class RadialMenuItem extends MenuItem
 			this.performAction();
 			e.consume();
 			return;
-		}
-		for (int i = 0; i < items.size(); i++)
-		{
-			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-			rmi.keyHintEvent(e);
 		}
 	}
 
@@ -389,7 +398,7 @@ public class RadialMenuItem extends MenuItem
 		if (getState() == MenuItem.OVER)
 			e.consume();
 	}
-	
+
 	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
 		if (isVisible())

@@ -14,11 +14,20 @@ import processing.xml.XMLElement;
 public class MenuIO
 {
 	static PApplet app;
+	static Object actionObject;
 
-	public static ArrayList loadFromXML(PApplet p, String filename)
+	/**
+	 * 
+	 * @param p
+	 * @param filename
+	 * @param actionHolder (optional) the object which will contain the action methods for this menu set.
+	 * @return
+	 */
+	public static ArrayList loadFromXML(PApplet p, String filename, Object actionHolder)
 	{
 		ArrayList menus = new ArrayList();
 		app = p;
+		actionObject = actionHolder;
 		InputStream in = p.openStream(filename);
 		try
 		{
@@ -48,7 +57,7 @@ public class MenuIO
 			String type = el.getStringAttribute("type");
 			newItem = createMenu(type);
 			newItem.setName(itemName);
-		} else if (elName.equalsIgnoreCase("menuitem"))
+		} else if (elName.equalsIgnoreCase("item"))
 		{
 			if (parent != null)
 			{
@@ -62,7 +71,10 @@ public class MenuIO
 			while (attrs.hasMoreElements())
 			{
 				String attr = (String) attrs.nextElement();
-				// System.out.println(attr);
+				/*
+				 * Skip the "name" attribute -- we already used it to create
+				 * this menuitem.
+				 */
 				if (attr.equalsIgnoreCase("name"))
 					continue;
 				/*
@@ -83,7 +95,7 @@ public class MenuIO
 			}
 		}
 
-		return null;
+		return newItem;
 	}
 
 	static final String menuPackage = Menu.class.getPackage().getName();
@@ -91,11 +103,29 @@ public class MenuIO
 	private static Menu createMenu(String classType)
 	{
 		String fullClass = menuPackage + "." + classType;
+		Class c = null;
 		try
 		{
-			Class c = Class.forName(fullClass);
-			Constructor construct = c
-					.getConstructor(new Class[] { PApplet.class });
+			c = Class.forName(fullClass);
+		} catch (ClassNotFoundException e)
+		{
+			/*
+			 * If we couldn't find a class for this name, see if we don't have a
+			 * fully-qualified class name.
+			 */
+			try
+			{
+				c = Class.forName(classType);
+			} catch (ClassNotFoundException e1)
+			{
+				e1.printStackTrace();
+			}
+		}
+		
+		Constructor construct;
+		try
+		{
+			construct = c.getConstructor(new Class[] { PApplet.class });
 			Object newMenu = construct.newInstance(new Object[] { app });
 			return (Menu) newMenu;
 		} catch (Exception e)
@@ -118,30 +148,40 @@ public class MenuIO
 	 */
 	private static void setAttribute(MenuItem item, String attr, String value)
 	{
-		String upperFirst = "set" + attr.substring(0, 1).toUpperCase()
-				+ attr.substring(1, attr.length()).toLowerCase();
+		attr = attr.toLowerCase();
+		String upperFirst = "set" + upperFirst(attr);
 		try
 		{
+			Class[] argC = null;
+			Object[] args = null;
 			/*
 			 * Exception: setAction(Object,String)
 			 */
-			Class[] argC = null;
-			Object[] args = null;
 			if (attr.equalsIgnoreCase("action"))
 			{
-				argC = new Class[] {Object.class, String.class};
-				args = new Object[] {PhyloWidget.ui, value};
+				argC = new Class[] { Object.class, String.class };
+				args = new Object[] { actionObject, value };
+			} else if (attr.equalsIgnoreCase("tool"))
+			{
+				argC = new Class[] { String.class };
+				args = new Object[] { upperFirst(value) };
 			} else
 			{
-				argC = new Class[] {String.class};
-				args = new Object[] {value};
+				argC = new Class[] { String.class };
+				args = new Object[] { value };
 			}
-			Method m = item.getClass().getMethod(upperFirst,
-					argC);
-			m.invoke(item,args);
+			Method m = item.getClass().getMethod(upperFirst, argC);
+			m.invoke(item, args);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private static String upperFirst(String s)
+	{
+		String upper = s.substring(0, 1).toUpperCase();
+		String orig = s.substring(1, s.length());
+		return upper + orig;
 	}
 }

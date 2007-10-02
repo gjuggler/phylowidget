@@ -16,6 +16,9 @@ import processing.core.PConstants;
 
 public class RadialMenu extends Menu
 {
+	
+	public static final float FADE_DIST_MULTIPLIER = .5f;
+	
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
 	float innerRadius;
@@ -100,7 +103,7 @@ public class RadialMenu extends Menu
 	{
 		RadialMenuItem rmi = new RadialMenuItem();
 		rmi.setName(s);
-		rmi.setHint(c);
+		rmi.setHint(String.valueOf(c));
 		return rmi;
 	}
 
@@ -176,7 +179,7 @@ public class RadialMenu extends Menu
 		myRect.setRect(x, y, 0, 0);
 		getRect(myRect, buffRect);
 		float dist = myRect.distToPoint(pt);
-		float fadeDist = Math.max(myRect.width, myRect.height) / 3;
+		float fadeDist = Math.max(myRect.width, myRect.height) * FADE_DIST_MULTIPLIER;
 		fadeDist = Math.max(fadeDist, radius);
 		if (dist < fadeDist)
 		{

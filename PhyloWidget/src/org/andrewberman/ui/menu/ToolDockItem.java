@@ -41,7 +41,7 @@ public class ToolDockItem extends DockItem
 	public void setMenu(Menu menu)
 	{
 		super.setMenu(menu);
-		if (tool == null)
+		if (tool == null && toolString != null)
 		{
 			setTool(toolString);
 		}

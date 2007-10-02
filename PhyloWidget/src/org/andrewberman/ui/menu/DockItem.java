@@ -44,7 +44,7 @@ public class DockItem extends MenuItem implements TweenListener
 	public void setMenu(Menu menu)
 	{
 		super.setMenu(menu);
-		if (icon == null)
+		if (icon == null && iconFile != null)
 			setIcon(iconFile);
 	}
 	

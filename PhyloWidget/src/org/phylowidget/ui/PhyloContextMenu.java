@@ -34,7 +34,6 @@ public final class PhyloContextMenu extends RadialMenu
 		if (curNodeRange != null)
 		{
 			// Update our position based on the current menu node.
-//			curNodeRange.render.getNodePosition(curNodeRange.node,nodePt);
 			setPosition(curNodeRange.node.x,curNodeRange.node.y);
 		}
 		super.draw();
@@ -44,13 +43,11 @@ public final class PhyloContextMenu extends RadialMenu
 	{
 		super.show();
 		setNodeRange(r);
-//		hover.hide();
 	}
 	
 	public void hide()
 	{
 		super.hide();
-//		hover.show();
 		curNodeRange.node.hovered = false;
 	}
 	

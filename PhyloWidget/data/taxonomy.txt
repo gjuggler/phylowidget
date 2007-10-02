@@ -315,12 +315,10 @@ arrow cane
 uva grass
 wild cane
 Chromohalobacter
-Chromohalobacter Ventosa et al. 1989 emend. Arahal et al. 2001
 Chromobacterium marismortui Elazari-Volcani 1940
 Chromobacterium maris-mortui
 Chromobacterium marismortui
 Chromohalobacter marismortui
-Chromohalobacter marismortui (ex Elazari-Volcani 1940) Ventosa et al. 1989
 Desulfovibrio gabonensis
 Desulfovibrio gabonensis Tardy-Jacquenod et al. 1996
 Cloning vector pBluescript
@@ -555,7 +553,6 @@ Streptomyces bottropensis Waksman 1961
 Actinomyces diastatochromogenes Krainsky 1914
 Actinomyces diastatochromogenes
 Streptomyces diastatochromogenes
-Streptomyces diastatochromogenes (Krainsky 1914) Waksman and Henrici 1948
 Streptomyces eurythermus
 Streptomyces eurythermus Corbaz et al. 1957
 Streptomyces neyagawaensis
@@ -595,9 +592,6 @@ Sorex araneus
 Rubrobacter
 Rubrobacter Suzuki et al. 1989
 Arthrobacter radiotolerans
-Arthrobacter radiotolerans Yoshinaka et al. 1973 (Approved Lists 1980)
-Rubrobacter radiotolerans
-Rubrobacter radiotolerans (Yoshinaka et al. 1973) Suzuki et al. 1989
 Zygosaccharomyces mellis
 Zygosaccharomyces microellipsoides
 Zygosaccharomyces mrakii

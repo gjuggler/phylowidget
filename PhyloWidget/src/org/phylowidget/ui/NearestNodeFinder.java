@@ -12,8 +12,8 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.TreeManager;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 

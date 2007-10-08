@@ -21,6 +21,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * This object helps cache the sets of predecessor and successor neighbors
 	 * by listening to changes on this JGraphT object and updating as necessary.
 	 * If you expect to be changing your graph lots and not calling the
@@ -44,21 +49,26 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	public static final Integer FORWARD = new Integer(1);
 	public Comparator sorter = new EnclosedLeavesComparator(-1);
 
+	public static final String INTERNAL_NODE_LABEL = "";
+	
 	/*
 	 * ****** OPTIONS ******
 	 */
-	boolean useNeighborIndex;
-
-	public RootedTree(Object newRoot)
-	{
-		this();
-		/*
-		 * When we're given a label in the constructor, make a new root node out
-		 * of it.
-		 */
-		Object o = createAndAddVertex(newRoot);
-		setRoot(o);
-	}
+	/**
+	 * (only relevant for subclassers) If true, then this tree will keep an
+	 * indexed structure of the neighbors of each node's neighbors.
+	 */
+	protected boolean useNeighborIndex;
+	/**
+	 * If true, then this RootedTree will ensure that no two vertices in the
+	 * tree have the same string representation (i.e. the same String resulting
+	 * from calling toString()).
+	 */
+	protected boolean enforceUniqueLabels;
+	/**
+	 * Keys are the String label, values are the vertex Objects.
+	 */
+	private HashMap vertexLabels;
 
 	public RootedTree()
 	{
@@ -85,8 +95,98 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	protected void setOptions()
 	{
 		useNeighborIndex = true;
+		setEnforceUniqueLabels(true);
 	}
 
+	/**
+	 * Returns whether this RootedTree enforces unique node labels or not.
+	 */
+	public boolean getEnforceUniqueLabels()
+	{
+		return enforceUniqueLabels;
+	}
+
+	/**
+	 * 
+	 * Set this RootedTree to either enforce or not enforce unique node labels.
+	 * 
+	 * @param enforceUniqueLabels
+	 *            If true, then this RootedTree will ensure that node labels are
+	 *            unique.
+	 */
+	public void setEnforceUniqueLabels(boolean enforceUniqueLabels)
+	{
+		this.enforceUniqueLabels = enforceUniqueLabels;
+		if (enforceUniqueLabels)
+		{
+			vertexLabels = new HashMap();
+			ArrayList nodes = new ArrayList();
+			getAll(getRoot(), null, nodes);
+			for (int i = 0; i < nodes.size(); i++)
+			{
+				Object o = nodes.get(i);
+				vertexLabels.put(o.toString(), o);
+			}
+		}
+	}
+
+	/**
+	 * Checks the current Rooted Tree for existence of the label attached to the
+	 * vertex, and if it already exists in the tree, returns a new unique label.
+	 */
+	void makeLabelUnique(Labelable vertex)
+	{
+		if (!enforceUniqueLabels)
+			return;
+		if (vertex.getLabel().length() == 0)
+		{
+			vertex.setLabel("_1");
+		}
+		while (vertexLabels.containsKey(vertex.getLabel()))
+		{
+			String cur = vertex.getLabel();
+			/*
+			 * Take the current label and increment the suffixed number.
+			 */
+			int i = cur.lastIndexOf('_');
+			if (i != -1)
+			{
+				String num = cur.substring(i + 1);
+				int curNum = Integer.parseInt(num) + 1;
+				vertex.setLabel(cur.substring(0, i + 1) + curNum);
+			} else
+			{
+				vertex.setLabel(cur + "_" + 1);
+			}
+		}
+	}
+
+	public String getLabel(Labelable vertex)
+	{
+		return vertex.getLabel();
+	}
+	
+	public void setLabel(Labelable vertex, String label)
+	{
+		vertex.setLabel(label);
+		makeLabelUnique(vertex);
+	}
+	
+	public double getBranchLength(Object vertex)
+	{
+		Object parent = getParentOf(vertex);
+		return getEdgeWeight(getEdge(parent,vertex));
+	}
+	
+	public void setBranchLength(Object vertex, double weight)
+	{
+		Object parent = getParentOf(vertex);
+		if (parent == null)
+			return;
+		Object edge = getEdge(parent,vertex);
+		setEdgeWeight(edge, weight);
+	}
+	
 	/**
 	 * A "factory" method for creating node objects. Currently it just returns
 	 * the string given as input, but it could be extended by a subclass to
@@ -103,7 +203,33 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 */
 	public Object createVertex(Object o)
 	{
-		return new DefaultVertex(o);
+		DefaultVertex v = new DefaultVertex(o);
+		return v;
+	}
+
+	public boolean addVertex(Object o)
+	{
+		Labelable v;
+		if (!(o instanceof Labelable))
+		{
+			v = (Labelable) createVertex(o);
+		} else
+		{
+			v = (Labelable) o;
+		}
+		makeLabelUnique(v);
+		vertexLabels.put(v.getLabel(), v);
+		return super.addVertex(v);
+	}
+
+	public boolean removeVertex(Object o)
+	{
+		if (o instanceof Labelable)
+		{
+			Labelable v = (Labelable) o;
+			vertexLabels.remove(v.getLabel());
+		}
+		return super.removeVertex(o);
 	}
 
 	public Object createAndAddVertex(Object o)
@@ -235,6 +361,8 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 */
 	public synchronized void getAll(Object vertex, List leaves, List nodes)
 	{
+		if (vertex == null)
+			return;
 		Stack s = new Stack();
 		s.push(vertex);
 		while (!s.isEmpty())
@@ -363,11 +491,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * 
 	 * @param v
 	 */
-	public void addSisterNode(Object v,Object newSister)
+	public void addSisterNode(Object v, Object newSister)
 	{
 		Object curParent = getParentOf(v);
-		Object newParent = createAndAddVertex("");
-//		Object newSister = createAndAddVertex("");
+		Object newParent = createAndAddVertex(INTERNAL_NODE_LABEL);
+		// Object newSister = createAndAddVertex("");
 		if (v == getRoot())
 		{
 			setRoot(newParent);
@@ -377,17 +505,24 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 		addEdge(newParent, newSister);
 		addEdge(newParent, v);
-//		return newSister;
+		// return newSister;
 	}
 
+	/**
+	 * Adds an "anonymous" child node below the given vertex.
+	 * 
+	 * @param v
+	 */
 	public void addChildNode(Object v)
 	{
-		Object newNode = createAndAddVertex("[new child]");
+		Object newNode = createAndAddVertex("");
 		addEdge(v, newNode);
 	}
 
 	/**
-	 * Inserts vertex insertMe at the midpoint of the edge between a and b.
+	 * Inserts vertex insertMe at the midpoint of the edge between a and b. Note
+	 * that insertMe must have already been created using the
+	 * createVertex(Object) method of this RootedTree.
 	 * 
 	 * @param a
 	 *            the parent node (edge source)
@@ -395,7 +530,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 *            the child node (edge target)
 	 * @param insertMe
 	 */
-	public void insertNodeBetween(Object a, Object b, Object insertMe)
+	protected void insertNodeBetween(Object a, Object b, Object insertMe)
 	{
 		Object e = getEdge(a, b);
 		double weight = getEdgeWeight(e);
@@ -406,6 +541,14 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		removeEdge(a, b);
 	}
 
+	/**
+	 * Reroots this RootedTree using the midpoint method. The pivot edge is
+	 * taken to be the edge between the given vertex (called "pivot") and its
+	 * parent. See the inline comments for more information on the algorithm and
+	 * steps involved.
+	 * 
+	 * @param pivot
+	 */
 	public synchronized void reroot(Object pivot)
 	{
 		// System.out.println("Rerooting tree...");
@@ -518,6 +661,19 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 	}
 
+	/**
+	 * Flips the children directly below the given vertex.
+	 * 
+	 * A note on implementation: the RootedTree object contains a HashMap that
+	 * keeps track of a sort value for each node. This can be either FORWARD or
+	 * REVERSE, where FORWARD is the default sort. Note that this means we
+	 * cannot arbitrarily shuffle the children of a vertex if there are more
+	 * than 3. However, for most phylogenetic purposes, this is a rare
+	 * occurrence and is not worth the extra effort.
+	 * 
+	 * @param parent
+	 *            the vertex whose direct children to flip.
+	 */
 	public void flipChildren(Object parent)
 	{
 		// If we've already stored a sorting value, then toggle it.
@@ -536,7 +692,12 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 	}
 
-	public void reverseAllChildren(Object vertex)
+	/**
+	 * Reverses the entire subtree below a given vertex.
+	 * 
+	 * @param vertex
+	 */
+	public void reverseSubtree(Object vertex)
 	{
 		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
 		while (bfi.hasNext())
@@ -546,6 +707,13 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 	}
 
+	/**
+	 * Ladderizes the tree below the given vertex. Ladderizing is equivalent to
+	 * "re-sorting" the tree, where the vertices below a given vertex are sorted
+	 * by the their number of total enclosed leaf vertices.
+	 * 
+	 * @param vertex
+	 */
 	public void ladderizeSubtree(Object vertex)
 	{
 		BreadthFirstIterator bfi = new BreadthFirstIterator(this, vertex);
@@ -584,13 +752,27 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 	}
 
+	/**
+	 * @return the current root of this RootedTree.
+	 */
 	public Object getRoot()
 	{
 		return root;
 	}
 
+	/**
+	 * Sets the root vertex of this tree. Note that this DOES NOT reroot the
+	 * tree using the midpoint algorithm. For that operation, see
+	 * reroot(object).
+	 * 
+	 * @param newRoot
+	 */
 	public void setRoot(Object newRoot)
 	{
+		if (!containsVertex(newRoot))
+		{
+			addVertex(newRoot);
+		}
 		root = newRoot;
 	}
 

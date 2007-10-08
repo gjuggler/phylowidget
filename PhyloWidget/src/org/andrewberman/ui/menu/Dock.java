@@ -82,9 +82,8 @@ public class Dock extends Menu
 	public Dock(PApplet app)
 	{
 		super(app);
-		origWidth = 40;
 		inset = style.margin;
-		maxPossibleWidth = origWidth * (1 + bulgeAmount);
+		
 
 		drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 		mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
@@ -92,6 +91,7 @@ public class Dock extends Menu
 		rotation = new DockRotationHandler();
 		rotation.setRotation(LEFT);
 
+		setWidth(40);
 		layout();
 		show();
 	}
@@ -184,6 +184,7 @@ public class Dock extends Menu
 	public void setWidth(float newWidth)
 	{
 		origWidth = newWidth;
+		maxPossibleWidth = origWidth * (1 + bulgeAmount);
 		layout();
 	}
 
@@ -261,7 +262,7 @@ public class Dock extends Menu
 					menu.style.font, 24, false);
 			float tHeight = (ascent + descent);
 			float tWidth = UIUtils.getTextWidth(menu.canvas.g, menu.style.font,
-					24, i.label, false);
+					24, i.getLabel(), false);
 
 			float tX = 0;
 			float tY = 0;
@@ -299,7 +300,7 @@ public class Dock extends Menu
 			// menu.canvas.fill(0,alpha);
 			menu.canvas.textFont(FontLoader.instance.vera);
 			menu.canvas.textSize(24);
-			menu.canvas.text(i.label, tX, tY);
+			menu.canvas.text(i.getLabel(), tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);
 		}
 

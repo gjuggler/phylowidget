@@ -30,7 +30,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		GraphListener
 {
 
-	protected PApplet p;
+//	protected PApplet p;
 	protected PGraphics canvas;
 
 	/**
@@ -80,10 +80,11 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	protected boolean sorted = false;
 
 	protected boolean needsLayout;
+	
+	protected float lineThicknessMult = 0.2f;
 
-	public AbstractTreeRenderer(PApplet p)
+	public AbstractTreeRenderer()
 	{
-		this.p = p;
 		rect = new Rectangle2D.Float(0, 0, 0, 0);
 		font = FontLoader.instance.vera;
 		style = RenderStyleSet.defaultStyle();
@@ -183,7 +184,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	/**
 	 * Draws this renderer's view to the canvas.
 	 */
-	protected void draw()
+	protected synchronized void draw()
 	{
 		try
 		{
@@ -196,11 +197,13 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		/*
 		 * Draw the nodes that are in range.
 		 */
+		canvas.background(255);
+		
 		canvas.noStroke();
 		canvas.fill(0);
-		canvas.textFont(font);
+		canvas.textFont(FontLoader.instance.vera);
+		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 		canvas.textSize(textSize);
-		canvas.textAlign(PConstants.LEFT);
 		hint();
 		inRange.clear();
 		Rectangle2D.Float screenRect = new Rectangle2D.Float(0, 0,
@@ -211,7 +214,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		 * Set up some rendering constants so we don't recalculate within the
 		 * loop.
 		 */
-		baseStroke = getNodeRadius() / 10f;
+		baseStroke = getNodeRadius() * 2 * style.lineThicknessMultiplier;
 		int size = inRange.size();
 		for (int i = 0; i < size; i++)
 		{
@@ -284,7 +287,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 					return style.copyColor.getRGB();
 				case (PhyloNode.NONE):
 				default:
-					return style.regColor.getRGB();
+					return style.foregroundColor.getRGB();
 			}
 		}
 	}

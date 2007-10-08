@@ -1,6 +1,7 @@
-package org.phylowidget;
+package org.phylowidget.ui;
 
 import org.andrewberman.ui.camera.MovableCamera;
+import org.phylowidget.PhyloWidget;
 
 public class PhyloCamera extends MovableCamera
 {

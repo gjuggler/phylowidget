@@ -97,10 +97,9 @@ public class RectMover extends MovableCamera
 		
 		updateConvenienceVariables();
 		constrainToScreen();
-		
 		// Set our associated object's rectangle.
 		if (r != null)
-			r.setRect(-cx * getZ() - w/2, -cy * getZ() - h/2, w, h);
+			r.setRect(-cx * getZ() - w/2.0f, -cy * getZ() - h/2.0f, w, h);
 	}
 
 	private void updateConvenienceVariables()

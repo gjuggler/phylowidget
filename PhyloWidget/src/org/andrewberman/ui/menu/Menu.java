@@ -274,6 +274,12 @@ public abstract class Menu extends MenuItem implements UIObject, Positionable
 		// Subclassers should put changes in the boolean options here.
 	}
 
+	public void setFontsize(float newSize)
+	{
+		style.fontSize = newSize;
+		layout();
+	}
+	
 	protected void createBuffer(int w, int h)
 	{
 		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);

@@ -218,6 +218,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		tempPt.setLocation(r.node.x,r.node.y);
 		// float radius = r.render.getNodeRadius();
 		float radius = r.render.getNodeRadius() * wTween.position;
+		radius = Math.max(radius,5);
 		float x = pt.x - tempPt.x;
 		float y = pt.y - tempPt.y;
 		return (x * x + y * y < radius * radius);

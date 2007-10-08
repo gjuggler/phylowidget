@@ -29,7 +29,7 @@ public class FontLoader
 	{
 		this.p = p;
 		
-		vera = p.loadFont("data/BitstreamVeraSans-Roman-48.vlw");
+		vera = p.loadFont("BitstreamVeraSans-Roman-12.vlw");
 		InputStream in = p.openStream("vera.ttf");
 		try
 		{

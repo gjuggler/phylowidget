@@ -3,31 +3,29 @@ package org.phylowidget.ui;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
-import org.jgrapht.traverse.BreadthFirstIterator;
-import org.phylowidget.PhyloWidget;
-import org.phylowidget.net.JSObjectCrap;
-import org.phylowidget.net.TextBoxUpdater;
+import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
-import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeIO;
+import org.phylowidget.tree.Labelable;
 
 public class PhyloTree extends CachedRootedTree
 {
 	private static final long serialVersionUID = 1L;
 
-	public boolean loading;
-	private TextBoxUpdater updater = new TextBoxUpdater();
+	private JSTreeUpdater updater;
+	
+	private boolean synchronizedWithJS;
 
-	public PhyloTree(Object o)
+	public static PhyloTree createDefault()
 	{
-		super(o);
-		addGraphListener(new NewickUpdater());
+		PhyloTree t = new PhyloTree();
+		Object v = t.createAndAddVertex("PhyloWidget");
+		t.setRoot(v);
+		return t;
 	}
-
+	
 	public PhyloTree()
 	{
 		super();
-		addGraphListener(new NewickUpdater());
 	}
 
 	public Object createVertex(Object o)
@@ -41,22 +39,20 @@ public class PhyloTree extends CachedRootedTree
 		updateNewick();
 	}
 
-	public void reverseAllChildren(Object vertex)
+	public void reverseSubtree(Object vertex)
 	{
-		super.reverseAllChildren(vertex);
+		super.reverseSubtree(vertex);
 		updateNewick();
 	}
 
 	public void updateNewick()
 	{
-		if (loading)
-			return;
-		updater.triggerUpdate(this);
+		if (synchronizedWithJS)
+			updater.triggerUpdate(this);
 	}
 
 	class NewickUpdater implements GraphListener
 	{
-
 		public void edgeAdded(GraphEdgeChangeEvent e)
 		{
 			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
@@ -81,5 +77,20 @@ public class PhyloTree extends CachedRootedTree
 				updateNewick();
 		}
 
+	}
+
+	public boolean isSynchronizedWithJS()
+	{
+		return synchronizedWithJS;
+	}
+
+	public void setSynchronizedWithJS(boolean synchronizedWithJS)
+	{
+		this.synchronizedWithJS = synchronizedWithJS;
+		if (synchronizedWithJS && updater == null)
+		{
+			updater = new JSTreeUpdater();
+			addGraphListener(new NewickUpdater());
+		}
 	}
 }

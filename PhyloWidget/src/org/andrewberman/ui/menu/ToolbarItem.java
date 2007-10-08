@@ -72,7 +72,7 @@ public class ToolbarItem extends MenuItem
 			 */
 			g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize));
 			g2.setPaint(menu.style.textColor);
-			g2.drawString(label, x + textOffsetX, y + textOffsetY);
+			g2.drawString(getLabel(), x + textOffsetX, y + textOffsetY);
 		}
 		super.draw();
 	}

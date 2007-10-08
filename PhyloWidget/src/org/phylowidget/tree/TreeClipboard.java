@@ -1,19 +1,25 @@
-package org.phylowidget.ui;
+package org.phylowidget.tree;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.phylowidget.tree.RootedTree;
+import org.phylowidget.PhyloWidget;
+import org.phylowidget.net.JSClipUpdater;
+import org.phylowidget.ui.PhyloNode;
+import org.phylowidget.ui.PhyloTree;
 
 public class TreeClipboard
 {
 	public static TreeClipboard instance;
 
-	RootedTree clone;
-	RootedTree origin;
+	String newickString;
+	RootedTree origTree;
 	PhyloNode origVertex;
+	
+	JSClipUpdater updater;
 
 	private TreeClipboard()
 	{
+		updater = new JSClipUpdater();
 	}
 
 	public static TreeClipboard instance()
@@ -25,17 +31,17 @@ public class TreeClipboard
 
 	boolean isEmpty()
 	{
-		return (clone == null);
+		return (newickString.length() == 0);
 	}
 
-	void clearClipboard()
+	public void clearClipboard()
 	{
-		if (clone != null)
+		setClip("");
+		if (origTree != null)
 		{
-			setStateRecursive(origin, (PhyloNode) origin.getRoot(),
+			setStateRecursive(origTree, (PhyloNode) origTree.getRoot(),
 					PhyloNode.NONE);
-			clone = null;
-			origin = null;
+			origTree = null;
 		}
 	}
 
@@ -55,42 +61,52 @@ public class TreeClipboard
 
 	public synchronized void setClip(RootedTree tree, PhyloNode node)
 	{
-		clone = tree.cloneSubtree(node);
-		origin = tree;
+		RootedTree clone = tree.cloneSubtree(node);
+		setClip(TreeIO.createNewickString(clone));
+		origTree = tree;
 		origVertex = node;
 	}
 
+	public synchronized void setClip(String newick)
+	{
+		newickString = newick;
+		updater.triggerUpdate(newickString);
+	}
+	
 	public synchronized void paste(RootedTree destTree, PhyloNode destNode)
 	{
 		if (isEmpty())
 			throw new Error("Called TreeClipboard.paste() with empty clipboard");
+		
+		// Translate the newick string into a RooteTree.
+		PhyloTree tree = new PhyloTree();
+		TreeIO.parseNewickString(tree,newickString);
 		// Add the clone's vertices and edges to the destination tree.
-		Graphs.addGraph(destTree, clone);
+		Graphs.addGraph(destTree, tree);
 
 		// Insert the clone's root vertex into the midpoint above destNode.
 		if (destTree.getParentOf(destNode) == null)
 		{
-			destTree.addEdge(destNode, clone.getRoot());
+			destTree.addEdge(destNode, tree.getRoot());
 		} else
 		{
-			Object internalVertex = destTree.createAndAddVertex("[internal vertex]");
+			Object internalVertex = destTree.createAndAddVertex("");
 			destTree.insertNodeBetween(destTree.getParentOf(destNode), destNode,
 					internalVertex);
-			destTree.addEdge(internalVertex, clone.getRoot());
+			destTree.addEdge(internalVertex, tree.getRoot());
 		}
 
-		if (origin != null)
+		if (origTree != null)
 		{
 			if (origVertex.getState() == PhyloNode.CUT)
 			{
-				origin.deleteSubtree(origVertex);
-				origin.cullElbowsBelow(origin.getRoot());
-				setStateRecursive(origin, (PhyloNode) origin.getRoot(),
+				origTree.deleteSubtree(origVertex);
+				origTree.cullElbowsBelow(origTree.getRoot());
+				setStateRecursive(origTree, (PhyloNode) origTree.getRoot(),
 						PhyloNode.NONE);
 				origVertex = null;
 			}
 		}
-		clone = clone.cloneSubtree(clone.getRoot());
 	}
 
 	void setStateRecursive(RootedTree tree, PhyloNode base, int state)

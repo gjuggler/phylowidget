@@ -1,10 +1,14 @@
 package org.phylowidget;
 
 import java.awt.RenderingHints;
+import java.io.IOException;
+import java.util.Properties;
 
 import org.andrewberman.ui.FontLoader;
-import org.phylowidget.net.TreeUpdater;
+import org.phylowidget.net.PWClipUpdater;
+import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.tree.TreeIO;
+import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.UIManager;
 
@@ -19,6 +23,7 @@ public class PhyloWidget extends PApplet
 	public static PhyloWidget p;
 	public static TreeManager trees;
 	public static UIManager ui;
+	public static Properties props;
 	
 	public static int WIDTH = 400;
 	public static int HEIGHT = 400;
@@ -31,7 +36,8 @@ public class PhyloWidget extends PApplet
 	
 	public boolean stopCreatedThreads = false;
 	
-	private TreeUpdater updater;
+	private PWTreeUpdater updater;
+	private PWClipUpdater clipUpdater;
 	
 	public PhyloWidget()
 	{
@@ -46,31 +52,32 @@ public class PhyloWidget extends PApplet
 		
 		p = this;
 		
+		// Load the properties file.
+		props = new Properties();
+		try
+		{
+			props.load(this.openStream("phylowidget.properties"));
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		// Creates, manages, and renders trees.
 		trees = new TreeManager(this);
 		// Creates and manages UI elements.
 		ui = new UIManager(this);
-		updater = new TreeUpdater();
+		updater = new PWTreeUpdater();
+		clipUpdater = new PWClipUpdater();
 		
 		trees.setup();
 		ui.setup();
-		trees.setTree(new PhyloTree("PhyloWidget"));
+		trees.setTree(PhyloTree.createDefault());
+		
 	}
 
 	float theta = 0;
 	public void draw()
-	{
-		background(255);
-//		drawFrameRate();
-		translate(width/2,height/2);
-//		theta += 0.001;
-//		rotate(theta);
-		
-//		noFill();
-//		stroke(0);
-//		strokeWeight(1);
-//		ellipse(0,0,10,10);
-		
+	{	
 		trees.update();
 		ui.update();
 	}
@@ -111,10 +118,14 @@ public class PhyloWidget extends PApplet
 		}
 	}
 	
-	public void loadNewick(String s)
+	public void updateTree(String s)
 	{
-//		System.out.println(s);
 		updater.triggerUpdate(s);
+	}
+	
+	public void updateClip(String s)
+	{
+		clipUpdater.triggerUpdate(s);
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

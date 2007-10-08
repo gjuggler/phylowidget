@@ -67,7 +67,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 			 */
 			g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize));
 			g2.setPaint(menu.style.textColor);
-			g2.drawString(label, x + menu.style.padX, y + labelOffsetY);
+			g2.drawString(getLabel(), x + menu.style.padX, y + labelOffsetY);
 			/*
 			 * Draw the shortcut text if necessary.
 			 */
@@ -144,7 +144,7 @@ public class VerticalMenuItem extends MenuItem implements Sizable, Positionable
 		 */
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		labelWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, label,
+		labelWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, getLabel(),
 				true);
 		numElements++;
 		/*

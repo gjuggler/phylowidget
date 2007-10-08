@@ -4,7 +4,9 @@ public interface TreeActions
 {
 
 	public void newTree();
-	public void outputTree();
+	public void outputSmall();
+	public void outputBig();
+	public void outputPDF();
 	
 	public void flipTree();
 	public void sortTree();

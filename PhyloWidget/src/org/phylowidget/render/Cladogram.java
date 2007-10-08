@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.List;
 
+import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
@@ -13,6 +14,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphicsJava2D;
 
 public class Cladogram extends AbstractTreeRenderer
@@ -35,10 +37,6 @@ public class Cladogram extends AbstractTreeRenderer
 	protected float rowSize, colSize, numRows, numCols;
 
 	/**
-	 * Rotation of the text, in radians.
-	 */
-	public float textRotation = 0;// PApplet.PI/10f;
-	/**
 	 * Size of the text, as a multiplier relative to normal size.
 	 */
 	public float textSize = 1f;
@@ -56,8 +54,6 @@ public class Cladogram extends AbstractTreeRenderer
 
 	protected Point ptemp = new Point(0, 0);
 	protected Point ptemp2 = new Point(0, 0);
-
-	public static float dotMult = 0.5f;
 
 	/**
 	 * Transformations required to go from the stored position to the actual
@@ -77,9 +73,9 @@ public class Cladogram extends AbstractTreeRenderer
 	 */
 	public boolean useBranchLengths;
 
-	public Cladogram(PApplet p)
+	public Cladogram()
 	{
-		super(p);
+		super();
 	}
 
 	protected void setOptions()
@@ -115,8 +111,8 @@ public class Cladogram extends AbstractTreeRenderer
 			if (UIUtils.isJava2D(canvas))
 			{
 				// width = fm.stringWidth(n.getName());
-				width = (float) fm.getStringBounds(n.getLabel(),
-						p.getGraphics()).getWidth() / 100f;
+				Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
+				width = (float) fm.getStringBounds(n.getLabel(), g2).getWidth() / 100f;
 			} else
 			{
 				char[] chars = n.getLabel().toCharArray();
@@ -174,7 +170,6 @@ public class Cladogram extends AbstractTreeRenderer
 			{
 				float asdf = (float) tree.getHeightToRoot(n)
 						/ (float) tree.getMaxHeightToLeaf(tree.getRoot());
-				System.out.println(n.label + " " + asdf);
 				return asdf;
 			}
 		} else
@@ -183,6 +178,19 @@ public class Cladogram extends AbstractTreeRenderer
 					/ (float) tree.getMaxDepthToLeaf(tree.getRoot());
 			return md;
 		}
+	}
+
+	public float branchLengthPerPixel()
+	{
+		return (float) (tree.getMaxHeightToLeaf(tree.getRoot()) / scaleX);
+	}
+
+	public float branchLengthForXPos(Object vertex, float xPos)
+	{
+		PhyloNode parent = (PhyloNode) tree.getParentOf(vertex);
+		float parentX = parent.x;
+		float dx = xPos - parentX;
+		return dx * branchLengthPerPixel();
 	}
 
 	/**
@@ -233,7 +241,7 @@ public class Cladogram extends AbstractTreeRenderer
 		/*
 		 * Figure out the ideal row size.
 		 */
-		float overhang = gutterWidth * (float) Math.sin(textRotation);
+		float overhang = gutterWidth * (float) Math.sin(PApplet.radians(style.textRotation));
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
 		textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
@@ -247,7 +255,7 @@ public class Cladogram extends AbstractTreeRenderer
 		if (keepAspectRatio)
 			constrainAspectRatio();
 		textSize = Math.min(rowSize, textSize);
-		dotWidth = textSize * dotMult;
+		dotWidth = textSize * style.nodeSizeMultiplier;
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;
@@ -357,12 +365,13 @@ public class Cladogram extends AbstractTreeRenderer
 		}
 	}
 
-	protected void drawLabel(PhyloNode n)
+	protected synchronized void drawLabel(PhyloNode n)
 	{
-		p.pushMatrix();
-		p.translate(n.x + dotWidth, n.y);
-		p.rotate(textRotation);
-		if (PhyloWidget.usingNativeFonts)
+		 canvas.pushMatrix();
+		 canvas.translate(n.x + dotWidth, n.y);
+		 canvas.rotate(PApplet.radians(style.textRotation));
+		if (canvas.getClass() == PGraphicsJava2D.class
+				&& PhyloWidget.usingNativeFonts)
 		{
 			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 			Graphics2D g2 = pgj.g2;
@@ -370,8 +379,13 @@ public class Cladogram extends AbstractTreeRenderer
 			g2.setPaint(Color.black);
 			g2.drawString(n.getLabel(), 0, 0 + dFont);
 		} else
-			canvas.text(n.getLabel(), n.x + dotWidth, n.y + dFont);
-		p.popMatrix();
+		{
+			canvas.textFont(FontLoader.instance.vera);
+			canvas.textAlign(PConstants.LEFT, PConstants.BOTTOM);
+			canvas.textSize(textSize);
+			canvas.text(n.getLabel(), 0, 0+dFont);
+		}
+		 canvas.popMatrix();
 	}
 
 	public float getNodeRadius()

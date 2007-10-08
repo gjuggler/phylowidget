@@ -43,4 +43,9 @@ public final class Rectangle extends Rectangle2D.Float
 			my = y+height;
 		return (float) Math.sqrt( (px-mx)*(px-mx) + (py-my)*(py-my));
 	}
+	
+	public void translate(float x, float y)
+	{
+		setRect(this.x+x, this.y+y, width, height);
+	}
 }

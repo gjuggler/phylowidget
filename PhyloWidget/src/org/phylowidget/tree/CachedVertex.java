@@ -10,6 +10,7 @@ public class CachedVertex extends DefaultVertex
 	 */
 	private int depthToRoot;
 	private double heightToRoot;
+	private double branchLength;
 	
 	/**
 	 * Calculated during leaf-to-root recursion.
@@ -92,6 +93,16 @@ public class CachedVertex extends DefaultVertex
 	public void setMaxHeightToLeaf(double maxHeightToLeaf)
 	{
 		this.maxHeightToLeaf = maxHeightToLeaf;
+	}
+
+	public double getBranchLength()
+	{
+		return branchLength;
+	}
+
+	public void setBranchLength(double branchLength)
+	{
+		this.branchLength = branchLength;
 	}
 
 	

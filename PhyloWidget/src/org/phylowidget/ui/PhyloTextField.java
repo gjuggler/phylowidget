@@ -7,43 +7,54 @@ import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
-import org.phylowidget.net.HintListener;
-import org.phylowidget.net.UBioHintSource;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
 
-public class PhyloTextField extends TextField implements HintListener
+public class PhyloTextField extends TextField
 {
-	UBioHintSource hints;
 	NodeRange curRange;
-	String oldName;
+	String oldValue;
+
+	int editMode;
+	static final int LABEL = 0;
+	static final int BRANCH_LENGTH = 1;
 
 	public PhyloTextField(PApplet p)
 	{
 		super(p);
 		hidden = true;
 		alwaysAnchorLeft = true;
-		hints = new UBioHintSource(this);
 	}
 
 	public void draw()
 	{
-		if (curRange != null)
+		if (!hidden)
 		{
 			curRange.render.positionText(curRange.node, this);
 			super.draw();
 		}
 	}
 
-	protected void startEditing(NodeRange r)
+	protected void startEditing(NodeRange r, int editMode)
 	{
+		this.editMode = editMode;
 		curRange = r;
-		oldName = r.node.getLabel();
+		RootedTree t = r.render.getTree();
 		reset();
-		// hide();
-		text.replace(0, text.length(), r.node.getLabel());
-		// r.render.positionText(r.node, this);
+		String oldValue = null;
+		switch (editMode)
+		{
+			case (LABEL):
+				oldValue = t.getLabel(r.node);
+				break;
+			case (BRANCH_LENGTH):
+				oldValue = String.valueOf(t.getBranchLength(r.node));
+				break;
+		}
+		text.replace(0, text.length(), oldValue);
 		show();
 		FocusManager.instance.setModalFocus(this);
 	}
@@ -57,22 +68,42 @@ public class PhyloTextField extends TextField implements HintListener
 	void hideAndCommit()
 	{
 		hide();
-		curRange = null;
+		RootedTree t = curRange.render.getTree();
+		if (t instanceof PhyloTree)
+		{
+			PhyloTree pt = (PhyloTree) t;
+			pt.updateNewick();
+		}
 	}
 
 	void hideAndReject()
 	{
 		hide();
-		setName(oldName); // Set back to the old name.
-		curRange = null;
+		updateValue(oldValue); // Set back to the old name.
 	}
 
-	void setName(String s)
+	void updateValue(String s)
 	{
 		synchronized (this)
 		{
-			curRange.node.setLabel(s);
-			curRange.render.layout();
+			TreeRenderer r = curRange.render;
+			switch (editMode)
+			{
+				case (LABEL):
+					r.getTree().setLabel(curRange.node, s);
+					break;
+				case (BRANCH_LENGTH):
+					try {
+						double value = Double.parseDouble(s);
+						r.getTree().setBranchLength(curRange.node, value);
+					} catch (Exception e)
+					{
+						e.printStackTrace();
+						r.layout();
+						return;
+					}
+			}
+			r.layout();
 		}
 	}
 
@@ -82,10 +113,8 @@ public class PhyloTextField extends TextField implements HintListener
 
 		if (id == UIEvent.TEXT_VALUE)
 		{
-			setName(getText());
+			updateValue(getText());
 			this.layout();
-			// curRange.render.layout();
-			// hints.getHints(getText());
 		}
 	}
 
@@ -123,12 +152,6 @@ public class PhyloTextField extends TextField implements HintListener
 		{
 			hideAndCommit();
 		}
-	}
-
-	public void createHints(String[] s)
-	{
-		// TODO Auto-generated method stub
-
 	}
 
 }

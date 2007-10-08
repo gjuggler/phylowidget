@@ -11,10 +11,9 @@ import processing.core.PApplet;
 public class DiagonalCladogram extends Cladogram
 {
 
-	public DiagonalCladogram(PApplet p)
+	public DiagonalCladogram()
 	{
-		super(p);
-		DiagonalCladogram.dotMult = 0.25f;
+		super();
 	}
 
 	protected void setOptions()

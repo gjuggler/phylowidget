@@ -11,6 +11,7 @@ import java.util.Stack;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
+import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
 import sun.misc.Queue;
@@ -35,11 +36,6 @@ public class CachedRootedTree extends RootedTree
 		super();
 	}
 
-	public CachedRootedTree(Object o)
-	{
-		super(o);
-	}
-
 	public Object createVertex(Object o)
 	{
 		return new CachedVertex(o);
@@ -60,6 +56,18 @@ public class CachedRootedTree extends RootedTree
 		calculateStuff();
 	}
 
+	private List getChildrenOfNoSort(Object vertex)
+	{
+		List l;
+		if (useNeighborIndex)
+		{
+			l = new ArrayList();
+			l.addAll(neighbors.successorsOf(vertex));
+		} else
+			l = Graphs.successorListOf(this, vertex);
+		return l;
+	}
+	
 	private void calculateStuff()
 	{
 		/*
@@ -88,11 +96,12 @@ public class CachedRootedTree extends RootedTree
 				CachedVertex p = (CachedVertex) getParentOf(v);
 				v.setDepthToRoot(p.getDepthToRoot() + 1);
 				double ew = getEdgeWeight(getEdge(p, v));
+				v.setBranchLength(ew);
 				v.setHeightToRoot(p.getHeightToRoot() + ew);
 				v.setParent(p);
 			}
 			// Add this vertex's children to the stack.
-			s.addAll(getChildrenOf(v));
+			s.addAll(getChildrenOfNoSort(v));
 		}
 
 		/*
@@ -109,7 +118,7 @@ public class CachedRootedTree extends RootedTree
 		{
 			Object o = traversal.removeFirst();
 			dest.addLast(o);
-			List children = getChildrenOf(o);
+			List children = getChildrenOfNoSort(o);
 			for (int i=0; i < children.size(); i++)
 			{
 				traversal.addLast(children.get(i));
@@ -117,7 +126,6 @@ public class CachedRootedTree extends RootedTree
 		}
 		
 		// A placeholder object for our hashtable.
-		Integer dummyInt = new Integer(0);
 		while (!dest.isEmpty())
 		{
 			CachedVertex cv = (CachedVertex) dest.removeLast();
@@ -136,7 +144,7 @@ public class CachedRootedTree extends RootedTree
 				int numLeaves = 0;
 				int maxDepth = 0;
 				double maxHeight = 0;
-				List children = getChildrenOf(cv); // Gather our children.
+				List children = getChildrenOfNoSort(cv); // Gather our children.
 				for (int i = 0; i < children.size(); i++)
 				{
 					CachedVertex child = (CachedVertex) children.get(i);
@@ -207,7 +215,13 @@ public class CachedRootedTree extends RootedTree
 		modPlus();
 		super.fireVertexRemoved(arg0);
 	}
-
+	
+	public void setBranchLength(Object vertex, double weight)
+	{
+		modPlus();
+		super.setBranchLength(vertex, weight);
+	}
+	
 	private void modPlus()
 	{
 		modID++;

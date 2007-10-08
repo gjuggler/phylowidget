@@ -10,11 +10,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.jgrapht.traverse.DepthFirstIterator;
-import org.phylowidget.ui.PhyloNode;
 
 public class TreeIO
 {
@@ -68,7 +68,7 @@ public class TreeIO
 		 */
 		if (s.indexOf(';') == -1)
 			s = s + ';';
-		System.out.println("input: " + s);
+//		System.out.println("input: " + s);
 		/*
 		 * String buffer which we'll be parsing from.
 		 */
@@ -102,6 +102,7 @@ public class TreeIO
 		 */
 		boolean parsingNumber = false;
 		boolean innerNode = false;
+		boolean withinEscapedString = false;
 		/*
 		 * Pattern matcher.
 		 */
@@ -115,7 +116,18 @@ public class TreeIO
 		for (int i = 0; i < sb.length(); i++)
 		{
 			char c = sb.charAt(i);
-			// System.out.println(c);
+			if (withinEscapedString)
+			{
+				temp.append(c);
+				if (c == '\'')
+					withinEscapedString = false;
+				continue;
+			} else if (c == '\'')
+			{
+				temp.append(c);
+				withinEscapedString = true;
+				continue;
+			}
 			boolean isControl = controlChars.indexOf(c) != -1;
 			if (isControl)
 			{
@@ -151,15 +163,11 @@ public class TreeIO
 					{
 						// Do I need this stuff here? YUP.
 						curLabel = temp.toString();
-						curLabel = curLabel.replace('_', ' ');
 						curLabel = curLabel.trim();
 					}
-//					if (curLabel.length() == 0)
-//						curLabel = String.valueOf(nodeCount);// + " " +
-					// curLength;
 					// Create a vertex for the current label and length.
-					Object curNode = tree.createVertex(curLabel);
-					tree.addVertex(curNode);
+					curLabel = parseNexusLabel(curLabel);
+					Object curNode = tree.createAndAddVertex(curLabel);
 					if (c == ';')
 					{
 						// Can't forget to store which node is the root!
@@ -221,9 +229,11 @@ public class TreeIO
 		/*
 		 * Now, to recreate the newick file's node sorting. We previously
 		 * recorded the "first" child node for each parent node, which we'll now
-		 * use to determine whether we want to sort that node in forward or reverse.
+		 * use to determine whether we want to sort that node in forward or
+		 * reverse.
 		 */
-		BreadthFirstIterator dfi = new BreadthFirstIterator(tree,tree.getRoot());
+		BreadthFirstIterator dfi = new BreadthFirstIterator(tree, tree
+				.getRoot());
 		while (dfi.hasNext())
 		{
 			Object p = dfi.next();
@@ -250,7 +260,7 @@ public class TreeIO
 		/*
 		 * Ok, I was gonna make this one iterative instead of recursive (like
 		 * the parser), but it's just too annoying. So maybe on reeeeally large
-		 * trees, this will result in heap problems? Oh, well...
+		 * trees, this will result in heap problems. Oh, well...
 		 */
 		if (!tree.isLeaf(v))
 		{
@@ -264,8 +274,11 @@ public class TreeIO
 			}
 			sb.append(')');
 		}
-		if (v.toString().length() != 0)
-			sb.append(v.toString());
+		// Call this to make the vertex's label nicely formatted for Nexus
+		// output.
+		String s = getNexusCompliantLabel(tree, v);
+		if (s.length() != 0)
+			sb.append(s);
 		Object p = tree.getParentOf(v);
 		if (p != null)
 		{
@@ -275,4 +288,67 @@ public class TreeIO
 		}
 	}
 
+	static Pattern escaper = Pattern.compile("([^a-zA-Z0-9])");
+
+	public static String escapeRE(String str)
+	{
+		return escaper.matcher(str).replaceAll("\\\\$1");
+	}
+
+	static String naughtyChars = "()[]{}/\\,;:=*'\"`<>^-+~";
+	static String naughtyRegex = "[" + escapeRE(naughtyChars) + "]";
+	static Pattern naughtyPattern = Pattern.compile(naughtyRegex);
+
+	static Pattern quotePattern = Pattern.compile("'");
+
+	private static String getNexusCompliantLabel(RootedTree t, Object v)
+	{
+		String s = v.toString();
+		Matcher m = naughtyPattern.matcher(s);
+		if (m.find())
+		{
+			/*
+			 * If we have bad characters in the label, we:
+			 * 
+			 * 1. escape the whole thing in single quotes
+			 * 
+			 * 2. double-escape single quotes
+			 */
+			Matcher quoteM = quotePattern.matcher(s);
+			s = quoteM.replaceAll("''");
+			s = "'" + s + "'";
+		} else
+		{
+			// Otherwise, just turn whitespace into underbars.
+			s = s.replaceAll(" ", "_");
+		}
+		/*
+		 * Now, if the label is just a number (i.e. "_123") we assume that this
+		 * is an unlabeled node, and the number was just inserted by PhyloWidget
+		 * to keep the node labels unique.
+		 */
+		if (s.lastIndexOf('_') == 0)
+		{
+			s = "";
+		}
+		return s;
+	}
+
+	static Pattern singleQuotePattern = Pattern.compile("('')");
+
+	private static String parseNexusLabel(String label)
+	{
+		if (label.indexOf("'") == 0)
+		{
+			label = label.substring(1, label.length() - 1);
+			/*
+			 * Now, fix back all internal single quotes.
+			 */
+			Matcher m = singleQuotePattern.matcher(label);
+			label = m.replaceAll("'");
+		}
+		label = label.replace('_', ' ');
+		label = label.trim();
+		return label;
+	}
 }

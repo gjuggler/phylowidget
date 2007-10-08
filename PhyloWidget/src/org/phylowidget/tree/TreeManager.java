@@ -1,19 +1,17 @@
-package org.phylowidget;
+package org.phylowidget.tree;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.EventManager;
+import org.andrewberman.ui.Rectangle;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.Phylogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.tree.RandomTreeMutator;
-import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
@@ -23,7 +21,7 @@ public class TreeManager implements SettableRect
 	protected PApplet p;
 
 	public static RectMover camera;
-	protected static Rectangle2D.Float cameraRect;
+	protected static Rectangle cameraRect;
 	protected ArrayList trees;
 	protected ArrayList renderers;
 
@@ -39,7 +37,7 @@ public class TreeManager implements SettableRect
 	{
 		trees = new ArrayList();
 		renderers = new ArrayList();
-		cameraRect = new Rectangle2D.Float(0, 0, 0, 0);
+		cameraRect = new Rectangle(0, 0, 0, 0);
 		camera = new RectMover(p, this);
 		camera.fillScreen();
 		/*
@@ -110,33 +108,30 @@ public class TreeManager implements SettableRect
 
 	public void setTree(RootedTree tree)
 	{
-		// String s = "(,(,,),)";
-//		String s = "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);";
-		// String s = "((a,b),c);";
-		// String s = "(Alpha,Beta,Gamma,Delta,,Epsilon,,,);";
-		// String s = "(A:3.33,(C:3,B:2):5)";
-		// String s = "(B:6.0,(A:5.0,C:3.0,E:4.0)Ancestor1:5.0,D:11.0);";
-		// String s =
-		// "(((One:0.2,Two:0.3):0.3,(Three:0.5,Four:0.3):0.2):0.3,Five:0.7):0.0;";
 		trees.clear();
 		trees.add(tree);
 		getRenderer().setTree(tree);
+		if (tree instanceof PhyloTree)
+		{
+			PhyloTree pt = (PhyloTree) tree;
+			pt.setSynchronizedWithJS(true);
+		}
 		mutator = new RandomTreeMutator(tree);
 	}
 
 	public void diagonalRender()
 	{
-		setRenderer(new DiagonalCladogram(p));
+		setRenderer(new DiagonalCladogram());
 	}
 
 	public void cladogramRender()
 	{
-		setRenderer(new Cladogram(p));
+		setRenderer(new Cladogram());
 	}
 
 	public void phylogramRender()
 	{
-		setRenderer(new Phylogram(p));
+		setRenderer(new Phylogram());
 	}
 
 	void setRenderer(TreeRenderer r)
@@ -154,6 +149,11 @@ public class TreeManager implements SettableRect
 	{
 		if (cameraRect != null)
 			cameraRect.setFrame(x, y, w, h);
+		/*
+		 * The cameraRect is using coordinates where (0,0) is the center of the rectangle to be rendered.
+		 * We want this rectangle to be centered in our PApplet, so we translate the cameraRect accordingly.
+		 */
+		cameraRect.translate(p.width/2, p.height/2);
 	}
 
 	public static Rectangle2D.Float getVisibleRect()

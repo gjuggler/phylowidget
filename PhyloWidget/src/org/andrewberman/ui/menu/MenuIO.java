@@ -20,10 +20,13 @@ public class MenuIO
 	 * 
 	 * @param p
 	 * @param filename
-	 * @param actionHolder (optional) the object which will contain the action methods for this menu set.
+	 * @param actionHolder
+	 *            (optional) the object which will contain the action methods
+	 *            for this menu set.
 	 * @return
 	 */
-	public static ArrayList loadFromXML(PApplet p, String filename, Object actionHolder)
+	public static ArrayList loadFromXML(PApplet p, String filename,
+			Object actionHolder)
 	{
 		ArrayList menus = new ArrayList();
 		app = p;
@@ -49,7 +52,6 @@ public class MenuIO
 	public static MenuItem menuElement(MenuItem parent, XMLElement el)
 	{
 		MenuItem newItem = null;
-		System.out.println(el);
 		String elName = el.getName();
 		String itemName = el.getStringAttribute("name");
 		if (elName.equalsIgnoreCase("menu"))
@@ -57,32 +59,32 @@ public class MenuIO
 			String type = el.getStringAttribute("type");
 			newItem = createMenu(type);
 			newItem.setName(itemName);
-		} else if (elName.equalsIgnoreCase("item"))
+		} else if (parent != null)
 		{
-			if (parent != null)
-			{
-				newItem = parent.add(itemName);
-			} else
-			{
-				throw new RuntimeException(
-						"XML parsing error: Cannot have a parent-less 'menuitem' element!");
-			}
-			Enumeration attrs = el.enumerateAttributeNames();
-			while (attrs.hasMoreElements())
-			{
-				String attr = (String) attrs.nextElement();
-				/*
-				 * Skip the "name" attribute -- we already used it to create
-				 * this menuitem.
-				 */
-				if (attr.equalsIgnoreCase("name"))
-					continue;
-				/*
-				 * For all other attributes, call the set[Attribute] method of
-				 * the MenuItem.
-				 */
-				setAttribute(newItem, attr, el.getStringAttribute(attr));
-			}
+			newItem = parent.add(itemName);
+		} else
+		{
+			throw new RuntimeException(
+					"XML parsing error: Cannot have a parent-less 'menuitem' element!");
+		}
+		Enumeration attrs = el.enumerateAttributeNames();
+		while (attrs.hasMoreElements())
+		{
+			String attr = (String) attrs.nextElement();
+//			System.out.println(attr);
+			/*
+			 * Skip the "name" and "type" attributes -- we already used them to create this
+			 * menuitem.
+			 */
+			if (attr.equalsIgnoreCase("name"))
+				continue;
+			if (attr.equalsIgnoreCase("type"))
+				continue;
+			/*
+			 * For all other attributes, call the set[Attribute] method of the
+			 * MenuItem.
+			 */
+			setAttribute(newItem, attr, el.getStringAttribute(attr));
 		}
 
 		if (newItem != null)
@@ -121,7 +123,7 @@ public class MenuIO
 				e1.printStackTrace();
 			}
 		}
-		
+
 		Constructor construct;
 		try
 		{
@@ -170,8 +172,15 @@ public class MenuIO
 				argC = new Class[] { String.class };
 				args = new Object[] { value };
 			}
-			Method m = item.getClass().getMethod(upperFirst, argC);
-			m.invoke(item, args);
+			try {
+				Method m = item.getClass().getMethod(upperFirst, argC);
+				m.invoke(item, args);
+			} catch (Exception e)
+			{
+				Method m = item.getClass().getMethod(upperFirst, new Class[] { Float.TYPE});
+				m.invoke(item, new Object[] { new Float(value)});
+			}
+			
 		} catch (Exception e)
 		{
 			e.printStackTrace();

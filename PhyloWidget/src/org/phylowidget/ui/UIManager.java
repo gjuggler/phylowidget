@@ -14,10 +14,13 @@ import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.ToolDockItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.TreeManager;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.render.RenderOutput;
+import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeClipboard;
 import org.phylowidget.tree.TreeIO;
+import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 
@@ -34,7 +37,6 @@ public final class UIManager implements TreeActions, NodeActions
 
 	PhyloTextField text;
 	PhyloContextMenu context;
-	ToolDock dock;
 
 	public UIManager(PApplet p)
 	{
@@ -48,19 +50,25 @@ public final class UIManager implements TreeActions, NodeActions
 	public void setup()
 	{
 		nearest = new NearestNodeFinder(p);
-
-		ArrayList menus = MenuIO.loadFromXML(p,"menus.xml",this);
-		
-		for (int i=0; i < menus.size(); i++)
-		{
-			Menu menu = (Menu) menus.get(i);
-			if (menu.getClass() == PhyloContextMenu.class)
-			{
-				context = (PhyloContextMenu)menu;
-			}
-		}
-		
 		text = new PhyloTextField(p);
+		final UIManager uiman = this;
+//		javax.swing.SwingUtilities.invokeLater(new Runnable()
+//		{
+//			public void run()
+//			{
+				String menuFile = (String) PhyloWidget.props.get("menuFile");
+				ArrayList menus = MenuIO.loadFromXML(p, menuFile, uiman);
+
+				for (int i = 0; i < menus.size(); i++)
+				{
+					Menu menu = (Menu) menus.get(i);
+					if (menu.getClass() == PhyloContextMenu.class)
+					{
+						context = (PhyloContextMenu) menu;
+					}
+				}
+//			}
+//		});
 	}
 
 	public void update()
@@ -81,26 +89,24 @@ public final class UIManager implements TreeActions, NodeActions
 	{
 		return curRange().node;
 	}
-	
+
 	public NodeRange curRange()
 	{
 		return context.curNodeRange;
 	}
-	
-	
+
 	/*
 	 * Node actions.
 	 */
-	
-	
+
 	public void editBranchLength()
 	{
-		//TODO.
+		text.startEditing(curRange(), PhyloTextField.BRANCH_LENGTH);
 	}
-	
+
 	public void editName()
 	{
-		text.startEditing(curRange());
+		text.startEditing(curRange(), PhyloTextField.LABEL);
 	}
 
 	public void reroot()
@@ -119,7 +125,7 @@ public final class UIManager implements TreeActions, NodeActions
 	public void flipSubtree()
 	{
 		NodeRange r = curRange();
-		r.render.getTree().reverseAllChildren(curNode());
+		r.render.getTree().reverseSubtree(curNode());
 		r.render.layout();
 	}
 
@@ -178,7 +184,7 @@ public final class UIManager implements TreeActions, NodeActions
 	// *******************************************************
 	// ACTIONS
 	// *******************************************************
-	
+
 	public void zoomToFull()
 	{
 		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
@@ -207,28 +213,24 @@ public final class UIManager implements TreeActions, NodeActions
 	/*
 	 * Tree Actions.
 	 */
-	
+
 	public void newTree()
 	{
-		PhyloWidget.trees.setTree(new PhyloTree("PhyloWidget"));
+		PhyloWidget.trees.setTree(PhyloTree.createDefault());
 		PhyloWidget.trees
 				.setTree(TreeIO
 						.parseNewickString(
 								new PhyloTree(),
 								// "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);"));
 								"(Bovine,(Hylobates:0.36079,(Pongo:0.33636,(G._Gorilla:0.17147, (P._paniscus:0.19268,H._sapiens:0.11927):0.08386):0.06124):0.15057), Rodent);"));
-	}
-
-	public void outputTree()
-	{
-		String s = TreeIO.createNewickString(PhyloWidget.trees.getTree());
-		System.out.println(s);
+		layout();
 	}
 
 	public void flipTree()
 	{
-		RootedTree t = PhyloWidget.trees.getTree();
-		t.reverseAllChildren(t.getRoot());
+		RootedTree t = getCurTree();
+		t.reverseSubtree(t.getRoot());
+		layout();
 	}
 
 	public void sortTree()
@@ -242,21 +244,39 @@ public final class UIManager implements TreeActions, NodeActions
 	{
 		RootedTree tree = getCurTree();
 		tree.cullElbowsBelow(tree.getRoot());
+		layout();
 	}
 
-	
 	public void phyloView()
 	{
 		PhyloWidget.trees.phylogramRender();
 	}
-	
+
 	public void cladoView()
 	{
 		PhyloWidget.trees.cladogramRender();
 	}
-	
+
 	public void diagonalView()
 	{
 		PhyloWidget.trees.diagonalRender();
+	}
+
+	public void outputBig()
+	{
+		TreeRenderer tr = PhyloWidget.trees.getRenderer();
+		RenderOutput.save(p,getCurTree(),tr,1600,1200);
+	}
+
+	public void outputPDF()
+	{
+		TreeRenderer tr = PhyloWidget.trees.getRenderer();
+		RenderOutput.savePDF(p,getCurTree(),tr);
+	}
+
+	public void outputSmall()
+	{
+		TreeRenderer tr = PhyloWidget.trees.getRenderer();
+		RenderOutput.save(p,getCurTree(),tr,640,480);
 	}
 }

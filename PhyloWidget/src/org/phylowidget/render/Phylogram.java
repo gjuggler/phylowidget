@@ -14,9 +14,9 @@ import processing.core.PApplet;
 public class Phylogram extends Cladogram
 {
 
-	public Phylogram(PApplet p)
+	public Phylogram()
 	{
-		super(p);
+		super();
 	}
 
 	protected void setOptions()

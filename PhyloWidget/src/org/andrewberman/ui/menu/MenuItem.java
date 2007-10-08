@@ -57,7 +57,7 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	Action action;
 	Shortcut shortcut;
-	public String label;
+	private String label;
 	ArrayList items;
 	/**
 	 * The same items as above, but z-sorted for hit detection and drawing
@@ -706,5 +706,15 @@ public abstract class MenuItem implements Positionable, Sizable
 			return max;
 		}
 
+	}
+
+	public String getLabel()
+	{
+		return label;
+	}
+
+	public void setLabel(String label)
+	{
+		this.label = label;
 	}
 }

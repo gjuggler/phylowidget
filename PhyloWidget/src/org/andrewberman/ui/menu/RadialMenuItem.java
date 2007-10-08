@@ -265,9 +265,9 @@ public class RadialMenuItem extends MenuItem
 		// Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
 
 		if (items.size() > 0)
-			displayLabel = label.concat("...");
+			displayLabel = getLabel().concat("...");
 		else
-			displayLabel = label;
+			displayLabel = getLabel();
 
 		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize,
 				displayLabel, true);

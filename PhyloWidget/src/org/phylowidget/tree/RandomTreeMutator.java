@@ -29,12 +29,19 @@ public class RandomTreeMutator implements Runnable
 	public RandomTreeMutator(RootedTree t)
 	{
 		tree = t;
-		random = new Random();
+		random = new Random(System.currentTimeMillis());
 
 		// InputStream is = new FileInputStream("taxonomy.txt");
 		InputStream is = PhyloWidget.p.openStream("taxonomy.txt");
 		InputStreamReader read = new InputStreamReader(is);
 		in = new BufferedReader(read);
+		try
+		{
+			in.mark(10);
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void start()
@@ -127,25 +134,20 @@ public class RandomTreeMutator implements Runnable
 	public String getLocalNCBITaxon()
 	{
 		String taxonName = DEFAULT_NAME;
-
 		try
 		{
-			String s = in.readLine();
-			taxonName = s;
-		} catch (FileNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return taxonName;
-		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return taxonName;
+			in.reset();
+			int limit = random.nextInt(200);
+			for (int i=0; i < limit; i++)
+			{
+				taxonName = in.readLine();
+			}
+			if (taxonName == null)
+				taxonName = DEFAULT_NAME;
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			return taxonName;
+			return DEFAULT_NAME;
 		}
 		return taxonName;
 	}

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>${project.name}: Built with Processing</title>
+
+<script type-"text/javascript" src="phylowidget.js"></script>
+
+<style type="text/css">
+body {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  text-align: center;
+  font-family: verdana, geneva, arial, helvetica, sans-serif; 
+  font-size: 11px; 
+  background-color: white; 
+  text-decoration: none; 
+  font-weight: normal; 
+  line-height: normal;
+}
+ 
+A          { color: #3399CC; text-decoration: none; }
+A:link     { color: #3399CC; text-decoration: none; }
+A:visited  { color: #3399CC; text-decoration: none; }
+A:active   { color: #3399CC; text-decoration: underline; }
+A:hover    { color: #3399CC; text-decoration: underline; }
+
+#content {
+  width: 600px;
+  margin: auto;
+}
+
+#content div {
+  margin: auto;
+}
+
+#comments {
+}
+
+input {
+  font-size:12px;
+}
+
+fieldset {
+  background:#CEE3F6;
+  margin:auto;
+  text-align:center;
+  margin-top: 5px;
+}
+
+legend {
+  background:white;
+  border:1px solid black;
+  padding:5px;
+}
+
+#treeText,#clipText {
+  width:100%;
+}
+
+#textBox {
+		  padding: 0px;
+		  display: inline-block;
+		  width: 400px;
+	  	  height: 400px;
+//		  position: absolute;
+		  left: 0px;
+		  top: 0px;
+		}
+
+#textDiv {
+		  left:10px;
+		  top:10px;
+		  width:400px;
+		  height:400px;
+//		  position:relative;
+		}
+
+
+</style>
+
+<script type="text/javascript" src="include/resize.js"></script>		
+<script type="text/javascript" src="include/resize_applet.js"></script>	
+
+</head>
+
+<body>
+
+<div id="content">
+
+<fieldset>
+<legend>PhyloWidget</legend>
+<div id="sketch">
+<div id="textDiv">
+<div id="textBox">
+<!--[if !IE]> -->
+<object id="myApplet" name="myApplet" classid="java:${internal.launcherClass}.class" 
+            			type="application/x-java-applet"
+            			archive="${internal.allJars}"
+            			width="${applet.width}" height="${applet.height}"
+            			standby="Loading Processing software..." >
+            			
+					<param name="archive" value="${internal.allJars}" />
+				
+					<param name="mayscript" value="true" />
+
+					<param name="scriptable" value="true" />
+				
+					<param name="image" value="loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+					<param name="subapplet.classname" VALUE="${project.class}"> 
+					<param name="subapplet.displayname" VALUE="${project.name}"> 
+					<param name="test_string" value="outer" />
+<!--<![endif]-->
+<object id="myAppletInner" name="myApplet" classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" 
+						codebase="http://java.sun.com/update/1.4.2/jinstall-1_4_2_12-windows-i586.cab"
+						width="400" height="400"
+						standby="Loading Processing software..."  >
+						
+					<param name="code" value="BouncyBubbles" />
+					<param name="archive" value="BouncyBubbles.jar" />
+
+					
+					<param name="mayscript" value="true" />
+					<param name="scriptable" value="true" />
+					
+					<param name="image" value="loading.gif" />
+					<param name="boxmessage" value="Loading Processing software..." />
+					<param name="boxbgcolor" value="#FFFFFF" />
+					
+					<param name="test_string" value="inner" />
+					
+					<p>
+						<strong>
+							This browser does not have a Java Plug-in.
+							<br />
+
+							<a href="http://java.sun.com/products/plugin/downloads/index.html" title="Download Java Plug-in">
+								Get the latest Java Plug-in here.
+							</a>
+						</strong>
+					</p>
+				
+				</object>
+<!--[if !IE]> -->
+				</object>
+<!--<![endif]-->
+</div>
+<div id="handleRight" style="width:5px;height:400px;background:transparent url(images/drag-right.gif) no-repeat center right;position:absolute;left:400px;top:0px;cursor:e-resize;">
+	</div>
+<div id="handleCorner" style="width:5px;height:5px;background:transparent url(images/drag-bottomright.gif) no-repeat bottom right;position:absolute;left:400px;top:400px;cursor:se-resize;">
+	</div>
+<div id="handleBottom" style="width:400px;height:5px;background:transparent url(images/drag-bottom.gif) no-repeat bottom center;position:absolute;left:0px;top:400px;cursor:s-resize;">
+	</div>
+</div>
+<script type="text/javascript" src="include/resize_settings.js"></script>
+</div>	
+</fieldset>
+
+<form>
+<fieldset>
+<legend>Tree Text</legend>
+<input name="treeText" id="treeText" onFocus="selectOnce(this);" value="Paste your Newick-formatted tree here, then press 'Create Tree'.">
+</input>
+<br/>
+<input style="margin-top:5px;" type="button" name="sendButton" onClick="javascript:updateJavaTree();" value="Create Tree"/>
+</fieldset>
+<fieldset>
+<legend>Clipboard Text</legend>
+<input name="clipText" id="clipText" onChange="updateJavaClip();" value="Clipboard area. This text will synchronize with PhyloWidget's clipboard.">
+</input>
+</fieldset>
+</form>
+
+<div id="comments" style="clear:left;margin-top:10px;">
+${internal.appletComments}
+</div>
+
+<p>
+<a href="${internal.sourceZip}">Source code</a>
+</p>
+
+</div>
+
+</body>
+</html>

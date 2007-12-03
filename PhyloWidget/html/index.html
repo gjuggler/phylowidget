@@ -6,48 +6,60 @@
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 <title>${project.name}: Built with Processing</title>
 
+<script type="text/javascript" src="phylowidget.js"></script>
+
 <style type="text/css">
 body {
   margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  text-align: center;
   font-family: verdana, geneva, arial, helvetica, sans-serif; 
   font-size: 11px; 
-  background-color: #DDDDCC; 
+  background-color: white; 
   text-decoration: none; 
   font-weight: normal; 
-  line-height: normal; 
+  line-height: normal;
 }
  
-A          { color: #3399CC; }
-A:link     { color: #3399CC; text-decoration: underline; }
-A:visited  { color: #3399CC; text-decoration: underline; }
+A          { color: #3399CC; text-decoration: none; }
+A:link     { color: #3399CC; text-decoration: none; }
+A:visited  { color: #3399CC; text-decoration: none; }
 A:active   { color: #3399CC; text-decoration: underline; }
 A:hover    { color: #3399CC; text-decoration: underline; }
 
-#sketch {
-  margin-left: 50px;
-  margin-top: 50px;
-  width:200px;
-  height:200px;
+#content {
+  width: 600px;
+  margin: auto;
+}
+
+#content div {
+  margin: auto;
 }
 
 #comments {
-  margin-top: 15px;
-  margin-left: 50px;
-  width:600px;
 }
 
+input {
+  font-size:12px;
+}
+
+fieldset {
+  background:#CEE3F6;
+  margin:auto;
+  text-align:center;
+  margin-top: 5px;
+}
+
+legend {
+  background:white;
+  border:1px solid black;
+  padding:5px;
+}
+
+#treeText,#clipText {
+  width:100%;
+}
 </style>
-
-<script language="javascript">
-function resize() {
-  div = document.getElementById('sketch');
-  div.height = 500;
-  div.width = 500;
-  document.PApplet.size(500,500);
-}
-window.onResize = resize;
-window.onLoad = resize;
-</script>
 
 </head>
 
@@ -55,12 +67,14 @@ window.onLoad = resize;
 
 <div id="content">
 
+<fieldset>
+<legend>PhyloWidget</legend>
 <div id="sketch">
 <applet
- name="PApplet"
+ name="PhyloWidget"
  code="${internal.launcherClass}" 
  archive="${internal.allJars}"
- width="100%" height="100%"
+ width="${applet.width}" height="${applet.height}"
  mayscript="true">
 <param name="image" value="loading.gif">
 <param name="boxmessage" value="Loading Processing software...">
@@ -75,11 +89,27 @@ window.onLoad = resize;
      or an anti-Microsoft diatribe. -->
 To view this content, you need to install Java from <A HREF="http://java.com">java.com</A>
 </applet>
-</div>
 
-<div id="comments">
+</div>
+</fieldset>
+
+<form>
+<fieldset>
+<legend>Tree Text</legend>
+<input name="treeText" id="treeText" onFocus="selectOnce(this);" value="Paste your Newick-formatted tree here, then press 'Create Tree'.">
+</input>
+<br/>
+<input style="margin-top:5px;" type="button" name="sendButton" onClick="javascript:updateJavaTree();" value="Create Tree"/>
+</fieldset>
+<fieldset>
+<legend>Clipboard Text</legend>
+<input name="clipText" id="clipText" onChange="updateJavaClip();" value="Clipboard area. This text will synchronize with PhyloWidget's clipboard.">
+</input>
+</fieldset>
+</form>
+
+<div id="comments" style="clear:left;margin-top:10px;">
 ${internal.appletComments}
- width="${applet.width}" height="${applet.height}"
 </div>
 
 <p>

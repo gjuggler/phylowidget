@@ -1,0 +1,11 @@
+<menu name="toolbar" type="Toolbar" fontsize="12">
+		<item name="File">
+			<item name="New Tree" action="newTree" shortcut="control-n"/>
+			<item name="Output Tree"/>
+		</item>
+		<item name="View">
+			<item name="Zoom to Full" action="zoomToFull" shortcut="control-1"/>
+		</item>
+		<item name="Tree">
+		</item>
+	</menu>

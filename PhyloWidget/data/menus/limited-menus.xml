@@ -1,0 +1,22 @@
+<menuset name="PhyloWidget Menus">
+	<menu name="toolbar" type="Toolbar" fontsize="12">
+		<item name="File">
+			<item name="Output Tree">
+				<item name="Large (1600x1200)" action="outputBig"/>
+				<item name="Small (640 x 480)" action="outputSmall"/>
+				<item name="PDF (Pub. quality)" action="outputPDF"/>
+			</item>
+		</item>
+		<item name="View">
+			<item name="Phylogram" action="phyloView"/>
+			<item name="Cladogram" action="cladoView"/>
+			<item name="Diagonal" action="diagonalView"/>
+			<item name="Zoom to Full" action="zoomToFull" shortcut="control-1"/>
+		</item>
+	</menu>
+
+	<menu name="dock" type="ToolDock" width="30">
+		<item name="Scroll" tool="scroll" shortcut="s" icon="dock\scroll.png"/>
+		<item name="Zoom" tool="zoom" shortcut="z" icon="dock\zoom.png"/>
+	</menu>
+</menuset>

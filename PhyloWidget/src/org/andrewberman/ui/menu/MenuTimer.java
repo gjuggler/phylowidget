@@ -18,7 +18,7 @@ public final class MenuTimer extends Thread
 	MenuItem item;
 	MenuItem parent;
 	MenuItem lastSet;
-	static final int delay = 150;
+	static final int delay = 100;
 	boolean unset;
 	boolean startDelay;
 
@@ -62,14 +62,15 @@ public final class MenuTimer extends Thread
 						}
 					else if (unset)
 					{
-						item.hideAllChildren();
+						item.close();
 						item = null;
 						parent = null;
 					} else
 					{
-						parent.setOpenItem(item);
+//						parent.closeMyChildren();
+						item.menuTriggerLogic();
 						parent = null;
-						item = null;
+//						item = null;
 					}
 				}
 			}
@@ -79,8 +80,6 @@ public final class MenuTimer extends Thread
 
 	public void setMenuItem(MenuItem setMe)
 	{
-		if (setMe == null)
-			return;
 		if (setMe == lastSet)
 			return;
 		// if (item == setMe) return;

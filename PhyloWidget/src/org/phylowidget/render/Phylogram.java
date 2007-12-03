@@ -23,7 +23,7 @@ public class Phylogram extends Cladogram
 	{
 		super.setOptions();
 		useBranchLengths = true;
-		keepAspectRatio = true;
+		keepAspectRatio = false;
 	}
 	
 }

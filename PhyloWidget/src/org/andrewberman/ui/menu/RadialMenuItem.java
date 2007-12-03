@@ -17,7 +17,6 @@ import java.util.Collections;
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.menu.MenuItem.ZDepthComparator;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -59,35 +58,13 @@ public class RadialMenuItem extends MenuItem
 	public void drawUnder()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		// float r = radius;
-		roundedRect.setRoundRect(rectX, rectY, rectW, rectH, rectH / 3,
-				rectH / 3);
-		if (getState() == DISABLED)
-			g2.setPaint(menu.style.stateColors[DISABLED]);
-		else
-			g2.setPaint(Color.white);
-		g2.fill(roundedRect);
-		g2.setPaint(Color.black);
-		g2.setStroke(menu.style.stroke);
-		g2.draw(roundedRect);
+		MenuUtils.drawWhiteTextRect(this, rectX, rectY, rectW, rectH);
 		super.draw();
-	}
-
-	protected void show()
-	{
-		super.show();
-	}
-
-	protected void hide()
-	{
-		super.hide();
 	}
 
 	public void draw()
 	{
 		super.draw();
-		if (!isVisible())
-			return;
 		if (isShowingLabel())
 		{
 			drawUnder();
@@ -99,7 +76,7 @@ public class RadialMenuItem extends MenuItem
 
 	boolean isShowingLabel()
 	{
-		if (!isShowingChildren())
+		if (!isOpen())
 		{
 			MenuItem par = parent;
 			int distToMenu = 1;
@@ -125,7 +102,7 @@ public class RadialMenuItem extends MenuItem
 		Graphics2D g2 = menu.buff.g2;
 		// this.isAncestorOf(menu.currentlyHovered);
 		// if (this.isAncestorOf(menu.currentlyHovered))
-		if (isShowingChildren())
+		if (isOpen())
 			g2.setPaint(menu.style.getGradient(Menu.OVER, x - rHi, y - rHi, x
 					+ rHi, y + rHi));
 		else
@@ -139,7 +116,7 @@ public class RadialMenuItem extends MenuItem
 		/*
 		 * Draw the sub-items triangle, if necessary
 		 */
-		if (items.size() > 0 && !isShowingChildren())
+		if (items.size() > 0 && !isOpen())
 		{
 			float theta = (tLo + tHi) / 2;
 			float scale = (rHi - rLo) / 2;
@@ -198,12 +175,12 @@ public class RadialMenuItem extends MenuItem
 		float tMid = (tHi + tLo) / 2;
 		float dTheta = tHi - tLo;
 		/*
-		 * Sub-item sizing: Ensure that sub-items' thetas are constrained within a certain
-		 * range.
+		 * Sub-item sizing: Ensure that sub-items' thetas are constrained within
+		 * a certain range.
 		 */
 		float minTheta = PApplet.QUARTER_PI / 2f * items.size();
-		float maxTheta = Math.min(PApplet.HALF_PI*1.5f,dTheta);
-		
+		float maxTheta = Math.min(PApplet.HALF_PI * 1.5f, dTheta);
+
 		dTheta = PApplet.constrain(dTheta, minTheta, maxTheta);
 		layoutSubItems(rLo, rHi, tMid - dTheta / 2, tMid + dTheta / 2);
 	}
@@ -265,9 +242,9 @@ public class RadialMenuItem extends MenuItem
 		// Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
 
 		if (items.size() > 0)
-			displayLabel = getLabel().concat("...");
+			displayLabel = getName().concat("...");
 		else
-			displayLabel = getLabel();
+			displayLabel = getName();
 
 		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize,
 				displayLabel, true);
@@ -342,7 +319,7 @@ public class RadialMenuItem extends MenuItem
 
 	float getMaxRadius()
 	{
-		if (!isVisible())
+		if (!isOpen())
 			return 0;
 		float max = this.rHi;
 		for (int i = 0; i < items.size(); i++)
@@ -357,8 +334,8 @@ public class RadialMenuItem extends MenuItem
 
 	public boolean containsPoint(Point pt)
 	{
-		if (!isVisible())
-			return false;
+//		if (!isOpen())
+//			return false;
 		boolean contained = false;
 		if (wedge.contains(pt.x, pt.y))
 			contained = true;
@@ -371,15 +348,16 @@ public class RadialMenuItem extends MenuItem
 		}
 		return contained;
 	}
-	
+
 	protected void keyHintEvent(KeyEvent e)
 	{
-		if (!isVisible())
-			return;
-		for (int i = 0; i < items.size(); i++)
+		if (isOpen())
 		{
-			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-			rmi.keyHintEvent(e);
+			for (int i = 0; i < items.size(); i++)
+			{
+				RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+				rmi.keyHintEvent(e);
+			}
 		}
 		if (e.isConsumed())
 			return;
@@ -401,13 +379,13 @@ public class RadialMenuItem extends MenuItem
 
 	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
-		if (isVisible())
-		{
-			super.getRect(rect, buff);
-			buff.setRect(wedge.getBounds2D());
-			Rectangle2D.union(rect, buff, rect);
-			buff.setRect(rectX, rectY, rectW, rectH);
-			Rectangle2D.union(rect, buff, rect);
-		}
+		// if (isOpen())
+		// {
+		super.getRect(rect, buff);
+		buff.setRect(wedge.getBounds2D());
+		Rectangle2D.union(rect, buff, rect);
+		buff.setRect(rectX, rectY, rectW, rectH);
+		Rectangle2D.union(rect, buff, rect);
+		// }
 	}
 }

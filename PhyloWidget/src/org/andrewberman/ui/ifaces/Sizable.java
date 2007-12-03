@@ -8,6 +8,8 @@ package org.andrewberman.ui.ifaces;
 public interface Sizable
 {
 	public void setSize(float w, float h);
+	public void setWidth(float w);
+	public void setHeight(float h);
 	public float getWidth();
 	public float getHeight();
 }

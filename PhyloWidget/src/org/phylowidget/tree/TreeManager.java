@@ -12,6 +12,7 @@ import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.Phylogram;
 import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.ui.PhyloNode;
 import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
@@ -26,8 +27,9 @@ public class TreeManager implements SettableRect
 	protected ArrayList renderers;
 
 	// public Navigator nav;
-	public RandomTreeMutator mutator;
-
+	private RandomTreeMutator mutator;
+	private boolean mutateMe;
+	
 	public TreeManager(PApplet p)
 	{
 		this.p = p;
@@ -58,6 +60,13 @@ public class TreeManager implements SettableRect
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
 					cameraRect.height);
 		}
+		
+		if (mutateMe)
+		{
+			mutator.randomlyMutateTree();
+			mutateMe = false;
+		}
+		
 	}
 
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect)
@@ -78,7 +87,8 @@ public class TreeManager implements SettableRect
 
 	public void mutateTree()
 	{
-		mutator.randomlyMutateTree();
+//		mutator.randomlyMutateTree();
+		mutateMe = true;
 	}
 
 	public void startMutatingTree(int delay)
@@ -106,6 +116,26 @@ public class TreeManager implements SettableRect
 		return (TreeRenderer) renderers.get(0);
 	}
 
+	public void fforward(boolean upX, boolean upY)
+	{
+		update();
+		for (int i=0; i < trees.size(); i++)
+		{
+			RootedTree tree = (RootedTree) trees.get(i);
+			ArrayList nodes = new ArrayList();
+			tree.getAll(tree.getRoot(), null, nodes);
+			for (int j=0; j < nodes.size(); j++)
+			{
+				PhyloNode n = (PhyloNode) nodes.get(j);
+				if (upX)
+					n.xTween.fforward();
+				if (upY)
+					n.yTween.fforward();
+			}	
+		}
+		
+	}
+	
 	public void setTree(RootedTree tree)
 	{
 		trees.clear();
@@ -116,6 +146,7 @@ public class TreeManager implements SettableRect
 			PhyloTree pt = (PhyloTree) tree;
 			pt.setSynchronizedWithJS(true);
 		}
+		fforward(false,true);
 		mutator = new RandomTreeMutator(tree);
 	}
 

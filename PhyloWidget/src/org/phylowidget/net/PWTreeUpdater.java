@@ -1,5 +1,6 @@
 package org.phylowidget.net;
 
+import org.andrewberman.unsorted.DelayedAction;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.PhyloTree;
@@ -25,6 +26,7 @@ public class PWTreeUpdater extends DelayedAction
 	public void run()
 	{
 		PhyloTree t = new PhyloTree();
+		TreeIO.setOldTree(PhyloWidget.trees.getTree());
 		PhyloWidget.trees.setTree(TreeIO.parseNewickString(t, parseMe));
 	}
 }

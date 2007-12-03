@@ -15,11 +15,12 @@ import java.util.regex.Pattern;
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
+import org.phylowidget.PhyloWidget;
 
 public class TreeIO
 {
 
-	public static RootedTree parseFile(File f)
+	public static RootedTree parseFile(RootedTree t, File f)
 	{
 		try
 		{
@@ -28,7 +29,7 @@ public class TreeIO
 			InputStream is = url.openStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			return parseReader(br);
+			return parseReader(t,br);
 		} catch (Exception e)
 		{
 			// TODO Auto-generated catch block
@@ -37,7 +38,7 @@ public class TreeIO
 		}
 	}
 
-	public static RootedTree parseReader(BufferedReader br)
+	public static RootedTree parseReader(RootedTree t, BufferedReader br)
 	{
 		String line;
 		StringBuffer buff = new StringBuffer();
@@ -52,12 +53,7 @@ public class TreeIO
 			e.printStackTrace();
 			return null;
 		}
-		return parseNewickString(buff.toString());
-	}
-
-	static RootedTree parseNewickString(String s)
-	{
-		return parseNewickString(new RootedTree(), s);
+		return parseNewickString(t,buff.toString());
 	}
 
 	public static RootedTree parseNewickString(RootedTree tree, String s)
@@ -68,7 +64,7 @@ public class TreeIO
 		 */
 		if (s.indexOf(';') == -1)
 			s = s + ';';
-//		System.out.println("input: " + s);
+		// System.out.println("input: " + s);
 		/*
 		 * String buffer which we'll be parsing from.
 		 */
@@ -79,7 +75,7 @@ public class TreeIO
 		int[] countForDepth = new int[1];
 		/*
 		 * A hashtable recording the first (i.e. first in order) child for each
-		 * node. This will be used after parsing is complete to reconstitute the
+		 * node. This will be used after parsing is complete to recreate the
 		 * correct sorting order of nodes and leaves. key = parent node value =
 		 * first child node
 		 */
@@ -167,7 +163,8 @@ public class TreeIO
 					}
 					// Create a vertex for the current label and length.
 					curLabel = parseNexusLabel(curLabel);
-					Object curNode = tree.createAndAddVertex(curLabel);
+					Object curNode = newNode(tree,curLabel);
+//					Object curNode = tree.createAndAddVertex(curLabel);
 					if (c == ';')
 					{
 						// Can't forget to store which node is the root!
@@ -245,9 +242,34 @@ public class TreeIO
 					tree.sorting.put(p, RootedTree.FORWARD);
 			}
 		}
+		/*
+		 * If the oldTree was set, unset it.
+		 */
+		oldTree = null;
 		return tree;
 	}
 
+	static RootedTree oldTree;
+	public static void setOldTree(RootedTree t)
+	{
+		oldTree = t;
+	}
+	
+	static Object newNode(RootedTree t, String s)
+	{
+		Object newNode = null;
+		if (oldTree != null)
+		{
+			newNode = oldTree.getVertexForLabel(s);
+		}
+		if (newNode == null)
+		{
+			newNode = t.createVertex(s);
+		}
+		t.addVertex(newNode);
+		return newNode;
+	}
+	
 	public static String createNewickString(RootedTree tree)
 	{
 		StringBuffer sb = new StringBuffer();
@@ -323,13 +345,19 @@ public class TreeIO
 			s = s.replaceAll(" ", "_");
 		}
 		/*
-		 * Now, if the label is just a number (i.e. "_123") we assume that this
+		 * Now, if the label is just a number (i.e. "#123") we assume that this
 		 * is an unlabeled node, and the number was just inserted by PhyloWidget
 		 * to keep the node labels unique.
 		 */
-		if (s.lastIndexOf('_') == 0)
+		if (!UniqueLabeler.isLabelSignificant(s) && !t.isLeaf(v))
 		{
-			s = "";
+			String prop = PhyloWidget.props.getProperty("outputAllInnerNodes",
+					"false");
+			boolean pr = Boolean.parseBoolean(prop);
+			if (!pr)
+			{
+				s = "";
+			}
 		}
 		return s;
 	}

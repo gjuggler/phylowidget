@@ -49,7 +49,7 @@ public class Dock extends Menu
 	/**
 	 * The amount by which the icons "bulge" when approached.
 	 */
-	public float bulgeAmount = .75f;
+	public float bulgeAmount = .5f;
 	/**
 	 * The "rolloff" factor for the icons' bulge. Play around with it to find a
 	 * value that you like.
@@ -75,39 +75,37 @@ public class Dock extends Menu
 	 * If false, no triangles. Simple!
 	 */
 	public boolean triangleOnSelected;
-	
+
 	public boolean consumeWhenActive;
-	
 
 	public Dock(PApplet app)
 	{
 		super(app);
 		inset = style.margin;
-		
 
 		drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 		mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 		mousePt = new Point(0, 0);
 		rotation = new DockRotationHandler();
-		rotation.setRotation(LEFT);
+		rotation.setRotation(BOTTOM);
 
 		setWidth(40);
 		layout();
-		show();
+		open();
 	}
 
 	protected void setOptions()
 	{
 		super.setOptions();
-		
+
 		useCameraCoordinates = false;
 		clickAwayBehavior = CLICKAWAY_COLLAPSES;
 		hoverNavigable = false;
 		clickToggles = true;
 		useHandCursor = true;
 		actionOnMouseDown = true;
-		hideOnAction = true;
-		usesJava2D = false;
+		closeOnAction = true;
+		usesJava2D = true;
 		autoDim = true;
 
 		autoCenter = true;
@@ -159,9 +157,9 @@ public class Dock extends Menu
 		curWidth = maxWidth;
 	}
 
-	public void hide()
+	public void close()
 	{
-		// My docks never hide. Subclasses may want to change this, though.
+		// Do nothing.
 	}
 
 	float mousePos()
@@ -194,10 +192,16 @@ public class Dock extends Menu
 		layout();
 	}
 
-	public void setRotation(int rot)
+	public void setRotation(String rot)
 	{
-		rotation.setRotation(rot);
-		layout();
+		if (rot.equalsIgnoreCase("left"))
+			rotation.setRotation(LEFT);
+		else if (rot.equalsIgnoreCase("right"))
+			rotation.setRotation(RIGHT);
+		if (rot.equalsIgnoreCase("top"))
+			rotation.setRotation(TOP);
+		if (rot.equalsIgnoreCase("bottom"))
+			rotation.setRotation(BOTTOM);
 	}
 
 	public DockItem getSelectedItem()
@@ -215,7 +219,7 @@ public class Dock extends Menu
 		/*
 		 * Draw a nice-looking background gradient.
 		 */
-		if (UIUtils.isJava2D(canvas))
+		if (usesJava2D)
 		{
 			Graphics2D g2 = menu.buff.g2;
 			g2.setPaint(menu.style.getGradient((float) drawRect.getMinY(),
@@ -252,28 +256,30 @@ public class Dock extends Menu
 			canvas.endShape();
 		}
 
-		if (currentlyHovered != null)
+		if (hovered != null)
 		{
-//			 System.out.println("Hello!");
-			MenuItem i = currentlyHovered;
+			MenuItem i = hovered;
+			float fontSize = origWidth/2f;
 			float ascent = UIUtils.getTextAscent(menu.canvas.g,
-					menu.style.font, 24, false);
-			float descent = UIUtils.getTextAscent(menu.canvas.g,
-					menu.style.font, 24, false);
+					menu.style.font, fontSize, false);
+			float descent = UIUtils.getTextDescent(menu.canvas.g,
+					menu.style.font, fontSize, false);
 			float tHeight = (ascent + descent);
 			float tWidth = UIUtils.getTextWidth(menu.canvas.g, menu.style.font,
-					24, i.getLabel(), false);
+					fontSize, i.getName(), false);
 
 			float tX = 0;
 			float tY = 0;
 			switch (rotation.rot)
 			{
 				case (LEFT):
+					menu.canvas.textAlign(PApplet.LEFT);
 					tX = inset + maxPossibleWidth + menu.style.padX;
 					tY = i.getY() + i.getHeight() / 2 + tHeight / 2 - descent
 							/ 2;
 					break;
 				case (RIGHT):
+					menu.canvas.textAlign(PApplet.LEFT);
 					tX = menu.canvas.width - inset - maxPossibleWidth
 							- menu.style.padX - tWidth;
 					tY = i.getY() + i.getHeight() / 2 + tHeight / 2 - descent
@@ -293,14 +299,19 @@ public class Dock extends Menu
 					break;
 			}
 
+			if (usesJava2D)
+			{
+				MenuUtils.drawWhiteTextRect(this, tX-menu.style.padX, tY-ascent-menu.style.padX,tWidth+menu.style.padX*2,tHeight+menu.style.padX*2);
+			}
+			
 			Color c = menu.style.textColor;
 			int alpha = (int) (menu.alpha * 255);
 			menu.canvas.fill(menu.canvas.color(c.getRed(), c.getGreen(), c
 					.getBlue(), alpha));
 			// menu.canvas.fill(0,alpha);
 			menu.canvas.textFont(FontLoader.instance.vera);
-			menu.canvas.textSize(24);
-			menu.canvas.text(i.getLabel(), tX, tY);
+			menu.canvas.textSize(fontSize);
+			menu.canvas.text(i.getName(), tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);
 		}
 
@@ -383,10 +394,10 @@ public class Dock extends Menu
 			}
 		}
 		super.mouseEvent(e, screen, model);
-		
+
 		if (isActivated && consumeWhenActive)
 		{
-//			e.consume();
+			e.consume();
 		}
 	}
 
@@ -419,21 +430,13 @@ public class Dock extends Menu
 		di.setName(label);
 		return di;
 	}
-	
-	public MenuItem add(MenuItem addMe)
-	{
-		super.add(addMe);
-		show();
-		return addMe;
-	}
-	
+
 	public DockItem add(String label, String iconFile)
 	{
 		DockItem addMe = new DockItem();
 		addMe.setName(label);
 		addMe.setIcon(iconFile);
 		add(addMe);
-		show();
 		return addMe;
 	}
 
@@ -520,19 +523,15 @@ public class Dock extends Menu
 			switch (rot)
 			{
 				case (LEFT):
-					d.layoutRule = MenuItem.LAYOUT_RIGHT;
 					d.setPosition(inset, pos);
 					break;
 				case (RIGHT):
-					d.layoutRule = MenuItem.LAYOUT_LEFT;
 					d.setPosition(pg.width - item.getWidth() - inset, pos);
 					break;
 				case (TOP):
-					d.layoutRule = MenuItem.LAYOUT_BELOW;
 					d.setPosition(pos, inset);
 					break;
 				case (BOTTOM):
-					d.layoutRule = MenuItem.LAYOUT_ABOVE;
 					d.setPosition(pos, pg.height - item.getHeight() - inset);
 					break;
 			}

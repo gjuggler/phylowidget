@@ -15,6 +15,7 @@ import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
+import org.andrewberman.ui.ifaces.UIObject;
 
 import processing.core.PFont;
 
@@ -36,125 +37,101 @@ import processing.core.PFont;
  */
 public abstract class MenuItem implements Positionable, Sizable
 {
+	/**
+	 * Constants that define the values for the "state" field.
+	 */
 	public static final int UP = 0;
 	public static final int OVER = 1;
 	public static final int DOWN = 2;
 	public static final int DISABLED = 3;
 
-	public static final int LAYOUT_BELOW = 0;
-	public static final int LAYOUT_RIGHT = 1;
-	public static final int LAYOUT_LEFT = 2;
-	public static final int LAYOUT_ABOVE = 3;
-	int layoutRule;
+	protected static ZDepthComparator zComp;
+	protected static MenuTimer timer = MenuTimer.instance();
 
-	static ZDepthComparator zComp;
+	protected Menu menu;
+	protected Menu nearestMenu;
+	protected MenuItem parent;
 
-	static MenuTimer timer;
-
-	public Menu menu;
-	public Menu nearestMenu;
-	public MenuItem parent;
-
-	Action action;
-	Shortcut shortcut;
-	private String label;
-	ArrayList items;
+	protected Action action;
+	protected Shortcut shortcut;
+	protected String name;
+	protected ArrayList<MenuItem> items;
 	/**
 	 * The same items as above, but z-sorted for hit detection and drawing
 	 * purposes.
 	 */
-	ArrayList zSortedItems;
-	boolean needsZSort;
+	protected ArrayList<MenuItem> zSortedItems;
+	protected boolean needsZSort;
 
 	protected float x, y;
 	protected float width, height;
 
-	private int z;
+	protected int z;
 
-	int state = UP;
-	boolean clickedInside;
-	boolean mouseInside;
-	boolean hidden = true;
+	protected int state;
+	private boolean isOpen;
+	protected boolean mouseInside;
 
 	/**
 	 * If true, this menu item will hide itself when its action is performed. If
 	 * false, it will remain open.
 	 */
-	public static boolean hideOnAction = true;
+	public static boolean closeOnAction = true;
 
-	MenuItem()
+	public MenuItem()
 	{
 		setName(new String());
-		items = new ArrayList(2);
-		zSortedItems = new ArrayList(2);
-		timer = MenuTimer.instance();
+		items = new ArrayList<MenuItem>(1);
+		zSortedItems = new ArrayList<MenuItem>(1);
 	}
 
-	public void setName(String name)
-	{
-		this.label = name;
-	}
-	
 	public MenuItem setAction(Object object, String method)
 	{
 		action = new Action(object, method);
 		if (shortcut != null)
 			shortcut.action = action;
+		menu.layout();
 		return this;
+	}
+
+	public Action getAction()
+	{
+		return action;
 	}
 
 	public MenuItem setShortcut(String s)
 	{
 		shortcut = ShortcutManager.instance.createShortcut(s);
-		// shortcut = new Shortcut(s);
 		if (action != null)
 			shortcut.action = action;
 		menu.layout();
 		return this;
 	}
 
-	public void setPosition(float x, float y)
+	public Shortcut getShortcut()
 	{
-		this.x = x;
-		this.y = y;
+		return shortcut;
 	}
 
-	public float getX()
+	public MenuItem add(MenuItem item)
 	{
-		return x;
-	}
-
-	public float getY()
-	{
-		return y;
-	}
-
-	public void setSize(float w, float h)
-	{
-		width = w;
-		height = h;
-	}
-
-	public float getWidth()
-	{
-		return width;
-	}
-
-	public float getHeight()
-	{
-		return height;
-	}
-
-	public MenuItem add(MenuItem seg)
-	{
-		items.add(seg);
-		zSortedItems.add(seg);
+		items.add(item);
+		/*
+		 * Add this item to the zSortedList and re-sort.
+		 */
+		zSortedItems.add(item);
 		zSort();
-		seg.setParent(this);
-		seg.setMenu(menu);
+		/*
+		 * Set the sub-item's parent to this item, and its menu to our menu.
+		 */
+		item.setParent(this);
+		item.setMenu(menu);
+		/*
+		 * Layout the entire menu so things look nice.
+		 */
 		if (menu != null)
 			menu.layout();
-		return seg;
+		return item;
 	}
 
 	public void remove(MenuItem item)
@@ -166,7 +143,7 @@ public abstract class MenuItem implements Positionable, Sizable
 			menu.layout();
 	}
 
-	private void zSort()
+	protected void zSort()
 	{
 		if (zComp == null)
 			zComp = new ZDepthComparator();
@@ -175,26 +152,39 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	public MenuItem add(String newLabel)
 	{
-		if (nearestMenu != null)
-		{
-			MenuItem item = nearestMenu.create(newLabel);
-			add(item);
-			return item;
-		} else if (menu != null)
-		{
-			MenuItem item = menu.create(newLabel);
-			add(item);
-			return item;
-		} else
-		{
-			throw new RuntimeException(
-					"Error in MenuItem.add(String): This MenuItem is not associated with any menu!");
-		}
+		return add(create(newLabel));
 	}
 
+	/**
+	 * Creates a MenuItem that this Menu can have added to it. Subclassers
+	 * should implement this method to create a new top-level Menuitem, i.e.
+	 * your DinnerMenu object should create and return a DinnerMenuItem that
+	 * could then be inserted into your DinnerMenu using add(MenuItem).
+	 * 
+	 * @param label
+	 *            the label of the MenuItem to be created
+	 * @return a MenuItem that is compatible with the current Menu instance.
+	 */
+	public MenuItem create(String label)
+	{
+		if (nearestMenu != null)
+			return nearestMenu.create(label);
+		else if (menu != null)
+			return menu.create(label);
+		else
+			throw new RuntimeException("Error in MenuItem.create(String label)");
+	}
+
+	/**
+	 * Searches through the sub-item tree for the MenuItem with a given name.
+	 * 
+	 * @param search
+	 *            the name to search with.
+	 * @return
+	 */
 	public MenuItem get(String search)
 	{
-		if (label.equals(search))
+		if (getName().equals(search))
 			return this;
 		else
 		{
@@ -206,58 +196,85 @@ public abstract class MenuItem implements Positionable, Sizable
 			}
 		}
 		return null;
-		// throw new RuntimeException("Unable to find MenuItem (label
-		// \""+search+"\") within the specified MenuItem (label
-		// \""+label+"\")");
 	}
 
 	/**
-	 * Returns whether this MenuItem is visible or not. For example, an
+	 * Returns whether this MenuItem is enabled or not. Could be used by
+	 * subclasses to sometimes *not* be enabled.
+	 * 
+	 * If isEnabled() returns false, the MenuItem will (a) return DISABLED in
+	 * its getState() method, and (b) will not perform its action when pressed
+	 * or otherwise activated.
 	 * 
 	 * @return
 	 */
-	public boolean isVisible()
-	{
-		if (hidden)
-			return false;
-		return true;
-	}
-
 	public boolean isEnabled()
 	{
 		return true;
 	}
 
-	/**
-	 * Returns whether this MenuItem is showing its children or not.
-	 * 
-	 * @return true if any of this MenuItem's children are showing.
-	 */
-	public boolean isShowingChildren()
+	public boolean isOpen()
 	{
-		for (int i = 0; i < items.size(); i++)
+		if (items.size() == 0) return false;
+		return isOpen;
+	}
+
+	public boolean hasChildren()
+	{
+		return items.size() > 0;
+	}
+	
+	public boolean hasOpenChildren()
+	{
+		for (int i=0; i < items.size(); i++)
 		{
-			if (((MenuItem) items.get(i)).isVisible())
+			MenuItem item = (MenuItem) items.get(i);
+			if (item.isOpen())
 				return true;
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Draws this MenuItem to the current root menu's PGraphics object.
 	 */
 	public void draw()
 	{
+		drawMyself();
+		if (!isOpen())
+			return;
 		if (needsZSort)
 		{
 			zSort();
 			needsZSort = false;
 		}
+		/*
+		 * Here's where the zSorted items come in handy. Draw items in order of
+		 * the zSortedItems list, so that items on "top" (i.e. with the lowest z
+		 * value) draw last.
+		 */
+		drawBefore();
 		for (int i = 0; i < zSortedItems.size(); i++)
 		{
 			MenuItem seg = (MenuItem) zSortedItems.get(i);
 			seg.draw();
 		}
+		drawAfter();
+	}
+
+	protected void drawMyself()
+	{
+
+	}
+
+	protected void drawBefore()
+	{
+		// Do nothing.
+	}
+
+	protected void drawAfter()
+	{
+		// Do nothing.
 	}
 
 	/**
@@ -272,13 +289,13 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
-	boolean isAncestorOfSelected()
+	protected boolean isAncestorOfLastHovered()
 	{
 		if (menu == null)
 			return false;
-		if (this == menu.lastHovered)
+		if (this == menu.hovered)
 			return true;
-		else if (isAncestorOf(menu.lastHovered))
+		else if (isAncestorOf(menu.hovered))
 			return true;
 		return false;
 	}
@@ -302,79 +319,41 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
-	protected void hide()
+	/**
+	 * Shows this MenuItem and its direct sub-MenuItems.
+	 */
+	public void open()
 	{
-		hidden = true;
+		if (isOpen)
+			close();
+		isOpen = true;
 	}
 
-	protected void hideChildren()
+	public void close()
 	{
 		for (int i = 0; i < items.size(); i++)
 		{
-			((MenuItem) items.get(i)).hide();
+			MenuItem item = (MenuItem) items.get(i);
+			item.close();
 		}
+		isOpen = false;
 	}
 
-	protected void hideAllChildren()
-	{
-		hideChildren();
-		for (int i = 0; i < items.size(); i++)
-		{
-			final MenuItem item = (MenuItem) items.get(i);
-			item.hideAllChildren();
-		}
-	}
-
-	protected void show()
-	{
-		hidden = false;
-	}
-
-	protected void showChildren()
-	{
-		// We hide all children first to make sure any sub-submenus aren't
-		// showing.
-		hideAllChildren();
-		for (int i = 0; i < items.size(); i++)
-		{
-			((MenuItem) items.get(i)).show();
-		}
-	}
-
-	protected void setOpenItem(MenuItem openMe)
+	public void closeMyChildren()
 	{
 		for (int i = 0; i < items.size(); i++)
 		{
-			final MenuItem item = (MenuItem) items.get(i);
-			if (item == openMe)
-				item.showChildren();
-			else
-				item.hideAllChildren();
+			MenuItem item = (MenuItem) items.get(i);
+			item.close();
 		}
-	}
-
-	protected void toggle()
-	{
-		if (isVisible())
-			hide();
-		else
-			show();
 	}
 
 	protected void toggleChildren()
 	{
-		final boolean showingChildren = isShowingChildren();
-		for (int i = 0; i < items.size(); i++)
-		{
-			MenuItem seg = (MenuItem) items.get(i);
-			if (showingChildren)
-			{
-				seg.hide();
-			} else
-			{
-				seg.show();
-			}
-		}
+		if (isOpen)
+			close();
+		else
+			open();
 	}
 
 	protected void setMenu(Menu menu)
@@ -415,12 +394,15 @@ public abstract class MenuItem implements Positionable, Sizable
 			return; // Do nothing if disabled.
 		if (items.size() > 0)
 		{
+			/*
+			 * If we have sub-items, trigger an open or close event.
+			 */
 			menuTriggerLogic();
 		} else
 		{
 			menu.fireEvent(UIEvent.MENU_ACTIONPERFORMED);
-			if (hideOnAction)
-				menu.hide();
+			if (closeOnAction)
+				menu.clickaway();
 			if (action != null)
 				action.performAction();
 		}
@@ -430,25 +412,42 @@ public abstract class MenuItem implements Positionable, Sizable
 	{
 		if (timer.item == this || !nearestMenu.clickToggles)
 		{
-			if (nearestMenu.singletNavigation)
-				parent.setOpenItem(this);
-			else
-				showChildren();
+			if (nearestMenu.singletNavigation && parent != null)
+			{
+				parent.closeMyChildren();
+				this.open();
+			} else
+				this.open();
 		} else if (nearestMenu.clickToggles)
 		{
 			if (nearestMenu.singletNavigation)
 			{
 				if (parent != null)
 				{
-					if (isShowingChildren())
-						parent.setOpenItem(null);
+					if (isOpen())
+						parent.closeMyChildren();
 					else
-						parent.setOpenItem(this);
+					{
+						parent.closeMyChildren();
+						this.open();
+					}
 				}
 			} else
 				toggleChildren();
 		}
 	}
+
+	// protected void setOpenItem(MenuItem item)
+	// {
+	// for (int i = 0; i < items.size(); i++)
+	// {
+	// MenuItem cur = (MenuItem) items.get(i);
+	// if (cur == item)
+	// cur.open();
+	// else
+	// cur.close();
+	// }
+	// }
 
 	/**
 	 * Subclasses should return true if the point is contained within their
@@ -471,6 +470,8 @@ public abstract class MenuItem implements Positionable, Sizable
 	 */
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
+		if (!isOpen())
+			return;
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
@@ -488,51 +489,54 @@ public abstract class MenuItem implements Positionable, Sizable
 		float max = 0;
 		for (int i = 0; i < items.size(); i++)
 		{
-			float curWidth = ((MenuItem) items.get(i)).getTextWidth();
+			MenuItem item = (MenuItem) items.get(i);
+			float curWidth = item.width;
 			if (curWidth > max)
 				max = curWidth;
 		}
 		return max;
 	}
 
-	/**
-	 * Determines the max width of this MenuItem's "content". Currently just
-	 * returns the max width based on the width of the label text and the
-	 * current Palette's padding, but subclasses can override this default
-	 * behavior.
-	 * 
-	 * @return the maximum width of this MenuItem.
-	 */
-	protected float getTextWidth()
+	protected float getMaxHeight()
 	{
-		PFont font = menu.style.font;
-		float fontSize = menu.style.fontSize;
-		float width = UIUtils.getTextWidth(menu.buff, font, fontSize, label,
-				true);
-		return width + menu.style.padX * 2;
+		float max = 0;
+		for (int i = 0; i < items.size(); i++)
+		{
+			MenuItem item = (MenuItem) items.get(i);
+			float curWidth = item.height;
+			if (curWidth > max)
+				max = curWidth;
+		}
+		return max;
+	}
+	
+	protected void calcPreferredSize()
+	{
 	}
 
 	protected float getTextHeight()
 	{
 		PFont font = menu.style.font;
 		float fontSize = menu.style.fontSize;
-		return UIUtils.getTextHeight(menu.buff, font, fontSize, label, true)
+		return UIUtils.getTextHeight(menu.buff, font, fontSize, name, true)
 				+ menu.style.padY * 2;
 	}
 
 	protected void itemMouseEvent(MouseEvent e, Point tempPt)
 	{
 		mouseInside = false;
-		if (this.isVisible())
-			visibleMouseEvent(e, tempPt);
-		for (int i = zSortedItems.size()-1; i >= 0; i--)
+		visibleMouseEvent(e, tempPt);
+		if (isOpen())
 		{
-			MenuItem item = (MenuItem) zSortedItems.get(i);
-			if (e.isConsumed())
-				continue;
-			item.itemMouseEvent(e, tempPt);
-			if (item.mouseInside)
-				mouseInside = true;
+			for (int i = zSortedItems.size() - 1; i >= 0; i--)
+			{
+				MenuItem item = (MenuItem) zSortedItems.get(i);
+				if (e.isConsumed())
+					continue;
+				item.itemMouseEvent(e, tempPt);
+				if (item.mouseInside)
+					mouseInside = true;
+			}
 		}
 		if (mouseInside && getZ() == 0)
 		{
@@ -562,19 +566,20 @@ public abstract class MenuItem implements Positionable, Sizable
 		if (state == MenuItem.DOWN)
 		{
 			menu.lastPressed = this;
-			menu.currentlyHovered = this;
-			menu.lastHovered = this;
+			menu.hovered = this;
+//			menu.currentlyFocused = this;
+//			menu.lastHovered = this;
 		} else if (state == MenuItem.OVER)
 		{
-			menu.lastHovered = this;
-			menu.currentlyHovered = this;
-		} else if (state == MenuItem.UP && menu.currentlyHovered == this)
+//			menu.lastHovered = this;
+			menu.hovered = this;
+		} else if (state == MenuItem.UP && menu.hovered == this)
 		{
-			menu.currentlyHovered = null;
+//			menu.hovered = null;
 		}
 	}
 
-	int getState()
+	protected int getState()
 	{
 		if (!isEnabled())
 			return DISABLED;
@@ -601,16 +606,14 @@ public abstract class MenuItem implements Positionable, Sizable
 			case MouseEvent.MOUSE_PRESSED:
 				if (containsPoint)
 				{
-					clickedInside = true;
 					if (nearestMenu.actionOnMouseDown)
 						performAction();
-				} else
-					clickedInside = false;
+				}
+				// The switch statement continues on through the next case...
 			case MouseEvent.MOUSE_DRAGGED:
-				if (/* clickedInside && */containsPoint)
+				if (containsPoint)
 				{
 					setState(MenuItem.DOWN);
-					// else if (containsPoint) this.state = MenuItem.OVER;
 				} else
 					setState(MenuItem.UP);
 				break;
@@ -629,6 +632,8 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	public void keyEvent(KeyEvent e)
 	{
+		if (!isOpen())
+			return;
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem) items.get(i);
@@ -648,7 +653,7 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	public String toString()
 	{
-		return label;
+		return name;
 	}
 
 	class ZDepthComparator implements Comparator
@@ -690,7 +695,7 @@ public abstract class MenuItem implements Positionable, Sizable
 		int maxDepth(MenuItem item)
 		{
 			int max = 0;
-			if (!item.isShowingChildren())
+			if (!item.isOpen())
 			{
 				max = 0;
 			} else
@@ -708,13 +713,65 @@ public abstract class MenuItem implements Positionable, Sizable
 
 	}
 
-	public String getLabel()
+	public void setName(String name)
 	{
-		return label;
+		this.name = name;
 	}
 
-	public void setLabel(String label)
+	public String getName()
 	{
-		this.label = label;
+		return name;
+	}
+
+	public void setPosition(float x, float y)
+	{
+		setX(x);
+		setY(y);
+	}
+
+	public void setX(float x)
+	{
+		this.x = x;
+	}
+
+	public void setY(float y)
+	{
+		this.y = y;
+	}
+
+	public float getX()
+	{
+		return x;
+	}
+
+	public float getY()
+	{
+		return y;
+	}
+
+	public void setSize(float w, float h)
+	{
+		setWidth(w);
+		setHeight(h);
+	}
+
+	public void setWidth(float width)
+	{
+		this.width = width;
+	}
+
+	public void setHeight(float height)
+	{
+		this.height = height;
+	}
+
+	public float getWidth()
+	{
+		return width;
+	}
+
+	public float getHeight()
+	{
+		return height;
 	}
 }

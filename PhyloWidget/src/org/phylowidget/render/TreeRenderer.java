@@ -39,9 +39,11 @@ public interface TreeRenderer
 
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 
-	public float getNodeRadius();
-
-	public void positionText(PhyloNode node, TextField text);
-
+	public Object rangeForNode(Object node);
 	
+	public float getRowHeight();
+	
+	public float getTextSize();
+	
+	public void positionText(PhyloNode node, TextField text);
 }

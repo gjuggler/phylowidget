@@ -93,7 +93,8 @@ public class PhyloTextField extends TextField
 					r.getTree().setLabel(curRange.node, s);
 					break;
 				case (BRANCH_LENGTH):
-					try {
+					try
+					{
 						double value = Double.parseDouble(s);
 						r.getTree().setBranchLength(curRange.node, value);
 					} catch (Exception e)
@@ -121,14 +122,17 @@ public class PhyloTextField extends TextField
 	public void keyEvent(KeyEvent e)
 	{
 		super.keyEvent(e);
-
+		if (hidden)
+			return;
 		switch (e.getKeyCode())
 		{
 			case (KeyEvent.VK_ESCAPE):
 				hideAndReject();
+				e.consume();
 				break;
 			case (KeyEvent.VK_ENTER):
 				hideAndCommit();
+				e.consume();
 				break;
 		}
 	}

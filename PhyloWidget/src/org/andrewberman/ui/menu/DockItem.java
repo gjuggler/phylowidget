@@ -96,7 +96,7 @@ public class DockItem extends MenuItem implements TweenListener
 				int alf = (int) (menu.alpha * 255);
 				menu.canvas.tint(255, alf);
 //				float pad = menu.style.padX;
-				menu.canvas.image(icon, x+pad, y+pad, width-2*pad, height-2*pad);
+				menu.canvas.image(icon, x+xOffset,y+yOffset,w,h);
 				menu.canvas.noTint();
 			}
 		}

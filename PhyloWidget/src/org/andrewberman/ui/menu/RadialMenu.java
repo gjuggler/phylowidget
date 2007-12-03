@@ -16,16 +16,16 @@ import processing.core.PConstants;
 
 public class RadialMenu extends Menu
 {
-	
+
 	public static final float FADE_DIST_MULTIPLIER = .5f;
-	
+
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
 	float innerRadius;
 	float radius;
 
 	private VisibleDepthComparator visComp = new VisibleDepthComparator();
-	
+
 	Rectangle myRect = new Rectangle(0, 0, 0, 0);
 	Rectangle buffRect = new Rectangle(0, 0, 0, 0);
 
@@ -41,14 +41,15 @@ public class RadialMenu extends Menu
 	protected void setOptions()
 	{
 		super.setOptions();
-		
-		setRadii(10,30);
+
+		setRadii(10, 30);
 		clickAwayBehavior = Menu.CLICKAWAY_HIDES;
 		hoverNavigable = false;
 		clickToggles = true;
 		autoDim = true;
 		useCameraCoordinates = true;
 		modalFocus = true;
+		useHandCursor = true;
 	}
 
 	public void setRadius(float r)
@@ -144,7 +145,7 @@ public class RadialMenu extends Menu
 			for (int i = 0; i < item.items.size(); i++)
 			{
 				MenuItem item2 = (MenuItem) item.items.get(i);
-				if (item2.isShowingChildren())
+				if (item2.isOpen())
 				{
 					item = item2;
 					shouldContinue = true;
@@ -155,15 +156,16 @@ public class RadialMenu extends Menu
 
 	}
 
-	public void draw()
-	{
-		super.draw();
-	}
-
-	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
-	{
-		super.getRect(rect, buff);
-	}
+	//
+	// public void draw()
+	// {
+	// super.draw();
+	// }
+	//
+	// protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
+	// {
+	// super.getRect(rect, buff);
+	// }
 
 	public void setPosition(float x, float y)
 	{
@@ -179,22 +181,26 @@ public class RadialMenu extends Menu
 		myRect.setRect(x, y, 0, 0);
 		getRect(myRect, buffRect);
 		float dist = myRect.distToPoint(pt);
-		float fadeDist = Math.max(myRect.width, myRect.height) * FADE_DIST_MULTIPLIER;
+		float fadeDist = Math.max(myRect.width, myRect.height)
+				* FADE_DIST_MULTIPLIER;
 		fadeDist = Math.max(fadeDist, radius);
 		if (dist < fadeDist)
 		{
-			float normalized = 1f - (dist / fadeDist);
-			aTween.continueTo(normalized);
-			aTween.fforward();
+			if (autoDim)
+			{
+				float normalized = 1f - (dist / fadeDist);
+				aTween.continueTo(normalized);
+				aTween.fforward();
+			}
 		} else
 		{
-			hide();
+			close();
 		}
 	}
 
 	public void keyEvent(KeyEvent e)
 	{
-		if (!isVisible())
+		if (!isOpen())
 			return;
 		if (e.getID() == KeyEvent.KEY_TYPED)
 		{

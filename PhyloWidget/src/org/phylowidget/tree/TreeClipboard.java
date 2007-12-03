@@ -14,7 +14,7 @@ public class TreeClipboard
 	String newickString;
 	RootedTree origTree;
 	PhyloNode origVertex;
-	
+
 	JSClipUpdater updater;
 
 	private TreeClipboard()
@@ -72,39 +72,40 @@ public class TreeClipboard
 		newickString = newick;
 		updater.triggerUpdate(newickString);
 	}
-	
+
 	public synchronized void paste(RootedTree destTree, PhyloNode destNode)
 	{
 		if (isEmpty())
 			throw new Error("Called TreeClipboard.paste() with empty clipboard");
-		
 		// Translate the newick string into a RooteTree.
 		PhyloTree tree = new PhyloTree();
-		TreeIO.parseNewickString(tree,newickString);
+		TreeIO.parseNewickString(tree, newickString);
 		// Add the clone's vertices and edges to the destination tree.
-		Graphs.addGraph(destTree, tree);
-
-		// Insert the clone's root vertex into the midpoint above destNode.
-		if (destTree.getParentOf(destNode) == null)
+		synchronized (destTree)
 		{
-			destTree.addEdge(destNode, tree.getRoot());
-		} else
-		{
-			Object internalVertex = destTree.createAndAddVertex("");
-			destTree.insertNodeBetween(destTree.getParentOf(destNode), destNode,
-					internalVertex);
-			destTree.addEdge(internalVertex, tree.getRoot());
-		}
-
-		if (origTree != null)
-		{
-			if (origVertex.getState() == PhyloNode.CUT)
+			Graphs.addGraph(destTree, tree);
+			// Insert the clone's root vertex into the midpoint above destNode.
+			if (destTree.getParentOf(destNode) == null)
 			{
-				origTree.deleteSubtree(origVertex);
-				origTree.cullElbowsBelow(origTree.getRoot());
-				setStateRecursive(origTree, (PhyloNode) origTree.getRoot(),
-						PhyloNode.NONE);
-				origVertex = null;
+				destTree.addEdge(destNode, tree.getRoot());
+			} else
+			{
+				Object internalVertex = destTree.createAndAddVertex("");
+				destTree.insertNodeBetween(destTree.getParentOf(destNode),
+						destNode, internalVertex);
+				destTree.addEdge(internalVertex, tree.getRoot());
+			}
+
+			if (origTree != null)
+			{
+				if (origVertex.getState() == PhyloNode.CUT)
+				{
+					origTree.deleteSubtree(origVertex);
+					origTree.cullElbowsBelow(origTree.getRoot());
+					setStateRecursive(origTree, (PhyloNode) origTree.getRoot(),
+							PhyloNode.NONE);
+					origVertex = null;
+				}
 			}
 		}
 	}

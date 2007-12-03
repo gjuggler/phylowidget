@@ -3,6 +3,7 @@ package org.phylowidget.ui;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.Labelable;
@@ -15,6 +16,14 @@ public class PhyloTree extends CachedRootedTree
 	
 	private boolean synchronizedWithJS;
 
+	public PhyloTree()
+	{
+		super();
+		String uniquify = PhyloWidget.props.getProperty("enforceUniqueLabels", "true");
+		boolean unique = Boolean.parseBoolean(uniquify);
+		setEnforceUniqueLabels(unique);
+	}
+	
 	public static PhyloTree createDefault()
 	{
 		PhyloTree t = new PhyloTree();
@@ -23,10 +32,14 @@ public class PhyloTree extends CachedRootedTree
 		return t;
 	}
 	
-	public PhyloTree()
+	public PhyloNode hoveredNode;
+	
+	public void setHoveredNode(PhyloNode n)
 	{
-		super();
+		hoveredNode = n;
 	}
+	
+	
 
 	public Object createVertex(Object o)
 	{

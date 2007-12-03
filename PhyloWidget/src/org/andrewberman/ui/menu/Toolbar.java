@@ -3,6 +3,7 @@ package org.andrewberman.ui.menu;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -28,8 +29,6 @@ import processing.core.PFont;
  */
 public class Toolbar extends Menu
 {
-	float width, height;
-	boolean isActive;
 	RoundRectangle2D.Float roundRect = new RoundRectangle2D.Float(0, 0, 0, 0,
 			0, 0);
 	Rectangle2D.Float buffRect = new Rectangle2D.Float(0, 0, 0, 0);
@@ -48,7 +47,12 @@ public class Toolbar extends Menu
 	{
 		super(app);
 		layout();
-		show();
+		open();
+	}
+
+	protected boolean isActive()
+	{
+		return hasOpenChildren();
 	}
 
 	protected void setOptions()
@@ -59,14 +63,14 @@ public class Toolbar extends Menu
 		 */
 		useCameraCoordinates = false;
 		clickToggles = true;
-		hoverNavigable = false;
+		hoverNavigable = true;
 		clickAwayBehavior = Menu.CLICKAWAY_COLLAPSES;
-		actionOnMouseDown = true;
+		// actionOnMouseDown = true;
 		useHandCursor = true;
 		autoDim = true;
-		
+
 		fullWidth = false;
-		isModal = true;
+		// isModal = true;
 		/*
 		 * Do some automatic positioning.
 		 */
@@ -81,145 +85,66 @@ public class Toolbar extends Menu
 		}
 	}
 
-	public void drawBefore()
+	public void setX(float x)
+	{
+		this.x = x + style.strokeWidth;
+	}
+
+	public void setY(float y)
+	{
+		this.y = y + style.strokeWidth;
+	}
+
+	public void draw()
 	{
 		if (fullWidth)
 			setFullWidth();
-		roundRect.setRoundRect(x, y, width, height, height * style.roundOff,
-				height * style.roundOff);
-		/*
-		 * Now draw the rectangle using extra-spiffy Java2D gradients.
-		 */
-		/*
-		 * Draw the first gradient: a full-height gradient.
-		 */
-		buff.g2.setPaint(style.getGradient(y, y + height));
-		buff.g2.fill(roundRect);
-		/*
-		 * Draw a translucent gradient on top of the first, starting halfway and
-		 * going to the bottom.
-		 */
-		Composite oldC = buff.g2.getComposite();
-		AlphaComposite c = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-				0.5f * menu.alpha);
-		buff.g2.setComposite(c);
-		buff.g2.setPaint(style.getGradient(y + height, y + height / 3));
-		buff.g2.fillRect((int) x, (int) (y + height / 2), (int) width,
-				(int) height / 2);
-		buff.g2.setComposite(oldC);
-		/*
-		 * Finally, draw the stroke on top of everything.
-		 */
-		RenderingHints rh = menu.buff.g2.getRenderingHints();
-		buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		buff.g2.setPaint(style.strokeColor);
-		buff.g2.setStroke(style.stroke);
-		buff.g2.draw(roundRect);
-		buff.g2.setRenderingHints(rh);
-
-		super.drawBefore();
+		super.draw();
 	}
 
-	protected void setOpenItem(MenuItem item)
+	public void drawBefore()
 	{
-		super.setOpenItem(item);
-		if (item == null)
-		{
-			isActive = false;
-			if (isModal && isRootMenu())
-				FocusManager.instance.removeFromFocus(this);
-		} else
-		{
-			isActive = true;
-			if (isModal && isRootMenu())
-				FocusManager.instance.setModalFocus(this);
-		}
+		MenuUtils.drawDoubleGradientRect(this, x, y, width, height);
 	}
 
-	public MenuItem create(String label)
+	public MenuItem create(String name)
 	{
 		ToolbarItem ti = new ToolbarItem();
-		ti.setName(label);
+		ti.setLayoutMode(ToolbarItem.LAYOUT_BELOW);
+		ti.drawChildrenTriangle = false;
+		ti.setName(name);
 		return ti;
 	}
 
-	public MenuItem add(MenuItem item)
+	protected void clickaway()
 	{
-		super.add(item);
-		/*
-		 * We need to modify this method a little bit, so that when an item is
-		 * added to this Toolbar, we automatically call show() so that the
-		 * MenuItem that was just added is set to become visible.
-		 */
-		show();
-		return item;
-	}
-	
-	public void hide()
-	{
-		/*
-		 * A toolbar should never be hidden, so we're going to override this
-		 * method to only hide the ToolBarMenuItems' children.
-		 */
-		for (int i = 0; i < items.size(); i++)
+		super.clickaway();
+		if (isModal)
 		{
-			((MenuItem) items.get(i)).hideAllChildren();
-		}
-		/*
-		 * Now I need to turn off my isActive flag.
-		 */
-		this.isActive = false;
-		if (isModal && isRootMenu())
 			FocusManager.instance.removeFromFocus(this);
-	}
-
-	public void show()
-	{
-		super.show();
+		}
 	}
 
 	public void layout()
 	{
-		/*
-		 * Calculate the height of each row in this menu.
-		 */
-		PFont font = style.font;
-		float fontSize = style.fontSize;
-		float descent = UIUtils.getTextDescent(buff, font, fontSize, true);
-		float ascent = UIUtils.getTextAscent(buff, font, fontSize, true);
-		float textHeight = descent + ascent;
-		float itemHeight = textHeight + style.padY * 2;
-		float fontOffsetY = itemHeight / 2 + textHeight / 2 - descent;
-		/*
-		 * Set the width, height and position for the top-level items.
-		 */
-		float xOffset = style.margin;
-		float yOffset = style.margin;
+		float xOffset = style.padX;
+		float yOffset = style.padY;
+
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
-			float itemWidth = item.getTextWidth();
-			if (item instanceof Sizable)
-			{
-				Sizable size = (Sizable) item;
-				size.setSize(itemWidth, itemHeight);
-			}
+			item.calcPreferredSize();
+			float itemWidth = item.width;
 			if (item instanceof Positionable)
 			{
 				Positionable pos = (Positionable) item;
 				pos.setPosition(x + xOffset, y + yOffset);
 			}
-			if (item instanceof ToolbarItem)
-			{
-				ToolbarItem tbi = (ToolbarItem) item;
-				tbi.textOffsetX = style.padX;
-				tbi.textOffsetY = fontOffsetY;
-			}
 			xOffset += itemWidth;
 			/*
-			 * I had been using the following line for adding padding between toolbar items,
-			 * but it looks better without any space, so we're adding zero.
+			 * I had been using the following line for adding padding between
+			 * toolbar items, but it looks better without any space, so for now
+			 * I am adding zero.
 			 */
 			if (i < items.size() - 1)
 				xOffset += 0;
@@ -230,8 +155,9 @@ public class Toolbar extends Menu
 		if (fullWidth)
 			setFullWidth();
 		else
-			width = xOffset + style.margin;
-		height = itemHeight + style.padY * 2;
+			width = xOffset + style.padX;
+		float maxHeight = getMaxHeight();
+		height = maxHeight + style.padY * 2;
 		/*
 		 * Trigger the recursive layout.
 		 */
@@ -246,7 +172,7 @@ public class Toolbar extends Menu
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
 		super.getRect(rect, buff);
-		if (isVisible())
+		if (isOpen())
 		{
 			buff.setRect(x, y, width, height);
 			Rectangle2D.union(rect, buff, rect);
@@ -256,8 +182,66 @@ public class Toolbar extends Menu
 	protected void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-		if (isActive)
+		if (isActive())
 			aTween.continueTo(fullAlpha);
+		// if (e.getID() == MouseEvent.MOUSE_PRESSED)
+		// {
+		// if (clickedInside)
+		// System.out.println("HEY");
+		// }
+		// if (isActive() && isModal)
+		// {
+		// FocusManager.instance.setModalFocus(this);
+		// }
+	}
+
+	@Override
+	public void keyEvent(KeyEvent e)
+	{
+		super.keyEvent(e);
+//		System.out.println("event");
+//		if (hovered == null)
+//		{
+//			items.get(0).setState(MenuItem.OVER);
+//		}
+//		int code = e.getKeyCode();
+//		int type = e.getID();
+//		switch (code)
+//		{
+//			case (KeyEvent.VK_ENTER):
+//				if (hovered.hasChildren())
+//				{
+//					hovered.open();
+//					MenuItem i = hovered.items.get(0);
+//					i.setState(MenuItem.OVER);
+//					hovered.setState(MenuItem.UP);
+//				} else
+//				{
+//					hovered.performAction();
+//				}
+//				break;
+//			case (KeyEvent.VK_RIGHT):
+////				System.out.println("RIGHT");
+//				if (hovered.hasChildren())
+//				{
+//					hovered.open();
+//					MenuItem i = hovered.items.get(0);
+//					i.setState(MenuItem.OVER);
+//					hovered.setState(MenuItem.UP);
+//				} else
+//				{
+//					/*
+//					 * TODO: Find currently open top-level menuitem, and move
+//					 * one to the right. Shoudl wrap around to the left if
+//					 * necessary.
+//					 */
+//					MenuItem p = hovered.parent;
+//					int index = p.items.indexOf(hovered);
+//					p.items.get(index+1).setState(MenuItem.OVER);
+//					hovered.setState(MenuItem.UP);
+//				}
+//				break;
+//		}
 	}
 
 	protected boolean containsPoint(Point pt)

@@ -78,45 +78,41 @@ public class DiagonalCladogram extends Cladogram
 		numCols = numRows / 2;
 	}
 
-	protected void drawLine(PhyloNode n)
+	protected void drawLineImpl(PhyloNode p, PhyloNode n)
 	{
-		if (tree.getParentOf(n) != null)
+		List list = tree.getChildrenOf(p);
+		Collections.sort(list);
+		int index = list.indexOf(n);
+		if (index != 0 && index != list.size() - 1)
 		{
-			PhyloNode parent = (PhyloNode) tree.getParentOf(n);
-			List list = tree.getChildrenOf(parent);
-			Collections.sort(list);
-			int index = list.indexOf(n);
-			if (index != 0 && index != list.size() - 1)
-			{
-				/*
-				 * This block is only seen by nodes that are "stuck in the
-				 * middle" of a polytomy.Maybe we should we do something a la:
-				 * 
-				 * http://www.slipperorchids.info/taxonomy/cladogram.jpg
-				 * 
-				 * I tried this already, but such solutions don't tend to scale
-				 * up well with large polytomies.
-				 */
-			}
-			float retreatX = getRetreat();
-			float retreatY = getRetreat();
-			if (parent.y > n.y)
-				retreatY = -retreatY;
-			canvas.line(n.x, n.y, parent.x + retreatX, parent.y + retreatY);
-			// canvas.line(n.x - rad, n.y, parent.x, n.y);
-			// float retreat = 0;
-			// if (n.y < parent.y)
-			// retreat = -rad;
-			// else
-			// retreat = rad;
-			// canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
+			/*
+			 * This block is only seen by nodes that are "stuck in the
+			 * middle" of a polytomy.Maybe we should we do something a la:
+			 * 
+			 * http://www.slipperorchids.info/taxonomy/cladogram.jpg
+			 * 
+			 * I tried this already, but such solutions don't tend to scale
+			 * up well with large polytomies.
+			 */
 		}
+		float retreatX = getNodeRadius() / 2f;
+		float retreatY = getNodeRadius() / 2f;
+		if (p.y > n.y)
+			retreatY = -retreatY;
+		canvas.line(n.x, n.y, p.x + retreatX, p.y + retreatY);
+		// canvas.line(n.x - rad, n.y, parent.x, n.y);
+		// float retreat = 0;
+		// if (n.y < parent.y)
+		// retreat = -rad;
+		// else
+		// retreat = rad;
+		// canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 	}
 
-	float sqrt2 = (float) Math.sqrt(2);
-
-	protected float getRetreat()
-	{
-		return getNodeRadius() * sqrt2/2;
-	}
+	// float sqrt2 = (float) Math.sqrt(2);
+	//
+	// protected float getNodeRadius()
+	// {
+	// return getRowHeight() * sqrt2/2;
+	// }
 }

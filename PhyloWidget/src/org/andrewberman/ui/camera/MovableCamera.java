@@ -9,7 +9,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Point2D;
 
-import org.andrewberman.ui.FocusManager;
+//import org.andrewberman.ui.FocusManager;
 
 import processing.core.PApplet;
 
@@ -84,8 +84,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		/*
 		 * Handle the edge scrolling.
 		 */
-		if (mouseInside && enableSideScrolling
-				&& !FocusManager.instance.isModal())
+		if (mouseInside && enableSideScrolling)
 		{
 			pt.setLocation(p.mouseX, p.mouseY);
 			float zoomMultiplier = NUDGE_SCALE / getZ();

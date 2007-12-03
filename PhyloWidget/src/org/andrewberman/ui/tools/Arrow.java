@@ -10,4 +10,9 @@ public class Arrow extends Tool
 		super(p);
 	}
 
+	public boolean respondToOtherEvents()
+	{
+		return true;
+	}
+
 }

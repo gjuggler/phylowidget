@@ -30,8 +30,8 @@ public class RectMover extends MovableCamera
 		super(app);
 		this.r = r;
 		
-		wTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
-		hTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
+		wTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
+		hTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
 
 		/**
 		 * Kind of important: call update() to make sure nothing here is null
@@ -107,10 +107,10 @@ public class RectMover extends MovableCamera
 		/*
 		 * Set the convenience variables.
 		 */
-		cx = xTween.position;
-		cy = yTween.position;
-		w = wTween.position;
-		h = hTween.position;
+		cx = xTween.getPosition();
+		cy = yTween.getPosition();
+		w = wTween.getPosition();
+		h = hTween.getPosition();
 	}
 	
 	private void constrainToScreen()

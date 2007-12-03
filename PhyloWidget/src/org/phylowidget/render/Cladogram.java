@@ -1,8 +1,17 @@
 package org.phylowidget.render;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -11,6 +20,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.ui.NodeTraverser;
 import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
@@ -39,8 +49,7 @@ public class Cladogram extends AbstractTreeRenderer
 	/**
 	 * Size of the text, as a multiplier relative to normal size.
 	 */
-	public float textSize = 1f;
-
+	// public float textSize = 1f;
 	protected float dFont;
 	/**
 	 * Radius of the node ellipses.
@@ -59,9 +68,8 @@ public class Cladogram extends AbstractTreeRenderer
 	 * Transformations required to go from the stored position to the actual
 	 * position. Should be set at the beginning of each draw.
 	 */
-	protected float scaleX, scaleY = 0;
-	protected float dx, dy = 0;
-
+	// protected float scaleX, scaleY = 0;
+	// protected float dx, dy = 0;
 	/**
 	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
 	 * won't stretch to completely fill its enclosing rectangle.
@@ -229,19 +237,12 @@ public class Cladogram extends AbstractTreeRenderer
 
 	protected void drawRecalc()
 	{
-		// if (forward)
-		// textRotation += 0.02f;
-		// else
-		// textRotation -= 0.02f;
-		// if (textRotation < -PApplet.HALF_PI)
-		// forward = true;
-		// if (textRotation > PApplet.HALF_PI)
-		// forward = false;
-
 		/*
 		 * Figure out the ideal row size.
 		 */
-		float overhang = gutterWidth * (float) Math.sin(PApplet.radians(style.textRotation));
+		float overhang = gutterWidth
+				* (float) Math
+						.sin(PApplet.radians(PhyloWidget.ui.textRotation));
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
 		textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
@@ -255,7 +256,7 @@ public class Cladogram extends AbstractTreeRenderer
 		if (keepAspectRatio)
 			constrainAspectRatio();
 		textSize = Math.min(rowSize, textSize);
-		dotWidth = textSize * style.nodeSizeMultiplier;
+		dotWidth = textSize * PhyloWidget.ui.nodeSize;
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;
@@ -266,11 +267,15 @@ public class Cladogram extends AbstractTreeRenderer
 		dy = (rect.height - scaleY - overhang * textSize) / 2;
 		dx += rect.getX();
 		dy += rect.getY();
+		/*
+		 * Multiply the textSize by the user-specified scaling factor.
+		 */
+		textSize *= PhyloWidget.ui.textSize;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 		/*
 		 * Update all the node ranges.
 		 */
-		updateNodeRanges();
+		// updateNodeRanges();
 	}
 
 	protected void constrainAspectRatio()
@@ -278,124 +283,198 @@ public class Cladogram extends AbstractTreeRenderer
 		rowSize = colSize = Math.min(rowSize, colSize);
 	}
 
-	protected void updateNodeRanges()
+	@Override
+	protected void updateNode(PhyloNode n)
 	{
-		/*
-		 * Update all the XYRange objects.
-		 */
-		for (int i = 0; i < ranges.size(); i++)
-		{
-			NodeRange r = (NodeRange) ranges.get(i);
-			PhyloNode n = r.node;
-			n.x = n.unscaledX * scaleX + dx;
-			n.y = n.unscaledY * scaleY + dy;
-			PhyloNode parent;
-			if (tree.getParentOf(n) != null)
-				parent = (PhyloNode) tree.getParentOf(n);
-			else
-			{
-				parent = n;
-			}
-			switch (r.type)
-			{
-				case (TreeRenderer.NODE):
-					n.update();
-					r.loX = Math.min(n.x - rad, parent.x - rad);
-					r.hiX = Math.max(n.x + rad, parent.x + rad);
-					r.loY = Math.min(n.y - rad, parent.y - rad);
-					r.hiY = Math.max(n.y + rad, parent.y + rad);
-					break;
-				case (TreeRenderer.LABEL):
-					r.loX = n.x + dotWidth;
-					float textHeight = (font.ascent() + font.descent())
-							* textSize;
-					r.loY = n.y - textHeight / 2;
-					r.hiY = n.y + textHeight / 2;
-					float width = 0;
-					width = n.unitTextWidth * textSize;
-					r.hiX = r.loX + width;
-					break;
-			}
-		}
-		list.sort();
-		// skipNodes();
+		super.updateNode(n);
+		n.x = (float) (n.unscaledX * scaleX + dx);
+		n.y = (float) (n.unscaledY * scaleY + dy);
 	}
 
-	protected void skipNodes()
+	// protected void updateNodeRanges()
+	// {
+	// /*
+	// * Update all the XYRange objects.
+	// */
+	// int threshold = (int) PhyloWidget.ui.renderThreshold;
+	// for (int i = 0; i < nodes.size(); i++)
+	// {
+	// PhyloNode n = (PhyloNode) nodes.get(i);
+	// n.update();
+	// if (i > threshold)
+	// continue;
+	// n.x = n.unscaledX * scaleX + dx;
+	// n.y = n.unscaledY * scaleY + dy;
+	// // PhyloNode n = (PhyloNode) nodes.get(i);
+	//			
+	// // n.update();
+	// // NodeRange r = nodesToRanges.get(n);
+	// }
+	// // NodeRange r = (NodeRange) ranges.get(i);
+	// // n.x = n.unscaledX * scaleX + dx;
+	// // n.y = n.unscaledY * scaleY + dy;
+	// // PhyloNode parent;
+	// // if (tree.getParentOf(n) != null)
+	// // parent = (PhyloNode) tree.getParentOf(n);
+	// // else
+	// // {
+	// // parent = n;
+	// // }
+	// // switch (r.type)
+	// // {
+	// // case (TreeRenderer.NODE):
+	// // n.update();
+	// // r.loX = Math.min(n.x - rad, parent.x - rad);
+	// // r.hiX = Math.max(n.x + rad, parent.x + rad);
+	// // r.loY = Math.min(n.y - rad, parent.y - rad);
+	// // r.hiY = Math.max(n.y + rad, parent.y + rad);
+	// // break;
+	// // case (TreeRenderer.LABEL):
+	// // r.loX = n.x + dotWidth;
+	// // float textHeight = (font.ascent() + font.descent())
+	// // * textSize;
+	// // r.loY = n.y - textHeight / 2;
+	// // r.hiY = n.y + textHeight / 2;
+	// // float width = 0;
+	// // width = n.unitTextWidth * textSize;
+	// // r.hiX = r.loX + width;
+	// // break;
+	// // }
+	// // }
+	// // list.sort();
+	// }
+
+	@Override
+	protected void initNodeRange(NodeRange r)
 	{
-		/*
-		 * Skip nodes if the rows are small enough to allow it.
-		 */
-		skipMe.clear();
-		if (rowSize < SKIP_THRESH)
-		{
-			for (int i = 0; i < leaves.size(); i++)
-			{
-				PhyloNode n = (PhyloNode) leaves.get(i);
-				int asdf = 1;
-				if (rowSize < SKIP_THRESH)
-					asdf = 2;
-				if (rowSize < SKIP_THRESH * .5)
-					asdf = 3;
-				if (rowSize < SKIP_THRESH * .25)
-					asdf = 4;
-				if (rowSize < SKIP_THRESH * .1)
-					asdf = 10;
-				if (i % asdf != 0)
-					skipMe.put(n, null);
-			}
-		}
+		PhyloNode n = r.node;
+		PhyloNode p = (PhyloNode) tree.getParentOf(n);
+		if (p == null)
+			p = n;
+		r.loX = (float) Math.min(n.unscaledX - rad / rect.width, p.unscaledX
+				- rad / rect.width);
+		r.hiX = (float) Math.max(n.unscaledX + rad / rect.width, p.unscaledX
+				+ rad / rect.width);
+		r.loY = (float) Math.min(n.unscaledY - rad / rect.width, p.unscaledY
+				- rad / rect.width);
+		r.hiY = (float) Math.max(n.unscaledY + rad / rect.width, p.unscaledY
+				+ rad / rect.width);
 	}
 
-	protected void drawNode(PhyloNode n)
+	Rectangle2D.Float tRect = new Rectangle2D.Float();
+
+	@Override
+	protected boolean isNodeWithinScreen(PhyloNode n)
+	{
+		PhyloNode p = (PhyloNode) tree.getParentOf(n);
+		if (p == null)
+			p = n;
+		tRect.setFrameFromDiagonal(n.x, n.y, p.x, p.y);
+		return screenRect.intersects(tRect);
+	}
+
+	protected void drawNodeMarkerImpl(PhyloNode n)
 	{
 		canvas.ellipse(n.x, n.y, dotWidth, dotWidth);
 	}
 
-	protected void drawLine(PhyloNode n)
+	protected void drawLineImpl(PhyloNode p, PhyloNode c)
 	{
-		if (tree.getParentOf(n) != null)
-		{
-			PhyloNode parent = (PhyloNode) tree.getParentOf(n);
-			canvas.line(n.x - rad, n.y, parent.x, n.y);
-			float retreat = getRetreat();
-			if (n.y < parent.y)
-				retreat = -retreat;
-			canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
-		}
+		canvas.line(p.x, p.y, p.x, c.y);
+		canvas.line(p.x, c.y, c.x, c.y);
+//		if (PhyloWidget.ui.showBranchLengths)
+//		{
+//			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
+//			Graphics2D g2 = pgj.g2;
+//			g2.setFont(font.font.deriveFont(textSize * .5f));
+//			g2.setPaint(Color.black);
+//			double temp = tree.getBranchLength(n);
+//			temp *= 100;
+//			temp = (int) temp;
+//			temp /= 100;
+//			String s = String.valueOf(temp);
+//			// g2.drawString(s, parent.x, n.y - strokeForNode(n));
+//		}
 	}
 
-	protected synchronized void drawLabel(PhyloNode n)
+	protected void drawLabelImpl(PhyloNode n)
 	{
-		 canvas.pushMatrix();
-		 canvas.translate(n.x + dotWidth, n.y);
-		 canvas.rotate(PApplet.radians(style.textRotation));
+		canvas.pushMatrix();
+		canvas.translate(n.x + dotWidth / 2 + textSize / 3, n.y);
+		canvas.rotate(PApplet.radians(PhyloWidget.ui.textRotation));
 		if (canvas.getClass() == PGraphicsJava2D.class
 				&& PhyloWidget.usingNativeFonts)
 		{
 			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 			Graphics2D g2 = pgj.g2;
+			/*
+			 * If it's not a leaf, then draw the white background.
+			 */
+			// if (!tree.isLeaf(n))
+			// {
+			// float ratio = (float) tree.getNumEnclosedLeaves(n)
+			// / (float) tree.getNumEnclosedLeaves(tree.getRoot());
+			// ratio = (float) Math.sqrt(ratio);
+			// g2.setFont(font.font.deriveFont(textSize * ratio));
+			// float tw = UIUtils.getTextWidth(canvas, font, textSize * ratio,
+			// n.getLabel(), true);
+			// g2.setPaint(Color.black);
+			// float ascent = UIUtils.getTextAscent(canvas, font, textSize
+			// * ratio, true);
+			// float descent = UIUtils.getTextDescent(canvas, font, textSize
+			// * ratio, true);
+			// float df = (ascent - descent) / 2f;
+			// g2.drawString(n.getLabel(), 0, 0 + df);
+			// } else
+			// {
 			g2.setFont(font.font.deriveFont(textSize));
 			g2.setPaint(Color.black);
 			g2.drawString(n.getLabel(), 0, 0 + dFont);
+			// }
 		} else
 		{
 			canvas.textFont(FontLoader.instance.vera);
 			canvas.textAlign(PConstants.LEFT, PConstants.BOTTOM);
 			canvas.textSize(textSize);
-			canvas.text(n.getLabel(), 0, 0+dFont);
+			canvas.text(n.getLabel(), 0, 0 + dFont);
 		}
-		 canvas.popMatrix();
+		canvas.popMatrix();
 	}
 
-	public float getNodeRadius()
+	public float getRowHeight()
 	{
-		return dotWidth / 2;
+		return rowSize;
 	}
 
-	protected float getRetreat()
+	public float getTextSize()
 	{
-		return getNodeRadius();
+		return textSize;
+	}
+
+	protected float getNodeRadius()
+	{
+		return dotWidth / 2f;
+	}
+
+	@Override
+	public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
+	{
+		AffineTransform sc = AffineTransform.getScaleInstance(1 / scaleX,
+				1 / scaleY);
+		AffineTransform tr = AffineTransform.getTranslateInstance(-dx, -dy);
+
+		Point2D p1 = new Point2D.Double(rect.getMinX(), rect.getMinY());
+		Point2D p2 = new Point2D.Double(rect.getMaxX(), rect.getMaxY());
+
+		p1 = tr.transform(p1, null);
+		p2 = tr.transform(p2, null);
+		p1 = sc.transform(p1, null);
+		p2 = sc.transform(p2, null);
+
+		rect.setFrameFromDiagonal(p1, p2);
+		// Rectangle2D.Float tempRect = new Rectangle2D.Float();
+		// tempRect.setFrameFromDiagonal(p1, p2);
+		super.nodesInRange(arr, rect);
 	}
 
 	public void positionText(PhyloNode n, TextField tf)
@@ -403,9 +482,11 @@ public class Cladogram extends AbstractTreeRenderer
 		tf.setTextSize(textSize);
 		float tfWidth = UIUtils.getTextWidth(canvas, font, textSize, tf
 				.getText(), true);
-		float textWidth = Math.max(n.unitTextWidth * textSize + 5, tfWidth);
+		float textWidth = (float) Math.max(n.unitTextWidth * textSize + 5,
+				tfWidth);
 		tf.setWidth(textWidth);
-		tf.setPositionByBaseline(n.x + dotWidth, n.y + dFont);
+		tf
+				.setPositionByBaseline(n.x + dotWidth / 2 + textSize / 3, n.y
+						+ dFont);
 	}
-
 }

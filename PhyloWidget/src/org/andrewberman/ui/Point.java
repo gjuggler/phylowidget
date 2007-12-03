@@ -48,4 +48,19 @@ public final class Point extends Point2D.Float
 		return this;
 	}
 
+	public float dotProd(Point that)
+	{
+		return this.x * that.x + this.y * that.y;
+	}
+	
+	public float length()
+	{
+		return (float) Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+	
+	public float lengthSqr()
+	{
+		return this.x * this.x + this.y * this.y;
+	}
+	
 }

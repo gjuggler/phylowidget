@@ -16,15 +16,14 @@ import org.phylowidget.ui.PhyloNode;
 
 public class RandomTreeMutator implements Runnable
 {
+	private RootedTree tree;
+	private Thread wrapper;
+	private java.util.Random random;
+	private static String DEFAULT_NAME = "PhyloWidget";
 
-	private RootedTree			tree;
-	private Thread				wrapper;
-	private java.util.Random	random;
-	private static String		DEFAULT_NAME	= "PhyloWidget";
+	public int delay = 1000;
 
-	public int					delay			= 1000;
-
-	public int					mutations		= 0;
+	public int mutations = 0;
 
 	public RandomTreeMutator(RootedTree t)
 	{
@@ -75,23 +74,37 @@ public class RandomTreeMutator implements Runnable
 		}
 	}
 
-	private ArrayList	allNodes	= new ArrayList(100);
+	private ArrayList allNodes = new ArrayList(100);
 
 	public synchronized void randomlyMutateTree()
 	{
 		String taxonName = DEFAULT_NAME;
 		// taxonName = getRemoteNCBITaxon();
 		taxonName = getLocalNCBITaxon();
-//		synchronized (tree)
-//		{
-			allNodes.clear();
-			tree.getAll(tree.getRoot(), null, allNodes);
-			int i = random.nextInt(allNodes.size());
-			Object vertex = allNodes.get(i);
-			PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
-			tree.addSisterNode(vertex,sis);
-			mutations++;
-//		}
+		// synchronized (tree)
+		// {
+		allNodes.clear();
+		tree.getAll(tree.getRoot(), null, allNodes);
+		int i = random.nextInt(allNodes.size());
+		Object vertex = allNodes.get(i);
+		PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
+		tree.addSisterNode(vertex, sis);
+
+		tree.setBranchLength(vertex, randomBranch());
+		tree.setBranchLength(sis, randomBranch());
+		tree.setBranchLength(tree.getParentOf(sis), randomBranch());
+		mutations++;
+		// }
+//		PhyloWidget.trees.fforward(true, true);
+	}
+
+	private double randomBranch()
+	{
+		double val = Math.random();
+		val *= 100;
+		val = Math.round(val);
+		val /= 100;
+		return val;
 	}
 
 	private String getRemoteNCBITaxon()
@@ -129,7 +142,7 @@ public class RandomTreeMutator implements Runnable
 		return taxonName;
 	}
 
-	BufferedReader	in;
+	BufferedReader in;
 
 	public String getLocalNCBITaxon()
 	{
@@ -138,7 +151,7 @@ public class RandomTreeMutator implements Runnable
 		{
 			in.reset();
 			int limit = random.nextInt(200);
-			for (int i=0; i < limit; i++)
+			for (int i = 0; i < limit; i++)
 			{
 				taxonName = in.readLine();
 			}

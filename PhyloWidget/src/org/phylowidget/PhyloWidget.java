@@ -1,12 +1,15 @@
 package org.phylowidget;
 
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.andrewberman.ui.FontLoader;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
+import org.phylowidget.net.TaxonRetriever;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloTree;
@@ -34,20 +37,17 @@ public class PhyloWidget extends PApplet
 	public static boolean usingNativeFonts;
 	public static boolean openGL;
 	
-	public boolean stopCreatedThreads = false;
-	
 	private PWTreeUpdater updater;
 	private PWClipUpdater clipUpdater;
 	
 	public PhyloWidget()
 	{
 		super();
-		p = this;
 	}
 
 	public void setup()
 	{
-		this.size(500,500);
+		size(500,500);
 		frameRate(FRAMERATE);
 		
 		p = this;
@@ -60,6 +60,7 @@ public class PhyloWidget extends PApplet
 		} catch (IOException e)
 		{
 			e.printStackTrace();
+			return;
 		}
 		
 		// Creates, manages, and renders trees.
@@ -71,21 +72,22 @@ public class PhyloWidget extends PApplet
 		
 		trees.setup();
 		ui.setup();
-		trees.setTree(PhyloTree.createDefault());
+		ui.newTree();
 		
+//		TaxonRetriever.getHints("mus");
 	}
 
-	float theta = 0;
 	public void draw()
-	{	
+	{
 		trees.update();
 		ui.update();
+		
+		drawFrameRate();
 	}
 
 	public void stop()
 	{
 		super.stop();
-		stopCreatedThreads = true;
 	}
 	
 	public void drawFrameRate()
@@ -104,8 +106,8 @@ public class PhyloWidget extends PApplet
 //			size(w,h,OPENGL);
 		if (g.getClass() == PGraphicsJava2D.class)
 		{
-			PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
-			p.hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
+			PGraphicsJava2D pg = (PGraphicsJava2D) g;
+			hint(PConstants.ENABLE_NATIVE_FONTS); // Native fonts are nice!
 			usingNativeFonts = true;
 			pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 //			pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
@@ -126,6 +128,13 @@ public class PhyloWidget extends PApplet
 	public void updateClip(String s)
 	{
 		clipUpdater.triggerUpdate(s);
+	}
+	
+	@Override
+	public void keyPressed()
+	{
+		super.keyPressed();
+		if (key == KeyEvent.VK_ESCAPE) key = 0;
 	}
 	
 	static public void main(String args[]) {   PApplet.main(new String[] { "PhyloWidget" });}

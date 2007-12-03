@@ -65,8 +65,8 @@ public final class HoverHalo implements TweenListener, UIObject
 			return;
 		
 		NodeRange r = curNode;
-		if (r == null)
-			r = PhyloWidget.ui.nearest.nearest;
+//		if (r == null)
+//			r = PhyloWidget.ui.nearest.nearest;
 		if (r != prevNearest)
 		{
 			prevNearest = r;
@@ -83,7 +83,7 @@ public final class HoverHalo implements TweenListener, UIObject
 		dist = (dist > maxD ? maxD : dist);
 		float alpha = (maxD - dist) / maxD * 255;
 
-		float rad = r.render.getNodeRadius();
+		float rad = r.render.getRowHeight();
 		rect.setFrameFromCenter(r.node.x, r.node.y, r.node.x - rad, r.node.y
 				- rad);
 		// rect.x = r.node.x;
@@ -95,9 +95,9 @@ public final class HoverHalo implements TweenListener, UIObject
 		wTween.update();
 		hTween.update();
 
-		hoverMult = wTween.position;
+		hoverMult = wTween.getPosition();
 		int color = RenderStyleSet.defaultStyle().hoverColor.getRGB();
-		p.stroke(color * aTween.position);
+		p.stroke(color * aTween.getPosition());
 
 		if (solid)
 		{
@@ -112,8 +112,8 @@ public final class HoverHalo implements TweenListener, UIObject
 			p.stroke(40, 120, 240, 255);
 			p.strokeWeight(Math.max(rect.width / 20, 3));
 		}
-		float w = wTween.position * rect.width;
-		float h = hTween.position * rect.height;
+		float w = wTween.getPosition() * rect.width;
+		float h = hTween.getPosition()* rect.height;
 		float x = (float) rect.getCenterX();
 		float y = (float) rect.getCenterY();
 		switch (type)
@@ -179,30 +179,30 @@ public final class HoverHalo implements TweenListener, UIObject
 		// System.out.println("Hover event!");
 		Point pt = model;
 
-		NodeRange r = PhyloWidget.ui.nearest.nearest;
-		if (r == null)
-			return;
-
-		switch (e.getID())
-		{
-			case (MouseEvent.MOUSE_MOVED):
-				if (containsPoint(r, pt))
-				{
-					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
-					r.node.hovered = true;
-				} else
-				{
-					UIUtils.releaseCursor(this, p);
-					r.node.hovered = false;
-				}
-				break;
-			case (MouseEvent.MOUSE_PRESSED):
-				if (containsPoint(r, pt))
-				{
-					PhyloWidget.ui.context.show(r);
-				}
-				break;
-		}
+//		NodeRange r = PhyloWidget.ui.nearest.nearest;
+//		if (r == null)
+//			return;
+//
+//		switch (e.getID())
+//		{
+//			case (MouseEvent.MOUSE_MOVED):
+//				if (containsPoint(r, pt))
+//				{
+//					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
+//					r.node.hovered = true;
+//				} else
+//				{
+//					UIUtils.releaseCursor(this, p);
+//					r.node.hovered = false;
+//				}
+//				break;
+//			case (MouseEvent.MOUSE_PRESSED):
+//				if (containsPoint(r, pt))
+//				{
+//					PhyloWidget.ui.context.open(r);
+//				}
+//				break;
+//		}
 	}
 
 	public void focusEvent(FocusEvent e)
@@ -217,7 +217,7 @@ public final class HoverHalo implements TweenListener, UIObject
 //		r.render.getNodePosition(r.node, tempPt);
 		tempPt.setLocation(r.node.x,r.node.y);
 		// float radius = r.render.getNodeRadius();
-		float radius = r.render.getNodeRadius() * wTween.position;
+		float radius = r.render.getRowHeight() * wTween.getPosition();
 		radius = Math.max(radius,5);
 		float x = pt.x - tempPt.x;
 		float y = pt.y - tempPt.y;

@@ -4,11 +4,7 @@ public final class TweenFriction implements TweenFunction
 {
 	float easeSpeed;
 	
-	public static TweenFriction tween;
-	
-	static {
-		tween = new TweenFriction(.3f);
-	}
+	public static TweenFriction tween = new TweenFriction(.3f);
 	
 	public static TweenFriction tween(float speed)
 	{

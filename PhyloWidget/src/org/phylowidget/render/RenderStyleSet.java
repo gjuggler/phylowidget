@@ -51,16 +51,16 @@ public class RenderStyleSet
 		regStroke = 1f;
 
 		dimColor = foregroundColor.brighter(200);
-		dimStroke = 4f;
+		dimStroke = 2f;
 
 		hoverColor = new Color(100, 150, 255);
-		hoverStroke = 3f;
+		hoverStroke = 2f;
 
 		copyColor = new Color(255, 0, 0);
-		copyStroke = 4f;
+		copyStroke = 2f;
 
 		nodeSizeMultiplier = 0.5f;
-		lineThicknessMultiplier = 0.1f;
+		lineThicknessMultiplier = 1f;
 	}
 
 	private void loadFromProperties()

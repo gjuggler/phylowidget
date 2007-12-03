@@ -107,7 +107,6 @@ public class TextField extends AbstractUIObject implements Positionable
 		UIUtils.loadUISinglets(p);
 		StringClipboard.lazyLoad();
 		Blinker.lazyLoad();
-		EventManager.instance.add(this);
 
 		canvas = p;
 		style = StyleSet.defaultStyle();
@@ -136,6 +135,7 @@ public class TextField extends AbstractUIObject implements Positionable
 			pg = createBuffer(OFFSET, OFFSET);
 			layout();
 		}
+		EventManager.instance.add(this);
 	}
 
 	PGraphicsJava2D createBuffer(int w, int h)
@@ -903,5 +903,15 @@ public class TextField extends AbstractUIObject implements Positionable
 		{
 
 		}
+	}
+
+	public void setX(float f)
+	{
+		x = f;
+	}
+
+	public void setY(float f)
+	{
+		y = f;
 	}
 }

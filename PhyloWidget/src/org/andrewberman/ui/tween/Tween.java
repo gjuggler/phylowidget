@@ -3,8 +3,8 @@ package org.andrewberman.ui.tween;
 
 public class Tween
 {
-	public TweenListener listener;
-	public TweenFunction function;
+	TweenListener listener;
+	TweenFunction function;
 
 	public static final int STARTED = 0;
 	public static final int UPDATED = 1;
@@ -17,21 +17,20 @@ public class Tween
 	public static final int OUT = 1;
 	public static final int INOUT = 2;
 	
-	public boolean isTweening;
-	public int tweenType; // use the IN/OUT/INOUT static variables with this.
+	boolean isTweening;
+	int tweenType; // use the IN/OUT/INOUT static variables with this.
 
-	public float position;
-	public float time;
-	public float begin;
-	public float change;
-	public float duration;
+	float position;
+	float time;
+	float begin;
+	float change;
+	float duration;
 
 	public Tween(TweenListener listener, TweenFunction function, int type)
 	{
 		this.listener = listener;
 		this.function = function;
 		this.tweenType = type;
-		this.isTweening = false;
 	}
 	
 	public Tween(TweenListener listener, TweenFunction function, int tweenType,
@@ -43,15 +42,7 @@ public class Tween
 		this.begin = begin;
 		this.position = begin;
 		this.change = end - begin;
-//		this.useSeconds = _useSeconds;
-		//	    if (this.useSeconds) {
-		//	      this.duration = _duration * PhyloWidget.instance.frameRate;
-		//	    } else {
-		//		this.duration = _duration;
-		//	    }
 		this.duration = duration;
-		this.time = 0;
-		this.isTweening = false;
 		start();
 	}
 
@@ -59,12 +50,6 @@ public class Tween
 	{
 		return this.time;
 	}
-
-//	public void setTime(float t)
-//	{
-//		this.time = t;
-//		update();
-//	}
 
 	public float getPosition()
 	{
@@ -76,31 +61,16 @@ public class Tween
 		return this.duration;
 	}
 
-//	public void setDuration(float newD)
-//	{
-//		float oldD = this.duration;
-//		// This sets a new duration, but keeps the object's current position the same.
-//		// Lets us change the duration while a tween is running.
-//		this.time = (int) ((this.time / oldD) * newD);
-//		update();
-//	}
-
 	public float getFinish()
 	{
 		return this.begin + this.change;
 	}
-
-//	public void setFinish(float f)
-//	{
-//		// TODO: Figure out a way to change the finish without changing anything else.
-//	}
 
 	public void rewind()
 	{
 		this.time = 0;
 		this.position = this.begin;
 		dispatchEvent(REWOUND);
-		//	    this.obj[this.tweenProp] = this.position;
 	}
 
 	public void fforward()
@@ -108,7 +78,6 @@ public class Tween
 		this.time = this.duration;
 		this.position = getFinish();
 		dispatchEvent(FFORWARDED);
-		//	    this.obj[this.tweenProp] = this.position;
 	}
 
 	public void start()
@@ -170,7 +139,6 @@ public class Tween
 				fforward();
 				stop();
 				dispatchEvent(FINISHED);
-//				System.out.println("STOP!"+listener);
 			} else
 			{
 				this.time++;
@@ -191,5 +159,20 @@ public class Tween
 			}
 		}
 		return position;
+	}
+
+	public TweenFunction getFunction()
+	{
+		return function;
+	}
+
+	public void setFunction(TweenFunction function)
+	{
+		this.function = function;
+	}
+
+	public boolean isTweening()
+	{
+		return isTweening;
 	}
 }

@@ -19,6 +19,40 @@ public class CachedVertex extends DefaultVertex
 	private int numEnclosed;
 	private int maxDepthToLeaf;
 	private double maxHeightToLeaf;
+	private int maxChildEnclosed;
+
+	private Object firstChild;
+	private Object lastChild;
+	
+	public int getMaxChildEnclosed()
+	{
+		return maxChildEnclosed;
+	}
+
+	public void setMaxChildEnclosed(int maxChildEnclosed)
+	{
+		this.maxChildEnclosed = maxChildEnclosed;
+	}
+	
+	public Object getFirstChild()
+	{
+		return firstChild;
+	}
+
+	public void setFirstChild(Object firstChild)
+	{
+		this.firstChild = firstChild;
+	}
+
+	public Object getLastChild()
+	{
+		return lastChild;
+	}
+
+	public void setLastChild(Object lastChild)
+	{
+		this.lastChild = lastChild;
+	}
 
 	public CachedVertex(Object o)
 	{

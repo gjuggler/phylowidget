@@ -11,8 +11,8 @@ public class UIEvent extends AWTEvent
 	public static final int TEXT_SELECTION = 1;
 	public static final int TEXT_CARET = 2;
 	
-	public static final int MENU_SHOWN = 3;
-	public static final int MENU_HIDDEN = 4;
+	public static final int MENU_OPENED = 3;
+	public static final int MENU_CLOSED = 4;
 	public static final int MENU_ACTIONPERFORMED = 7;
 	
 	public static final int DOCK_ITEM_SELECTED = 8;

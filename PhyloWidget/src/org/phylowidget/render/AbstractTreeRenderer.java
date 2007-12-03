@@ -2,18 +2,27 @@ package org.phylowidget.render;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.menu.MenuUtils;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.UniqueLabeler;
 import org.phylowidget.ui.HoverHalo;
 import org.phylowidget.ui.PhyloNode;
+import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -29,15 +38,13 @@ import processing.core.PGraphicsJava2D;
 public abstract class AbstractTreeRenderer implements TreeRenderer,
 		GraphListener
 {
-
-//	protected PApplet p;
 	protected PGraphics canvas;
 
 	/**
 	 * The rectangle that defines the area in which this renderer will draw
 	 * itself.
 	 */
-	public Rectangle2D.Float rect;
+	public Rectangle2D.Float rect, screenRect;
 
 	/**
 	 * The tree that will be rendered.
@@ -73,15 +80,20 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	protected SortedXYRangeList list = new SortedXYRangeList();
 
-	protected ArrayList ranges = new ArrayList();
+	// protected ArrayList<NodeRange> ranges = new ArrayList<NodeRange>();
 
 	protected ArrayList inRange = new ArrayList();
 
-	protected boolean sorted = false;
+	protected HashMap<PhyloNode, NodeRange> nodesToRanges = new HashMap<PhyloNode, NodeRange>();
 
 	protected boolean needsLayout;
-	
+
 	protected float lineThicknessMult = 0.2f;
+
+	protected int nodesToDraw;
+	protected int threshold;
+
+	protected double scaleX, scaleY, dx, dy;
 
 	public AbstractTreeRenderer()
 	{
@@ -103,6 +115,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	public void render(PGraphics canvas, float x, float y, float w, float h)
 	{
 		this.canvas = canvas;
+		nodesToDraw = (int) PhyloWidget.ui.renderThreshold;
 		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
@@ -110,9 +123,11 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		{
 			if (needsLayout)
 			{
-				update();
+				doLayout();
+				// System.out.println("update " + System.currentTimeMillis());
 				needsLayout = false;
 			}
+			counter = 0;
 			draw();
 		}
 	}
@@ -121,14 +136,15 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 * Updates this renderer's internal representation of the tree. This should
 	 * only be called when the tree is changed.
 	 */
-	protected void update()
+	protected void doLayout()
 	{
 		leaves.clear();
 		nodes.clear();
+		nodesToRanges.clear();
 		tree.getAll(tree.getRoot(), leaves, nodes);
-
+		Collections.sort(nodes, tree.sorter);
 		doTheLayout();
-		createEmptyNodeRanges();
+		initNodeRanges();
 	}
 
 	final public void layout()
@@ -149,102 +165,209 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 * This method creates an empty NodeRange object for each node in the tree,
 	 * and an empty NodeRange object of type LABEL for each leaf in the tree.
 	 */
-	protected void createEmptyNodeRanges()
+	protected void initNodeRanges()
 	{
 		list.clear();
-		ranges.clear();
+		nodesToRanges.clear();
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			PhyloNode n = (PhyloNode) nodes.get(i);
 			NodeRange r = new NodeRange();
-			r.loX = n.getTargetX();
-			r.hiX = n.getTargetX() + .001f;
-			r.loY = n.getTargetY();
-			r.hiY = n.getTargetY() + .001f;
+			nodesToRanges.put(n, r);
+			// r.loX = n.getTargetX();
+			// r.hiX = n.getTargetX() + .001f;
+			// r.loY = n.getTargetY();
+			// r.hiY = n.getTargetY() + .001f;
 			r.type = NodeRange.NODE;
 			r.node = n;
 			r.render = this;
-			ranges.add(r);
+			initNodeRange(r);
 			list.insert(r, false);
-			if (tree.isLeaf(n))
-			{
-				NodeRange r2 = new NodeRange();
-				r2.loX = r2.hiX = n.getTargetX();
-				r2.loY = r2.hiY = n.getTargetY() + .001f;
-				r2.type = NodeRange.LABEL;
-				r2.node = n;
-				r2.render = this;
-				ranges.add(r2);
-				list.insert(r2, false);
-			}
 		}
 		list.sortFull();
+	}
+
+	protected void initNodeRange(NodeRange r)
+	{
+
 	}
 
 	/**
 	 * Draws this renderer's view to the canvas.
 	 */
-	protected synchronized void draw()
+	int counter;
+
+	protected void draw()
 	{
-		try
-		{
-		drawRecalc();
-		if (!sorted)
-		{
-			list.sort();
-			sorted = true;
-		}
 		/*
-		 * Draw the nodes that are in range.
+		 * Call to subclasses that allow them to do some calculations that need
+		 * to be performed on a frame-by-frame basis.
 		 */
+		drawRecalc();
+		/*
+		 * Now, let's set up the canvas.
+		 */
+		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
 		canvas.background(255);
-		
 		canvas.noStroke();
 		canvas.fill(0);
 		canvas.textFont(FontLoader.instance.vera);
 		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 		canvas.textSize(textSize);
 		hint();
-		inRange.clear();
-		Rectangle2D.Float screenRect = new Rectangle2D.Float(0, 0,
-				canvas.width, canvas.height);
+		screenRect = new Rectangle2D.Float(0, 0, canvas.width, canvas.height);
 		UIUtils.screenToModel(screenRect);
-		list.getInRange(inRange, screenRect);
+
 		/*
-		 * Set up some rendering constants so we don't recalculate within the
-		 * loop.
+		 * FIRST LOOP: Updating nodes Update all nodes, regardless of
+		 * "threshold" status.
+		 * Also set each node's drawMe flag to FALSE.
 		 */
-		baseStroke = getNodeRadius() * 2 * style.lineThicknessMultiplier;
-		int size = inRange.size();
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < nodes.size(); i++)
 		{
-			NodeRange r = (NodeRange) inRange.get(i);
-			PhyloNode n = r.node;
-			switch (r.type)
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			updateNode(n);
+			n.drawMe = false;
+		}
+		/*
+		 * SECOND LOOP: Flagging drawn nodes
+		 *  -- Now, we go through all nodes
+		 * (remember this is a list sorted by significance, i.e. enclosed number
+		 * of leaves). At each node, we decide whether or not to draw it based
+		 * on whether it is within the screen area. We exit the loop once the
+		 * threshold number of nodes has been drawn.
+		 */
+		int nodesDrawn = 0;
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			if (nodesDrawn >= nodesToDraw)
 			{
-				case (TreeRenderer.LABEL):
-					canvas.fill(colorForNode(n));
-					drawLabel(n);
-					break;
-				case (TreeRenderer.NODE):
-					canvas.strokeWeight(strokeForNode(n));
-					canvas.stroke(colorForNode(n));
-					drawLine(n);
-					canvas.noStroke();
-					canvas.fill(colorForNode(n));
-					// canvas.fill(style.regColor.getRGB());
-					drawNode(n);
-					break;
+//				threshold = tree.getNumEnclosedLeaves(n);
+				break;
+			}
+			if (!isNodeWithinScreen(n))
+				continue;
+			/*
+			 * Ok, let's flag this thing to be drawn.
+			 */
+			n.drawMe = true;
+			nodesDrawn++;
+		}
+		/*
+		 * THIRD LOOP: Drawing nodes
+		 *   - This loop actually does the drawing.
+		 */
+		nodesDrawn = 0;
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			if (!n.drawMe)
+				continue;
+			/*
+			 * Ok, we've skipped all the non-drawn nodes,
+			 * let's do the actual drawing.
+			 */
+			handleNode(n);
+		}
+		unhint();
+	}
+
+	protected void handleNode(PhyloNode n)
+	{
+		/*
+		 * Set up the strokes and weights.
+		 */
+		if (tree.isLeaf(n))
+		{
+			/*
+			 * CASE 1: LEAF NODE
+			 * - Draw line to parent
+			 * - Draw node marker
+			 * - Draw label
+			 */
+			drawNodeMarker(n);
+			if (n.getParent() != null)
+				drawLine((PhyloNode) n.getParent(), n);
+			drawLabel(n);
+		} else
+		{
+			/*
+			 * CASE 3: INTERNAL NODE
+			 * - Draw node marker
+			 * - Draw line to parent
+			 * - Go through children:
+			 *    - if child is flagged to be drawn, continue
+			 *    - if child is *not* drawn, draw a line to its early / latest
+			 */
+			drawNodeMarker(n);
+			drawLine((PhyloNode) n.getParent(), n);
+			List l = tree.getChildrenOf(n);
+			for (int i = 0; i < l.size(); i++)
+			{
+				PhyloNode child = (PhyloNode) l.get(i);
+				NodeRange r = nodesToRanges.get(child);
+				/*
+				 * If this child is thresholded out, then draw a placemark line to its
+				 * earliest or latest leaf node.
+				 */
+				if (!child.drawMe)
+				{
+					PhyloNode leaf = null;
+					if (i == 0)
+						leaf = (PhyloNode) tree.getFirstLeaf(child);
+					else if (i == l.size() - 1)
+						leaf = (PhyloNode) tree.getLastLeaf(child);
+					else
+						/*
+						 * If this child is a "middle child", just do nothing.
+						 */
+						continue;
+					drawLine(n, leaf);
+					drawLabel(leaf);
+				}
+			}
+			/*
+			 * Now, we want to draw this inner node's label if it's significant
+			 * and we are set to show clade labels.
+			 */
+			if (UniqueLabeler.isLabelSignificant(n.getLabel())
+					&& PhyloWidget.ui.showCladeLabels)
+			{
+				drawLabel(n);
 			}
 		}
-		} catch (Exception e)
+		/*
+		 * If we've got a PhyloTree on our hands,
+		 * let's take care of the hovered node.
+		 */
+		if (tree instanceof PhyloTree)
 		{
-			e.printStackTrace();
-			return;
-		} finally
-		{
-			unhint();
+			PhyloTree pt = (PhyloTree) tree;
+			PhyloNode h = pt.hoveredNode;
+			if (h != null)
+			{
+				canvas.stroke(style.hoverColor.getRGB());
+				float weight = baseStroke * style.hoverStroke;
+				weight *= PhyloWidget.ui.traverser.glowTween.getPosition();
+				canvas.strokeWeight(weight);
+				canvas.fill(style.hoverColor.getRGB());
+				drawLine((PhyloNode) h.getParent(), h);
+				canvas.noStroke();
+				canvas.fill(style.hoverColor.getRGB());
+				drawNodeMarker(h);
+			}
 		}
+	}
+
+	protected boolean isNodeWithinScreen(PhyloNode n)
+	{
+		return screenRect.contains(n.x, n.y);
+	}
+
+	protected void updateNode(PhyloNode n)
+	{
+		n.update();
 	}
 
 	float baseStroke;
@@ -252,43 +375,33 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	float strokeForNode(PhyloNode n)
 	{
 		float stroke = baseStroke;
-		if (n.hovered)
-			stroke *= style.hoverStroke * HoverHalo.hoverMult;
-		else
+		switch (n.getState())
 		{
-			switch (n.getState())
-			{
-				case (PhyloNode.CUT):
-					stroke *= style.dimStroke;
-					break;
-				case (PhyloNode.COPY):
-					stroke *= style.copyStroke;
-					break;
-				case (PhyloNode.NONE):
-				default:
-					stroke *= style.regStroke;
-					break;
-			}
+			case (PhyloNode.CUT):
+				stroke *= style.dimStroke;
+				break;
+			case (PhyloNode.COPY):
+				stroke *= style.copyStroke;
+				break;
+			case (PhyloNode.NONE):
+			default:
+				stroke *= style.regStroke;
+				break;
 		}
 		return stroke;
 	}
 
 	int colorForNode(PhyloNode n)
 	{
-		if (n.hovered)
-			return style.hoverColor.getRGB();
-		else
+		switch (n.getState())
 		{
-			switch (n.getState())
-			{
-				case (PhyloNode.CUT):
-					return style.dimColor.getRGB();
-				case (PhyloNode.COPY):
-					return style.copyColor.getRGB();
-				case (PhyloNode.NONE):
-				default:
-					return style.foregroundColor.getRGB();
-			}
+			case (PhyloNode.CUT):
+				return style.dimColor.getRGB();
+			case (PhyloNode.COPY):
+				return style.copyColor.getRGB();
+			case (PhyloNode.NONE):
+			default:
+				return style.foregroundColor.getRGB();
 		}
 	}
 
@@ -302,7 +415,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 			oldRH = g2.getRenderingHints();
 			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 					RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
+		canvas.noSmooth();
 	}
 
 	void unhint()
@@ -327,16 +443,31 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 
 	protected void drawLabel(PhyloNode n)
 	{
+		drawLabelImpl(n);
 	}
 
-	protected void drawNode(PhyloNode n)
+	protected void drawNodeMarker(PhyloNode n)
 	{
+		canvas.noStroke();
+		canvas.fill(colorForNode(n));
+		drawNodeMarkerImpl(n);
 	}
 
-	protected void drawLine(PhyloNode n)
+	protected void drawLine(PhyloNode p, PhyloNode c)
 	{
+		/*
+		 * Keep in mind that p may be null (in the case of root node).
+		 */
+		float weight = strokeForNode(c);
+		canvas.strokeWeight(weight);
+		canvas.stroke(colorForNode(c));
+		drawLineImpl(p,c);
 	}
 
+	abstract void drawLineImpl(PhyloNode p, PhyloNode c);
+	abstract void drawNodeMarkerImpl(PhyloNode n);
+	abstract void drawLabelImpl(PhyloNode n);
+	
 	public void setTree(RootedTree t)
 	{
 		if (tree != null)
@@ -354,7 +485,6 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	public void vertexAdded(GraphVertexChangeEvent e)
 	{
-		// if (e.getType() == GraphVertexChangeEvent.VERTEX_ADDED)
 		needsLayout = true;
 	}
 
@@ -366,7 +496,6 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	public void vertexRemoved(GraphVertexChangeEvent e)
 	{
-		// if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
 		needsLayout = true;
 	}
 
@@ -392,4 +521,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 			list.getInRange(arr, rect);
 		}
 	}
+
+	public Object rangeForNode(Object n)
+	{
+		return nodesToRanges.get(n);
+	}
+
 }

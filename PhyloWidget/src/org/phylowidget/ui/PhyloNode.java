@@ -7,11 +7,11 @@ import org.phylowidget.tree.CachedVertex;
 
 public class PhyloNode extends CachedVertex implements Comparable
 {
-	public float unscaledX,unscaledY;
+	public double unscaledX,unscaledY;
 	public float x,y;
-	public float unitTextWidth;
+	public double unitTextWidth;
+	public boolean drawMe;
 	
-	public boolean hovered;
 	private int state = 0;
 	public static final int NONE = 0;
 	public static final int CUT = 1;

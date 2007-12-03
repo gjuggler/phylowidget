@@ -10,17 +10,19 @@ import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.Tool;
+import org.andrewberman.ui.tools.ToolManager;
+import org.andrewberman.ui.tools.ToolManager.ToolShortcuts;
 
 import processing.core.PApplet;
 
-public class ToolDock extends Dock
+public class ToolDock extends Dock implements ToolManager.ToolShortcuts
 {
 	protected ToolManager toolManager;
 
 	public ToolDock(PApplet app)
 	{
 		super(app);
-		toolManager = new ToolManager();
+		toolManager = new ToolManager(this);
 		EventManager.instance.setToolManager(toolManager);
 	}
 
@@ -28,13 +30,13 @@ public class ToolDock extends Dock
 	{
 		ToolDockItem tdi = new ToolDockItem();
 		tdi.setName(s);
+			
 		return tdi;
 	}
 
 	public ToolDockItem create(String name, String toolClassName, String icon)
 	{
-		ToolDockItem tdi = new ToolDockItem();
-		tdi.setName(name);
+		ToolDockItem tdi = (ToolDockItem) create(name);
 		tdi.setTool(toolClassName);
 		tdi.setIcon(icon);
 		return tdi;
@@ -68,7 +70,7 @@ public class ToolDock extends Dock
 		{
 			activeItem.setState(MenuItem.DOWN);
 			activeItem.performAction();
-			currentlyHovered = null;
+			hovered = null;
 			for (int i = 0; i < items.size(); i++)
 			{
 				ToolDockItem tdi = (ToolDockItem) items.get(i);
@@ -84,43 +86,5 @@ public class ToolDock extends Dock
 
 	}
 
-	class ToolManager implements UIObject
-	{
-		Tool curTool;
 
-		public void switchTool(Tool switchMe)
-		{
-			if (curTool != null)
-				curTool.exit();
-			curTool = switchMe;
-			curTool.setCamera(EventManager.instance.toolCamera);
-			curTool.enter();
-			UIUtils.setBaseCursor(curTool.getCursor());
-		}
-
-		public void draw()
-		{
-			if (curTool != null)
-				curTool.draw();
-		}
-
-		public void focusEvent(FocusEvent e)
-		{
-			if (curTool != null)
-				curTool.focusEvent(e);
-		}
-
-		public void keyEvent(KeyEvent e)
-		{
-			checkToolShortcuts(e);
-			if (curTool != null)
-				curTool.keyEvent(e);
-		}
-
-		public void mouseEvent(MouseEvent e, Point screen, Point model)
-		{
-			if (curTool != null)
-				curTool.mouseEvent(e, screen, model);
-		}
-	}
 }

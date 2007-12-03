@@ -11,7 +11,7 @@ import org.phylowidget.ui.PhyloNode;
  */
 public final class NodeRange implements ItemI
 {
-	public TreeRenderer render;	
+	public AbstractTreeRenderer render;
 	public PhyloNode node;
 	
 	public int type=0;

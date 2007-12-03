@@ -50,7 +50,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	public Comparator sorter = new EnclosedLeavesComparator(-1);
 
 	public static final String INTERNAL_NODE_LABEL = "";
-	
+
 	/*
 	 * ****** OPTIONS ******
 	 */
@@ -66,9 +66,9 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 */
 	protected boolean enforceUniqueLabels;
 	/**
-	 * Keys are the String label, values are the vertex Objects.
+	 * An object which will handle keeping our labels unique.
 	 */
-	private HashMap vertexLabels;
+	private UniqueLabeler uniqueLabeler;
 
 	public RootedTree()
 	{
@@ -89,7 +89,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	}
 
 	/**
-	 * Subclasses should override this method to se any of the "option-like"
+	 * Subclasses should override this method to set any of the "option-like"
 	 * boolean variables provided, such as "useNeighborIndex".
 	 */
 	protected void setOptions()
@@ -119,14 +119,8 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		this.enforceUniqueLabels = enforceUniqueLabels;
 		if (enforceUniqueLabels)
 		{
-			vertexLabels = new HashMap();
-			ArrayList nodes = new ArrayList();
-			getAll(getRoot(), null, nodes);
-			for (int i = 0; i < nodes.size(); i++)
-			{
-				Object o = nodes.get(i);
-				vertexLabels.put(o.toString(), o);
-			}
+			uniqueLabeler = new UniqueLabeler();
+			uniqueLabeler.resetVertexLabels(this);
 		}
 	}
 
@@ -134,59 +128,48 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * Checks the current Rooted Tree for existence of the label attached to the
 	 * vertex, and if it already exists in the tree, returns a new unique label.
 	 */
-	void makeLabelUnique(Labelable vertex)
-	{
-		if (!enforceUniqueLabels)
-			return;
-		if (vertex.getLabel().length() == 0)
-		{
-			vertex.setLabel("_1");
-		}
-		while (vertexLabels.containsKey(vertex.getLabel()))
-		{
-			String cur = vertex.getLabel();
-			/*
-			 * Take the current label and increment the suffixed number.
-			 */
-			int i = cur.lastIndexOf('_');
-			if (i != -1)
-			{
-				String num = cur.substring(i + 1);
-				int curNum = Integer.parseInt(num) + 1;
-				vertex.setLabel(cur.substring(0, i + 1) + curNum);
-			} else
-			{
-				vertex.setLabel(cur + "_" + 1);
-			}
-		}
-	}
 
 	public String getLabel(Labelable vertex)
 	{
 		return vertex.getLabel();
 	}
-	
-	public void setLabel(Labelable vertex, String label)
+
+	public void setLabel(Object vertex, String label)
 	{
-		vertex.setLabel(label);
-		makeLabelUnique(vertex);
+		if (enforceUniqueLabels)
+		{
+			uniqueLabeler.changeLabel(vertex, label);
+		} else if (vertex instanceof Labelable)
+		{
+			Labelable v = (Labelable) vertex;
+			v.setLabel(label);
+		}
 	}
-	
+
+	public Object getVertexForLabel(String label)
+	{
+		if (enforceUniqueLabels)
+		{
+			return uniqueLabeler.getNodeForLabel(label);
+		} else
+			return null;
+	}
+
 	public double getBranchLength(Object vertex)
 	{
 		Object parent = getParentOf(vertex);
-		return getEdgeWeight(getEdge(parent,vertex));
+		return getEdgeWeight(getEdge(parent, vertex));
 	}
-	
+
 	public void setBranchLength(Object vertex, double weight)
 	{
 		Object parent = getParentOf(vertex);
 		if (parent == null)
 			return;
-		Object edge = getEdge(parent,vertex);
+		Object edge = getEdge(parent, vertex);
 		setEdgeWeight(edge, weight);
 	}
-	
+
 	/**
 	 * A "factory" method for creating node objects. Currently it just returns
 	 * the string given as input, but it could be extended by a subclass to
@@ -209,26 +192,15 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 
 	public boolean addVertex(Object o)
 	{
-		Labelable v;
-		if (!(o instanceof Labelable))
-		{
-			v = (Labelable) createVertex(o);
-		} else
-		{
-			v = (Labelable) o;
-		}
-		makeLabelUnique(v);
-		vertexLabels.put(v.getLabel(), v);
-		return super.addVertex(v);
+		if (enforceUniqueLabels)
+			uniqueLabeler.addLabel(o);
+		return super.addVertex(o);
 	}
 
 	public boolean removeVertex(Object o)
 	{
-		if (o instanceof Labelable)
-		{
-			Labelable v = (Labelable) o;
-			vertexLabels.remove(v.getLabel());
-		}
+		if (enforceUniqueLabels)
+			uniqueLabeler.removeLabel(o);
 		return super.removeVertex(o);
 	}
 
@@ -264,6 +236,37 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return l;
 	}
 
+	public Object getFirstLeaf(Object vertex)
+	{
+		Object cur = vertex;
+		while (!isLeaf(cur))
+		{
+			cur = getFirstChild(cur);
+		}
+		return cur;
+	}
+	
+	public Object getFirstChild(Object vertex)
+	{
+		return getChildrenOf(vertex).get(0);
+	}
+
+	public Object getLastChild(Object vertex)
+	{
+		List l = getChildrenOf(vertex);
+		return l.get(l.size());
+	}
+
+	public Object getLastLeaf(Object vertex)
+	{
+		Object cur = vertex;
+		while (!isLeaf(cur))
+		{
+			cur = getLastChild(cur);
+		}
+		return cur;
+	}
+	
 	public Object getParentOf(Object child)
 	{
 		// Special case: this vertex has no parents, i.e. it is the root.
@@ -350,6 +353,24 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return getEnclosedLeaves(vertex).size();
 	}
 
+	public int getMaxChildEnclosed(Object vertex)
+	{
+		if (isLeaf(vertex))
+			return 0;
+		List children = getChildrenOf(vertex);
+		int max = 0;
+		Object maxChild = null;
+		for (int i = 0; i < children.size(); i++)
+		{
+			int cur = getNumEnclosedLeaves(children.get(i));
+			if (cur > max)
+			{
+				max = cur;
+			}
+		}
+		return max;
+	}
+
 	/**
 	 * A method for retrieving all nodes below a given vertex in a tree. The
 	 * "leaves" and "nodes" List objects (which must have already been created
@@ -359,7 +380,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * @param leaves
 	 * @param nodes
 	 */
-	public synchronized void getAll(Object vertex, List leaves, List nodes)
+	public void getAll(Object vertex, List leaves, List nodes)
 	{
 		if (vertex == null)
 			return;
@@ -414,7 +435,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			setRoot(newRoot);
 		}
 		List nodes = getEnclosedVertices(vertex);
-		removeAllVertices(nodes);
+		for (int i = 0; i < nodes.size(); i++)
+		{
+//			deleteNode(nodes.get(i));
+			removeVertex(nodes.get(i));
+		}
 	}
 
 	public synchronized void deleteNode(Object vertex)
@@ -606,7 +631,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		// STEP 2: Create the new root.
 		//
 		// Add the new root vertex.
-		Object newRoot = createAndAddVertex("newroot");
+		Object newRoot = createAndAddVertex("");
 		// Capture the length of the edge above the pivot vertex.
 		insertNodeBetween(getParentOf(pivot), pivot, newRoot);
 		root = newRoot;
@@ -732,7 +757,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * @param vertex
 	 *            the node at which to begin culling
 	 */
-	public synchronized void cullElbowsBelow(Object vertex)
+	public void cullElbowsBelow(Object vertex)
 	{
 		ArrayList list = new ArrayList();
 		getAll(vertex, null, list);

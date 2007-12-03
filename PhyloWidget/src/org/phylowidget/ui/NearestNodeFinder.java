@@ -19,7 +19,7 @@ import processing.core.PApplet;
 
 public class NearestNodeFinder implements UIObject
 {
-//	private PApplet p;
+	private PApplet p;
 	
 	public static final float RADIUS = 50f;
 	
@@ -32,9 +32,9 @@ public class NearestNodeFinder implements UIObject
 	
 	public NearestNodeFinder(PApplet p)
 	{
-//		this.p = p;
+		this.p = p;
 		UIUtils.loadUISinglets(p);
-		
+//		
 		EventManager.instance.add(this);
 	}
 	
@@ -53,7 +53,8 @@ public class NearestNodeFinder implements UIObject
 	{
 		if (PhyloWidget.trees == null) return;
 		
-		float ratio = TreeManager.getVisibleRect().width / PhyloWidget.p.width;
+//		float ratio = TreeManager.getVisibleRect().width / PhyloWidget.p.width;
+		float ratio = TreeManager.camera.getZ();
 		float rad = RADIUS * ratio;
 		
 		pt.setLocation(x,y);

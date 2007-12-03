@@ -2,12 +2,18 @@ package org.andrewberman.ui.menu;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
+import org.andrewberman.ui.ifaces.Sizable;
 
 /**
  * The <code>ToolbarItem</code> class is a MenuItem that belongs to a Toolbar
@@ -18,139 +24,278 @@ import org.andrewberman.ui.ifaces.Positionable;
  */
 public class ToolbarItem extends MenuItem
 {
-	static final float roundOff = .2f;
+	static final float shortcutTextSize = .75f;;
 	static RoundRectangle2D.Float roundRect = new RoundRectangle2D.Float(0, 0,
 			0, 0, 0, 0);
 	static RoundRectangle2D.Float buffRoundRect = new RoundRectangle2D.Float(0,
 			0, 0, 0, 0, 0);
+	static AffineTransform at = new AffineTransform();
 
-	float width, height;
-	float textOffsetX;
-	float textOffsetY;
+	static Area tri;
+	static float triWidth;
 
-	public void draw()
+	Rectangle2D.Float subItemRect = new Rectangle2D.Float();
+
+	float tWidth, shortcutWidth;
+
+	boolean drawChildrenTriangle;
+
+	public ToolbarItem()
 	{
-		if (isVisible())
-		{
-			roundRect.setRoundRect(x, y, width, height, roundOff * height,
-					roundOff * height);
-			Graphics2D g2 = menu.buff.g2;
-			/*
-			 * Set the correct fill gradient
-			 */
-			if (isShowingChildren())
-			{
-				g2.setPaint(menu.style
-						.getGradient(MenuItem.DOWN, y, y + height));
-			} else
-			{
-				g2.setPaint(menu.style
-						.getGradient(MenuItem.OVER, y, y + height));
-			}
-			/*
-			 * Only perform the fill if the mood is right.
-			 */
-			if (getState() != MenuItem.UP || isShowingChildren())
-			{
-				g2.fill(roundRect);
-			}
-			/*
-			 * Draw the rounded rectangle outline.
-			 */
-			if (getState() != MenuItem.UP || isShowingChildren())
-			{
-				RenderingHints rh = menu.buff.g2.getRenderingHints();
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-						RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setPaint(menu.style.strokeColor);
-				g2.setStroke(menu.style.stroke);
-				g2.draw(roundRect);
-				g2.setRenderingHints(rh);
-			}
-			/*
-			 * Draw the text.
-			 */
-			g2.setFont(menu.style.font.font.deriveFont(menu.style.fontSize));
-			g2.setPaint(menu.style.textColor);
-			g2.drawString(getLabel(), x + textOffsetX, y + textOffsetY);
-		}
-		super.draw();
+		super();
 	}
 
-	public MenuItem add(String s)
+	protected void drawMyself()
 	{
+		roundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
+				menu.style.roundOff);
+		Graphics2D g2 = menu.buff.g2;
 		/*
-		 * Let's modify this method slightly so that by default we create items
-		 * within our underlying VerticalMenu.
+		 * Set the correct fill gradient
 		 */
-		if (items.size() != 0 && items.get(0) instanceof VerticalMenu)
+		if (isOpen() && parent == menu)
 		{
-			VerticalMenu vm = (VerticalMenu) items.get(0);
-			return vm.add(s);
+			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
 		} else
+			g2.setPaint(menu.style.getGradient(MenuItem.OVER, y, y + height));
+
+		/*
+		 * Only perform the fill if the mood is right.
+		 */
+		if (getState() != MenuItem.UP || isOpen() && isAncestorOfLastHovered()
+				|| isOpen() && menu == parent)
 		{
-			return add(new VerticalMenu(menu.canvas)).add(s);
+			g2.fill(roundRect);
+			g2.setPaint(menu.style.strokeColor);
+			g2.setStroke(menu.style.stroke);
+			g2.draw(roundRect);
 		}
+		/*
+		 * Draw the text, triangle, and shortcut.
+		 */
+		float curX = x + menu.style.padX;
+		MenuUtils.drawLeftText(this, getName(), curX);
+		curX += tWidth;
+		if (shortcut != null)
+		{
+			float rightX = getX() + getWidth();
+			curX = rightX - shortcutWidth;
+			// curX += menu.style.padX;
+			float shortSize = menu.style.fontSize * shortcutTextSize;
+			float descent = UIUtils.getTextDescent(menu.buff, menu.style.font,
+					shortSize, true);
+			g2.setFont(menu.style.font.font.deriveFont(shortSize));
+			g2.setPaint(menu.style.textColor.brighter(100));
+			float ht = UIUtils.getTextHeight(menu.canvas.g, menu.style.font,
+					shortSize, shortcut.label, true);
+			float yOffset = (height - ht) / 2f + descent;
+			yOffset += ht / 2;
+			g2.drawString(shortcut.label, curX, y + yOffset);
+		}
+		curX += shortcutWidth;
+		if (drawChildrenTriangle && items.size() > 0)
+		{
+			curX = x + width - triWidth - menu.style.padX;
+			at.setToIdentity();
+			at.translate(curX, y + height / 2);
+			Area a2 = tri.createTransformedArea(at);
+			g2.setPaint(menu.style.strokeColor);
+			g2.fill(a2);
+		}
+	}
+
+	protected void drawBefore()
+	{
+		if (isOpen() && items.size() > 0)
+			MenuUtils.drawBackgroundRoundRect(this, subItemRect.x,
+					subItemRect.y, subItemRect.width, subItemRect.height);
+	}
+
+	/**
+	 * Normally, the MenuItem's create() method just defers back to the nearest
+	 * Menu it can use to create an item, but here we want to change some
+	 * options, so let's override it.
+	 */
+	public MenuItem create(String label)
+	{
+		ToolbarItem ti = new ToolbarItem();
+		ti.setLayoutMode(ToolbarItem.LAYOUT_RIGHT);
+		ti.drawChildrenTriangle = true;
+		ti.setName(label);
+		return ti;
+	}
+
+	@Override
+	public void open()
+	{
+		super.open();
+		if (parent == menu)
+		{
+			FocusManager.instance.setFocus(menu);
+			System.out.println("FOCUS");
+		}
+
+	}
+
+	@Override
+	public void close()
+	{
+		super.close();
+		if (parent == menu)
+		{
+			FocusManager.instance.removeFromFocus(menu);
+		}
+	}
+
+	protected int layoutMode;
+	protected static final int LAYOUT_BELOW = 0;
+	protected static final int LAYOUT_RIGHT = 1;
+	protected static final int LAYOUT_LEFT = 2;
+
+	protected void setLayoutMode(int layoutMode)
+	{
+		this.layoutMode = layoutMode;
 	}
 
 	public void layout()
 	{
+		float curX = 0, curY = 0;
+		switch (layoutMode)
+		{
+			case (LAYOUT_BELOW):
+				curX = x - menu.style.padY;
+				curY = y + height;
+				break;
+			case (LAYOUT_RIGHT):
+			default:
+				curX = x + width;
+				curY = y - menu.style.padY;
+				break;
+		}
+		subItemRect.x = curX;
+		subItemRect.y = curY;
+		curX += menu.style.padY;
+		curY += menu.style.padY;
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
-			if (item instanceof Positionable)
-			{
-				Positionable pos = (Positionable) item;
-				pos.setPosition(x, (int) y + height + menu.style.margin / 2);
-			}
+			item.calcPreferredSize();
 		}
+		float maxWidth = getMaxWidth();
+		float maxHeight = getMaxHeight();
+		for (int i = 0; i < items.size(); i++)
+		{
+			MenuItem item = (MenuItem) items.get(i);
+			item.setPosition(curX, curY);
+			item.setSize(maxWidth, maxHeight);
+			curY += item.getHeight();
+		}
+		curY += menu.style.padY;
+
+		subItemRect.width = maxWidth + menu.style.padY * 2;
+		subItemRect.height = curY - subItemRect.y;
 		super.layout();
 	}
 
-	protected void getRect(Float rect, Float buff)
+	protected void calcPreferredSize()
 	{
-		if (isVisible())
+		super.calcPreferredSize();
+
+		/*
+		 * Calculate the text rectangle size.
+		 */
+		tWidth = UIUtils.getTextWidth(menu.buff, menu.style.font,
+				menu.style.fontSize, getName(), true);
+		/*
+		 * For the height, let's use the height of some capital letters.
+		 */
+		float tHeight = UIUtils.getTextHeight(menu.buff, menu.style.font,
+				menu.style.fontSize, "XYZ", true);
+
+		float triangleWidth = 0;
+		if (drawChildrenTriangle && items.size() > 0)
 		{
-			buff.setFrame(x, y, width, height);
-			Rectangle2D.union(rect, buff, rect);
+			/*
+			 * Calculate the width of the "submenu" triangle shape.
+			 */
+			at = AffineTransform.getScaleInstance(tHeight / 2f, tHeight / 2f);
+			Area a = menu.style.subTriangle.createTransformedArea(at);
+			ToolbarItem.tri = a;
+			ToolbarItem.triWidth = (float) a.getBounds2D().getWidth();
+			triangleWidth = triWidth + menu.style.padX;
 		}
+		shortcutWidth = 0;
+		if (shortcut != null)
+		{
+			shortcutWidth = menu.style.padX
+					+ UIUtils.getTextWidth(menu.buff, menu.style.font,
+							menu.style.fontSize * shortcutTextSize,
+							shortcut.label, true);
+		}
+
+		setWidth(tWidth + triangleWidth + shortcutWidth + 2 * menu.style.padX);
+		setHeight(tHeight + 2 * menu.style.padY);
+	}
+
+	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
+	{
+		buff.setFrame(x, y, width, height);
+		Rectangle2D.union(rect, buff, rect);
 		super.getRect(rect, buff);
 	}
 
 	protected void setState(int state)
 	{
-		super.setState(state);
-		if (menu instanceof Toolbar)
+		if (this.state == state)
+			return;
+		if (menu == parent && menu instanceof Toolbar)
 		{
+			boolean oldHov = menu.hoverNavigable;
+			menu.hoverNavigable = false;
+			super.setState(state);
 			Toolbar tb = (Toolbar) menu;
-			if (tb.isActive && state == MenuItem.OVER)
+			if (state != MenuItem.UP)
 			{
-				menu.setOpenItem(this);
-				setState(MenuItem.DOWN);
+				if (tb.isActive())
+				{
+					tb.closeMyChildren();
+					open();
+				}
 			}
-		}
+			menu.hoverNavigable = oldHov;
+		} else
+			super.setState(state);
+	}
+
+	protected void itemMouseEvent(MouseEvent e, Point pt)
+	{
+		/*
+		 * I'm doing this actionOnMouseDown stuff so that the top-level menus
+		 * are activated on a mouse press, to be more toolbar-like (I'm looking
+		 * to match Eclipse-like functionality). Basically, I'm overriding the
+		 * default values if we're in a top-level menu.
+		 */
+		super.itemMouseEvent(e, pt);
+		// if (parent == menu && mouseInside)
+		// {
+		// if (e.getID() == MouseEvent.MOUSE_RELEASED)
+		// {
+		// if (!isOpen())
+		// {
+		// menuTriggerLogic();
+		// } else
+		// {
+		// close();
+		// }
+		// }
+		// // System.out.println("Hey!");
+		// }
 	}
 
 	protected boolean containsPoint(Point p)
 	{
-		if (!isVisible()) return false;
-		buffRoundRect.setRoundRect(x, y, width, height, roundOff, roundOff);
+		buffRoundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
+				menu.style.roundOff);
 		return buffRoundRect.contains(p);
-	}
-
-	public void setSize(float w, float h)
-	{
-		this.width = w;
-		this.height = h;
-	}
-
-	public float getHeight()
-	{
-		return height;
-	}
-
-	public float getWidth()
-	{
-		return width;
 	}
 }

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.ifaces.UIObject;
+import org.andrewberman.ui.tools.ToolManager;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
@@ -47,7 +48,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 {
 	private PApplet p;
 	private ArrayList delegates = new ArrayList(5);
-	private UIObject toolManager;
+	private ToolManager toolManager;
 	public Camera toolCamera;
 
 	public static EventManager instance;
@@ -57,8 +58,6 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public static void lazyLoad(PApplet p)
 	{
-		// TODO: I had the "instance == null" commented out... but why? Let's
-		// leave it in...
 		// if (instance == null)
 		instance = new EventManager(p);
 	}
@@ -96,11 +95,16 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		delegates.add(o);
 	}
 
-	public void setToolManager(UIObject o)
+	public void setToolManager(ToolManager t)
 	{
-		toolManager = o;
+		toolManager = t;
 	}
 
+	public ToolManager getToolManager()
+	{
+		return toolManager;
+	}
+	
 	public void setCamera(Camera c)
 	{
 		toolCamera = c;
@@ -183,6 +187,19 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (FocusManager.instance.isModal())
 			return;
+		/*
+		 * Then, if the focus isn't modal and the object wasn't consumed,
+		 * continue sending the mouse event to the other uiobjects.
+		 */
+		for (int i = delegates.size() - 1; i >= 0; i--)
+		{
+			if (e.isConsumed())
+				break;
+			UIObject ui = (UIObject) delegates.get(i);
+			if (ui == FocusManager.instance.getFocusedObject())
+				continue;
+			ui.keyEvent(e);
+		}
 		/*
 		 * Lastly, dispatch to the tool manager if not consumed.
 		 */

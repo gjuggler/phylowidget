@@ -1,4 +1,4 @@
-package org.phylowidget.net;
+package org.andrewberman.unsorted;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,15 +12,16 @@ import org.phylowidget.ui.PhyloTree;
 public class DelayedAction
 {
 	private boolean updating;
+	boolean threaded;
 	Timer timer;
-	
+
 	public void trigger(int delay)
-	{	
+	{
 		if (timer != null)
 		{
 			timer.stop();
 		}
-		timer = new Timer(delay,new ActionListener()
+		timer = new Timer(delay, new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -37,16 +38,40 @@ public class DelayedAction
 		timer.setRepeats(false);
 		timer.start();
 	}
-	
+
 	private void doUpdate()
 	{
-		updating = true;
-		run();
-		updating = false;
+		if (threaded)
+		{
+			new Thread()
+			{
+				public void run()
+				{
+					updating = true;
+					run();
+					updating = false;
+				}
+			}.start();
+		} else
+		{
+			updating = true;
+			run();
+			updating = false;
+		}
 	}
-	
+
 	protected void run()
 	{
 		// Subclasses subclass this and do stuff here.
+	}
+
+	public boolean isThreaded()
+	{
+		return threaded;
+	}
+
+	public void setThreaded(boolean threaded)
+	{
+		this.threaded = threaded;
 	}
 }

@@ -4,7 +4,7 @@ import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
 
-public abstract class Camera implements TweenListener
+public class Camera
 {
 	protected Tween xTween;
 	protected Tween yTween;
@@ -14,9 +14,9 @@ public abstract class Camera implements TweenListener
 
 	public Camera()
 	{
-		xTween = new Tween(this, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
-		yTween = new Tween(this, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
-		zTween = new Tween(this, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES * 2);
+		xTween = new Tween(null, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
+		yTween = new Tween(null, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
+		zTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES * 2);
 	}
 
 	/*
@@ -113,10 +113,5 @@ public abstract class Camera implements TweenListener
 		xTween.update();
 		yTween.update();
 		zTween.update();
-	}
-	
-	public void tweenEvent(Tween t, int type)
-	{
-		// Do nothing.
 	}
 }

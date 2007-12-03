@@ -2,6 +2,7 @@ package org.phylowidget.tree;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,24 +14,17 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
+import org.phylowidget.tree.RootedTree.EnclosedLeavesComparator;
 
 import sun.misc.Queue;
 
 public class CachedRootedTree extends RootedTree
 {
 	private static final long serialVersionUID = 1L;
+	protected boolean inSync;
 
-	/**
-	 * A simple counter that is ticked every time the structure of the tree is
-	 * altered.
-	 */
-	private int modID = 1;
-	/**
-	 * Another simple counter that is set to modID whenever the tree is
-	 * re-calculated.
-	 */
-	private int calcID;
-
+	public Comparator sorter = new CachedEnclosedLeavesComparator(-1);
+	
 	public CachedRootedTree()
 	{
 		super();
@@ -41,19 +35,22 @@ public class CachedRootedTree extends RootedTree
 		return new CachedVertex(o);
 	}
 
+	private boolean inSync()
+	{
+		return inSync;
+	}
+
 	/**
 	 * Synchronizes each vertex's cached values with the current structure of
 	 * the tree. If the tree is already updated (i.e. modID == calcID), then
 	 * nothing happens.
 	 */
-	synchronized private void sync()
+	private void sync()
 	{
-		if (modID == calcID || root == null)
+		if (inSync() || root == null)
 			return;
-//		System.out.println("Calculating stuff...");
-
-		calcID = modID; // Do this before calculating to avoid stack overflow.
 		calculateStuff();
+		inSync = true;
 	}
 
 	private List getChildrenOfNoSort(Object vertex)
@@ -67,9 +64,10 @@ public class CachedRootedTree extends RootedTree
 			l = Graphs.successorListOf(this, vertex);
 		return l;
 	}
-	
-	private void calculateStuff()
+
+	protected void calculateStuff()
 	{
+
 		/*
 		 * Everything should be able to be cached by first sweeping from root to
 		 * leaves, then from leaves to root.
@@ -92,7 +90,7 @@ public class CachedRootedTree extends RootedTree
 				v.setParent(null);
 			} else
 			{
-				// Normal recursion.
+				// Normal iteration.
 				CachedVertex p = (CachedVertex) getParentOf(v);
 				v.setDepthToRoot(p.getDepthToRoot() + 1);
 				double ew = getEdgeWeight(getEdge(p, v));
@@ -110,7 +108,8 @@ public class CachedRootedTree extends RootedTree
 		// Load the vertices breadth-first into a linked list.
 		LinkedList traversal = new LinkedList();
 		/*
-		 * Destination linkedlist for the vertices. Root is first, leaves are last.
+		 * Destination linkedlist for the vertices. Root is first, leaves are
+		 * last.
 		 */
 		LinkedList dest = new LinkedList();
 		traversal.add(getRoot());
@@ -119,13 +118,12 @@ public class CachedRootedTree extends RootedTree
 			Object o = traversal.removeFirst();
 			dest.addLast(o);
 			List children = getChildrenOfNoSort(o);
-			for (int i=0; i < children.size(); i++)
+			for (int i = 0; i < children.size(); i++)
 			{
 				traversal.addLast(children.get(i));
 			}
 		}
-		
-		// A placeholder object for our hashtable.
+
 		while (!dest.isEmpty())
 		{
 			CachedVertex cv = (CachedVertex) dest.removeLast();
@@ -138,16 +136,37 @@ public class CachedRootedTree extends RootedTree
 				cv.setMaxHeightToLeaf(0);
 			} else
 			{
-				// Regular recursion, building up from the children's cached
+				// Regular iteration, building up from the children's cached
 				// values.
 				int numEnc = 0;
 				int numLeaves = 0;
 				int maxDepth = 0;
+				int minChildEnc = Integer.MAX_VALUE;
+				int maxChildEnc = 0;
+				CachedVertex firstChild = null;
+				CachedVertex lastChild = null;
 				double maxHeight = 0;
-				List children = getChildrenOfNoSort(cv); // Gather our children.
+				List children = getChildrenOfNoSort(cv);
+				Collections.sort(children,sorter);
+				if (sorting.containsKey(cv))
+				{
+					Integer i = (Integer) sorting.get(cv);
+					if (i == REVERSE)
+						Collections.reverse(children);
+				}
 				for (int i = 0; i < children.size(); i++)
 				{
 					CachedVertex child = (CachedVertex) children.get(i);
+					if (child.getNumEnclosed() >= maxChildEnc)
+					{
+						maxChildEnc = child.getNumEnclosed();
+						lastChild = child;
+					}
+					if (child.getNumEnclosed() <= minChildEnc)
+					{
+						minChildEnc = child.getNumEnclosed();
+						firstChild = child;
+					}
 					numEnc += child.getNumEnclosed() + 1;
 					numLeaves += child.getNumLeaves();
 					double ew = getEdgeWeight(getEdge(cv, child));
@@ -156,40 +175,83 @@ public class CachedRootedTree extends RootedTree
 					if (child.getMaxDepthToLeaf() + 1 > maxDepth)
 						maxDepth = child.getMaxDepthToLeaf() + 1;
 				}
+				cv.setMaxChildEnclosed(maxChildEnc);
 				cv.setNumEnclosed(numEnc);
 				cv.setNumLeaves(numLeaves);
 				cv.setMaxDepthToLeaf(maxDepth);
 				cv.setMaxHeightToLeaf(maxHeight);
+				/*
+				 * Cache the first and last child.
+				 */
+				cv.setFirstChild(children.get(0));
+				cv.setLastChild(children.get(children.size()-1));
 			}
 		}
 	}
-	
+
+	@Override
+	public int getMaxChildEnclosed(Object vertex)
+	{
+		CachedVertex c = (CachedVertex) vertex;
+		return c.getMaxChildEnclosed();
+	}
+
+	@Override
+	public Object getFirstChild(Object vertex)
+	{
+		CachedVertex c = (CachedVertex) vertex;
+		return c.getFirstChild();
+	}
+
+	@Override
+	public Object getLastChild(Object vertex)
+	{
+		CachedVertex c = (CachedVertex) vertex;
+		return c.getLastChild();
+	}
+
 	public double getHeightToRoot(Object vertex)
 	{
 		sync();
-		CachedVertex cv = (CachedVertex) vertex;
-		return cv.getHeightToRoot();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getHeightToRoot();
+		} else
+			return super.getHeightToRoot(vertex);
 	}
 
 	public int getMaxDepthToLeaf(Object vertex)
 	{
 		sync();
-		CachedVertex cv = (CachedVertex) vertex;
-		return cv.getMaxDepthToLeaf();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getMaxDepthToLeaf();
+		} else
+			return super.getMaxDepthToLeaf(vertex);
 	}
 
 	public double getMaxHeightToLeaf(Object vertex)
 	{
 		sync();
-		CachedVertex cv = (CachedVertex) vertex;
-		return cv.getMaxHeightToLeaf();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getMaxHeightToLeaf();
+		} else
+			return super.getMaxHeightToLeaf(vertex);
 	}
 
 	public int getNumEnclosedLeaves(Object vertex)
 	{
 		sync();
-		CachedVertex cv = (CachedVertex) vertex;
-		return cv.getNumLeaves();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getNumLeaves();
+		} else
+			return super.getNumEnclosedLeaves(vertex);
 	}
 
 	protected void fireEdgeAdded(Object arg0)
@@ -215,16 +277,58 @@ public class CachedRootedTree extends RootedTree
 		modPlus();
 		super.fireVertexRemoved(arg0);
 	}
-	
+
 	public void setBranchLength(Object vertex, double weight)
 	{
 		modPlus();
 		super.setBranchLength(vertex, weight);
 	}
-	
+
 	private void modPlus()
 	{
-		modID++;
+		inSync = false;
 	}
 
+	
+	class CachedEnclosedLeavesComparator implements Comparator
+	{
+		int dir;
+
+		public CachedEnclosedLeavesComparator(int dir)
+		{
+			this.dir = dir;
+		}
+
+		public int compare(Object o1, Object o2)
+		{
+			CachedVertex ca = (CachedVertex) o1;
+			CachedVertex cb = (CachedVertex) o2;
+			int a = ca.getNumEnclosed();
+			int b = cb.getNumEnclosed();
+
+			if (dir == 1)
+			{
+				if (a > b)
+					return 1;
+				else if (a < b)
+					return -1;
+				else
+					return 0;
+			} else
+			{
+				if (a > b)
+					return -1;
+				else if (a < b)
+					return 1;
+				else
+					return 0;
+			}
+		}
+
+		public boolean equals(Object o1, Object o2)
+		{
+			return (compare(o1, o1) == 0);
+		}
+
+	}
 }

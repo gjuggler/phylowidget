@@ -10,4 +10,6 @@ public interface Positionable
 	public void setPosition(float x, float y);
 	public float getX();
 	public float getY();
+	public void setX(float f);
+	public void setY(float f);
 }

@@ -123,7 +123,7 @@ public class StyleSet
 		p.lineTo(0f, .5f);
 		p.closePath();
 		subTriangle = new Area(p);
-		roundOff = .2f;
+		roundOff = 10;
 	}
 
 	public Paint getGradient(float lo, float hi)

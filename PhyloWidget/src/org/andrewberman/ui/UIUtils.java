@@ -349,6 +349,22 @@ public class UIUtils
 		return width;
 	}
 
+	public static Rectangle2D getTextRect(PGraphics g, PFont font, float size, String text, boolean useNativeFonts)
+	{
+		if (isJava2D(g) && useNativeFonts)
+		{
+			FontMetrics fm = getMetrics(g, font.font, size);
+			Graphics2D g2 = ((PGraphicsJava2D) g).g2;
+			return fm.getStringBounds(text, g2);
+		} else
+		{
+			Rectangle2D.Float rect = new Rectangle2D.Float();
+			rect.width = getTextWidth(g,font,size,text,useNativeFonts);
+			rect.height = getTextHeight(g,font,size,text,useNativeFonts);
+			return rect;
+		}
+	}
+	
 	/**
 	 * Copies the relevant transformation matrices from the indicated
 	 * <code>PApplet</code> into <code>UIUtils'</code> internal static

@@ -10,6 +10,11 @@ public final class Rectangle extends Rectangle2D.Float
 		super(x,y,w,h);
 	}
 	
+	public Rectangle()
+	{
+		super();
+	}
+
 	public float distToPoint(Point pt)
 	{
 		float px = pt.x;

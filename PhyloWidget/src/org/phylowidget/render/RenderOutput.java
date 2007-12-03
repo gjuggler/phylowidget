@@ -5,6 +5,7 @@ import java.awt.RenderingHints;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloNode;
 
@@ -19,22 +20,30 @@ public class RenderOutput
 
 	public static void savePDF(PApplet p, RootedTree t, TreeRenderer r)
 	{
-		try {
-		preprocess(t);
-		File f = p.outputFile("Save PDF as...");
-		p.noLoop();
-		PGraphicsPDF canvas = (PGraphicsPDF) p.createGraphics(p.width,
-				p.height, PConstants.PDF, f.getAbsolutePath());
-		canvas.beginDraw();
-		r.render(canvas, 0, 0, canvas.width, canvas.height);
-		canvas.endDraw();
-		canvas.dispose();
-		// canvas.save(f.getAbsolutePath());
+		/*
+		 * Change the rendering threshold to the size of the tree.
+		 */
+		float numNodes = t.vertexSet().size();
+		float oldThreshold = PhyloWidget.ui.renderThreshold;
+		PhyloWidget.ui.renderThreshold = numNodes;
+		try
+		{
+			preprocess(t);
+			File f = p.outputFile("Save PDF as...");
+			p.noLoop();
+			PGraphicsPDF canvas = (PGraphicsPDF) p.createGraphics(p.width,
+					p.height, PConstants.PDF, f.getAbsolutePath());
+			canvas.beginDraw();
+			r.render(canvas, 0, 0, canvas.width, canvas.height);
+			canvas.endDraw();
+			canvas.dispose();
+			// canvas.save(f.getAbsolutePath());
 		} catch (RuntimeException e)
 		{
 			e.printStackTrace();
 		} finally
 		{
+			PhyloWidget.ui.renderThreshold = oldThreshold;
 			p.loop();
 		}
 	}

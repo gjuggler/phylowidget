@@ -143,29 +143,28 @@ public class CachedRootedTree extends RootedTree
 				int maxDepth = 0;
 				int minChildEnc = Integer.MAX_VALUE;
 				int maxChildEnc = 0;
-				CachedVertex firstChild = null;
-				CachedVertex lastChild = null;
 				double maxHeight = 0;
 				List children = getChildrenOfNoSort(cv);
-				Collections.sort(children,sorter);
-				if (sorting.containsKey(cv))
-				{
-					Integer i = (Integer) sorting.get(cv);
-					if (i == REVERSE)
-						Collections.reverse(children);
-				}
+//				Collections.sort(children,sorter);
+				sortChildrenList(cv, children, sorter);
+//				if (sorting.containsKey(cv))
+//				{
+//					Integer i = (Integer) sorting.get(cv);
+//					if (i == REVERSE)
+//						Collections.reverse(children);
+//				}
 				for (int i = 0; i < children.size(); i++)
 				{
 					CachedVertex child = (CachedVertex) children.get(i);
 					if (child.getNumEnclosed() >= maxChildEnc)
 					{
 						maxChildEnc = child.getNumEnclosed();
-						lastChild = child;
+//						lastChild = child;
 					}
 					if (child.getNumEnclosed() <= minChildEnc)
 					{
 						minChildEnc = child.getNumEnclosed();
-						firstChild = child;
+//						firstChild = child;
 					}
 					numEnc += child.getNumEnclosed() + 1;
 					numLeaves += child.getNumLeaves();
@@ -199,6 +198,7 @@ public class CachedRootedTree extends RootedTree
 	@Override
 	public Object getFirstChild(Object vertex)
 	{
+		sync();
 		CachedVertex c = (CachedVertex) vertex;
 		return c.getFirstChild();
 	}
@@ -206,6 +206,7 @@ public class CachedRootedTree extends RootedTree
 	@Override
 	public Object getLastChild(Object vertex)
 	{
+		sync();
 		CachedVertex c = (CachedVertex) vertex;
 		return c.getLastChild();
 	}
@@ -284,7 +285,7 @@ public class CachedRootedTree extends RootedTree
 		super.setBranchLength(vertex, weight);
 	}
 
-	private void modPlus()
+	public void modPlus()
 	{
 		inSync = false;
 	}

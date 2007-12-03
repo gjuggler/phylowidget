@@ -368,8 +368,9 @@ public class Cladogram extends AbstractTreeRenderer
 	{
 		PhyloNode p = (PhyloNode) tree.getParentOf(n);
 		if (p == null)
-			p = n;
+			return screenRect.contains(n.x,n.y);
 		tRect.setFrameFromDiagonal(n.x, n.y, p.x, p.y);
+//		return screenRect.contains(n.x, n.y);
 		return screenRect.intersects(tRect);
 	}
 

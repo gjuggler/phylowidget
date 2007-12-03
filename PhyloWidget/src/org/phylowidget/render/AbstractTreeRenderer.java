@@ -197,169 +197,6 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	int counter;
 
-	protected void draw()
-	{
-		/*
-		 * Call to subclasses that allow them to do some calculations that need
-		 * to be performed on a frame-by-frame basis.
-		 */
-		drawRecalc();
-		/*
-		 * Now, let's set up the canvas.
-		 */
-		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
-		canvas.background(255);
-		canvas.noStroke();
-		canvas.fill(0);
-		canvas.textFont(FontLoader.instance.vera);
-		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
-		canvas.textSize(textSize);
-		hint();
-		screenRect = new Rectangle2D.Float(0, 0, canvas.width, canvas.height);
-		UIUtils.screenToModel(screenRect);
-
-		/*
-		 * FIRST LOOP: Updating nodes Update all nodes, regardless of
-		 * "threshold" status.
-		 * Also set each node's drawMe flag to FALSE.
-		 */
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			PhyloNode n = (PhyloNode) nodes.get(i);
-			updateNode(n);
-			n.drawMe = false;
-		}
-		/*
-		 * SECOND LOOP: Flagging drawn nodes
-		 *  -- Now, we go through all nodes
-		 * (remember this is a list sorted by significance, i.e. enclosed number
-		 * of leaves). At each node, we decide whether or not to draw it based
-		 * on whether it is within the screen area. We exit the loop once the
-		 * threshold number of nodes has been drawn.
-		 */
-		int nodesDrawn = 0;
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			PhyloNode n = (PhyloNode) nodes.get(i);
-			if (nodesDrawn >= nodesToDraw)
-			{
-//				threshold = tree.getNumEnclosedLeaves(n);
-				break;
-			}
-			if (!isNodeWithinScreen(n))
-				continue;
-			/*
-			 * Ok, let's flag this thing to be drawn.
-			 */
-			n.drawMe = true;
-			nodesDrawn++;
-		}
-		/*
-		 * THIRD LOOP: Drawing nodes
-		 *   - This loop actually does the drawing.
-		 */
-		nodesDrawn = 0;
-		for (int i = 0; i < nodes.size(); i++)
-		{
-			PhyloNode n = (PhyloNode) nodes.get(i);
-			if (!n.drawMe)
-				continue;
-			/*
-			 * Ok, we've skipped all the non-drawn nodes,
-			 * let's do the actual drawing.
-			 */
-			handleNode(n);
-		}
-		unhint();
-	}
-
-	protected void handleNode(PhyloNode n)
-	{
-		/*
-		 * Set up the strokes and weights.
-		 */
-		if (tree.isLeaf(n))
-		{
-			/*
-			 * CASE 1: LEAF NODE
-			 * - Draw line to parent
-			 * - Draw node marker
-			 * - Draw label
-			 */
-			drawNodeMarker(n);
-			if (n.getParent() != null)
-				drawLine((PhyloNode) n.getParent(), n);
-			drawLabel(n);
-		} else
-		{
-			/*
-			 * CASE 3: INTERNAL NODE
-			 * - Draw node marker
-			 * - Draw line to parent
-			 * - Go through children:
-			 *    - if child is flagged to be drawn, continue
-			 *    - if child is *not* drawn, draw a line to its early / latest
-			 */
-			drawNodeMarker(n);
-			drawLine((PhyloNode) n.getParent(), n);
-			List l = tree.getChildrenOf(n);
-			for (int i = 0; i < l.size(); i++)
-			{
-				PhyloNode child = (PhyloNode) l.get(i);
-				NodeRange r = nodesToRanges.get(child);
-				/*
-				 * If this child is thresholded out, then draw a placemark line to its
-				 * earliest or latest leaf node.
-				 */
-				if (!child.drawMe)
-				{
-					PhyloNode leaf = null;
-					if (i == 0)
-						leaf = (PhyloNode) tree.getFirstLeaf(child);
-					else if (i == l.size() - 1)
-						leaf = (PhyloNode) tree.getLastLeaf(child);
-					else
-						/*
-						 * If this child is a "middle child", just do nothing.
-						 */
-						continue;
-					drawLine(n, leaf);
-					drawLabel(leaf);
-				}
-			}
-			/*
-			 * Now, we want to draw this inner node's label if it's significant
-			 * and we are set to show clade labels.
-			 */
-			if (UniqueLabeler.isLabelSignificant(n.getLabel())
-					&& PhyloWidget.ui.showCladeLabels)
-			{
-				drawLabel(n);
-			}
-		}
-		/*
-		 * If we've got a PhyloTree on our hands,
-		 * let's take care of the hovered node.
-		 */
-		if (tree instanceof PhyloTree)
-		{
-			PhyloTree pt = (PhyloTree) tree;
-			PhyloNode h = pt.hoveredNode;
-			if (h != null)
-			{
-				canvas.stroke(style.hoverColor.getRGB());
-				float weight = baseStroke * style.hoverStroke;
-				weight *= PhyloWidget.ui.traverser.glowTween.getPosition();
-				canvas.strokeWeight(weight);
-				canvas.fill(style.hoverColor.getRGB());
-				drawLine((PhyloNode) h.getParent(), h);
-				canvas.noStroke();
-				canvas.fill(style.hoverColor.getRGB());
-				drawNodeMarker(h);
-			}
-		}
-	}
-
 	protected boolean isNodeWithinScreen(PhyloNode n)
 	{
 		return screenRect.contains(n.x, n.y);
@@ -430,6 +267,87 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		}
 	}
 
+	protected void draw()
+	{
+		/*
+		 * Call to subclasses that allow them to do some calculations that need
+		 * to be performed on a frame-by-frame basis.
+		 */
+		drawRecalc();
+		/*
+		 * Now, let's set up the canvas.
+		 */
+		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
+		canvas.background(255);
+		canvas.noStroke();
+		canvas.fill(0);
+		canvas.textFont(FontLoader.instance.vera);
+		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
+		canvas.textSize(textSize);
+		hint();
+		screenRect = new Rectangle2D.Float(0, 0, canvas.width, canvas.height);
+		UIUtils.screenToModel(screenRect);
+
+		/*
+		 * FIRST LOOP: Updating nodes Update all nodes, regardless of
+		 * "threshold" status.
+		 * Also set each node's drawMe flag to FALSE.
+		 */
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			updateNode(n);
+			n.drawMe = false;
+			n.isWithinScreen = isNodeWithinScreen(n);
+		}
+		/*
+		 * SECOND LOOP: Flagging drawn nodes
+		 *  -- Now, we go through all nodes
+		 * (remember this is a list sorted by significance, i.e. enclosed number
+		 * of leaves). At each node, we decide whether or not to draw it based
+		 * on whether it is within the screen area. We exit the loop once the
+		 * threshold number of nodes has been drawn.
+		 */
+		int nodesDrawn = 0;
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			// n.isWithinScreen = isNodeWithinScreen(n);
+			if (nodesDrawn >= nodesToDraw)
+				break;
+			if (!n.isWithinScreen)
+				continue;
+			/*
+			 * Ok, let's flag this thing to be drawn.
+			 */
+			n.drawMe = true;
+			nodesDrawn++;
+		}
+		/*
+		 * THIRD LOOP: Drawing nodes
+		 *   - This loop actually does the drawing.
+		 */
+		for (int i = 0; i < nodes.size(); i++)
+		{
+			PhyloNode n = (PhyloNode) nodes.get(i);
+			if (!n.drawMe)
+			{
+				if (n.isWithinScreen)
+				{
+					if (isAnyParentDrawn(n))
+						continue;
+				} else
+					continue;
+			}
+			/*
+			 * Ok, we've skipped all the non-drawn nodes,
+			 * let's do the actual drawing.
+			 */
+			handleNode(n);
+		}
+		unhint();
+	}
+
 	/**
 	 * This method is where subclasses should perform any calculations that
 	 * should be performed during each draw() cycle prior to the actual drawing.
@@ -439,6 +357,92 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	protected void drawRecalc()
 	{
+	}
+
+	protected void handleNode(PhyloNode n)
+	{
+		/*
+		 * Set up the strokes and weights.
+		 */
+		if (tree.isLeaf(n))
+		{
+			/*
+			 * CASE 1: LEAF NODE
+			 * - Draw line to parent
+			 * - Draw node marker
+			 * - Draw label
+			 */
+			drawNodeMarker(n);
+			drawLine((PhyloNode) n.getParent(), n);
+			drawLabel(n);
+		} else
+		{
+			/*
+			 * CASE 3: INTERNAL NODE
+			 * - Draw node marker
+			 * - Draw line to parent
+			 * - Go through children:
+			 *    - if child is flagged to be drawn, continue
+			 *    - if child is *not* drawn, draw a line to its early / latest
+			 */
+			drawNodeMarker(n);
+			drawLine((PhyloNode) n.getParent(), n);
+			List l = tree.getChildrenOf(n);
+			for (int i = 0; i < l.size(); i++)
+			{
+				PhyloNode child = (PhyloNode) l.get(i);
+				NodeRange r = nodesToRanges.get(child);
+				/*
+				 * If this child is thresholded out, then draw a placemark line to its
+				 * earliest or latest leaf node.
+				 */
+				if (!child.drawMe && child.isWithinScreen)
+				{
+					PhyloNode leaf = null;
+					if (i == 0)
+						leaf = (PhyloNode) tree.getFirstLeaf(child);
+					else if (i == l.size() - 1)
+						leaf = (PhyloNode) tree.getLastLeaf(child);
+					else
+						/*
+						 * If this child is a "middle child", just do nothing.
+						 */
+						continue;
+					drawLine(n, leaf);
+					drawLabel(leaf);
+				}
+			}
+			/*
+			 * Now, we want to draw this inner node's label if it's significant
+			 * and we are set to show clade labels.
+			 */
+			if (UniqueLabeler.isLabelSignificant(n.getLabel())
+					&& PhyloWidget.ui.showCladeLabels)
+			{
+				drawLabel(n);
+			}
+		}
+		/*
+		 * If we've got a PhyloTree on our hands,
+		 * let's take care of the hovered node.
+		 */
+		if (tree instanceof PhyloTree)
+		{
+			PhyloTree pt = (PhyloTree) tree;
+			PhyloNode h = pt.hoveredNode;
+			if (h != null)
+			{
+				canvas.stroke(style.hoverColor.getRGB());
+				float weight = baseStroke * style.hoverStroke;
+				weight *= PhyloWidget.ui.traverser.glowTween.getPosition();
+				canvas.strokeWeight(weight);
+				canvas.fill(style.hoverColor.getRGB());
+				drawLine((PhyloNode) h.getParent(), h);
+				canvas.noStroke();
+				canvas.fill(style.hoverColor.getRGB());
+				drawNodeMarker(h);
+			}
+		}
 	}
 
 	protected void drawLabel(PhyloNode n)
@@ -455,19 +459,35 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 
 	protected void drawLine(PhyloNode p, PhyloNode c)
 	{
+		if (p == null)
+			return;
 		/*
 		 * Keep in mind that p may be null (in the case of root node).
 		 */
 		float weight = strokeForNode(c);
 		canvas.strokeWeight(weight);
 		canvas.stroke(colorForNode(c));
-		drawLineImpl(p,c);
+		drawLineImpl(p, c);
 	}
 
 	abstract void drawLineImpl(PhyloNode p, PhyloNode c);
+
 	abstract void drawNodeMarkerImpl(PhyloNode n);
+
 	abstract void drawLabelImpl(PhyloNode n);
-	
+
+	boolean isAnyParentDrawn(PhyloNode n)
+	{
+		PhyloNode cur = (PhyloNode) n.getParent();
+		while (cur != null)
+		{
+			if (cur.drawMe)
+				return true;
+			cur = (PhyloNode) cur.getParent();
+		}
+		return false;
+	}
+
 	public void setTree(RootedTree t)
 	{
 		if (tree != null)

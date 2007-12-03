@@ -76,7 +76,7 @@ public class TreeIO
 		/*
 		 * A hashtable recording the first (i.e. first in order) child for each
 		 * node. This will be used after parsing is complete to recreate the
-		 * correct sorting order of nodes and leaves. key = parent node value =
+		 * correct sorting order of nodes and leaves. key = parent node; value =
 		 * first child node
 		 */
 		HashMap firstChildren = new HashMap();
@@ -246,6 +246,10 @@ public class TreeIO
 		 * If the oldTree was set, unset it.
 		 */
 		oldTree = null;
+		if (tree instanceof CachedRootedTree)
+		{
+			((CachedRootedTree)tree).modPlus();
+		}
 		return tree;
 	}
 

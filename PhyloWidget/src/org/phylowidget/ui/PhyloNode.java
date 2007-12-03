@@ -10,7 +10,7 @@ public class PhyloNode extends CachedVertex implements Comparable
 	public double unscaledX,unscaledY;
 	public float x,y;
 	public double unitTextWidth;
-	public boolean drawMe;
+	public boolean drawMe, isWithinScreen;
 	
 	private int state = 0;
 	public static final int NONE = 0;

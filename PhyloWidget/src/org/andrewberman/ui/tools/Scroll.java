@@ -25,8 +25,8 @@ public class Scroll extends Tool
 		super(p);
 		
 		shortcut = new Shortcut("s");
-		xTween = new Tween(null,TweenFriction.tween(0.3f),Tween.OUT,0,0,30);
-		yTween = new Tween(null,TweenFriction.tween(0.3f),Tween.OUT,0,0,30);
+		xTween = new Tween(null,TweenFriction.tween(0.8f),Tween.OUT,0,0,30);
+		yTween = new Tween(null,TweenFriction.tween(0.8f),Tween.OUT,0,0,30);
 	}
 	
 	public void draw()

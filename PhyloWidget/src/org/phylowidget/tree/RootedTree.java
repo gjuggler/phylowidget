@@ -225,6 +225,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			l.addAll(neighbors.successorsOf(vertex));
 		} else
 			l = Graphs.successorListOf(this, vertex);
+		return sortChildrenList(vertex,l,sorter);
+	}
+
+	List sortChildrenList(Object vertex, List l, Comparator sorter)
+	{
 		// Sort the resulting list.
 		Collections.sort(l, sorter);
 		if (sorting.containsKey(vertex))
@@ -235,7 +240,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 		return l;
 	}
-
+	
 	public Object getFirstLeaf(Object vertex)
 	{
 		Object cur = vertex;

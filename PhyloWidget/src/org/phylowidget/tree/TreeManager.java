@@ -104,11 +104,11 @@ public class TreeManager implements SettableRect
 		mutator.stop();
 	}
 
-	public RootedTree getTree()
+	public CachedRootedTree getTree()
 	{
 		if (trees.size() == 0)
 			return null;
-		return (RootedTree) trees.get(0);
+		return (CachedRootedTree) trees.get(0);
 	}
 
 	public TreeRenderer getRenderer()

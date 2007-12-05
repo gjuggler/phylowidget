@@ -1,22 +1,32 @@
 <menuset name="PhyloWidget Menus">
-	<menu name="toolbar" type="Toolbar" fontsize="12">
+	<menu type="Toolbar" fontsize="11">
 		<item name="File">
+			<item name="New Tree" action="treeNew" shortcut="control-n"/>
 			<item name="Output Tree">
-				<item name="Large (1600x1200)" action="outputBig"/>
-				<item name="Small (640 x 480)" action="outputSmall"/>
-				<item name="PDF (Pub. quality)" action="outputPDF"/>
+				<item name="Large (1600x1200)" action="fileOutputBig"/>
+				<item name="Small (640 x 480)" action="fileOutputSmall"/>
+				<item name="PDF (Pub. quality)" action="fileOutputPDF"/>
 			</item>
 		</item>
 		<item name="View">
-			<item name="Phylogram" action="phyloView"/>
-			<item name="Cladogram" action="cladoView"/>
-			<item name="Diagonal" action="diagonalView"/>
-			<item name="Zoom to Full" action="zoomToFull" shortcut="control-1"/>
+			<item name="Zoom to Full" action="viewZoomToFull" shortcut="control-F"/>
+			<item name="Renderer Type">
+				<item name="Phylogram" action="viewPhylogram" shortcut="control-1"/>
+				<item name="Cladogram" action="viewCladogram" shortcut="control-2"/>
+				<item name="Diagonal" action="viewDiagonal" shortcut="control-3"/>
+				<item name="Circle" action="viewCircle" shortcut="control-4"/>
+			</item>
+			<item name="Show/Hide">
+				<item name="Branch Lengths" type="CheckBox" property="showBranchLengths" value="false"/>
+				<item name="Inner Clade Labels" type="CheckBox" property="showCladeLabels" value="false"/>			
+			</item>
+			<item name="Drawing Style">
+				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" default="0" min="-45" max="45"/>
+				<item name="Text Size" type="NumberScroller" property="textSize" increment =".01" default="1" min="0" max="2"/>
+				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" default=".25" min="0" max="1"/>
+				<item name="Line Weight" type="NumberScroller" property="lineSize" increment =".001" default=".1" min="0" max=".5"/>
+			</item>
+			<item name="Threshold" type="NumberScroller" property="renderThreshold" increment="5" default="150" min="5" max="1000"/>
 		</item>
-	</menu>
-
-	<menu name="dock" type="ToolDock" width="30">
-		<item name="Scroll" tool="scroll" shortcut="s" icon="dock\scroll.png"/>
-		<item name="Zoom" tool="zoom" shortcut="z" icon="dock\zoom.png"/>
 	</menu>
 </menuset>

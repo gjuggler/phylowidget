@@ -15,10 +15,11 @@
 				<item name="Phylogram" action="viewPhylogram" shortcut="control-1"/>
 				<item name="Cladogram" action="viewCladogram" shortcut="control-2"/>
 				<item name="Diagonal" action="viewDiagonal" shortcut="control-3"/>
+				<item name="Circle" action="viewCircle" shortcut="control-4"/>
 			</item>
 			<item name="Show/Hide">
 				<item name="Branch Lengths" type="CheckBox" property="showBranchLengths" value="false"/>
-				<item name="Inner Clade Labels" type="CheckBox" property="showCladeLabels" value="true"/>			
+				<item name="Inner Clade Labels" type="CheckBox" property="showCladeLabels" value="false"/>			
 			</item>
 			<item name="Drawing Style">
 				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" default="0" min="-45" max="45"/>

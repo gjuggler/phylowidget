@@ -15,6 +15,7 @@ public class FontLoader
 	private PApplet p;
 	
 	public PFont vera;
+	public PFont veraNonNative;
 	
 	static public FontLoader instance;
 	
@@ -29,7 +30,8 @@ public class FontLoader
 	{
 		this.p = p;
 		
-		vera = p.loadFont("BitstreamVeraSans-Roman-12.vlw");
+		vera = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
+		veraNonNative = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
 		InputStream in = p.openStream("vera.ttf");
 		try
 		{

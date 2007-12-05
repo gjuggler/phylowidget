@@ -92,7 +92,7 @@ public class Cladogram extends AbstractTreeRenderer
 		useBranchLengths = false;
 	}
 
-	protected void doTheLayout()
+	protected void layoutImpl()
 	{
 		/*
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
@@ -188,18 +188,18 @@ public class Cladogram extends AbstractTreeRenderer
 		}
 	}
 
-	public float branchLengthPerPixel()
-	{
-		return (float) (tree.getMaxHeightToLeaf(tree.getRoot()) / scaleX);
-	}
-
-	public float branchLengthForXPos(Object vertex, float xPos)
-	{
-		PhyloNode parent = (PhyloNode) tree.getParentOf(vertex);
-		float parentX = parent.x;
-		float dx = xPos - parentX;
-		return dx * branchLengthPerPixel();
-	}
+//	public float branchLengthPerPixel()
+//	{
+//		return (float) (tree.getMaxHeightToLeaf(tree.getRoot()) / scaleX);
+//	}
+//
+//	public float branchLengthForXPos(Object vertex, float xPos)
+//	{
+//		PhyloNode parent = (PhyloNode) tree.getParentOf(vertex);
+//		float parentX = parent.x;
+//		float dx = xPos - parentX;
+//		return dx * branchLengthPerPixel();
+//	}
 
 	/**
 	 * A recursive function to set the positions for all the branches. Only
@@ -232,9 +232,7 @@ public class Cladogram extends AbstractTreeRenderer
 			return yPos;
 		}
 	}
-
-	boolean forward;
-
+	
 	protected void drawRecalc()
 	{
 		/*
@@ -286,9 +284,9 @@ public class Cladogram extends AbstractTreeRenderer
 	@Override
 	protected void updateNode(PhyloNode n)
 	{
-		super.updateNode(n);
-		n.x = (float) (n.unscaledX * scaleX + dx);
-		n.y = (float) (n.unscaledY * scaleY + dy);
+		n.update();
+		n.x = (float) (n.getUnscaledX() * scaleX + dx);
+		n.y = (float) (n.getUnscaledY() * scaleY + dy);
 	}
 
 	// protected void updateNodeRanges()
@@ -368,9 +366,9 @@ public class Cladogram extends AbstractTreeRenderer
 	{
 		PhyloNode p = (PhyloNode) tree.getParentOf(n);
 		if (p == null)
-			return screenRect.contains(n.x,n.y);
+			return screenRect.contains(n.x, n.y);
 		tRect.setFrameFromDiagonal(n.x, n.y, p.x, p.y);
-//		return screenRect.contains(n.x, n.y);
+		// return screenRect.contains(n.x, n.y);
 		return screenRect.intersects(tRect);
 	}
 
@@ -383,19 +381,19 @@ public class Cladogram extends AbstractTreeRenderer
 	{
 		canvas.line(p.x, p.y, p.x, c.y);
 		canvas.line(p.x, c.y, c.x, c.y);
-//		if (PhyloWidget.ui.showBranchLengths)
-//		{
-//			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
-//			Graphics2D g2 = pgj.g2;
-//			g2.setFont(font.font.deriveFont(textSize * .5f));
-//			g2.setPaint(Color.black);
-//			double temp = tree.getBranchLength(n);
-//			temp *= 100;
-//			temp = (int) temp;
-//			temp /= 100;
-//			String s = String.valueOf(temp);
-//			// g2.drawString(s, parent.x, n.y - strokeForNode(n));
-//		}
+		// if (PhyloWidget.ui.showBranchLengths)
+		// {
+		// PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
+		// Graphics2D g2 = pgj.g2;
+		// g2.setFont(font.font.deriveFont(textSize * .5f));
+		// g2.setPaint(Color.black);
+		// double temp = tree.getBranchLength(n);
+		// temp *= 100;
+		// temp = (int) temp;
+		// temp /= 100;
+		// String s = String.valueOf(temp);
+		// // g2.drawString(s, parent.x, n.y - strokeForNode(n));
+		// }
 	}
 
 	protected void drawLabelImpl(PhyloNode n)
@@ -411,33 +409,35 @@ public class Cladogram extends AbstractTreeRenderer
 			/*
 			 * If it's not a leaf, then draw the white background.
 			 */
-			// if (!tree.isLeaf(n))
-			// {
-			// float ratio = (float) tree.getNumEnclosedLeaves(n)
-			// / (float) tree.getNumEnclosedLeaves(tree.getRoot());
-			// ratio = (float) Math.sqrt(ratio);
-			// g2.setFont(font.font.deriveFont(textSize * ratio));
-			// float tw = UIUtils.getTextWidth(canvas, font, textSize * ratio,
-			// n.getLabel(), true);
-			// g2.setPaint(Color.black);
-			// float ascent = UIUtils.getTextAscent(canvas, font, textSize
-			// * ratio, true);
-			// float descent = UIUtils.getTextDescent(canvas, font, textSize
-			// * ratio, true);
-			// float df = (ascent - descent) / 2f;
-			// g2.drawString(n.getLabel(), 0, 0 + df);
-			// } else
-			// {
-			g2.setFont(font.font.deriveFont(textSize));
-			g2.setPaint(Color.black);
-			g2.drawString(n.getLabel(), 0, 0 + dFont);
-			// }
+			if (!tree.isLeaf(n))
+			{
+				float ratio = (float) tree.getNumEnclosedLeaves(n)
+						/ (float) tree.getNumEnclosedLeaves(tree.getRoot());
+				ratio = (float) Math.sqrt(ratio);
+				g2.setFont(font.font.deriveFont(textSize * ratio));
+				float tw = UIUtils.getTextWidth(canvas, font, textSize * ratio,
+						n.getLabel(), true);
+				g2.setPaint(Color.black);
+				float ascent = UIUtils.getTextAscent(canvas, font, textSize
+						* ratio, true);
+				float descent = UIUtils.getTextDescent(canvas, font, textSize
+						* ratio, true);
+				float df = (ascent - descent) / 2f;
+				g2.drawString(n.getLabel(), 0, 0 + df);
+			} else
+			{
+				g2.setFont(font.font.deriveFont(textSize));
+				g2.setPaint(style.foregroundColor);
+				g2.drawString(n.getLabel(), 0, 0 + dFont);
+			}
 		} else
 		{
-			canvas.textFont(FontLoader.instance.vera);
+			canvas.noHint(PApplet.ENABLE_NATIVE_FONTS);
+			canvas.textFont(FontLoader.instance.veraNonNative);
 			canvas.textAlign(PConstants.LEFT, PConstants.BOTTOM);
 			canvas.textSize(textSize);
 			canvas.text(n.getLabel(), 0, 0 + dFont);
+			canvas.hint(PApplet.ENABLE_NATIVE_FONTS);
 		}
 		canvas.popMatrix();
 	}

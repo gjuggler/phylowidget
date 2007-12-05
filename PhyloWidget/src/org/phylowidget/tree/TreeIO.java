@@ -355,9 +355,7 @@ public class TreeIO
 		 */
 		if (!UniqueLabeler.isLabelSignificant(s) && !t.isLeaf(v))
 		{
-			String prop = PhyloWidget.props.getProperty("outputAllInnerNodes",
-					"false");
-			boolean pr = Boolean.parseBoolean(prop);
+			boolean pr = PhyloWidget.ui.outputAllInnerNodes;
 			if (!pr)
 			{
 				s = "";

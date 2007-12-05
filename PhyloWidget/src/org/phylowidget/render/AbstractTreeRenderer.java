@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
+import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.menu.MenuUtils;
@@ -123,7 +124,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		{
 			if (needsLayout)
 			{
-				doLayout();
+				updateLayout();
 				// System.out.println("update " + System.currentTimeMillis());
 				needsLayout = false;
 			}
@@ -136,14 +137,14 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 * Updates this renderer's internal representation of the tree. This should
 	 * only be called when the tree is changed.
 	 */
-	protected void doLayout()
+	private void updateLayout()
 	{
 		leaves.clear();
 		nodes.clear();
 		nodesToRanges.clear();
 		tree.getAll(tree.getRoot(), leaves, nodes);
 		Collections.sort(nodes, tree.sorter);
-		doTheLayout();
+		layoutImpl();
 		initNodeRanges();
 	}
 
@@ -157,7 +158,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 * the tree structure is changed, so it's okay for this to be a relatively
 	 * expensive operation.
 	 */
-	protected void doTheLayout()
+	protected void layoutImpl()
 	{
 	}
 
@@ -278,9 +279,10 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		 * Now, let's set up the canvas.
 		 */
 		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
-		canvas.background(255);
+		canvas.background(style.backgroundColor.getRGB());
 		canvas.noStroke();
 		canvas.fill(0);
+		
 		canvas.textFont(FontLoader.instance.vera);
 		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 		canvas.textSize(textSize);

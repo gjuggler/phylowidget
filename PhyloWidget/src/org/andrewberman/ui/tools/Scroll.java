@@ -16,26 +16,27 @@ public class Scroll extends Tool
 {
 	Cursor cursor;
 	Cursor draggingCursor;
-	
-	float camDownX,camDownY;
-	Tween xTween,yTween;
-	
+
+	float camDownX, camDownY;
+	Tween xTween, yTween;
+
 	public Scroll(PApplet p)
 	{
 		super(p);
-		
+
 		shortcut = new Shortcut("s");
-		xTween = new Tween(null,TweenFriction.tween(0.8f),Tween.OUT,0,0,30);
-		yTween = new Tween(null,TweenFriction.tween(0.8f),Tween.OUT,0,0,30);
+		xTween = new Tween(null, TweenFriction.tween(0.8f), Tween.OUT, 0, 0, 30);
+		yTween = new Tween(null, TweenFriction.tween(0.8f), Tween.OUT, 0, 0, 30);
 	}
-	
+
 	public void draw()
 	{
 		xTween.update();
 		yTween.update();
 		if (xTween.isTweening() || yTween.isTweening())
 		{
-			getCamera().nudgeTo(camDownX - xTween.getPosition(),camDownY - yTween.getPosition());
+			getCamera().nudgeTo(camDownX - xTween.getPosition(),
+					camDownY - yTween.getPosition());
 			getCamera().fforward();
 		}
 		if (mouseDragging)
@@ -44,30 +45,48 @@ public class Scroll extends Tool
 			float dy = curPoint.y - downPoint.y;
 			dx /= getCamera().getZ();
 			dy /= getCamera().getZ();
-			xTween.continueTo(dx);
-			yTween.continueTo(dy);
+			if (controlPressed)
+			{
+				xTween.continueTo(xTween.getFinish() - dx/10f);
+				yTween.continueTo(yTween.getFinish() - dy/10f);
+				p.stroke(255, 0, 0);
+				p.strokeWeight(3.0f);
+				p.line(downPoint.x, downPoint.y, curPoint.x, curPoint.y);
+			} else
+			{
+				xTween.continueTo(dx);
+				yTween.continueTo(dy);
+			}
 		}
 	}
-	
+
 	@Override
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		super.mouseEvent(e, screen, model);
-		switch(e.getID())
+		switch (e.getID())
 		{
 			case (MouseEvent.MOUSE_PRESSED):
 				UIUtils.setBaseCursor(draggingCursor);
-			
+
 				break;
 			case (MouseEvent.MOUSE_RELEASED):
 				UIUtils.setBaseCursor(cursor);
 				break;
 		}
 	}
-	
+
 	@Override
 	void pressReset(MouseEvent e, Point screen, Point model)
 	{
+		reset();
+	}
+
+	@Override
+	void reset()
+	{
+		super.reset();
+		downPoint = (Point) curPoint.clone();
 		camDownX = getCamera().getX();
 		camDownY = getCamera().getY();
 		xTween.continueTo(0);
@@ -75,7 +94,7 @@ public class Scroll extends Tool
 		xTween.fforward();
 		yTween.fforward();
 	}
-	
+
 	@Override
 	public void enter()
 	{
@@ -85,13 +104,13 @@ public class Scroll extends Tool
 		xTween.fforward();
 		yTween.fforward();
 	}
-	
+
 	public Cursor getCursor()
 	{
 		if (cursor == null)
 		{
-			cursor = createCursor("cursors/grab.png",6,6);
-			draggingCursor = createCursor("cursors/grabbing.png",6,6);
+			cursor = createCursor("cursors/grab.png", 6, 6);
+			draggingCursor = createCursor("cursors/grabbing.png", 6, 6);
 		}
 		return cursor;
 	}
@@ -100,5 +119,5 @@ public class Scroll extends Tool
 	{
 		return false;
 	}
-	
+
 }

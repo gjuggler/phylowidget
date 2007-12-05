@@ -24,8 +24,8 @@ public abstract class Tool extends AbstractUIObject
 
 	Shortcut shortcut, toggle;
 	Point downPoint, curPoint;
-	boolean mousePressed, mouseDragging;
-	
+	boolean mousePressed, mouseDragging, controlPressed;
+
 	public Tool(PApplet p)
 	{
 		this.p = p;
@@ -37,7 +37,7 @@ public abstract class Tool extends AbstractUIObject
 	{
 		toggle = new Shortcut(s);
 	}
-	
+
 	public void setShortcut(String s)
 	{
 		shortcut = new Shortcut(s);
@@ -71,8 +71,7 @@ public abstract class Tool extends AbstractUIObject
 		camera = c;
 	}
 
-	public Cursor createCursor(String filename, int offsetX,
-			int offsetY)
+	public Cursor createCursor(String filename, int offsetX, int offsetY)
 	{
 		PImage img = p.loadImage(filename);
 		Dimension d = Toolkit.getDefaultToolkit().getBestCursorSize(img.width,
@@ -96,6 +95,10 @@ public abstract class Tool extends AbstractUIObject
 	}
 
 	void pressReset(MouseEvent e, Point screen, Point model)
+	{
+	}
+
+	void reset()
 	{
 
 	}
@@ -130,5 +133,23 @@ public abstract class Tool extends AbstractUIObject
 		} else
 			mouseDragging = false;
 	}
-	
+
+	@Override
+	public void keyEvent(KeyEvent e)
+	{
+		super.keyEvent(e);
+		if (e.isControlDown())
+		{
+			if (!controlPressed)
+				reset();
+			controlPressed = true;
+
+		} else
+		{
+			if (controlPressed)
+				reset();
+			controlPressed = false;
+		}
+	}
+
 }

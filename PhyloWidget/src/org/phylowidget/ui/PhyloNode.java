@@ -45,15 +45,25 @@ public class PhyloNode extends CachedVertex implements Comparable
 		yTween.continueTo(y*mult);
 	}
 	
-//	public float getTargetX()
-//	{
-//		return xTween.getFinish()/mult;
-//	}
-//	
-//	public float getTargetY()
-//	{
-//		return yTween.getFinish()/mult;
-//	}
+	public double getUnscaledX()
+	{
+		return unscaledX;
+	}
+	
+	public double getUnscaledY()
+	{
+		return unscaledY;
+	}
+	
+	public float getTargetX()
+	{
+		return xTween.getFinish()/mult;
+	}
+	
+	public float getTargetY()
+	{
+		return yTween.getFinish()/mult;
+	}
 	
 	public String toString()
 	{
@@ -70,20 +80,20 @@ public class PhyloNode extends CachedVertex implements Comparable
 		label = s;
 	}
 	
-//	public int compareTo(Object o)
-//	{
-//		if (o instanceof PhyloNode)
-//		{
-//			PhyloNode that = (PhyloNode) o;
-//			float a = this.getTargetY();
-//			float b = that.getTargetY();
-//			if (a < b)
-//				return -1;
-//			else if (a > b)
-//				return 1;
-//		}
-//		return 0;
-//	}
+	public int compareTo(Object o)
+	{
+		if (o instanceof PhyloNode)
+		{
+			PhyloNode that = (PhyloNode) o;
+			float a = this.getTargetY();
+			float b = that.getTargetY();
+			if (a < b)
+				return -1;
+			else if (a > b)
+				return 1;
+		}
+		return 0;
+	}
 	
 	public void setState(int state)
 	{

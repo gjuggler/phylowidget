@@ -8,7 +8,6 @@ import org.phylowidget.PhyloWidget;
 
 public class RenderStyleSet
 {
-
 	public Color backgroundColor;
 	public Color foregroundColor;
 	
@@ -25,11 +24,6 @@ public class RenderStyleSet
 
 	public float nodeSizeMultiplier;
 	public float lineThicknessMultiplier;
-
-	/*
-	 * Text rotation in degrees.
-	 */
-	public float textRotation;
 	
 	private static RenderStyleSet defaultSet;
 
@@ -39,15 +33,14 @@ public class RenderStyleSet
 		{
 			defaultSet = new RenderStyleSet();
 			defaultSet.loadDefaults();
-			defaultSet.loadFromProperties();
 		}
 		return defaultSet;
 	}
 
 	private void loadDefaults()
 	{
-
-		foregroundColor = new Color(Color.black);
+		foregroundColor = parseColor(PhyloWidget.ui.foregroundColor);
+		backgroundColor = parseColor(PhyloWidget.ui.backgroundColor);
 		regStroke = 1f;
 
 		dimColor = foregroundColor.brighter(200);
@@ -63,40 +56,50 @@ public class RenderStyleSet
 		lineThicknessMultiplier = 1f;
 	}
 
-	private void loadFromProperties()
+	Color parseColor(String s)
 	{
-		Properties p = PhyloWidget.props;
-		Class c = this.getClass();
-		Field[] fields = c.getFields();
-		for (int i = 0; i < fields.length; i++)
-		{
-			Field f = fields[i];
-			String s = f.getName();
-			if (p.containsKey(s))
-			{
-				try
-				{
-					String value = (String) p.get(s);
-					Class fieldType = f.getType();
-					if (fieldType == Float.TYPE)
-					{
-						f.setFloat(this, Float.parseFloat(value));
-					} else if (fieldType == Color.class)
-					{
-						// parse the color triplet.
-						String[] rgb = value.split(",");
-						Color color = new Color(Integer.parseInt(rgb[0]),
-								Integer.parseInt(rgb[1]), Integer
-										.parseInt(rgb[2]));
-						f.set(this, color);
-					}
-				} catch (Exception e)
-				{
-					e.printStackTrace();
-					continue;
-				}
-			}
-		}
+		s = s.replaceAll("[()]", "");
+		String[] rgb = s.split(",");
+		Color color = new Color(Integer.parseInt(rgb[0]),
+				Integer.parseInt(rgb[1]), Integer
+						.parseInt(rgb[2]));
+		return color;
 	}
+	
+//	private void loadFromProperties()
+//	{
+//		Properties p = PhyloWidget.props;
+//		Class c = this.getClass();
+//		Field[] fields = c.getFields();
+//		for (int i = 0; i < fields.length; i++)
+//		{
+//			Field f = fields[i];
+//			String s = f.getName();
+//			if (p.containsKey(s))
+//			{
+//				try
+//				{
+//					String value = (String) p.get(s);
+//					Class fieldType = f.getType();
+//					if (fieldType == Float.TYPE)
+//					{
+//						f.setFloat(this, Float.parseFloat(value));
+//					} else if (fieldType == Color.class)
+//					{
+//						// parse the color triplet.
+//						String[] rgb = value.split(",");
+//						Color color = new Color(Integer.parseInt(rgb[0]),
+//								Integer.parseInt(rgb[1]), Integer
+//										.parseInt(rgb[2]));
+//						f.set(this, color);
+//					}
+//				} catch (Exception e)
+//				{
+//					e.printStackTrace();
+//					continue;
+//				}
+//			}
+//		}
+//	}
 
 }

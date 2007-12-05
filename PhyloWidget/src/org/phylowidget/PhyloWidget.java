@@ -3,13 +3,14 @@ package org.phylowidget;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Properties;
 
 import org.andrewberman.ui.FontLoader;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.tree.TreeManager;
-import org.phylowidget.ui.PhyloUIManager;
+import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -21,8 +22,8 @@ public class PhyloWidget extends PApplet
 
 	public static PhyloWidget p;
 	public static TreeManager trees;
-	public static PhyloUIManager ui;
-	public static Properties props;
+	public static PhyloUI ui;
+//	public static Properties props;
 
 	public static int WIDTH = 400;
 	public static int HEIGHT = 400;
@@ -51,28 +52,26 @@ public class PhyloWidget extends PApplet
 		p = this;
 
 		// Load the properties file.
-		props = new Properties();
-		try
-		{
-			props.load(this.openStream("phylowidget.properties"));
-		} catch (IOException e)
-		{
-			e.printStackTrace();
-			return;
-		}
+//		props = new Properties();
+//		try
+//		{
+//			props.load(this.openStream("phylowidget.properties"));
+//		} catch (IOException e)
+//		{
+//			e.printStackTrace();
+//			return;
+//		}
 
 		// Creates, manages, and renders trees.
 		trees = new TreeManager(this);
 		// Creates and manages UI elements.
-		ui = new PhyloUIManager(this);
+		ui = new PhyloUI(this);
 		updater = new PWTreeUpdater();
 		clipUpdater = new PWClipUpdater();
 
-		trees.setup();
 		ui.setup();
-		ui.treeNew();
-
-		// TaxonRetriever.getHints("mus");
+		trees.setup();
+		
 	}
 
 	public void draw()
@@ -151,6 +150,18 @@ public class PhyloWidget extends PApplet
 		clipUpdater.triggerUpdate(s);
 	}
 
+	public void callFunction(String s, String p)
+	{
+		try {
+			Method m = ui.getClass().getMethod(s, new Class[]{String.class});
+			m.invoke(ui,new Object[]{p});
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
+	}
+	
 	@Override
 	public void keyPressed()
 	{

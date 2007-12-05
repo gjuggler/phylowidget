@@ -8,6 +8,7 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.Rectangle;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
+import org.phylowidget.render.Circlegram;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.Phylogram;
@@ -29,7 +30,8 @@ public class TreeManager implements SettableRect
 	// public Navigator nav;
 	private RandomTreeMutator mutator;
 	private boolean mutateMe;
-	
+	private Runnable runMe;
+
 	public TreeManager(PApplet p)
 	{
 		this.p = p;
@@ -45,7 +47,7 @@ public class TreeManager implements SettableRect
 		/*
 		 * We need to let the ToolManager know our current Camera object.
 		 */
-//		EventManager.lazyLoad(p);
+		// EventManager.lazyLoad(p);
 		EventManager.instance.setCamera(camera);
 		cladogramRender();
 	}
@@ -60,13 +62,19 @@ public class TreeManager implements SettableRect
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
 					cameraRect.height);
 		}
-		
+
 		if (mutateMe)
 		{
 			mutator.randomlyMutateTree();
 			mutateMe = false;
 		}
-		
+
+		if (runMe != null)
+		{
+			Runnable r = runMe;
+			runMe = null;
+			r.run();
+		}
 	}
 
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect)
@@ -87,7 +95,7 @@ public class TreeManager implements SettableRect
 
 	public void mutateTree()
 	{
-//		mutator.randomlyMutateTree();
+		// mutator.randomlyMutateTree();
 		mutateMe = true;
 	}
 
@@ -119,35 +127,43 @@ public class TreeManager implements SettableRect
 	public void fforward(boolean upX, boolean upY)
 	{
 		update();
-		for (int i=0; i < trees.size(); i++)
+		for (int i = 0; i < trees.size(); i++)
 		{
 			RootedTree tree = (RootedTree) trees.get(i);
 			ArrayList nodes = new ArrayList();
 			tree.getAll(tree.getRoot(), null, nodes);
-			for (int j=0; j < nodes.size(); j++)
+			for (int j = 0; j < nodes.size(); j++)
 			{
 				PhyloNode n = (PhyloNode) nodes.get(j);
 				if (upX)
 					n.xTween.fforward();
 				if (upY)
 					n.yTween.fforward();
-			}	
+			}
 		}
-		
+
 	}
-	
-	public void setTree(RootedTree tree)
+
+	public void setTree(final RootedTree tree)
 	{
-		trees.clear();
-		trees.add(tree);
-		getRenderer().setTree(tree);
-		if (tree instanceof PhyloTree)
+		runMe = new Runnable()
 		{
-			PhyloTree pt = (PhyloTree) tree;
-			pt.setSynchronizedWithJS(true);
-		}
-		fforward(false,true);
-		mutator = new RandomTreeMutator(tree);
+			public void run()
+			{
+				trees.clear();
+				trees.add(tree);
+				getRenderer().setTree(tree);
+				if (tree instanceof PhyloTree)
+				{
+					PhyloTree pt = (PhyloTree) tree;
+					pt.setSynchronizedWithJS(true);
+				}
+				fforward(false, true);
+				mutator = new RandomTreeMutator(tree);
+
+			}
+		};
+
 	}
 
 	public void diagonalRender()
@@ -165,6 +181,11 @@ public class TreeManager implements SettableRect
 		setRenderer(new Phylogram());
 	}
 
+	public void circleRender()
+	{
+		setRenderer(new Circlegram());
+	}
+	
 	void setRenderer(TreeRenderer r)
 	{
 		renderers.clear();
@@ -184,7 +205,7 @@ public class TreeManager implements SettableRect
 		 * The cameraRect is using coordinates where (0,0) is the center of the rectangle to be rendered.
 		 * We want this rectangle to be centered in our PApplet, so we translate the cameraRect accordingly.
 		 */
-		cameraRect.translate(p.width/2, p.height/2);
+		cameraRect.translate(p.width / 2, p.height / 2);
 	}
 
 	public static Rectangle2D.Float getVisibleRect()

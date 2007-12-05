@@ -19,8 +19,7 @@ public class PhyloTree extends CachedRootedTree
 	public PhyloTree()
 	{
 		super();
-		String uniquify = PhyloWidget.props.getProperty("enforceUniqueLabels", "true");
-		boolean unique = Boolean.parseBoolean(uniquify);
+		boolean unique = PhyloWidget.ui.enforceUniqueLabels;
 		setEnforceUniqueLabels(unique);
 	}
 	

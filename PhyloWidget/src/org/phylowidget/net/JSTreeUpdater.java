@@ -16,7 +16,7 @@ public class JSTreeUpdater extends DelayedAction
 	{
 		tree = t;
 		trigger(200);
-		jsCall = PhyloWidget.props.getProperty("treeJavascript", "updateTree");
+		jsCall = PhyloWidget.ui.treeJavascript;
 	}
 
 	public void run()

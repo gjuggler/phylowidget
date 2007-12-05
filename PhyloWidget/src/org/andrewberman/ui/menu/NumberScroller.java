@@ -41,7 +41,24 @@ public class NumberScroller extends MenuItem
 
 	public float getValue()
 	{
+		float oldValue = value;
+		try
+		{
+			if (useReflection)
+				value = field.getFloat(fieldObj);
+		} catch (Exception e)
+		{
+			useReflection = false;
+			e.printStackTrace();
+		}
+		if (value != oldValue)
+			updateString();
 		return value;
+	}
+
+	void updateString()
+	{
+		stringValue = df.format(value);
 	}
 
 	public void setDefault(float def)
@@ -82,8 +99,9 @@ public class NumberScroller extends MenuItem
 		/*
 		 * Try and auto-detect number of decimal places from the increment.
 		 */
-		int numDecimals = (int)Math.ceil((float)-Math.log10(increment));
-//		System.out.println(Math.log10(increment)+ " "+getName() + " " + increment + " " + numDecimals);
+		int numDecimals = (int) Math.ceil((float) -Math.log10(increment));
+		// System.out.println(Math.log10(increment)+ " "+getName() + " " +
+		// increment + " " + numDecimals);
 		df.setMinimumFractionDigits(numDecimals);
 		df.setMaximumFractionDigits(numDecimals);
 
@@ -94,11 +112,11 @@ public class NumberScroller extends MenuItem
 	{
 		scrollSpeed = changePerPixel;
 	}
-	
+
 	protected void drawMyself()
 	{
 		super.drawMyself();
-
+		getValue();
 		if (scrolling)
 		{
 			/*
@@ -116,23 +134,13 @@ public class NumberScroller extends MenuItem
 		/*
 		 * update the "value" object using Reflection.
 		 */
-		try
-		{
-			if (useReflection)
-				value = field.getFloat(fieldObj);
-		} catch (Exception e)
-		{
-			useReflection = false;
-			e.printStackTrace();
-		} finally
-		{
-			MenuUtils.drawText(this, stringValue, true, true, curX, y, nWidth,
-					height);
-		}
+		MenuUtils.drawText(this, stringValue, true, true, curX, y, nWidth,
+				height);
 	}
 
 	public void setValue(float val)
 	{
+		float oldValue = value;
 		value = PApplet.constrain(val, min, max);
 		if (useReflection)
 		{
@@ -144,7 +152,7 @@ public class NumberScroller extends MenuItem
 				e.printStackTrace();
 			}
 		}
-		stringValue = df.format(value);
+		updateString();
 	}
 
 	protected void calcPreferredSize()
@@ -176,7 +184,7 @@ public class NumberScroller extends MenuItem
 		nWidth += 2 * menu.style.padX;
 
 		nOffset = getWidth() - menu.style.padX - nWidth;
-		
+
 		setWidth(menu.style.padX + tWidth + nWidth + menu.style.padX);
 		setHeight(tHeight + 2 * menu.style.padY);
 	}
@@ -244,9 +252,10 @@ public class NumberScroller extends MenuItem
 	{
 		if (scrolling)
 			return true;
-		buffRoundRect.setRoundRect(x, y, width, height, menu.style.roundOff, menu.style.roundOff);
-//		buffRoundRect.setRoundRect(x + nOffset, y, nWidth, height,
-//				menu.style.roundOff, menu.style.roundOff);
+		buffRoundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
+				menu.style.roundOff);
+		// buffRoundRect.setRoundRect(x + nOffset, y, nWidth, height,
+		// menu.style.roundOff, menu.style.roundOff);
 		return buffRoundRect.contains(p);
 	}
 

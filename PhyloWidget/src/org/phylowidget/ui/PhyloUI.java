@@ -1,12 +1,20 @@
 package org.phylowidget.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderOutput;
 import org.phylowidget.render.RenderStyleSet;
 import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
@@ -15,38 +23,113 @@ import processing.core.PApplet;
 
 public class PhyloUI extends PhyloUISetup
 {
-
 	public PhyloUI(PApplet p)
 	{
 		super(p);
 	}
 
-	/*
-	 * Preferences. Note that preferences should be loaded from the following settings sources
-	 * with the specified priority order:
-	 * 5. hard-coded default (set below)
-	 * 4. URL parsing (get / post variables)
-	 * 3. applet tag
-	 * 2. phylowidget.properties
-	 * 1. menu XML file
-	 * 
-	 */
-
 	public String menuFile = "menus/full-menus.xml";
 	public String clipJavascript = "updateClip";
 	public String treeJavascript = "updateTree";
+	public String foregroundColor = "(0,0,0)";
+	public String backgroundColor = "(255,255,255)";
+	public String tree = "Homo Sapiens";
 
 	public float textRotation = 0;
 	public float textSize = 1;
-	public float lineSize = RenderStyleSet.defaultStyle().lineThicknessMultiplier;
-	public float nodeSize = RenderStyleSet.defaultStyle().nodeSizeMultiplier;
-	public float renderThreshold = 500f;
+	public float lineSize = 0.1f;
+	public float nodeSize = 0.3f;
+	public float renderThreshold = 300f;
+
 	public boolean showBranchLengths = false;
 	public boolean showCladeLabels = false;
+	public boolean outputAllInnerNodes = false;
+	public boolean enforceUniqueLabels = false;
 
 	/*
 	 * Node actions.
 	 */
+
+	@Override
+	public void setup()
+	{
+		/*
+		 * Run the PhyloUISetup's setup() method. Note that this method
+		 * loads the menus and their associated default values.
+		 */
+		super.setup();
+		/*
+		 * Load the preferences.
+		 * Note that preferences should be loaded from the following settings sources
+		 * with the specified priority order:
+		 * 5. hard-coded default (set below)
+		 * 4. Menu XML file (loaded in the above setup() method call)
+		 * 3. URL parsing (get / post variables) (done via PHP, put into applet tags)
+		 * 2. applet tag
+		 * 1. phylowidget.properties
+		 */
+
+		Field[] fArray = PhyloUI.class.getDeclaredFields();
+		List<Field> fields = Arrays.asList(fArray);
+
+		/*
+		 * PRIORITY 2: APPLET TAGS
+		 */
+		for (Field f : fields)
+		{
+			String param = p.getParameter(f.getName());
+			if (param != null)
+			{
+				setField(f, param);
+			}
+		}
+
+		/*
+		 * PRIORITY 1: PHYLOWIDGET.PROPERTIES
+		 */
+		Properties props = new Properties();
+		try
+		{
+			props.load(p.openStream("phylowidget.properties"));
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		for (Field f : fields)
+		{
+			if (props.containsKey(f.getName()))
+			{
+				setField(f, props.getProperty(f.getName()));
+			}
+		}
+
+		/*
+		 * Initialize the tree.
+		 */
+		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(), tree));
+	}
+
+	private void setField(Field f, String param)
+	{
+		try
+		{
+			Class<?> c = f.getType();
+			if (c == String.class)
+				f.set(this, param);
+			else if (c == Boolean.TYPE)
+				f.setBoolean(this, Boolean.parseBoolean(param));
+			else if (c == Float.TYPE)
+				f.setFloat(this, Float.parseFloat(param));
+			else if (c == Integer.TYPE)
+				f.setInt(this, Integer.parseInt(param));
+			else if (c == Double.TYPE)
+				f.setDouble(this, Double.parseDouble(param));
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
+	}
 
 	public void nodeEditBranchLength()
 	{
@@ -165,6 +248,11 @@ public class PhyloUI extends PhyloUISetup
 		PhyloWidget.trees.diagonalRender();
 	}
 
+	public void viewCircle()
+	{
+		PhyloWidget.trees.circleRender();
+	}
+	
 	public void viewZoomToFull()
 	{
 		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
@@ -176,19 +264,15 @@ public class PhyloUI extends PhyloUISetup
 
 	public void treeNew()
 	{
-		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
-		// "(((dog:22.90000,(((bear:13.00000,raccoon:13.00000):5.75000,(seal:12.00000,sea_lion:12.00000):6.75000):1.00000,weasel:19.75000):3.15000):22.01667,cat:44.91667):27.22619,monkey:72.14286);"));
-				// "(Bovine,(Hylobates:0.36079,(Pongo:0.33636,(G._Gorilla:0.17147,
-				// (P._paniscus:0.19268,H._sapiens:0.11927):0.08386):0.06124):0.15057),
-				// Rodent);"));
-				"Homo Sapiens"));
+		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(), "Homo Sapiens"));
 		layout();
 	}
 
 	public void treeFlip()
 	{
-		RootedTree t = getCurTree();
+		PhyloTree t = (PhyloTree) getCurTree();
 		t.reverseSubtree(t.getRoot());
+		t.modPlus();
 		layout();
 	}
 
@@ -263,13 +347,14 @@ public class PhyloUI extends PhyloUISetup
 	{
 		final TreeRenderer tr = PhyloWidget.trees.getRenderer();
 		setMessage("Outputting PDF...");
-		new Thread() {
+		new Thread()
+		{
 			public void run()
 			{
 				RenderOutput.savePDF(p, getCurTree(), tr);
 				setMessage("");
 			}
 		}.start();
-		
+
 	}
 }

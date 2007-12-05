@@ -72,16 +72,16 @@ public class DiagonalCladogram extends Cladogram
 		return 1 - (float) (numLeaves - 1) / (float) leaves.size();
 	}
 
-	protected void doTheLayout()
+	protected void layoutImpl()
 	{
-		super.doTheLayout();
+		super.layoutImpl();
 		numCols = numRows / 2;
 	}
 
 	protected void drawLineImpl(PhyloNode p, PhyloNode n)
 	{
 		List list = tree.getChildrenOf(p);
-		Collections.sort(list);
+//		Collections.sort(list);
 		int index = list.indexOf(n);
 		if (index != 0 && index != list.size() - 1)
 		{
@@ -100,13 +100,6 @@ public class DiagonalCladogram extends Cladogram
 		if (p.y > n.y)
 			retreatY = -retreatY;
 		canvas.line(n.x, n.y, p.x + retreatX, p.y + retreatY);
-		// canvas.line(n.x - rad, n.y, parent.x, n.y);
-		// float retreat = 0;
-		// if (n.y < parent.y)
-		// retreat = -rad;
-		// else
-		// retreat = rad;
-		// canvas.line(parent.x, n.y, parent.x, parent.y + retreat);
 	}
 
 	// float sqrt2 = (float) Math.sqrt(2);

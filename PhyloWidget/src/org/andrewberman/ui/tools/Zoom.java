@@ -15,21 +15,21 @@ import processing.core.PApplet;
 public class Zoom extends Tool
 {
 	Cursor zoomCursor;
-	
+
 	float targetX, targetY;
 	double downZoom, zoomFactor;
 	float downCameraX, downCameraY;
 
 	Tween zoomTween;
-	
-	boolean isScrolling;
-	
+
+
 	public Zoom(PApplet p)
 	{
 		super(p);
-		
+
 		shortcut = new Shortcut("z");
-		zoomTween = new Tween(null,TweenFriction.tween(0.3f),Tween.OUT,1,1,30);
+		zoomTween = new Tween(null, TweenFriction.tween(0.3f), Tween.OUT, 1, 1,
+				30);
 	}
 
 	public void draw()
@@ -38,7 +38,16 @@ public class Zoom extends Tool
 		if (mouseDragging)
 		{
 			float zoomDist = downPoint.y - curPoint.y;
-			zoomFactor = downZoom * Math.exp(zoomDist/100f);
+			if (controlPressed)
+			{
+				zoomFactor *= Math.exp(zoomDist / 100f / 10f);
+				p.stroke(255,0,0);
+				p.strokeWeight(3.0f);
+				p.line(downPoint.x, curPoint.y, downPoint.x, downPoint.y);
+			} else
+			{
+				zoomFactor = downZoom * Math.exp(zoomDist / 100f);
+			}
 			zoomTween.continueTo((float) zoomFactor);
 		}
 		if (zoomTween.isTweening())
@@ -60,21 +69,22 @@ public class Zoom extends Tool
 			cam.fforward();
 		}
 	}
-	
+
 	@Override
 	public void enter()
 	{
 		super.enter();
 		reset();
 	}
-	
+
 	void pressReset(MouseEvent e, Point screen, Point model)
 	{
 		reset();
 	}
-	
+
 	void reset()
 	{
+		downPoint = (Point) curPoint.clone();
 		targetX = downPoint.x - p.width / 2;
 		targetY = downPoint.y - p.height / 2;
 		downCameraX = getCamera().getX();
@@ -98,9 +108,5 @@ public class Zoom extends Tool
 	{
 		return false;
 	}
-	
-	public void keyEvent(KeyEvent e)
-	{
-		int code = e.getKeyCode();
-	}
+
 }

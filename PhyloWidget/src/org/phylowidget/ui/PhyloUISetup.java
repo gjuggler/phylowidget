@@ -56,16 +56,11 @@ public class PhyloUISetup
 		traverser = new NodeTraverser(p);
 		nearest = new NearestNodeFinder(p);
 		text = new PhyloTextField(p);
-		
-		/*
-		 * Load properties from the "phylowidget.properties" file.
-		 */
-		
-		
+	
 		/*
 		 * Load the menu file.
 		 */
-		String menuFile = (String) PhyloWidget.props.get("menuFile");
+		String menuFile = (String) PhyloWidget.ui.menuFile;
 		ArrayList menus = MenuIO.loadFromXML(p, menuFile, this);
 
 		for (int i = 0; i < menus.size(); i++)

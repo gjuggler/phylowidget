@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FontLoader;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
+import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloUI;
 
@@ -23,16 +25,17 @@ public class PhyloWidget extends PApplet
 	public static PhyloWidget p;
 	public static TreeManager trees;
 	public static PhyloUI ui;
-//	public static Properties props;
+	// public static Properties props;
 
-	public static int WIDTH = 400;
-	public static int HEIGHT = 400;
+	// public static int WIDTH = 400;
+	// public static int HEIGHT = 400;
 
 	public static float FRAMERATE = 40;
 	public static float TWEEN_FACTOR = 30f / FRAMERATE;
 
 	public static boolean usingNativeFonts;
 	public static boolean openGL;
+	public static boolean isOutputting;
 
 	private PWTreeUpdater updater;
 	private PWClipUpdater clipUpdater;
@@ -46,21 +49,21 @@ public class PhyloWidget extends PApplet
 
 	public void setup()
 	{
-		size(500, 500);
+		size(this.width, this.height);
 		frameRate(FRAMERATE);
 
 		p = this;
 
 		// Load the properties file.
-//		props = new Properties();
-//		try
-//		{
-//			props.load(this.openStream("phylowidget.properties"));
-//		} catch (IOException e)
-//		{
-//			e.printStackTrace();
-//			return;
-//		}
+		// props = new Properties();
+		// try
+		// {
+		// props.load(this.openStream("phylowidget.properties"));
+		// } catch (IOException e)
+		// {
+		// e.printStackTrace();
+		// return;
+		// }
 
 		// Creates, manages, and renders trees.
 		trees = new TreeManager(this);
@@ -71,16 +74,20 @@ public class PhyloWidget extends PApplet
 
 		ui.setup();
 		trees.setup();
-		
+
+		bgColor = Color.parseColor(PhyloWidget.ui.background).getRGB();
 	}
+
+	int bgColor;
 
 	public void draw()
 	{
+		background(bgColor);
 		trees.update();
 		if (messageString.length() != 0)
 			drawMessage();
-		else
-			drawFrameRate();
+		drawNumLeaves();
+		drawFrameRate();
 	}
 
 	public void stop()
@@ -92,14 +99,28 @@ public class PhyloWidget extends PApplet
 	{
 		textAlign(PApplet.LEFT);
 		textFont(FontLoader.instance.vera);
-		fill(0);
-		text(String.valueOf(round(frameRate * 10) / 10.0), 5, height - 10);
+		textSize(10);
+		fill(255, 0, 0);
+		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40,
+				height - 10);
 		// Uncomment to print out the number of leaves.
 		// RootedTree t = trees.getTree();
 		// int numLeaves = t.getNumEnclosedLeaves(t.getRoot());
 		// text(numLeaves,5,height-10);
 	}
 
+	void drawNumLeaves()
+	{
+		int leaves = trees.getRenderer().getTree().getNumEnclosedLeaves(
+				trees.getRenderer().getTree().getRoot());
+		String nleaves = String.valueOf(leaves);
+		textAlign(PApplet.LEFT);
+		textFont(FontLoader.instance.vera);
+		textSize(10);
+		fill(255,0,0);
+		text(nleaves,width - 100, height - 10);
+	}
+	
 	void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
@@ -152,16 +173,17 @@ public class PhyloWidget extends PApplet
 
 	public void callFunction(String s, String p)
 	{
-		try {
-			Method m = ui.getClass().getMethod(s, new Class[]{String.class});
-			m.invoke(ui,new Object[]{p});
+		try
+		{
+			Method m = ui.getClass().getMethod(s, new Class[] { String.class });
+			m.invoke(ui, new Object[] { p });
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 			return;
 		}
 	}
-	
+
 	@Override
 	public void keyPressed()
 	{

@@ -5,13 +5,12 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.EventManager;
-import org.andrewberman.ui.Rectangle;
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.render.Circlegram;
 import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
-import org.phylowidget.render.Phylogram;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.ui.PhyloNode;
 import org.phylowidget.ui.PhyloTree;
@@ -23,7 +22,7 @@ public class TreeManager implements SettableRect
 	protected PApplet p;
 
 	public static RectMover camera;
-	protected static Rectangle cameraRect;
+	protected static UIRectangle cameraRect;
 	protected ArrayList trees;
 	protected ArrayList renderers;
 
@@ -41,7 +40,7 @@ public class TreeManager implements SettableRect
 	{
 		trees = new ArrayList();
 		renderers = new ArrayList();
-		cameraRect = new Rectangle(0, 0, 0, 0);
+		cameraRect = new UIRectangle(0, 0, 0, 0);
 		camera = new RectMover(p, this);
 		camera.fillScreen();
 		/*
@@ -49,7 +48,7 @@ public class TreeManager implements SettableRect
 		 */
 		// EventManager.lazyLoad(p);
 		EventManager.instance.setCamera(camera);
-		cladogramRender();
+		rectangleRender();
 	}
 
 	public void update()
@@ -59,8 +58,16 @@ public class TreeManager implements SettableRect
 		for (int i = 0; i < renderers.size(); i++)
 		{
 			TreeRenderer r = (TreeRenderer) renderers.get(i);
+			
+//			float oldThresh = PhyloWidget.ui.renderThreshold;
+//			PhyloWidget.ui.renderThreshold = 50;
+//			r.render(p.g, p.width*.75f, p.height*.75f, p.width*.25f, p.height*.25f, false);
+//			PhyloWidget.ui.renderThreshold = oldThresh;
+//			
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
-					cameraRect.height);
+					cameraRect.height, true);
+			
+			
 		}
 
 		if (mutateMe)
@@ -171,14 +178,9 @@ public class TreeManager implements SettableRect
 		setRenderer(new DiagonalCladogram());
 	}
 
-	public void cladogramRender()
+	public void rectangleRender()
 	{
 		setRenderer(new Cladogram());
-	}
-
-	public void phylogramRender()
-	{
-		setRenderer(new Phylogram());
 	}
 
 	public void circleRender()

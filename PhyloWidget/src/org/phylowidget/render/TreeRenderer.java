@@ -28,8 +28,8 @@ public interface TreeRenderer
 {
 	public static final int NODE = 0;
 	public static final int LABEL = 1;
-	
-	public void render(PGraphics canvas, float x, float y, float w, float h);
+
+	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender);
 
 	public void layout();
 
@@ -40,10 +40,10 @@ public interface TreeRenderer
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 
 	public Object rangeForNode(Object node);
-	
+
 	public float getRowHeight();
-	
+
 	public float getTextSize();
-	
+
 	public void positionText(PhyloNode node, TextField text);
 }

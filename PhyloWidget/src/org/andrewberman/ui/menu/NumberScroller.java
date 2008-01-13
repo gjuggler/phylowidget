@@ -36,6 +36,11 @@ public class NumberScroller extends MenuItem
 		df = new DecimalFormat("#######0.0#");
 		df.setDecimalSeparatorAlwaysShown(false);
 
+		setIncrement(increment);
+		setDefault(defaultValue);
+		setValue(value);
+		setScrollSpeed(scrollSpeed);
+		
 		stringValue = new String();
 	}
 

@@ -15,6 +15,8 @@ import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
 
+import processing.core.PApplet;
+
 /**
  * The <code>ToolbarItem</code> class is a MenuItem that belongs to a Toolbar
  * object. It represents the "base" MenuItem of a Toolbar, i.e. the actual item
@@ -24,7 +26,7 @@ import org.andrewberman.ui.ifaces.Sizable;
  */
 public class ToolbarItem extends MenuItem
 {
-	static final float shortcutTextSize = .75f;;
+	static final float shortcutTextSize = .75f;
 	static RoundRectangle2D.Float roundRect = new RoundRectangle2D.Float(0, 0,
 			0, 0, 0, 0);
 	static RoundRectangle2D.Float buffRoundRect = new RoundRectangle2D.Float(0,
@@ -50,26 +52,43 @@ public class ToolbarItem extends MenuItem
 		roundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
 				menu.style.roundOff);
 		Graphics2D g2 = menu.buff.g2;
+
 		/*
 		 * Set the correct fill gradient
 		 */
 		if (isOpen() && parent == menu)
 		{
 			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
+		} else if (!hasChildren() && getState() == MenuItem.DOWN)
+		{
+			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
 		} else
-			g2.setPaint(menu.style.getGradient(MenuItem.OVER, y, y + height));
+			g2.setPaint(menu.style.getGradient(getState(), y, y + height));
 
 		/*
 		 * Only perform the fill if the mood is right.
 		 */
-		if (getState() != MenuItem.UP || isOpen() && isAncestorOfLastHovered()
-				|| isOpen() && menu == parent)
+		if (getState() != MenuItem.UP || isOpen())
 		{
-			g2.fill(roundRect);
-			g2.setPaint(menu.style.strokeColor);
-			g2.setStroke(menu.style.stroke);
-			g2.draw(roundRect);
+			if (getState() == MenuItem.DISABLED)
+			{
+				g2.fill(roundRect);
+				g2.setPaint(menu.style.strokeColor);
+				g2.setStroke(menu.style.stroke);
+				g2.draw(roundRect);
+			} else if (menu.hovered != null && menu.hovered != this
+					&& !isAncestorOfHovered())
+			{
+				;
+			} else
+			{
+				g2.fill(roundRect);
+				g2.setPaint(menu.style.strokeColor);
+				g2.setStroke(menu.style.stroke);
+				g2.draw(roundRect);
+			}
 		}
+
 		/*
 		 * Draw the text, triangle, and shortcut.
 		 */
@@ -95,12 +114,25 @@ public class ToolbarItem extends MenuItem
 		curX += shortcutWidth;
 		if (drawChildrenTriangle && items.size() > 0)
 		{
-			curX = x + width - triWidth - menu.style.padX;
-			at.setToIdentity();
-			at.translate(curX, y + height / 2);
-			Area a2 = tri.createTransformedArea(at);
-			g2.setPaint(menu.style.strokeColor);
-			g2.fill(a2);
+			if (layoutMode == LAYOUT_BELOW && getState() != MenuItem.UP
+					&& !isOpen())
+			{
+				curX = x + width / 2;
+				at.setToIdentity();
+				at.translate(curX, y + height + menu.style.padY / 2);
+				at.rotate(PApplet.HALF_PI);
+				Area a2 = tri.createTransformedArea(at);
+				g2.setPaint(menu.style.strokeColor);
+				g2.fill(a2);
+			} else if (layoutMode != LAYOUT_BELOW)
+			{
+				curX = x + width - triWidth - menu.style.padX;
+				at.setToIdentity();
+				at.translate(curX, y + height / 2);
+				Area a2 = tri.createTransformedArea(at);
+				g2.setPaint(menu.style.strokeColor);
+				g2.fill(a2);
+			}
 		}
 	}
 
@@ -125,27 +157,27 @@ public class ToolbarItem extends MenuItem
 		return ti;
 	}
 
-	@Override
-	public void open()
-	{
-		super.open();
-		if (parent == menu)
-		{
-			FocusManager.instance.setFocus(menu);
-			System.out.println("FOCUS");
-		}
+	// @Override
+	// public void open()
+	// {
+	// super.open();
+	// if (parent == menu)
+	// {
+	// FocusManager.instance.setFocus(menu);
+	// // System.out.println("FOCUS");
+	// }
+	//
+	// }
 
-	}
-
-	@Override
-	public void close()
-	{
-		super.close();
-		if (parent == menu)
-		{
-			FocusManager.instance.removeFromFocus(menu);
-		}
-	}
+	// @Override
+	// public void close()
+	// {
+	// super.close();
+	// if (parent == menu)
+	// {
+	// FocusManager.instance.removeFromFocus(menu);
+	// }
+	// }
 
 	protected int layoutMode;
 	protected static final int LAYOUT_BELOW = 0;
@@ -159,6 +191,8 @@ public class ToolbarItem extends MenuItem
 
 	public void layout()
 	{
+		if (menu == null)
+			return;
 		float curX = 0, curY = 0;
 		switch (layoutMode)
 		{
@@ -213,7 +247,8 @@ public class ToolbarItem extends MenuItem
 				menu.style.fontSize, "XYZ", true);
 
 		float triangleWidth = 0;
-		if (drawChildrenTriangle && items.size() > 0)
+		if (drawChildrenTriangle && items.size() > 0
+				&& layoutMode != LAYOUT_BELOW)
 		{
 			/*
 			 * Calculate the width of the "submenu" triangle shape.
@@ -244,28 +279,29 @@ public class ToolbarItem extends MenuItem
 		super.getRect(rect, buff);
 	}
 
-	protected void setState(int state)
-	{
-		if (this.state == state)
-			return;
-		if (menu == parent && menu instanceof Toolbar)
-		{
-			boolean oldHov = menu.hoverNavigable;
-			menu.hoverNavigable = false;
-			super.setState(state);
-			Toolbar tb = (Toolbar) menu;
-			if (state != MenuItem.UP)
-			{
-				if (tb.isActive())
-				{
-					tb.closeMyChildren();
-					open();
-				}
-			}
-			menu.hoverNavigable = oldHov;
-		} else
-			super.setState(state);
-	}
+	// protected void setState(int state)
+	// {
+	// super.setState(state);
+	// if (this.state == state)
+	// return;
+	// if (menu == parent && menu instanceof Toolbar)
+	// {
+	// boolean oldHov = menu.hoverNavigable;
+	// menu.hoverNavigable = false;
+	// super.setState(state);
+	// Toolbar tb = (Toolbar) menu;
+	// if (state != MenuItem.UP)
+	// {
+	// if (tb.isActive())
+	// {
+	// tb.closeMyChildren();
+	// open();
+	// }
+	// }
+	// menu.hoverNavigable = oldHov;
+	// } else
+	// super.setState(state);
+	// }
 
 	protected void itemMouseEvent(MouseEvent e, Point pt)
 	{

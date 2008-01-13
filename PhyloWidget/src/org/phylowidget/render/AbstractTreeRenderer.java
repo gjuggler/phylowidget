@@ -47,6 +47,8 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	 */
 	public Rectangle2D.Float rect, screenRect;
 
+	boolean mainRender;
+
 	/**
 	 * The tree that will be rendered.
 	 */
@@ -91,10 +93,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 
 	protected float lineThicknessMult = 0.2f;
 
-	protected int nodesToDraw;
 	protected int threshold;
-
-	protected double scaleX, scaleY, dx, dy;
 
 	public AbstractTreeRenderer()
 	{
@@ -113,10 +112,11 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 	{
 	}
 
-	public void render(PGraphics canvas, float x, float y, float w, float h)
+	public void render(PGraphics canvas, float x, float y, float w, float h,
+			boolean mainRender)
 	{
 		this.canvas = canvas;
-		nodesToDraw = (int) PhyloWidget.ui.renderThreshold;
+		this.mainRender = mainRender;
 		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
@@ -129,6 +129,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 				needsLayout = false;
 			}
 			counter = 0;
+			drawRecalc();
 			draw();
 		}
 	}
@@ -145,7 +146,8 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		tree.getAll(tree.getRoot(), leaves, nodes);
 		Collections.sort(nodes, tree.sorter);
 		layoutImpl();
-		initNodeRanges();
+//		if (mainRender)
+			initNodeRanges();
 	}
 
 	final public void layout()
@@ -274,15 +276,13 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		 * Call to subclasses that allow them to do some calculations that need
 		 * to be performed on a frame-by-frame basis.
 		 */
-		drawRecalc();
 		/*
 		 * Now, let's set up the canvas.
 		 */
 		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
-		canvas.background(style.backgroundColor.getRGB());
 		canvas.noStroke();
 		canvas.fill(0);
-		
+
 		canvas.textFont(FontLoader.instance.vera);
 		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 		canvas.textSize(textSize);
@@ -315,7 +315,7 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 		{
 			PhyloNode n = (PhyloNode) nodes.get(i);
 			// n.isWithinScreen = isNodeWithinScreen(n);
-			if (nodesDrawn >= nodesToDraw)
+			if (nodesDrawn >= PhyloWidget.ui.renderThreshold)
 				break;
 			if (!n.isWithinScreen)
 				continue;
@@ -374,8 +374,8 @@ public abstract class AbstractTreeRenderer implements TreeRenderer,
 			 * - Draw node marker
 			 * - Draw label
 			 */
-			drawNodeMarker(n);
 			drawLine((PhyloNode) n.getParent(), n);
+			drawNodeMarker(n);
 			drawLabel(n);
 		} else
 		{

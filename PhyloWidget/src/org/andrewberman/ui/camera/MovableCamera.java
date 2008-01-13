@@ -16,7 +16,6 @@ import processing.core.PApplet;
 public class MovableCamera extends Camera implements MouseWheelListener,
 		KeyListener, MouseMotionListener, MouseListener
 {
-	protected PApplet p;
 
 	Point2D.Float pt = new Point2D.Float(0, 0);
 	protected int NUDGE_DISTANCE;
@@ -31,7 +30,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 
 	public MovableCamera(PApplet p)
 	{
-		super();
+		super(p);
 		this.p = p;
 		makeResponsive();
 
@@ -62,22 +61,7 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		applyTransformations();
 	}
 
-	protected void applyTransformations()
-	{
-		/*
-		 * Translate by half the stage width and height to re-center the stage
-		 * at (0,0).
-		 */
-		p.translate(getStageWidth() / 2.0f, getStageHeight() / 2.0f);
-		/*
-		 * Now scale.
-		 */
-		p.scale(getZ());
-		/*
-		 * Then translate.
-		 */
-		p.translate(-getX(), -getY());
-	}
+
 
 	public void scroll()
 	{

@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
+import org.andrewberman.ui.ifaces.Malleable;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.menu.StyleSet;
 
@@ -52,7 +53,7 @@ import processing.core.PGraphicsJava2D;
  * 
  * @author Greg
  */
-public class TextField extends AbstractUIObject implements Positionable
+public class TextField extends AbstractUIObject implements Malleable
 {
 	static final int LEFT = -1;
 	static final int RIGHT = 1;
@@ -118,9 +119,9 @@ public class TextField extends AbstractUIObject implements Positionable
 		buffRect = new Rectangle2D.Float(0, 0, 0, 0);
 		clip = StringClipboard.instance;
 
-		width = 400;
+		width = 50;
 		x = 0;
-		y = 100;
+		y = 0;
 
 		if (UIUtils.isJava2D(canvas))
 		{
@@ -404,7 +405,7 @@ public class TextField extends AbstractUIObject implements Positionable
 
 	public void setPosition(float x, float y)
 	{
-		// setPositionByCorner(x,y);
+		 setPositionByCorner(x,y);
 	}
 
 	public void setPositionByCorner(float x, float y)
@@ -478,7 +479,7 @@ public class TextField extends AbstractUIObject implements Positionable
 		if (dir == RIGHT)
 		{
 			s = text.substring(caret, text.length());
-			String[] words = s.split("\\s\\S", 2);
+			String[] words = s.split("\\w\\W", 2);
 			String firstWord = words[0];
 			if (type == SELECT)
 				selectChar(firstWord.length() + pad);
@@ -488,7 +489,7 @@ public class TextField extends AbstractUIObject implements Positionable
 		{
 			s = text.reverse().substring(text.length() - caret, text.length());
 			text.reverse(); // Reverse the stringbuffer back to normal!
-			String[] words = s.split("\\S\\s", 2);
+			String[] words = s.split("\\W\\w", 2);
 			String firstWord = words[0];
 			if (type == SELECT)
 				selectChar(-1 * (firstWord.length() + 1));
@@ -562,6 +563,14 @@ public class TextField extends AbstractUIObject implements Positionable
 		fireEvent(UIEvent.TEXT_CARET);
 	}
 
+
+	protected void insertCharAt(char c, int pos)
+	{
+		insert(String.valueOf(c),pos);
+		fireEvent(UIEvent.TEXT_VALUE);
+	}
+	
+	
 	protected void insert(String s, int pos)
 	{
 		text.insert(pos, s);
@@ -570,20 +579,14 @@ public class TextField extends AbstractUIObject implements Positionable
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
-	protected void insertCharAt(char c, int pos)
-	{
-		text.insert(pos, c);
-		moveChar(1);
-		fireEvent(UIEvent.TEXT_VALUE);
-	}
-
 	protected void backspaceAt(int pos)
 	{
 		// Remove the char that exists before index pos.
 		if (pos <= 0)
 			return;
-		text.deleteCharAt(pos - 1);
-		moveChar(-1);
+//		text.deleteCharAt(pos - 1);
+		deleteAt(pos-1);
+		moveCaretTo(pos);
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
@@ -597,9 +600,18 @@ public class TextField extends AbstractUIObject implements Positionable
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
+	protected void deleteRange(int lo, int hi)
+	{
+		for(int i=hi; i >= lo; i--)
+		{
+			deleteAt(i);
+		}
+	}
+	
 	protected void deleteSelection()
 	{
-		text.delete(selLo, selHi);
+//		text.delete(selLo, selHi);
+		deleteRange(selLo,selHi);
 		// selHi = selAnchor = caret = selLo; // Need to resolve selection
 		// // deletion before calling
 		// // moveCaretTo.
@@ -617,7 +629,8 @@ public class TextField extends AbstractUIObject implements Positionable
 
 	protected void cut()
 	{
-		String s = text.substring(selLo, selHi);
+//		String s = text.substring(selLo, selHi);
+		String s = getText(selLo,selHi);
 		clip.toClipboard(s);
 		deleteSelection();
 	}
@@ -637,9 +650,15 @@ public class TextField extends AbstractUIObject implements Positionable
 		insert(s, caret);
 	}
 
+	public String getText(int lo,int hi)
+	{
+		return text.substring(lo, hi);
+	}
+	
 	public String getText()
 	{
-		return text.toString();
+//		return text.toString();
+		return getText(0,text.length());
 	}
 
 	synchronized protected void printState()
@@ -658,6 +677,12 @@ public class TextField extends AbstractUIObject implements Positionable
 	{
 		if (hidden)
 			return;
+		if (!FocusManager.instance.isFocused(this))
+		{
+			return;
+		}
+		
+//		System.out.println(getText());
 		// System.out.println(e);
 		int code = e.getKeyCode();
 		boolean meta = ((e.getModifiersEx() & metaMask) != 0);
@@ -914,4 +939,40 @@ public class TextField extends AbstractUIObject implements Positionable
 	{
 		y = f;
 	}
+
+	public float getBaselineY()
+	{
+		return y + pad + ascent;
+	}
+	
+	public float getHeight()
+	{
+		return height + 2*pad;
+	}
+
+	public float getWidth()
+	{
+		return width + 2*pad;
+	}
+
+	public float getFontSize()
+	{
+		return fontSize;
+	}
+	
+	public void setHeight(float h)
+	{
+		// TODO
+	}
+
+	public void setSize(float w, float h)
+	{
+		// TODO
+	}
+	
+	public StringBuffer getTextModel()
+	{
+		return text;
+	}
+	
 }

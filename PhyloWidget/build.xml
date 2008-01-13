@@ -5,7 +5,7 @@
     
     last update : July 3, 2007
     author : Gregory Jordan (phylowidget@gmail.com)
-    author : info@toxi.co.uk
+    author : Toxi (info@toxi.co.uk)
 -->
 
 <!--
@@ -133,7 +133,7 @@ This Ant task assumes a certain structure within your project directory:
 	<!-- TARGET: SIGNJAR -->
 	<target name="signJar" if="internal.signJar">
 		<antcall target="genKey" />
-		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}">
+		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" >
 			<fileset refid="jarFiles"/>
 			<fileset file="${applet}/${internal.finalJar}"/>
 		</signjar>
@@ -158,6 +158,7 @@ This Ant task assumes a certain structure within your project directory:
 			<fileset dir="${html}">
 				<include name="**/*.*" />
 				<exclude name="**/*.html" />
+				<exclude name="**/*.php" />
 			</fileset>
 		</copy>
 
@@ -176,6 +177,7 @@ This Ant task assumes a certain structure within your project directory:
 		<copy todir="${applet}">
 			<fileset dir="${html}">
 				<include name="**/*.html" />
+				<include name="**/*.php" />
 			</fileset>
 			<filterchain>
 				<expandproperties />

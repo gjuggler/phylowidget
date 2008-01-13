@@ -7,6 +7,7 @@ import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.RootedTree;
@@ -40,11 +41,12 @@ public class PhyloTextField extends TextField
 
 	protected void startEditing(NodeRange r, int editMode)
 	{
+		PhyloWidget.ui.setMessage("Press Enter to commit, Esc to revert.");
 		this.editMode = editMode;
 		curRange = r;
 		RootedTree t = r.render.getTree();
 		reset();
-		String oldValue = null;
+		oldValue = null;
 		switch (editMode)
 		{
 			case (LABEL):
@@ -63,6 +65,7 @@ public class PhyloTextField extends TextField
 	{
 		super.hide();
 		FocusManager.instance.removeFromFocus(this);
+		PhyloWidget.ui.setMessage("");
 	}
 
 	void hideAndCommit()

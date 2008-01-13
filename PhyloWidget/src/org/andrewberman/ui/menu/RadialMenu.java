@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Rectangle;
+import org.andrewberman.ui.UIRectangle;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -26,8 +26,8 @@ public class RadialMenu extends Menu
 
 	private VisibleDepthComparator visComp = new VisibleDepthComparator();
 
-	Rectangle myRect = new Rectangle(0, 0, 0, 0);
-	Rectangle buffRect = new Rectangle(0, 0, 0, 0);
+	UIRectangle myRect = new UIRectangle(0, 0, 0, 0);
+	UIRectangle buffRect = new UIRectangle(0, 0, 0, 0);
 
 	AffineTransform buffTransform, mouseTransform;
 
@@ -38,7 +38,7 @@ public class RadialMenu extends Menu
 		super(p);
 	}
 
-	protected void setOptions()
+	public void setOptions()
 	{
 		super.setOptions();
 

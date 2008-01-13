@@ -5,10 +5,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
-import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeIO;
-import org.phylowidget.ui.PhyloTree;
-
 public class DelayedAction
 {
 	private boolean updating;
@@ -20,23 +16,28 @@ public class DelayedAction
 		if (timer != null)
 		{
 			timer.stop();
-		}
-		timer = new Timer(delay, new ActionListener()
+			timer.setInitialDelay(delay);
+			timer.restart();
+			return;
+		} else
 		{
-			public void actionPerformed(ActionEvent e)
+			timer = new Timer(delay, new ActionListener()
 			{
-				if (!updating)
+				public void actionPerformed(ActionEvent e)
 				{
-					timer = null;
-					doUpdate();
-				} else
-				{
-					timer.start();
+					if (!updating)
+					{
+						timer = null;
+						doUpdate();
+					} else
+					{
+						timer.start();
+					}
 				}
-			}
-		});
-		timer.setRepeats(false);
-		timer.start();
+			});
+			timer.setRepeats(false);
+			timer.start();
+		}
 	}
 
 	private void doUpdate()

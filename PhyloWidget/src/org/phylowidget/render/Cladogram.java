@@ -25,17 +25,12 @@ import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
 public class Cladogram extends AbstractTreeRenderer
 {
-	/**
-	 * Another optimization method -- if we're zoomed out so far that rows
-	 * become unreadable (i.e. if rowsize is <= SKIP_THRESH), then start
-	 * skipping drawing nodes to relieve the strain on the text functions.
-	 */
-	HashMap skipMe = new HashMap();
-	public static final int SKIP_THRESH = 3;
+	protected double scaleX, scaleY, dx, dy;
 	/**
 	 * Fontmetrics for calculating text widths.
 	 */
@@ -74,12 +69,7 @@ public class Cladogram extends AbstractTreeRenderer
 	 * If true, this tree will maintain its "proper" aspect ratio, meaning it
 	 * won't stretch to completely fill its enclosing rectangle.
 	 */
-	public boolean keepAspectRatio;
-	/**
-	 * If set to true, then this cladogram will layout things according to
-	 * height instead of depth, i.e. phylogram vs. cladogram.
-	 */
-	public boolean useBranchLengths;
+//	public boolean keepAspectRatio;
 
 	public Cladogram()
 	{
@@ -88,8 +78,7 @@ public class Cladogram extends AbstractTreeRenderer
 
 	protected void setOptions()
 	{
-		keepAspectRatio = true;
-		useBranchLengths = false;
+//		keepAspectRatio = true;
 	}
 
 	protected void layoutImpl()
@@ -163,14 +152,14 @@ public class Cladogram extends AbstractTreeRenderer
 		 */
 		float yPos = ((float) (index + .5f) / (float) (leaves.size()));
 		float xPos = 1;
-		if (useBranchLengths)
+		if (PhyloWidget.ui.useBranchLengths)
 			xPos = nodeXPosition(n);
 		n.setUnscaledPosition(xPos, yPos);
 	}
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-		if (useBranchLengths)
+		if (PhyloWidget.ui.useBranchLengths)
 		{
 			if (tree.getParentOf(n) == null)
 				return 0;
@@ -233,6 +222,22 @@ public class Cladogram extends AbstractTreeRenderer
 		}
 	}
 	
+	@Override
+	public void render(PGraphics canvas, float x, float y, float w, float h,
+			boolean mainRender)
+	{
+//		if (!mainRender)
+//		{
+//			double[] oldVals = {scaleX,scaleY,dx,dy};
+//			super.render(canvas, x, y, w, h, mainRender);
+//			scaleX = oldVals[0];
+//			scaleY = oldVals[1];
+//			dx = oldVals[2];
+//			dy = oldVals[3];
+//		} else
+			super.render(canvas, x, y, w, h, mainRender);
+	}
+	
 	protected void drawRecalc()
 	{
 		/*
@@ -244,23 +249,25 @@ public class Cladogram extends AbstractTreeRenderer
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
 		textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
-		/*
-		 * Using that, figure out the ideal column size.
-		 */
 		colSize = rect.width / (numCols + 1 + gutterWidth);
-		/*
-		 * Now let us constrain the aspect ratio.
-		 */
-		if (keepAspectRatio)
-			constrainAspectRatio();
+//		System.out.println("height:"+rect.width);
+		if (!PhyloWidget.ui.fitTreeToWindow)
+		{
+			rowSize = colSize = Math.min(rowSize, colSize);
+			scaleX = colSize * numCols;
+			scaleY = rowSize * numRows;
+		}
 		textSize = Math.min(rowSize, textSize);
+		if (PhyloWidget.ui.fitTreeToWindow)
+		{
+			scaleX = rect.width - gutterWidth*textSize - 10;
+			scaleY = rect.height - absOverhang*textSize;
+		}
+//		System.out.println(scaleX);
 		dotWidth = textSize * PhyloWidget.ui.nodeSize;
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;
-		else
-			scaleX = colSize * (numCols);
-		scaleY = rowSize * numRows;
 		dx = (rect.width - scaleX - gutterWidth * textSize - textSize / 2) / 2;
 		dy = (rect.height - scaleY - overhang * textSize) / 2;
 		dx += rect.getX();
@@ -270,15 +277,11 @@ public class Cladogram extends AbstractTreeRenderer
 		 */
 		textSize *= PhyloWidget.ui.textSize;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
-		/*
-		 * Update all the node ranges.
-		 */
-		// updateNodeRanges();
 	}
 
 	protected void constrainAspectRatio()
 	{
-		rowSize = colSize = Math.min(rowSize, colSize);
+		
 	}
 
 	@Override
@@ -367,6 +370,15 @@ public class Cladogram extends AbstractTreeRenderer
 		PhyloNode p = (PhyloNode) tree.getParentOf(n);
 		if (p == null)
 			return screenRect.contains(n.x, n.y);
+		
+		float textWidth = (float)n.unitTextWidth * textSize;
+		float loX = n.x - dotWidth/2;
+		float textHeight = (font.ascent() + font.descent() ) * textSize;
+		float loY = n.y - textHeight / 2;
+		float hiY = n.y + textHeight / 2;
+		float width = (float) (n.unitTextWidth * textSize);
+		float hiX = n.x + dotWidth/2 + width;
+		
 		tRect.setFrameFromDiagonal(n.x, n.y, p.x, p.y);
 		// return screenRect.contains(n.x, n.y);
 		return screenRect.intersects(tRect);
@@ -401,7 +413,14 @@ public class Cladogram extends AbstractTreeRenderer
 		canvas.pushMatrix();
 		canvas.translate(n.x + dotWidth / 2 + textSize / 3, n.y);
 		canvas.rotate(PApplet.radians(PhyloWidget.ui.textRotation));
-		if (canvas.getClass() == PGraphicsJava2D.class
+		if (RenderOutput.isOutputting)
+		{
+			canvas.hint(PApplet.ENABLE_NATIVE_FONTS);
+			canvas.textFont(FontLoader.instance.vera);
+			canvas.textAlign(PConstants.LEFT, PConstants.BOTTOM);
+			canvas.textSize(textSize);
+			canvas.text(n.getLabel(), 0, 0 + dFont);
+		} else if (canvas.getClass() == PGraphicsJava2D.class
 				&& PhyloWidget.usingNativeFonts)
 		{
 			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
@@ -411,6 +430,9 @@ public class Cladogram extends AbstractTreeRenderer
 			 */
 			if (!tree.isLeaf(n))
 			{
+				/*
+				 * This is simply for drawing non-leaf nodes.
+				 */
 				float ratio = (float) tree.getNumEnclosedLeaves(n)
 						/ (float) tree.getNumEnclosedLeaves(tree.getRoot());
 				ratio = (float) Math.sqrt(ratio);
@@ -458,15 +480,15 @@ public class Cladogram extends AbstractTreeRenderer
 	}
 
 	@Override
-	public void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
+	public synchronized void nodesInRange(ArrayList arr, Rectangle2D.Float rect)
 	{
-		AffineTransform sc = AffineTransform.getScaleInstance(1 / scaleX,
-				1 / scaleY);
+		AffineTransform sc = AffineTransform.getScaleInstance(1f / scaleX,
+				1f / scaleY);
 		AffineTransform tr = AffineTransform.getTranslateInstance(-dx, -dy);
 
 		Point2D p1 = new Point2D.Double(rect.getMinX(), rect.getMinY());
 		Point2D p2 = new Point2D.Double(rect.getMaxX(), rect.getMaxY());
-
+		
 		p1 = tr.transform(p1, null);
 		p2 = tr.transform(p2, null);
 		p1 = sc.transform(p1, null);

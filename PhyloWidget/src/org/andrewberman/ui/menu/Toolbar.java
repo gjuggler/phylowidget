@@ -43,6 +43,10 @@ public class Toolbar extends Menu
 	 */
 	public boolean isModal;
 
+	public int orientation = HORIZONTAL;
+	public static final int HORIZONTAL = 0;
+	public static final int VERTICAL = 1;
+
 	public Toolbar(PApplet app)
 	{
 		super(app);
@@ -55,19 +59,19 @@ public class Toolbar extends Menu
 		return hasOpenChildren();
 	}
 
-	protected void setOptions()
+	public void setOptions()
 	{
 		super.setOptions();
 		/*
 		 * Override some default options from the Menu class.
 		 */
-		useCameraCoordinates = false;
+		useCameraCoordinates = true;
 		clickToggles = true;
 		hoverNavigable = true;
 		clickAwayBehavior = Menu.CLICKAWAY_COLLAPSES;
 		// actionOnMouseDown = true;
 		useHandCursor = true;
-		autoDim = true;
+		autoDim = false;
 
 		fullWidth = false;
 		// isModal = true;
@@ -80,19 +84,9 @@ public class Toolbar extends Menu
 			y = style.strokeWidth;
 		} else if (!useCameraCoordinates)
 		{
-			x = style.strokeWidth + style.margin;
-			y = style.strokeWidth + style.margin;
+			x = style.strokeWidth;
+			y = style.strokeWidth;
 		}
-	}
-
-	public void setX(float x)
-	{
-		this.x = x + style.strokeWidth;
-	}
-
-	public void setY(float y)
-	{
-		this.y = y + style.strokeWidth;
 	}
 
 	public void draw()
@@ -102,16 +96,43 @@ public class Toolbar extends Menu
 		super.draw();
 	}
 
+	@Override
+	public void open(MenuItem i)
+	{
+		super.open(i);
+		FocusManager.instance.setFocus(this);
+	}
+
+	@Override
+	public void close(MenuItem item)
+	{
+		super.close(item);
+		FocusManager.instance.removeFromFocus(this);
+	}
+
+	@Override
+	public void close()
+	{
+		closeMyChildren();
+		kbFocus = null;
+	}
+
 	public void drawBefore()
 	{
-		MenuUtils.drawDoubleGradientRect(this, x, y, width, height);
+		if (orientation == HORIZONTAL)
+			MenuUtils.drawDoubleGradientRect(this, x, y, width, height);
+		else
+			MenuUtils.drawVerticalGradientRect(this, x, y, width, height);
 	}
 
 	public MenuItem create(String name)
 	{
 		ToolbarItem ti = new ToolbarItem();
-		ti.setLayoutMode(ToolbarItem.LAYOUT_BELOW);
-		ti.drawChildrenTriangle = false;
+		if (orientation == HORIZONTAL)
+			ti.setLayoutMode(ToolbarItem.LAYOUT_BELOW);
+		else
+			ti.setLayoutMode(ToolbarItem.LAYOUT_RIGHT);
+		ti.drawChildrenTriangle = true;
 		ti.setName(name);
 		return ti;
 	}
@@ -135,19 +156,23 @@ public class Toolbar extends Menu
 			MenuItem item = (MenuItem) items.get(i);
 			item.calcPreferredSize();
 			float itemWidth = item.width;
+			float itemHeight = item.height;
 			if (item instanceof Positionable)
 			{
 				Positionable pos = (Positionable) item;
 				pos.setPosition(x + xOffset, y + yOffset);
 			}
-			xOffset += itemWidth;
+
+			if (orientation == HORIZONTAL)
+				xOffset += itemWidth;
+			else
+				yOffset += itemHeight;
 			/*
 			 * I had been using the following line for adding padding between
-			 * toolbar items, but it looks better without any space, so for now
-			 * I am adding zero.
+			 * toolbar items, but it looks better without any space, so I got rid of it.
 			 */
-			if (i < items.size() - 1)
-				xOffset += 0;
+			// if (i < items.size() - 1)
+			// xOffset += 0;
 		}
 		/*
 		 * Set this Toolbar's width and height.
@@ -155,9 +180,32 @@ public class Toolbar extends Menu
 		if (fullWidth)
 			setFullWidth();
 		else
-			width = xOffset + style.padX;
-		float maxHeight = getMaxHeight();
-		height = maxHeight + style.padY * 2;
+		{
+			if (orientation == HORIZONTAL)
+			{
+				width = xOffset + style.padX;
+				float maxHeight = getMaxHeight();
+				height = maxHeight + style.padY * 2;
+			} else
+			{
+				height = yOffset + style.padY;
+				float maxWidth = getMaxWidth();
+				width = maxWidth + style.padX * 2;
+			}
+		}
+
+		for (int i = 0; i < items.size(); i++)
+		{
+			MenuItem item = items.get(i);
+			if (orientation == HORIZONTAL)
+			{
+				item.setHeight(getMaxHeight());
+			} else
+			{
+				item.setWidth(getMaxWidth());
+			}
+		}
+
 		/*
 		 * Trigger the recursive layout.
 		 */
@@ -166,7 +214,27 @@ public class Toolbar extends Menu
 
 	void setFullWidth()
 	{
-		width = canvas.width - style.strokeWidth * 2;
+		if (orientation == HORIZONTAL)
+		{
+			width = canvas.width - style.strokeWidth * 2;
+		} else
+		{
+			height = canvas.height - style.strokeWidth * 2;
+		}
+	}
+
+	@Override
+	public void setState(MenuItem i, int s)
+	{
+		if (!isActive())
+			hoverNavigable = false;
+		super.setState(i, s);
+		if (i.parent == this && isActive() && s != MenuItem.UP)
+		{
+			closeMyChildren();
+			open(i);
+		}
+		hoverNavigable = true;
 	}
 
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
@@ -182,7 +250,7 @@ public class Toolbar extends Menu
 	protected void itemMouseEvent(MouseEvent e, Point pt)
 	{
 		super.itemMouseEvent(e, pt);
-		if (isActive())
+		if (isActive() && autoDim)
 			aTween.continueTo(fullAlpha);
 		// if (e.getID() == MouseEvent.MOUSE_PRESSED)
 		// {
@@ -195,58 +263,142 @@ public class Toolbar extends Menu
 		// }
 	}
 
+	protected void focusToItem(MenuItem i)
+	{
+		kbFocus = i;
+		close(this);
+		MenuItem parent = i.parent;
+		while (parent != null)
+		{
+			open(parent);
+			parent = parent.parent;
+		}
+		hoverNavigable = false;
+		setState(i, MenuItem.OVER);
+		hoverNavigable = true;
+	}
+
+	void focusWrap(MenuItem base, int dir)
+	{
+		int index = base.parent.items.indexOf(base);
+		if (dir > 0)
+			index++;
+		else if (dir < 0)
+			index--;
+		if (index > base.parent.items.size() - 1)
+			index = 0;
+		else if (index < 0)
+			index = base.parent.items.size() - 1;
+		focusToItem(base.parent.items.get(index));
+	}
+
 	@Override
 	public void keyEvent(KeyEvent e)
 	{
 		super.keyEvent(e);
-//		System.out.println("event");
-//		if (hovered == null)
-//		{
-//			items.get(0).setState(MenuItem.OVER);
-//		}
-//		int code = e.getKeyCode();
-//		int type = e.getID();
-//		switch (code)
-//		{
-//			case (KeyEvent.VK_ENTER):
-//				if (hovered.hasChildren())
-//				{
-//					hovered.open();
-//					MenuItem i = hovered.items.get(0);
-//					i.setState(MenuItem.OVER);
-//					hovered.setState(MenuItem.UP);
-//				} else
-//				{
-//					hovered.performAction();
-//				}
-//				break;
-//			case (KeyEvent.VK_RIGHT):
-////				System.out.println("RIGHT");
-//				if (hovered.hasChildren())
-//				{
-//					hovered.open();
-//					MenuItem i = hovered.items.get(0);
-//					i.setState(MenuItem.OVER);
-//					hovered.setState(MenuItem.UP);
-//				} else
-//				{
-//					/*
-//					 * TODO: Find currently open top-level menuitem, and move
-//					 * one to the right. Shoudl wrap around to the left if
-//					 * necessary.
-//					 */
-//					MenuItem p = hovered.parent;
-//					int index = p.items.indexOf(hovered);
-//					p.items.get(index+1).setState(MenuItem.OVER);
-//					hovered.setState(MenuItem.UP);
-//				}
-//				break;
-//		}
+		if (FocusManager.instance.getFocusedObject() != this)
+			return;
+		// System.out.println("EVENT!");
+		if (kbFocus == null)
+		{
+			items.get(0).setState(MenuItem.OVER);
+		}
+		int code = e.getKeyCode();
+		int type = e.getID();
+		if (type != KeyEvent.KEY_PRESSED)
+			return;
+
+		MenuItem p = kbFocus.parent;
+		switch (code)
+		{
+			case (KeyEvent.VK_ENTER):
+				if (kbFocus.hasChildren())
+				{
+					focusToItem(kbFocus.items.get(0));
+				} else
+				{
+					kbFocus.performAction();
+				}
+				break;
+			case (KeyEvent.VK_RIGHT):
+				if (p == this)
+				{
+					focusWrap(kbFocus, 1);
+				} else
+				{
+					if (kbFocus.hasChildren())
+					{
+						focusToItem(kbFocus.items.get(0));
+					} else
+					{
+						/*
+						 * Finds the currently open top-level menuitem, and move
+						 * one to the right. Should wrap around to the left if
+						 * necessary.
+						 */
+						for (int i = 0; i < items.size(); i++)
+						{
+							MenuItem m = items.get(i);
+							if (m.isAncestorOf(kbFocus))
+							{
+								focusWrap(m, 1);
+								System.out.println(kbFocus);
+								focusToItem(kbFocus.items.get(0));
+								break;
+							}
+						}
+					}
+				}
+				break;
+			case (KeyEvent.VK_LEFT):
+				if (p == this)
+				{
+					focusWrap(kbFocus, -1);
+				} else if (p.parent == this)
+				{
+					focusWrap(p, -1);
+					focusToItem(kbFocus.items.get(0));
+				} else
+				{
+					focusToItem(p);
+				}
+				break;
+			case (KeyEvent.VK_DOWN):
+				if (p == this)
+				{
+					focusToItem(kbFocus.items.get(0));
+				} else
+				{
+					focusWrap(kbFocus, 1);
+				}
+				break;
+			case (KeyEvent.VK_UP):
+				if (p == this)
+				{
+					focusToItem(kbFocus.items.get(0));
+				} else
+				{
+					focusWrap(kbFocus, -1);
+				}
+				break;
+		}
+		// System.out.println(kbFocus);
 	}
 
 	protected boolean containsPoint(Point pt)
 	{
-		buffRect.setRect(x, y, width, height);
-		return buffRect.contains(pt);
+		// buffRect.setRect(x, y, width, height);
+		// return buffRect.contains(pt);
+		return false;
+	}
+
+	public int getOrientation()
+	{
+		return orientation;
+	}
+
+	public void setOrientation(int orientation)
+	{
+		this.orientation = orientation;
 	}
 }

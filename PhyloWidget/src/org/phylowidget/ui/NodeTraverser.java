@@ -10,7 +10,7 @@ import java.util.List;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Rectangle;
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.Tool;
@@ -195,7 +195,7 @@ public class NodeTraverser implements UIObject, TweenListener
 	}
 
 	Point pt = new Point();
-	Rectangle rect = new Rectangle();
+	UIRectangle rect = new UIRectangle();
 
 	private void getWithinRange(float x, float y, float radius)
 	{
@@ -290,8 +290,10 @@ public class NodeTraverser implements UIObject, TweenListener
 				navigate(DOWN);
 				break;
 			case (KeyEvent.VK_ENTER):
+				System.out.println("Open!");
 				if (getCurRange() != null)
 					openContextMenu();
+				break;
 		}
 	}
 

@@ -1,7 +1,10 @@
 package org.phylowidget.ui;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,11 +31,11 @@ public class PhyloUI extends PhyloUISetup
 		super(p);
 	}
 
-	public String menuFile = "menus/full-menus.xml";
+	public String menuFile = "full-menus.xml";
 	public String clipJavascript = "updateClip";
 	public String treeJavascript = "updateTree";
-	public String foregroundColor = "(0,0,0)";
-	public String backgroundColor = "(255,255,255)";
+	public String foreground = "(0,0,0)";
+	public String background = "(255,255,255)";
 	public String tree = "Homo Sapiens";
 
 	public float textRotation = 0;
@@ -45,19 +48,13 @@ public class PhyloUI extends PhyloUISetup
 	public boolean showCladeLabels = false;
 	public boolean outputAllInnerNodes = false;
 	public boolean enforceUniqueLabels = false;
-
-	/*
-	 * Node actions.
-	 */
+	public boolean fitTreeToWindow = false;
+	public boolean antialias = false;
+	public boolean useBranchLengths = false;
 
 	@Override
 	public void setup()
 	{
-		/*
-		 * Run the PhyloUISetup's setup() method. Note that this method
-		 * loads the menus and their associated default values.
-		 */
-		super.setup();
 		/*
 		 * Load the preferences.
 		 * Note that preferences should be loaded from the following settings sources
@@ -102,7 +99,11 @@ public class PhyloUI extends PhyloUISetup
 				setField(f, props.getProperty(f.getName()));
 			}
 		}
-
+		/*
+		 * Run the PhyloUISetup's setup() method. Note that this method
+		 * loads the menus and their associated default values.
+		 */
+		super.setup();
 		/*
 		 * Initialize the tree.
 		 */
@@ -229,26 +230,21 @@ public class PhyloUI extends PhyloUISetup
 		}
 	}
 
-	// *******************************************************
-	// ACTIONS
-	// *******************************************************
+	/*
+	 * View actions.
+	 */
 
-	public void viewPhylogram()
+	public void viewRectangular()
 	{
-		PhyloWidget.trees.phylogramRender();
+		PhyloWidget.trees.rectangleRender();
 	}
-
-	public void viewCladogram()
-	{
-		PhyloWidget.trees.cladogramRender();
-	}
-
+	
 	public void viewDiagonal()
 	{
 		PhyloWidget.trees.diagonalRender();
 	}
 
-	public void viewCircle()
+	public void viewCircular()
 	{
 		PhyloWidget.trees.circleRender();
 	}
@@ -310,11 +306,44 @@ public class PhyloUI extends PhyloUISetup
 		PhyloWidget.trees.stopMutatingTree();
 	}
 
-	/*
-	 * File actions.
-	 */
-
-	public void fileOpen()
+	public void treeSave()
+	{
+		final File f = p.outputFile("Save tree as...");
+		setMessage("Saving tree...");
+		new Thread()
+		{
+			public void run()
+			{
+				p.noLoop();
+				String s = TreeIO.createNewickString(PhyloWidget.trees.getTree());
+				try
+				{
+					f.createNewFile();
+					BufferedWriter r = new BufferedWriter(new FileWriter(f));
+					r.append(s);
+					r.close();
+					p.loop();
+					setMessage("");
+				} catch (IOException e)
+				{
+					e.printStackTrace();
+					p.loop();
+					setMessage("Error writing file. Whoops!");
+					try
+					{
+						Thread.sleep(2000);
+					} catch (InterruptedException e1)
+					{
+						e1.printStackTrace();
+					}
+					setMessage("");
+					return;
+				}
+			}
+		}.start();
+	}
+	
+	public void treeLoad()
 	{
 		final File f = p.inputFile("Select Newick-format text file...");
 		setMessage("Loading tree...");
@@ -331,6 +360,10 @@ public class PhyloUI extends PhyloUISetup
 		}.start();
 	}
 
+	/*
+	 * File actions.
+	 */
+	
 	public void fileOutputSmall()
 	{
 		TreeRenderer tr = PhyloWidget.trees.getRenderer();

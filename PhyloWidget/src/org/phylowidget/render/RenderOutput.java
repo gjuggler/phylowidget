@@ -18,11 +18,14 @@ import processing.pdf.PGraphicsPDF;
 public class RenderOutput
 {
 
-	public static void savePDF(PApplet p, RootedTree t, TreeRenderer r)
+	public static boolean isOutputting;
+	
+	public static synchronized void savePDF(PApplet p, RootedTree t, TreeRenderer r)
 	{
 		/*
 		 * Change the rendering threshold to the size of the tree.
 		 */
+		isOutputting = true;
 		float numNodes = t.vertexSet().size();
 		float oldThreshold = PhyloWidget.ui.renderThreshold;
 		PhyloWidget.ui.renderThreshold = numNodes;
@@ -34,7 +37,7 @@ public class RenderOutput
 			PGraphicsPDF canvas = (PGraphicsPDF) p.createGraphics(p.width,
 					p.height, PConstants.PDF, f.getAbsolutePath());
 			canvas.beginDraw();
-			r.render(canvas, 0, 0, canvas.width, canvas.height);
+			r.render(canvas, 0, 0, canvas.width, canvas.height,true);
 			canvas.endDraw();
 			canvas.dispose();
 			// canvas.save(f.getAbsolutePath());
@@ -44,11 +47,12 @@ public class RenderOutput
 		} finally
 		{
 			PhyloWidget.ui.renderThreshold = oldThreshold;
+			isOutputting = false;
 			p.loop();
 		}
 	}
 
-	public static void save(PApplet p, RootedTree t, TreeRenderer r, int w,
+	public static synchronized void save(PApplet p, RootedTree t, TreeRenderer r, int w,
 			int h)
 	{
 		try
@@ -63,7 +67,7 @@ public class RenderOutput
 			canvas.beginDraw();
 			prettyHints(canvas);
 			canvas.background(255);
-			r.render(canvas, 0, 0, canvas.width, canvas.height);
+			r.render(canvas, 0, 0, canvas.width, canvas.height,true);
 			canvas.endDraw();
 			canvas.loadPixels();
 			PImage img = canvas.get();

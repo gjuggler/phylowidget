@@ -1,8 +1,11 @@
 package org.andrewberman.ui.camera;
 
 import org.andrewberman.ui.tween.Tween;
+import org.andrewberman.ui.tween.TweenFriction;
 import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
+
+import processing.core.PApplet;
 
 public class Camera
 {
@@ -12,11 +15,14 @@ public class Camera
 
 	protected int FRAMES = 15;
 
-	public Camera()
+	protected PApplet p;
+	
+	public Camera(PApplet p)
 	{
-		xTween = new Tween(null, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
-		yTween = new Tween(null, TweenQuad.tween, Tween.OUT, 0, 0, FRAMES);
-		zTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES * 2);
+		this.p = p;
+		xTween = new Tween(null, TweenFriction.tween(.2f), Tween.OUT, 0, 0, 0);
+		yTween = new Tween(null, TweenFriction.tween(.2f), Tween.OUT, 0, 0, 0);
+		zTween = new Tween(null, TweenFriction.tween(.2f), Tween.OUT, 1f, 1f, 0);
 	}
 
 	/*
@@ -49,6 +55,23 @@ public class Camera
 	{
 		zTween.continueTo(z);
 	}
+
+	protected void applyTransformations()
+	{
+		/*
+		 * Translate by half the stage width and height to re-center the stage
+		 * at (0,0).
+		 */
+		p.translate(getStageWidth() / 2.0f, getStageHeight() / 2.0f);
+		/*
+		 * Now scale.
+		 */
+		p.scale(getZ());
+		/*
+		 * Then translate.
+		 */
+		p.translate(-getX(), -getY());
+	}
 	
 	public void nudge(float dx, float dy)
 	{
@@ -80,12 +103,12 @@ public class Camera
 	 */
 	public float getStageWidth()
 	{
-		return 100;
+		return p.width;
 	}
 
 	public float getStageHeight()
 	{
-		return 100;
+		return p.height;
 	}
 
 	public float getX()
@@ -113,5 +136,6 @@ public class Camera
 		xTween.update();
 		yTween.update();
 		zTween.update();
+		applyTransformations();
 	}
 }

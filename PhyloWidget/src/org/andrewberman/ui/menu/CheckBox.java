@@ -1,6 +1,7 @@
 package org.andrewberman.ui.menu;
 
 import java.awt.Cursor;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -23,7 +24,13 @@ public class CheckBox extends MenuItem
 	private boolean useReflection;
 
 	private float tWidth, nWidth, nOffsetX, nHeight, nOffsetY;
-
+	
+	@Override
+	public boolean getCloseOnAction()
+	{
+		return false;
+	}
+	
 	public void setProperty(Object obj, String prop)
 	{
 		try
@@ -45,9 +52,10 @@ public class CheckBox extends MenuItem
 		setVal(Boolean.parseBoolean(s));
 	}
 
-	public void setVal(boolean value)
+	void setVal(boolean value)
 	{
 		this.value = value;
+		
 		if (useReflection)
 		{
 			try
@@ -60,6 +68,11 @@ public class CheckBox extends MenuItem
 		}
 	}
 
+	public boolean getValue()
+	{
+		return value;
+	}
+	
 	public void drawMyself()
 	{
 		super.drawMyself();
@@ -157,7 +170,9 @@ public class CheckBox extends MenuItem
 
 	protected void performAction()
 	{
-		// super.performAction();
+		setVal(!value);
+		
+		super.performAction();
 	}
 
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
@@ -173,7 +188,7 @@ public class CheckBox extends MenuItem
 			case (MouseEvent.MOUSE_PRESSED):
 				if (mouseInside)
 				{
-					setVal(!value);
+//					setVal(!value);
 				}
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
@@ -196,4 +211,22 @@ public class CheckBox extends MenuItem
 		return buffRoundRect.contains(p);
 	}
 
+	@Override
+	public void keyEvent(KeyEvent e)
+	{
+		super.keyEvent(e);
+		if (e.getID() != KeyEvent.KEY_PRESSED)
+			return;
+		switch (e.getKeyCode())
+		{
+			case (KeyEvent.VK_SPACE):
+//				setVal(!value);
+				performAction();
+				break;
+			case (KeyEvent.VK_ENTER):
+//				setVal(!value);
+				break;
+		}
+	}
+	
 }

@@ -62,7 +62,7 @@ public final class MenuTimer extends Thread
 						}
 					else if (unset)
 					{
-						item.close();
+						item.menu.close(item);
 						item = null;
 						parent = null;
 					} else
@@ -95,7 +95,7 @@ public final class MenuTimer extends Thread
 	{
 		if (unsetMe == item || (unsetMe == lastSet))
 		{
-			// System.out.println("Unset item:"+unsetMe);
+//			 System.out.println("Unset item:"+unsetMe);
 			// parent = unsetMe.nearestMenu;
 			// parent = unsetMe.parent;
 			item = unsetMe;

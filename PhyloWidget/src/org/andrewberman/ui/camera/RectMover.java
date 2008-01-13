@@ -23,7 +23,7 @@ public class RectMover extends MovableCamera
 
 	protected boolean constrainToScreen = true;
 	
-	final float border = 200;
+	float border = 100;
 	
 	public RectMover(PApplet app, SettableRect r)
 	{
@@ -79,7 +79,7 @@ public class RectMover extends MovableCamera
 	
 	public float getZ()
 	{
-		return w / p.width;
+		return w / (float)p.width;
 	}
 
 	public void update()
@@ -87,7 +87,6 @@ public class RectMover extends MovableCamera
 		/*
 		 * No super.update() because we're updating all the necessary tweens on our own.
 		 */
-
 		super.scroll();
 
 		xTween.update();
@@ -116,6 +115,8 @@ public class RectMover extends MovableCamera
 	private void constrainToScreen()
 	{
 		if (!this.constrainToScreen) return;
+		
+		border = Math.min(p.width/2f,p.height/2f);
 		
 		float effectiveWidth = Math.max(10,p.width - border);
 		float effectiveHeight = Math.max(10,p.height - border);

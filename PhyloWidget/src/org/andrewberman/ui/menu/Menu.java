@@ -128,7 +128,7 @@ public abstract class Menu extends MenuItem implements UIObject
 	/**
 	 * References to a few relevant MenuItems.
 	 */
-	protected MenuItem hovered, lastPressed;
+	protected MenuItem hovered, lastPressed, kbFocus;
 	/**
 	 * The current alpha value for this menu.
 	 */
@@ -230,7 +230,8 @@ public abstract class Menu extends MenuItem implements UIObject
 		EventManager.instance.add(this); // Add ourselves to EventManager.
 		canvas = app;
 		setMenu(this);
-		style = StyleSet.defaultStyle();
+		style = new StyleSet();
+		style.loadDefaults();
 		/*
 		 * Give our subclasses a chance to set their options before we start
 		 * initing stuff.
@@ -239,7 +240,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		init();
 	}
 
-	private void init()
+	protected void init()
 	{
 		if (UIUtils.isJava2D(canvas))
 			buff = (PGraphicsJava2D) canvas.g;
@@ -251,7 +252,7 @@ public abstract class Menu extends MenuItem implements UIObject
 					15);
 	}
 
-	protected void setOptions()
+	public void setOptions()
 	{
 		useCameraCoordinates = true;
 		usesJava2D = true;
@@ -295,7 +296,7 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	public void open()
 	{
-		super.open();
+		open(this);
 		if (modalFocus)
 			FocusManager.instance.setModalFocus(this);
 		else if (focusOnShow)
@@ -305,7 +306,7 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	public void close()
 	{
-		super.close();
+		close(this);
 		/*
 		 * Cause the cursor to be reverted back to normal in the case that this
 		 * Menu had changed it to a hand icon or something else.
@@ -322,6 +323,25 @@ public abstract class Menu extends MenuItem implements UIObject
 		 * Finally, fire the MENU_HIDDEN event to our listeners.
 		 */
 		fireEvent(UIEvent.MENU_CLOSED);
+	}
+
+	public void open(MenuItem i)
+	{
+		if (i.isOpen())
+			close();
+		i.isOpen = true;
+	}
+
+	public void close(MenuItem item)
+	{
+		ArrayList items = item.items;
+		for (int i = 0; i < items.size(); i++)
+		{
+			MenuItem child = (MenuItem) items.get(i);
+			close(child);
+			child.setState(MenuItem.UP);
+		}
+		item.isOpen = false;
 	}
 
 	public boolean isRootMenu()
@@ -351,6 +371,7 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	public void draw()
 	{
+		// System.out.println(hovered);
 		if (!isRootMenu())
 		{
 			super.draw();
@@ -504,28 +525,61 @@ public abstract class Menu extends MenuItem implements UIObject
 		return false;
 	}
 
-	public void setState(MenuItem i, int state)
+	public void setState(MenuItem item, int newState)
 	{
-		if (i.menu != this)
+		/*
+		 * If we're not the item's menu, throw an exception.
+		 */
+		if (item.menu != this)
 			throw new IllegalArgumentException();
-		
+		if (item == this)
+			return;
+		/*
+		 * If the state hasn't changed, just return.
+		 */
+		if (item.getState() == newState)
+			return;
+		/*
+		 * Actually set the state variable.
+		 */
+		item.setState(newState);
+
 		if (hoverNavigable)
 		{
-			if (state == MenuItem.OVER || state == MenuItem.DOWN)
-				timer.setMenuItem(this);
-			else if (state == MenuItem.UP)
-				timer.unsetMenuItem(this);
+			if (newState == MenuItem.OVER || newState == MenuItem.DOWN)
+				timer.setMenuItem(item);
+			else if (newState == MenuItem.UP)
+				timer.unsetMenuItem(item);
+		}
+
+		if (newState == MenuItem.DOWN)
+		{
+			lastPressed = item;
+			hovered = item;
+			kbFocus = item;
+		} else if (newState == MenuItem.OVER)
+		{
+			hovered = item;
+			kbFocus = item;
+		} else if (newState == MenuItem.UP)
+		{
+			if (item == hovered)
+			{
+				hovered = null;
+			}
 		}
 	}
-	
+
 	public void keyEvent(KeyEvent e)
 	{
-			switch (e.getKeyCode())
-			{
-				case (KeyEvent.VK_ESCAPE):
-					close();
-					break;
-			}
+		switch (e.getKeyCode())
+		{
+			case (KeyEvent.VK_ESCAPE):
+				close();
+				break;
+		}
+		if (kbFocus != null)
+			kbFocus.keyEvent(e);
 		super.keyEvent(e);
 	}
 

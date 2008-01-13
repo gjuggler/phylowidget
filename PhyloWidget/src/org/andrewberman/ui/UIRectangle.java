@@ -2,19 +2,26 @@ package org.andrewberman.ui;
 
 import java.awt.geom.Rectangle2D;
 
-public final class Rectangle extends Rectangle2D.Float
+import org.andrewberman.ui.ifaces.Malleable;
+
+public class UIRectangle extends Rectangle2D.Float
 {
 
-	public Rectangle(float x, float y, float w, float h)
+	public UIRectangle(float x, float y, float w, float h)
 	{
 		super(x,y,w,h);
 	}
 	
-	public Rectangle()
+	public UIRectangle()
 	{
 		super();
 	}
 
+	public UIRectangle(Malleable m)
+	{
+		super(m.getX(),m.getY(),m.getWidth(),m.getHeight());
+	}
+	
 	public float distToPoint(Point pt)
 	{
 		float px = pt.x;

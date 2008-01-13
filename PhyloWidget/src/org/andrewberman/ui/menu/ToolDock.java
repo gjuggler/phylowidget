@@ -68,14 +68,14 @@ public class ToolDock extends Dock implements ToolManager.ToolShortcuts
 		}
 		if (activeItem != null)
 		{
-			activeItem.setState(MenuItem.DOWN);
+			setState(activeItem,MenuItem.DOWN);
 			activeItem.performAction();
 			hovered = null;
 			for (int i = 0; i < items.size(); i++)
 			{
 				ToolDockItem tdi = (ToolDockItem) items.get(i);
 				if (tdi != activeItem)
-					tdi.setState(MenuItem.UP);
+					setState(tdi,MenuItem.UP);
 			}
 		}
 	}

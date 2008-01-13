@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -73,9 +74,21 @@ public class UIUtils
 			FocusManager.lazyLoad(p);
 			EventManager.lazyLoad(p);
 			ShortcutManager.lazyLoad(p);
+			setRenderingHints(p);
 		}
 	}
 
+	static void setRenderingHints(PApplet p)
+	{
+		if (p.g instanceof PGraphicsJava2D)
+		{
+			PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
+			Graphics2D g2 = pg.g2;
+			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		}
+	}
+	
 	/**
 	 * Retrieves the "meta" mask for the current system.
 	 * <p>
@@ -129,6 +142,11 @@ public class UIUtils
 			return;
 		cursorOwner = null;
 		p.setCursor(baseCursor);
+	}
+	
+	public static Object getCursorOwner()
+	{
+		return cursorOwner;
 	}
 
 	/**

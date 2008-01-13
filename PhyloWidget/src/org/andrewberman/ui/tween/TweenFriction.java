@@ -18,7 +18,7 @@ public final class TweenFriction implements TweenFunction
 	
 	public boolean isFinished(float t, float p, float b, float c, float d)
 	{
-		return (p >= b + c - .01 && p <= b + c + .01);
+		return (p >= b + c - .005 && p <= b + c + .005);
 	}
 	
 	public float easeIn(float t, float p, float b, float c, float d)

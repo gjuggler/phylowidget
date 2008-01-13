@@ -1,6 +1,8 @@
 package org.andrewberman.ui.tools;
 
+import java.awt.AWTException;
 import java.awt.Cursor;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -22,6 +24,7 @@ public class Zoom extends Tool
 
 	Tween zoomTween;
 
+	Robot r;
 
 	public Zoom(PApplet p)
 	{
@@ -41,12 +44,17 @@ public class Zoom extends Tool
 			if (controlPressed)
 			{
 				zoomFactor *= Math.exp(zoomDist / 100f / 10f);
-				p.stroke(255,0,0);
+				p.stroke(255,0,0,150);
 				p.strokeWeight(3.0f);
 				p.line(downPoint.x, curPoint.y, downPoint.x, downPoint.y);
 			} else
 			{
 				zoomFactor = downZoom * Math.exp(zoomDist / 100f);
+				float ratio = zoomTween.getPosition()/(float)downZoom;
+				p.stroke(255,0,0,150);
+				p.strokeWeight(1.0f*ratio);
+				p.noFill();
+				p.ellipse((float)downPoint.x, (float)downPoint.y, ratio*5,ratio*5);
 			}
 			zoomTween.continueTo((float) zoomFactor);
 		}
@@ -108,5 +116,4 @@ public class Zoom extends Tool
 	{
 		return false;
 	}
-
 }

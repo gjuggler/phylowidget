@@ -1,5 +1,6 @@
 package org.phylowidget.render;
 
+import java.awt.Graphics2D;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
+import processing.core.PGraphicsJava2D;
 
 public class Circlegram extends Cladogram
 {
@@ -19,9 +21,8 @@ public class Circlegram extends Cladogram
 	protected void setOptions()
 	{
 		super.setOptions();
-		useBranchLengths = true;
 	}
-	
+
 	@Override
 	protected void layoutImpl()
 	{
@@ -73,7 +74,7 @@ public class Circlegram extends Cladogram
 		// super.drawRecalc();
 		float circum = PApplet.PI;
 		rowSize = rect.height / (circum * numRows);
-//		textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
+		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
 		textSize = rowSize * circum;
 		dotWidth = textSize * PhyloWidget.ui.nodeSize;
 		rad = dotWidth / 2;
@@ -82,10 +83,10 @@ public class Circlegram extends Cladogram
 				* gutter);
 		scaleX = rowSize * numRows;
 		scaleY = rowSize * numRows;
-		dx = rect.width/2.0f;
-		dy = rect.width/2.0f;
-//		dx = 0;
-//		dy = 0;
+		dx = rect.width / 2.0f;
+		dy = rect.width / 2.0f;
+		// dx = 0;
+		// dy = 0;
 		dx += rect.getX();
 		dy += rect.getY();
 		textSize *= PhyloWidget.ui.textSize;
@@ -112,29 +113,82 @@ public class Circlegram extends Cladogram
 		float pr = (float) p.getTargetX();
 		double loTheta = Math.min(p.getTargetY(), n.getTargetY());
 		double hiTheta = Math.max(p.getTargetY(), n.getTargetY());
-		canvas.arc((float) (dx), (float) (dy), (float) (scaleX * pr), (float) (scaleY * pr),
-				(float) loTheta, (float) hiTheta);
-//		canvas.ellipseMode(PApplet.CORNER);
+		canvas.arc((float) (dx), (float) (dy), (float) (scaleX * pr),
+				(float) (scaleY * pr), (float) loTheta, (float) hiTheta);
+		// canvas.ellipseMode(PApplet.CORNER);
 		double r = p.getTargetX();
 		double x = r * cosines.get(n);
 		double y = r * sines.get(n);
-		double x1 = dx + scaleX*x;
-		double y1 = dy + scaleY*y;
-		canvas.line((float)x1,(float)y1,n.x,n.y);
+		double x1 = dx + scaleX * x;
+		double y1 = dy + scaleY * y;
+		canvas.line((float) x1, (float) y1, n.x, n.y);
+		if (tree.isLeaf(n))
+		{
+			double x2 = dx + scaleX * cosines.get(n);
+			double y2 = dy + scaleY * sines.get(n);
+			canvas.stroke(230);
+			canvas.line(n.x, n.y, (float) x2, (float) y2);
+		}
+	}
+
+	boolean between(float a, float lo, float hi)
+	{
+		if (a <= hi && a >= lo)
+			return true;
+		else
+			return false;
 	}
 
 	@Override
 	protected void drawLabelImpl(PhyloNode n)
 	{
-		float theta = (float) n.getUnscaledY();
-//		float theta = 0;
-		float oldTextRot = PhyloWidget.ui.textRotation;
-		PhyloWidget.ui.textRotation = theta / PApplet.TWO_PI * 360;
-		PhyloWidget.usingNativeFonts = false;
+		float theta = (float) n.getTargetY();
+		int degrees = (int) (theta / PApplet.TWO_PI * 360);
+
+		int textRotation = 0;
+		boolean alignRight = false;
+		if (between(degrees, 45, 90))
+		{
+			textRotation = 45;
+		} else if (between(degrees, 90, 135))
+		{
+			textRotation = -45;
+			alignRight = true;
+		} else if (between(degrees, 135, 225))
+		{
+			alignRight = true;
+		} else if (between(degrees, 225, 270))
+		{
+			textRotation = 45;
+			alignRight = true;
+		} else if (between(degrees, 270, 315))
+		{
+			textRotation = -45;
+		}
+
 		float oldR = n.getTargetX();
-		super.drawLabelImpl(n);
-		PhyloWidget.usingNativeFonts = true;
-		PhyloWidget.ui.textRotation = oldTextRot;
+		n.setUnscaledPosition(1, n.getTargetY());
+		updateNode(n);
+
+		canvas.pushMatrix();
+		canvas.translate(n.x + dotWidth / 2 + textSize / 3, n.y);
+		canvas.rotate(PApplet.radians(textRotation));
+
+		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
+		Graphics2D g2 = pgj.g2;
+		g2.setFont(font.font.deriveFont(textSize));
+		g2.setPaint(style.foregroundColor);
+		if (!alignRight)
+			g2.drawString(n.getLabel(), 0, 0 + dFont);
+		else
+		{
+			float width = (float) (n.unitTextWidth * textSize);
+			g2.drawString(n.getLabel(), -width, 0 + dFont);
+		}
+
+		canvas.popMatrix();
+
+		n.setUnscaledPosition(oldR, n.getTargetY());
+		updateNode(n);
 	}
-	
 }

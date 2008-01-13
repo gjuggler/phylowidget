@@ -81,7 +81,7 @@ public class Dock extends Menu
 	public Dock(PApplet app)
 	{
 		super(app);
-		inset = style.margin;
+		inset = style.padX;
 
 		drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 		mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
@@ -94,7 +94,7 @@ public class Dock extends Menu
 		open();
 	}
 
-	protected void setOptions()
+	public void setOptions()
 	{
 		super.setOptions();
 
@@ -104,7 +104,6 @@ public class Dock extends Menu
 		clickToggles = true;
 		useHandCursor = true;
 		actionOnMouseDown = true;
-		closeOnAction = true;
 		usesJava2D = true;
 		autoDim = true;
 
@@ -222,8 +221,8 @@ public class Dock extends Menu
 		if (usesJava2D)
 		{
 			Graphics2D g2 = menu.buff.g2;
-			g2.setPaint(menu.style.getGradient((float) drawRect.getMinY(),
-					(float) drawRect.getMaxY()));
+			g2.setPaint(menu.style.getGradient(0, (float) drawRect.getMinY(),
+					0, (float) drawRect.getMaxY()));
 			g2.fill(drawRect);
 			g2.setStroke(menu.style.stroke);
 			g2.setPaint(menu.style.strokeColor);
@@ -329,27 +328,27 @@ public class Dock extends Menu
 			{
 				case (LEFT):
 					float cy = i.getY() + i.getHeight() / 2;
-					float cx = inset + menu.style.margin;
+					float cx = inset + menu.style.padX;
 					pg.triangle(cx, cy + height, cx, cy - height, cx + height,
 							cy);
 					i.setPosition(i.getX() + height, i.getY());
 					break;
 				case (RIGHT):
 					cy = i.getY() + i.getHeight() / 2;
-					cx = canvas.width - inset - menu.style.margin;
+					cx = canvas.width - inset - menu.style.padX;
 					pg.triangle(cx, cy + height, cx, cy - height, cx - height,
 							cy);
 					i.setPosition(i.getX() - height, i.getY());
 					break;
 				case (TOP):
-					cy = inset + menu.style.margin;
+					cy = inset + menu.style.padY;
 					cx = i.getX() + i.getWidth() / 2;
 					pg.triangle(cx + height, cy, cx - height, cy, cx, cy
 							+ height);
 					i.setPosition(i.getX(), i.getY() + height);
 					break;
 				case (BOTTOM):
-					cy = canvas.width - inset - menu.style.margin;
+					cy = canvas.width - inset - menu.style.padY;
 					cx = i.getX() + i.getWidth() / 2;
 					pg.triangle(cx + height, cy, cx - height, cy, cx, cy
 							- height);
@@ -374,6 +373,12 @@ public class Dock extends Menu
 		super.keyEvent(e);
 	}
 
+	@Override
+	public void setState(MenuItem i, int s)
+	{
+		super.setState(i, s);
+	}
+	
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		if (useCameraCoordinates)

@@ -19,7 +19,7 @@ public final class PhyloContextMenu extends RadialMenu
 		super(p);
 	}
 
-	protected void setOptions()
+	public void setOptions()
 	{
 		super.setOptions();
 		this.setRadii(10, 28);
@@ -37,7 +37,7 @@ public final class PhyloContextMenu extends RadialMenu
 
 	public void open(NodeRange r)
 	{
-		super.open();
+		menu.open(this);
 		setNodeRange(r);
 		aTween.continueTo(1f);
 		aTween.fforward();

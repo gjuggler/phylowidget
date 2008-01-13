@@ -7,6 +7,7 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.menu.CheckBox;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuIO;
 import org.andrewberman.ui.menu.MenuItem;
@@ -60,7 +61,7 @@ public class PhyloUISetup
 		/*
 		 * Load the menu file.
 		 */
-		String menuFile = (String) PhyloWidget.ui.menuFile;
+		String menuFile = (String) "menus/"+PhyloWidget.ui.menuFile;
 		ArrayList menus = MenuIO.loadFromXML(p, menuFile, this);
 
 		for (int i = 0; i < menus.size(); i++)
@@ -69,6 +70,16 @@ public class PhyloUISetup
 			if (menu.getClass() == PhyloContextMenu.class)
 			{
 				context = (PhyloContextMenu) menu;
+			}
+			/*
+			 * Set a callback for the "use branch lengths" property.
+			 */
+			MenuItem item = menu.get("Use Branch Lengths");
+			if (item != null)
+			{
+				System.out.println("GOT IT");
+				CheckBox cb = (CheckBox) item;
+				cb.setAction(this,"layout");
 			}
 		}
 	}

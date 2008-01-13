@@ -54,7 +54,7 @@ public class StyleSet
 	 */
 	public float			padY;
 	public float			padX;
-	public float			margin;
+//	public float			margin;
 	/*
 	 * Shape stuff.
 	 */
@@ -97,7 +97,7 @@ public class StyleSet
 		stateColors[MenuItem.UP] = baseState;
 		stateColors[MenuItem.OVER] = baseState.brighter(20);
 		stateColors[MenuItem.DOWN] = baseState.darker(20);
-		stateColors[MenuItem.DISABLED] = baseState.darker(50);
+		stateColors[MenuItem.DISABLED] = baseState.darker(45);
 		menuGradLo = new Color(245, 245, 255);
 		menuGradHi = new Color(190, 210, 245);
 		/*
@@ -113,7 +113,7 @@ public class StyleSet
 		 */
 		padY = Math.round(fontSize / 3);
 		padX = padY * 1.5f;
-		margin = Math.min(padX, padY);
+//		margin = Math.min(padX, padY);
 		/*
 		 * Shape stuff.
 		 */
@@ -126,16 +126,16 @@ public class StyleSet
 		roundOff = 10;
 	}
 
-	public Paint getGradient(float lo, float hi)
-	{
-		return new GradientPaint(0, lo, menuGradLo, 0, hi, menuGradHi, true);
-	}
-
 	public Paint getGradient(float loX, float loY, float hiX, float hiY)
 	{
-		return new GradientPaint(loX, loY, menuGradHi.brighter(60), hiX, hiY,
-				menuGradHi, true);
+		return new GradientPaint(loX, loY, menuGradLo, hiX, hiY, menuGradHi, true);
 	}
+	
+//	public Paint getGradient(float loX, float loY, float hiX, float hiY)
+//	{
+//		return new GradientPaint(loX, loY, menuGradHi.brighter(60), hiX, hiY,
+//				menuGradHi, true);
+//	}
 
 	public Paint getGradient(int state, float loX, float loY, float hiX,
 			float hiY)

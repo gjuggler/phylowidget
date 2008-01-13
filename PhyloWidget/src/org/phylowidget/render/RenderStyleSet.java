@@ -39,8 +39,8 @@ public class RenderStyleSet
 
 	private void loadDefaults()
 	{
-		foregroundColor = parseColor(PhyloWidget.ui.foregroundColor);
-		backgroundColor = parseColor(PhyloWidget.ui.backgroundColor);
+		foregroundColor = Color.parseColor(PhyloWidget.ui.foreground);
+		backgroundColor = Color.parseColor(PhyloWidget.ui.background);
 		regStroke = 1f;
 
 		dimColor = foregroundColor.brighter(200);
@@ -56,15 +56,7 @@ public class RenderStyleSet
 		lineThicknessMultiplier = 1f;
 	}
 
-	Color parseColor(String s)
-	{
-		s = s.replaceAll("[()]", "");
-		String[] rgb = s.split(",");
-		Color color = new Color(Integer.parseInt(rgb[0]),
-				Integer.parseInt(rgb[1]), Integer
-						.parseInt(rgb[2]));
-		return color;
-	}
+	
 	
 //	private void loadFromProperties()
 //	{

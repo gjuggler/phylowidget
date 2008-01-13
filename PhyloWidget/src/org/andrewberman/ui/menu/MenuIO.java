@@ -80,7 +80,10 @@ public class MenuIO
 			String type = el.getStringAttribute("type");
 			newItem = createMenu(type);
 			// Set this Menu's name.
-			newItem.setName(itemName);
+			if (itemName != null)
+				newItem.setName(itemName);
+			else
+				newItem.setName("");
 		}
 		if (elName.equalsIgnoreCase("item"))
 		{
@@ -188,7 +191,7 @@ public class MenuIO
 			return (Menu) newMenu;
 		} catch (Exception e)
 		{
-			// e.printStackTrace();
+//			 e.printStackTrace();
 			try
 			{
 				construct = c.getConstructor(new Class[] {});

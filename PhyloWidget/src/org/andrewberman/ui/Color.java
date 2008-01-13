@@ -54,4 +54,14 @@ public final class Color extends java.awt.Color
 		return new Color(r,g,b);
 	}
 	
+	public static Color parseColor(String s)
+	{
+		s = s.replaceAll("[()]", "");
+		String[] rgb = s.split(",");
+		Color color = new Color(Integer.parseInt(rgb[0]),
+				Integer.parseInt(rgb[1]), Integer
+						.parseInt(rgb[2]));
+		return color;
+	}
+	
 }

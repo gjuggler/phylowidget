@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.ifaces.UIObject;
 
-public class AbstractUIObject implements UIObject
+public abstract class AbstractUIObject implements UIObject
 {
 	protected ArrayList listeners = new ArrayList(1);
 	

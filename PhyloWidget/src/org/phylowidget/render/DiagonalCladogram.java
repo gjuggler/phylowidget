@@ -18,8 +18,6 @@ public class DiagonalCladogram extends Cladogram
 
 	protected void setOptions()
 	{
-		keepAspectRatio = true;
-		useBranchLengths = false;
 	}
 
 	protected float branchPositions(PhyloNode n)

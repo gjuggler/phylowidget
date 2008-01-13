@@ -13,6 +13,7 @@ import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.ifaces.Malleable;
 import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.Sizable;
 import org.andrewberman.ui.ifaces.UIObject;
@@ -35,7 +36,7 @@ import processing.core.PFont;
  * 
  * @author Greg
  */
-public abstract class MenuItem implements Positionable, Sizable
+public abstract class MenuItem implements Positionable, Sizable, Malleable
 {
 	/**
 	 * Constants that define the values for the "state" field.
@@ -69,22 +70,17 @@ public abstract class MenuItem implements Positionable, Sizable
 	protected int z;
 
 	protected int state;
-	private boolean isOpen;
+	protected boolean isOpen;
 	protected boolean mouseInside;
-
-	/**
-	 * If true, this menu item will hide itself when its action is performed. If
-	 * false, it will remain open.
-	 */
-	public static boolean closeOnAction = true;
+	private boolean enabled = true;
 
 	public MenuItem()
 	{
-		setName(new String());
+		this.name = new String();
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
 	}
-
+	
 	public MenuItem setAction(Object object, String method)
 	{
 		action = new Action(object, method);
@@ -97,6 +93,15 @@ public abstract class MenuItem implements Positionable, Sizable
 	public Action getAction()
 	{
 		return action;
+	}
+
+	/**
+	 * If true, this menu item will hide itself when its action is performed. If
+	 * false, it will remain open.
+	 */
+	public boolean getCloseOnAction()
+	{
+		return true;
 	}
 
 	public MenuItem setShortcut(String s)
@@ -210,9 +215,14 @@ public abstract class MenuItem implements Positionable, Sizable
 	 */
 	public boolean isEnabled()
 	{
-		return true;
+		return enabled;
 	}
 
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
+	}
+	
 	public boolean isOpen()
 	{
 		if (items.size() == 0) return false;
@@ -289,7 +299,7 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
-	protected boolean isAncestorOfLastHovered()
+	protected boolean isAncestorOfHovered()
 	{
 		if (menu == null)
 			return false;
@@ -322,38 +332,40 @@ public abstract class MenuItem implements Positionable, Sizable
 	/**
 	 * Shows this MenuItem and its direct sub-MenuItems.
 	 */
-	public void open()
-	{
-		if (isOpen)
-			close();
-		isOpen = true;
-	}
+//	private void open()
+//	{
+////		if (isOpen)
+////			close();
+////		isOpen = true;
+//		menu.open(this);
+//	}
 
-	public void close()
-	{
-		for (int i = 0; i < items.size(); i++)
-		{
-			MenuItem item = (MenuItem) items.get(i);
-			item.close();
-		}
-		isOpen = false;
-	}
+//	private void close()
+//	{
+////		for (int i = 0; i < items.size(); i++)
+////		{
+////			MenuItem item = (MenuItem) items.get(i);
+////			item.close();
+////		}
+////		isOpen = false;
+//		menu.close(this);
+//	}
 
 	public void closeMyChildren()
 	{
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
-			item.close();
+			menu.close(item);
 		}
 	}
 
 	protected void toggleChildren()
 	{
 		if (isOpen)
-			close();
+			menu.close(this);
 		else
-			open();
+			menu.open(this);
 	}
 
 	protected void setMenu(Menu menu)
@@ -401,7 +413,7 @@ public abstract class MenuItem implements Positionable, Sizable
 		} else
 		{
 			menu.fireEvent(UIEvent.MENU_ACTIONPERFORMED);
-			if (closeOnAction)
+			if (getCloseOnAction())
 				menu.clickaway();
 			if (action != null)
 				action.performAction();
@@ -415,9 +427,9 @@ public abstract class MenuItem implements Positionable, Sizable
 			if (nearestMenu.singletNavigation && parent != null)
 			{
 				parent.closeMyChildren();
-				this.open();
+				menu.open(this);
 			} else
-				this.open();
+				menu.open(this);
 		} else if (nearestMenu.clickToggles)
 		{
 			if (nearestMenu.singletNavigation)
@@ -429,7 +441,7 @@ public abstract class MenuItem implements Positionable, Sizable
 					else
 					{
 						parent.closeMyChildren();
-						this.open();
+						menu.open(this);
 					}
 				}
 			} else
@@ -551,34 +563,39 @@ public abstract class MenuItem implements Positionable, Sizable
 		}
 	}
 
-	protected void setState(int state)
-	{
-		if (this.state == state)
-			return;
-		this.state = state;
-		if (nearestMenu.hoverNavigable)
-		{
-			if (state == MenuItem.OVER || state == MenuItem.DOWN)
-				timer.setMenuItem(this);
-			else if (state == MenuItem.UP)
-				timer.unsetMenuItem(this);
-		}
-		if (state == MenuItem.DOWN)
-		{
-			menu.lastPressed = this;
-			menu.hovered = this;
-//			menu.currentlyFocused = this;
-//			menu.lastHovered = this;
-		} else if (state == MenuItem.OVER)
-		{
-//			menu.lastHovered = this;
-			menu.hovered = this;
-		} else if (state == MenuItem.UP && menu.hovered == this)
-		{
-//			menu.hovered = null;
-		}
-	}
+	
+//	private void setState(int state)
+//	{
+//		menu.setState(this, state);
+		
+//		if (this.state == state)
+//			return;
+//		this.state = state;
+//		if (nearestMenu.hoverNavigable)
+//		{
+//			if (state == MenuItem.OVER || state == MenuItem.DOWN)
+//				timer.setMenuItem(this);
+//			else if (state == MenuItem.UP)
+//				timer.unsetMenuItem(this);
+//		}
+//		if (state == MenuItem.DOWN)
+//		{
+//			menu.lastPressed = this;
+//			menu.hovered = this;
+////			menu.currentlyFocused = this;
+////			menu.lastHovered = this;
+//		} else if (state == MenuItem.OVER)
+//		{
+////			menu.lastHovered = this;
+//			menu.hovered = this;
+//		} else if (state == MenuItem.UP && menu.hovered == this)
+//		{
+////			menu.hovered = null;
+//		}
+//	}
 
+	
+	
 	protected int getState()
 	{
 		if (!isEnabled())
@@ -587,8 +604,15 @@ public abstract class MenuItem implements Positionable, Sizable
 			return state;
 	}
 
+	protected void setState(int s)
+	{
+		state = s;
+	}
+	
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
+		if (!isEnabled())
+			return;
 		boolean containsPoint = containsPoint(tempPt);
 		if (containsPoint)
 			mouseInside = true;
@@ -597,10 +621,10 @@ public abstract class MenuItem implements Positionable, Sizable
 			case MouseEvent.MOUSE_MOVED:
 				if (containsPoint)
 				{
-					setState(MenuItem.OVER);
+					menu.setState(this,MenuItem.OVER);
 				} else
 				{
-					setState(MenuItem.UP);
+					menu.setState(this,MenuItem.UP);
 				}
 				break;
 			case MouseEvent.MOUSE_PRESSED:
@@ -613,9 +637,9 @@ public abstract class MenuItem implements Positionable, Sizable
 			case MouseEvent.MOUSE_DRAGGED:
 				if (containsPoint)
 				{
-					setState(MenuItem.DOWN);
+					menu.setState(this,MenuItem.DOWN);
 				} else
-					setState(MenuItem.UP);
+					menu.setState(this,MenuItem.UP);
 				break;
 			case MouseEvent.MOUSE_RELEASED:
 				if (containsPoint)
@@ -623,8 +647,10 @@ public abstract class MenuItem implements Positionable, Sizable
 					if (!nearestMenu.actionOnMouseDown)
 						performAction();
 					// setState(MenuItem.OVER);
+					if (getState() == MenuItem.DOWN)
+						menu.setState(this,MenuItem.OVER);
 				} else
-					setState(MenuItem.UP);
+					menu.setState(this,MenuItem.UP);
 			default:
 				break;
 		}
@@ -634,11 +660,11 @@ public abstract class MenuItem implements Positionable, Sizable
 	{
 		if (!isOpen())
 			return;
-		for (int i = 0; i < items.size(); i++)
-		{
-			MenuItem seg = (MenuItem) items.get(i);
-			seg.keyEvent(e);
-		}
+//		for (int i = 0; i < items.size(); i++)
+//		{
+//			MenuItem seg = (MenuItem) items.get(i);
+//			seg.keyEvent(e);
+//		}
 	}
 
 	public int getZ()
@@ -718,6 +744,11 @@ public abstract class MenuItem implements Positionable, Sizable
 		this.name = name;
 	}
 
+	public Menu getMenu()
+	{
+		return menu;
+	}
+	
 	public String getName()
 	{
 		return name;
@@ -727,6 +758,7 @@ public abstract class MenuItem implements Positionable, Sizable
 	{
 		setX(x);
 		setY(y);
+		layout();
 	}
 
 	public void setX(float x)

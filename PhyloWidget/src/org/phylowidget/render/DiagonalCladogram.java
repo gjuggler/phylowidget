@@ -8,7 +8,7 @@ import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
 
-public class DiagonalCladogram extends Cladogram
+public class DiagonalCladogram extends BasicTreeRenderer
 {
 
 	public DiagonalCladogram()
@@ -56,13 +56,15 @@ public class DiagonalCladogram extends Cladogram
 				* stepSize / 2;
 		float unscaledY = (loChildNewY + hiChildNewY) / 2;
 		float unscaledX = nodeXPosition(n);
-		n.setUnscaledPosition(unscaledX, unscaledY);
+		n.setPosition(unscaledX, unscaledY);
 		return 0;
 	}
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-		return xPosForNumEnclosedLeaves(tree.getNumEnclosedLeaves(n));
+		float a = xPosForNumEnclosedLeaves(tree.getNumEnclosedLeaves(n));
+		float b = (float) (tree.getBranchLength(n) / tree.getMaxHeightToLeaf(tree.getRoot()));
+		return a;
 	}
 
 	float xPosForNumEnclosedLeaves(int numLeaves)
@@ -70,16 +72,15 @@ public class DiagonalCladogram extends Cladogram
 		return 1 - (float) (numLeaves - 1) / (float) leaves.size();
 	}
 
-	protected void layoutImpl()
+	protected void layout()
 	{
-		super.layoutImpl();
+		super.layout();
 		numCols = numRows / 2;
 	}
 
 	protected void drawLineImpl(PhyloNode p, PhyloNode n)
 	{
 		List list = tree.getChildrenOf(p);
-//		Collections.sort(list);
 		int index = list.indexOf(n);
 		if (index != 0 && index != list.size() - 1)
 		{
@@ -95,15 +96,8 @@ public class DiagonalCladogram extends Cladogram
 		}
 		float retreatX = getNodeRadius() / 2f;
 		float retreatY = getNodeRadius() / 2f;
-		if (p.y > n.y)
+		if (getY(p) > getY(n))
 			retreatY = -retreatY;
-		canvas.line(n.x, n.y, p.x + retreatX, p.y + retreatY);
+		canvas.line(getX(n), getY(n),  getX(p) + retreatX, getY(p) + retreatY);
 	}
-
-	// float sqrt2 = (float) Math.sqrt(2);
-	//
-	// protected float getNodeRadius()
-	// {
-	// return getRowHeight() * sqrt2/2;
-	// }
 }

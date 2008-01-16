@@ -8,8 +8,9 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
+import org.phylowidget.PhyloWidget;
+import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.Circlegram;
-import org.phylowidget.render.Cladogram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.ui.PhyloNode;
@@ -30,6 +31,8 @@ public class TreeManager implements SettableRect
 	private RandomTreeMutator mutator;
 	private boolean mutateMe;
 	private Runnable runMe;
+
+	private boolean fforwardMe;
 
 	public TreeManager(PApplet p)
 	{
@@ -58,17 +61,23 @@ public class TreeManager implements SettableRect
 		for (int i = 0; i < renderers.size(); i++)
 		{
 			TreeRenderer r = (TreeRenderer) renderers.get(i);
-			
-//			float oldThresh = PhyloWidget.ui.renderThreshold;
-//			PhyloWidget.ui.renderThreshold = 50;
-//			r.render(p.g, p.width*.75f, p.height*.75f, p.width*.25f, p.height*.25f, false);
-//			PhyloWidget.ui.renderThreshold = oldThresh;
-//			
+
+			// float oldThresh = PhyloWidget.ui.renderThreshold;
+			// PhyloWidget.ui.renderThreshold = 50;
+			// r.render(p.g, p.width*.75f, p.height*.75f, p.width*.25f,
+			// p.height*.25f, false);
+			// PhyloWidget.ui.renderThreshold = oldThresh;
+			//			
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
 					cameraRect.height, true);
-			
-			
+
 		}
+
+//		if (fforwardMe)
+//		{
+//			fforward(true, true);
+//			fforwardMe = false;
+//		}
 
 		if (mutateMe)
 		{
@@ -93,12 +102,12 @@ public class TreeManager implements SettableRect
 		}
 	}
 
-	public void nodesTouchingPoint(ArrayList list, Point2D.Float pt)
-	{
-		Rectangle2D.Float rect = new Rectangle2D.Float();
-		rect.setFrame(pt.x, pt.y, 0, 0);
-		nodesInRange(list, rect);
-	}
+	// public void nodesTouchingPoint(ArrayList list, Point2D.Float pt)
+	// {
+	// Rectangle2D.Float rect = new Rectangle2D.Float();
+	// rect.setFrame(pt.x, pt.y, 0, 0);
+	// nodesInRange(list, rect);
+	// }
 
 	public void mutateTree()
 	{
@@ -110,7 +119,7 @@ public class TreeManager implements SettableRect
 	{
 		mutator.stop();
 		mutator = new RandomTreeMutator((RootedTree) trees.get(0));
-		mutator.delay = delay;
+		mutator.setDelay(delay);
 		mutator.start();
 	}
 
@@ -128,28 +137,28 @@ public class TreeManager implements SettableRect
 
 	public TreeRenderer getRenderer()
 	{
-		return (TreeRenderer) renderers.get(0);
-	}
-
-	public void fforward(boolean upX, boolean upY)
-	{
-		update();
-		for (int i = 0; i < trees.size(); i++)
+		synchronized (renderers)
 		{
-			RootedTree tree = (RootedTree) trees.get(i);
-			ArrayList nodes = new ArrayList();
-			tree.getAll(tree.getRoot(), null, nodes);
-			for (int j = 0; j < nodes.size(); j++)
-			{
-				PhyloNode n = (PhyloNode) nodes.get(j);
-				if (upX)
-					n.xTween.fforward();
-				if (upY)
-					n.yTween.fforward();
-			}
+			return (TreeRenderer) renderers.get(0);
 		}
-
 	}
+//
+//	public void fforward(boolean upX, boolean upY)
+//	{
+//		// update();
+//		for (int i = 0; i < trees.size(); i++)
+//		{
+//			RootedTree tree = (RootedTree) trees.get(i);
+//			ArrayList nodes = new ArrayList();
+//			tree.getAll(tree.getRoot(), null, nodes);
+//			for (int j = 0; j < nodes.size(); j++)
+//			{
+//				PhyloNode n = (PhyloNode) nodes.get(j);
+//				n.fforward();
+//			}
+//		}
+//
+//	}
 
 	public void setTree(final RootedTree tree)
 	{
@@ -165,9 +174,8 @@ public class TreeManager implements SettableRect
 					PhyloTree pt = (PhyloTree) tree;
 					pt.setSynchronizedWithJS(true);
 				}
-				fforward(false, true);
+				fforwardMe = true;
 				mutator = new RandomTreeMutator(tree);
-
 			}
 		};
 
@@ -180,20 +188,27 @@ public class TreeManager implements SettableRect
 
 	public void rectangleRender()
 	{
-		setRenderer(new Cladogram());
+		setRenderer(new BasicTreeRenderer());
 	}
 
 	public void circleRender()
 	{
 		setRenderer(new Circlegram());
 	}
-	
+
 	void setRenderer(TreeRenderer r)
 	{
-		renderers.clear();
-		if (getTree() != null)
+		synchronized (renderers)
+		{
+			renderers.clear();
 			r.setTree(getTree());
-		renderers.add(r);
+			renderers.add(r);
+		}
+	}
+
+	public void triggerMutation()
+	{
+		mutateMe = true;
 	}
 
 	/**

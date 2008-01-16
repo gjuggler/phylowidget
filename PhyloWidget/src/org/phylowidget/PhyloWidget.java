@@ -37,7 +37,7 @@ public class PhyloWidget extends PApplet
 	public static boolean openGL;
 	public static boolean isOutputting;
 
-	private PWTreeUpdater updater;
+	private PWTreeUpdater treeUpdater;
 	private PWClipUpdater clipUpdater;
 
 	private String messageString = new String();
@@ -69,7 +69,7 @@ public class PhyloWidget extends PApplet
 		trees = new TreeManager(this);
 		// Creates and manages UI elements.
 		ui = new PhyloUI(this);
-		updater = new PWTreeUpdater();
+		treeUpdater = new PWTreeUpdater();
 		clipUpdater = new PWClipUpdater();
 
 		ui.setup();
@@ -163,7 +163,7 @@ public class PhyloWidget extends PApplet
 
 	public void updateTree(String s)
 	{
-		updater.triggerUpdate(s);
+		treeUpdater.triggerUpdate(s);
 	}
 
 	public void updateClip(String s)

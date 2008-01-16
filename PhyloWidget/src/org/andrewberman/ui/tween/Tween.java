@@ -65,7 +65,17 @@ public class Tween
 	{
 		return this.begin + this.change;
 	}
+	
+	public float getChange()
+	{
+		return change;
+	}
 
+	public float getBegin()
+	{
+		return begin;
+	}
+	
 	public void rewind()
 	{
 		this.time = 0;

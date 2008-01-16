@@ -30,7 +30,7 @@ public final class PhyloContextMenu extends RadialMenu
 		if (curNodeRange != null)
 		{
 			// Update our position based on the current menu node.
-			setPosition(curNodeRange.node.x,curNodeRange.node.y);
+			setPosition(curNodeRange.node.getRealX(),curNodeRange.node.getRealY());
 		}
 		super.draw();
 	}

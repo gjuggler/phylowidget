@@ -11,7 +11,7 @@ import org.phylowidget.ui.PhyloNode;
  */
 public final class NodeRange implements ItemI
 {
-	public AbstractTreeRenderer render;
+	public BasicTreeRenderer render;
 	public PhyloNode node;
 	
 	public int type=0;
@@ -19,10 +19,6 @@ public final class NodeRange implements ItemI
 	public static final int LABEL = 1;
 
 	public float loX, hiX, loY, hiY = 0;
-	public static final int LO_X = 0;
-	public static final int HI_X = 1;
-	public static final int LO_Y = 2;
-	public static final int HI_Y = 3;
 	
 	public float get(int what)
 	{
@@ -39,5 +35,12 @@ public final class NodeRange implements ItemI
 			default:
 				return -1;
 		}
+	}
+	
+	@Override
+	public String toString()
+	{
+//		return super.toString();
+		return node.getLabel()+" "+loX+" "+hiX+" "+loY+" "+hiY;
 	}
 }

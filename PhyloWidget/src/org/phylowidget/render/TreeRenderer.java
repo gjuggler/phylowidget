@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.FontLoader;
+import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
 import org.jgrapht.event.GraphEdgeChangeEvent;
@@ -31,12 +32,14 @@ public interface TreeRenderer
 
 	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender);
 
-	public void layout();
+	public void layoutTrigger();
 
 	public void setTree(RootedTree t);
 
 	public RootedTree getTree();
 
+	public void setMouseLocation(Point pt);
+	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 
 	public Object rangeForNode(Object node);

@@ -5,6 +5,8 @@
 var treeInputID = "treeText";
 // The ID of the clipboard input element.
 var clipInputID = "clipText";
+// The ID of the node info element.
+var nodeInfoID = "nodeText";
 
 /*
  * This function is called by Java to update the HTML's tree text.
@@ -19,6 +21,12 @@ function updateClip(newtext)
 {
   getObject(clipInputID).value = newtext;
   return;
+}
+
+function updateNode(newtext)
+{
+  getObject(nodeInfoID).innerHTML = newtext;
+//  getObject("PhyloWidget").focus();
 }
 
 /*
@@ -47,7 +55,7 @@ function getObject(id) {
 
 
 /*
- *  This function causes the newick input 
+ *  This function causes the newick input box to be selected fully once.
  */
 var selected=false;
 function selectOnce(el)

@@ -133,9 +133,9 @@ This Ant task assumes a certain structure within your project directory:
 	<!-- TARGET: SIGNJAR -->
 	<target name="signJar" if="internal.signJar">
 		<antcall target="genKey" />
-		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" >
-			<fileset refid="jarFiles"/>
-			<fileset file="${applet}/${internal.finalJar}"/>
+		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" lazy="false">
+			<fileset refid="jarFiles" />
+			<fileset file="${applet}/${internal.finalJar}" />
 		</signjar>
 	</target>
 
@@ -169,6 +169,9 @@ This Ant task assumes a certain structure within your project directory:
 
 		<!-- If the applet.comments refers to a valid filename, load it up. -->
 		<loadfile property="internal.appletComments" srcFile="${applet.comments}" failonerror="false" />
+		<condition property="internal.appletComments" value="${internal.appletComments}" else="${applet.comments}">
+			<isset property="${internal.appletComments}" />
+		</condition>
 
 		<!-- Let's be a little sneaky here: we expand out the current set
 		of properties, and use the <filterchain> to automatically replace
@@ -237,6 +240,13 @@ This Ant task assumes a certain structure within your project directory:
 			<flattenmapper />
 		</pathconvert>
 		<property name="internal.allJars" value="${internal.finalJar},${internal.jarList}" />
+	</target>
+
+	<target name="upload" depends="dist">
+		<scp todir="${project.serverDest}" trust="true" failonerror="false" verbose="true">
+			<fileset id="allFiles" dir="${applet}" casesensitive="no"/>
+		</scp>
+
 	</target>
 
 </project>

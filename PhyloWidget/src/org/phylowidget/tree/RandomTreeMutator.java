@@ -70,7 +70,7 @@ public class RandomTreeMutator implements Runnable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			randomlyMutateTree();
+			PhyloWidget.trees.triggerMutation();
 		}
 	}
 
@@ -81,8 +81,8 @@ public class RandomTreeMutator implements Runnable
 		String taxonName = DEFAULT_NAME;
 		// taxonName = getRemoteNCBITaxon();
 		taxonName = getLocalNCBITaxon();
-		// synchronized (tree)
-		// {
+		 synchronized (tree)
+		 {
 		allNodes.clear();
 		tree.getAll(tree.getRoot(), null, allNodes);
 		int i = random.nextInt(allNodes.size());
@@ -94,7 +94,7 @@ public class RandomTreeMutator implements Runnable
 		tree.setBranchLength(sis, randomBranch());
 		tree.setBranchLength(tree.getParentOf(sis), randomBranch());
 		mutations++;
-		// }
+		 }
 //		PhyloWidget.trees.fforward(true, true);
 	}
 
@@ -173,6 +173,16 @@ public class RandomTreeMutator implements Runnable
 	public void stop()
 	{
 		wrapper = null;
+	}
+
+	public int getDelay()
+	{
+		return delay;
+	}
+
+	public void setDelay(int delay)
+	{
+		this.delay = delay;
 	}
 
 }

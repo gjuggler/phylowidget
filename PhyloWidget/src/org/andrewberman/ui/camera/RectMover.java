@@ -116,7 +116,7 @@ public class RectMover extends MovableCamera
 	{
 		if (!this.constrainToScreen) return;
 		
-		border = Math.min(p.width/2f,p.height/2f);
+		border = Math.min(p.width*.9f,p.height*.9f);
 		
 		float effectiveWidth = Math.max(10,p.width - border);
 		float effectiveHeight = Math.max(10,p.height - border);
@@ -158,6 +158,18 @@ public class RectMover extends MovableCamera
 			wTween.fforward();
 			hTween.fforward();
 		}
+		
+		float minZoom = 0.2f;
+		if (getZ() < minZoom)
+		{
+//			fillScreen();
+			zoomTo(minZoom);
+			xTween.fforward();
+			yTween.fforward();
+			wTween.fforward();
+			hTween.fforward();
+		}
+//		System.out.println(getZ());
 		
 		updateConvenienceVariables();
 	}

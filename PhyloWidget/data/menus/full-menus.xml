@@ -1,5 +1,5 @@
 <menuset name="PhyloWidget Menus">
-	<menu type="Toolbar" fontsize="11">
+	<menu type="Toolbar" fontsize="11" x="2" y="2">
 		<item name="File">
 			<item name="New Tree" action="treeNew" shortcut="control-n"/>
 			<item name="Load Tree..." action="treeLoad"/>
@@ -7,7 +7,7 @@
 			<item name="Export Image">
 				<item name="Large (1600x1200)" action="fileOutputBig"/>
 				<item name="Small (640 x 480)" action="fileOutputSmall"/>
-				<item name="PDF (Pub. quality)" action="fileOutputPDF"/>
+				<item name="PDF" action="fileOutputPDF"/>
 			</item>
 		</item>
 		<item name="View">
@@ -23,12 +23,12 @@
 			</item>
 			<item name="Style">
 				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" default="0" min="-45" max="45"/>
-				<item name="Text Size" type="NumberScroller" property="textSize" increment =".01" default="1" min="0" max="2"/>
-				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" default=".25" min="0" max="1"/>
+				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" default=".2" min="0" max=".5"/>
 				<item name="Line Weight" type="NumberScroller" property="lineSize" increment =".001" default=".1" min="0" max=".5"/>
 			</item>
 			<item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" default="150" min="5" max="1000"/>
-			<item name="Stretch Tree to Fit" type="CheckBox" property="fitTreeToWindow" />
+			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" default="10" min="0" max="36"/>
+			<!-- <item name="Stretch Tree to Fit" type="CheckBox" property="fitTreeToWindow" /> -->
 			<item name="Use Branch Lengths" type="CheckBox" property="useBranchLengths" shortcut="ctrl-b" />
 		</item>
 		<item name="Tree">

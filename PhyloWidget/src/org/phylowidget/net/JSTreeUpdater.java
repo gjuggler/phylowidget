@@ -1,8 +1,7 @@
 package org.phylowidget.net;
 
-import java.util.Properties;
-
 import org.andrewberman.unsorted.DelayedAction;
+import org.andrewberman.unsorted.JSObjectCrap;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;

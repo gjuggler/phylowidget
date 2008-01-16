@@ -20,44 +20,59 @@ import processing.core.PApplet;
 public class NearestNodeFinder implements UIObject
 {
 	private PApplet p;
-	
+
 	public static final float RADIUS = 50f;
-	
-	Point2D.Float pt = new Point2D.Float(0,0);
-	Rectangle2D.Float rect = new Rectangle2D.Float(0,0,0,0);
+
+	Point2D.Float pt = new Point2D.Float(0, 0);
+	Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
 	ArrayList hits = new ArrayList(50);
-	
+
 	NodeRange nearest;
 	float nearestDist;
-	
+
+	private Point updatePt;
+
 	public NearestNodeFinder(PApplet p)
 	{
 		this.p = p;
 		UIUtils.loadUISinglets(p);
-//		
+		//		
 		EventManager.instance.add(this);
 	}
-	
+
 	public void draw()
 	{
-		// Do nothing.
+		update();
 	}
-	
+
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		// Let's send screen coordintaes to the update() function.
-		update(screen.x,screen.y);
+		// update(screen.x,screen.y);
+		synchronized (this)
+		{
+			needsUpdate = true;
+		}
+		updatePt = screen;
 	}
-	
-	void update(float x, float y)
+
+	boolean needsUpdate;
+
+	synchronized void update()
 	{
-		if (PhyloWidget.trees == null) return;
-		
-//		float ratio = TreeManager.getVisibleRect().width / PhyloWidget.p.width;
+		if (PhyloWidget.trees == null)
+			return;
+		if (!needsUpdate)
+			return;
+
+		System.out.println("Hey");
+
+		// float ratio = TreeManager.getVisibleRect().width /
+		// PhyloWidget.p.width;
 		float ratio = TreeManager.camera.getZ();
 		float rad = RADIUS * ratio;
-		
-		pt.setLocation(x,y);
+
+		pt = updatePt;
 		rect.x = pt.x - rad;
 		rect.y = pt.y - rad;
 		rect.width = rad * 2;
@@ -66,17 +81,17 @@ public class NearestNodeFinder implements UIObject
 		UIUtils.screenToModel(rect);
 		hits.clear();
 		PhyloWidget.trees.nodesInRange(hits, rect);
-		
+
 		nearestDist = Float.MAX_VALUE;
 		NodeRange temp = null;
-		for (int i=0; i < hits.size(); i++)
+		for (int i = 0; i < hits.size(); i++)
 		{
-			NodeRange r = (NodeRange)hits.get(i);
-			PhyloNode n = r.node;	
+			NodeRange r = (NodeRange) hits.get(i);
+			PhyloNode n = r.node;
 			switch (r.type)
 			{
 				case (NodeRange.NODE):
-					float dist = (float) pt.distance(n.x,n.y);
+					float dist = (float) pt.distance(n.getX(), n.getY());
 					if (dist < nearestDist)
 					{
 						temp = r;
@@ -87,10 +102,11 @@ public class NearestNodeFinder implements UIObject
 		}
 		if (temp != null)
 			nearest = temp;
+		needsUpdate = false;
 	}
 
 	public void focusEvent(FocusEvent e)
-	{		
+	{
 	}
 
 	public void keyEvent(KeyEvent e)

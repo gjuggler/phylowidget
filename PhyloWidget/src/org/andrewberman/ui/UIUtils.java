@@ -140,6 +140,7 @@ public class UIUtils
 	{
 		if (cursorOwner != o)
 			return;
+		System.out.println("Released.");
 		cursorOwner = null;
 		p.setCursor(baseCursor);
 	}

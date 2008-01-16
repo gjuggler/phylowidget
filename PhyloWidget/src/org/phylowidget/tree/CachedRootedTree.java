@@ -24,7 +24,7 @@ public class CachedRootedTree extends RootedTree
 	protected boolean inSync;
 
 	public Comparator sorter = new CachedEnclosedLeavesComparator(-1);
-	
+
 	public CachedRootedTree()
 	{
 		super();
@@ -127,7 +127,7 @@ public class CachedRootedTree extends RootedTree
 		while (!dest.isEmpty())
 		{
 			CachedVertex cv = (CachedVertex) dest.removeLast();
-			if (isLeaf(cv))
+			if (super.isLeaf(cv))
 			{
 				// If this vertex is a leaf, set the base cached values.
 				cv.setNumEnclosed(1);
@@ -145,26 +145,26 @@ public class CachedRootedTree extends RootedTree
 				int maxChildEnc = 0;
 				double maxHeight = 0;
 				List children = getChildrenOfNoSort(cv);
-//				Collections.sort(children,sorter);
+				// Collections.sort(children,sorter);
 				sortChildrenList(cv, children, sorter);
-//				if (sorting.containsKey(cv))
-//				{
-//					Integer i = (Integer) sorting.get(cv);
-//					if (i == REVERSE)
-//						Collections.reverse(children);
-//				}
+				// if (sorting.containsKey(cv))
+				// {
+				// Integer i = (Integer) sorting.get(cv);
+				// if (i == REVERSE)
+				// Collections.reverse(children);
+				// }
 				for (int i = 0; i < children.size(); i++)
 				{
 					CachedVertex child = (CachedVertex) children.get(i);
 					if (child.getNumEnclosed() >= maxChildEnc)
 					{
 						maxChildEnc = child.getNumEnclosed();
-//						lastChild = child;
+						// lastChild = child;
 					}
 					if (child.getNumEnclosed() <= minChildEnc)
 					{
 						minChildEnc = child.getNumEnclosed();
-//						firstChild = child;
+						// firstChild = child;
 					}
 					numEnc += child.getNumEnclosed() + 1;
 					numLeaves += child.getNumLeaves();
@@ -183,7 +183,7 @@ public class CachedRootedTree extends RootedTree
 				 * Cache the first and last child.
 				 */
 				cv.setFirstChild(children.get(0));
-				cv.setLastChild(children.get(children.size()-1));
+				cv.setLastChild(children.get(children.size() - 1));
 			}
 		}
 	}
@@ -211,6 +211,18 @@ public class CachedRootedTree extends RootedTree
 		return c.getLastChild();
 	}
 
+	@Override
+	public int getDepthToRoot(Object vertex)
+	{
+		sync();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getDepthToRoot();
+		} else
+			return super.getDepthToRoot(vertex);
+	}
+	
 	public double getHeightToRoot(Object vertex)
 	{
 		sync();
@@ -255,6 +267,18 @@ public class CachedRootedTree extends RootedTree
 			return super.getNumEnclosedLeaves(vertex);
 	}
 
+	@Override
+	public boolean isLeaf(Object vertex)
+	{
+		sync();
+		if (inSync())
+		{
+			CachedVertex cv = (CachedVertex) vertex;
+			return cv.getNumLeaves() <= 1;
+		} else
+			return super.isLeaf(vertex);
+	}
+
 	protected void fireEdgeAdded(Object arg0)
 	{
 		modPlus();
@@ -290,7 +314,6 @@ public class CachedRootedTree extends RootedTree
 		inSync = false;
 	}
 
-	
 	class CachedEnclosedLeavesComparator implements Comparator
 	{
 		int dir;

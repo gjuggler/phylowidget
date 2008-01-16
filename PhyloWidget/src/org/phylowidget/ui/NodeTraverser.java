@@ -1,6 +1,7 @@
 package org.phylowidget.ui;
 
 import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -28,14 +29,22 @@ import processing.core.PApplet;
 
 public class NodeTraverser implements UIObject, TweenListener
 {
-	private PApplet p;
-	private NodeRange curNodeRange;
 	public static final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
-
+	private NodeRange curNodeRange;
 	public Tween glowTween;
+
 	boolean isGlowing;
+	Point mousePt = new Point();
 
 	ArrayList nearNodes = new ArrayList(10);
+
+	private PApplet p;
+
+	Point pt = new Point();
+
+	UIRectangle rect = new UIRectangle();
+
+	Point tempPt = new Point();
 
 	public NodeTraverser(PApplet p)
 	{
@@ -46,10 +55,200 @@ public class NodeTraverser implements UIObject, TweenListener
 		glowTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f, .75f, 30);
 	}
 
-	private void resetGlow()
+	private boolean containsPoint(NodeRange r, Point pt)
 	{
-		glowTween.rewind();
-		glowTween.start();
+		tempPt.setLocation(getX(r), getY(r));
+		float radius = r.render.getTextSize() / 2f;
+		float distance = (float) pt.distance(tempPt);
+		// System.out.println("rad:" + radius + " dist:" + distance);
+		if (distance < radius)
+		{
+			return true;
+		}
+
+		Rectangle rc = new Rectangle();
+		rc.setFrameFromDiagonal(r.loX, r.loY, r.hiX, r.hiY);
+		return rc.contains(pt);
+	}
+
+	public void draw()
+	{
+		/*
+		 * Update the glowing circle's radius.
+		 */
+		if (isGlowing)
+		{
+			glowTween.update();
+			float glowRadius = PhyloWidget.trees.getRenderer().getTextSize();
+			glowRadius *= glowTween.getPosition();
+
+			p.noFill();
+			p.strokeWeight(glowRadius / 10f);
+			int color = RenderStyleSet.defaultStyle().hoverColor.getRGB();
+			p.stroke(color);
+			NodeRange r = getCurRange();
+			float cX = getX(r);
+			float cY = getY(r);
+			p.ellipse(cX, cY, glowRadius, glowRadius);
+		}
+	}
+
+	public void focusEvent(FocusEvent e)
+	{
+
+	}
+
+	public NodeRange getCurRange()
+	{
+		if (curNodeRange == null)
+		{
+			/*
+			 * If we haven't set a "focused" NodeRange yet, set it to the root
+			 * node.
+			 */
+			TreeRenderer render = PhyloWidget.trees.getRenderer();
+			RootedTree t = render.getTree();
+			PhyloNode n = (PhyloNode) t.getRoot();
+			curNodeRange = rangeForNode(render, n);
+		}
+		return curNodeRange;
+	}
+
+	public PhyloNode getCurrentNode()
+	{
+		NodeRange nr = getCurRange();
+		return nr.node;
+	}
+
+	private NodeRange getNearestNode(float x, float y)
+	{
+		getWithinRange(x, y, 40);
+		pt.setLocation(x, y);
+		float nearestDist = Float.MAX_VALUE;
+		NodeRange temp = null;
+		for (int i = 0; i < nearNodes.size(); i++)
+		{
+			NodeRange r = (NodeRange) nearNodes.get(i);
+			PhyloNode n = r.node;
+			switch (r.type)
+			{
+				case (NodeRange.NODE):
+					float dist = (float) pt.distance(getX(r), getY(r));
+
+					if (dist < nearestDist)
+					{
+						temp = r;
+						nearestDist = dist;
+					}
+					break;
+			}
+		}
+		return temp;
+	}
+
+	private void getWithinRange(float x, float y, float radius)
+	{
+		float ratio = TreeManager.camera.getZ();
+		float rad = radius * ratio;
+
+		pt.setLocation(x, y);
+		rect.x = (float) (pt.getX() - rad);
+		rect.y = (float) (pt.getY() - rad);
+		rect.width = rad * 2;
+		rect.height = rad * 2;
+		UIUtils.screenToModel(pt);
+		UIUtils.screenToModel(rect);
+		nearNodes.clear();
+		PhyloWidget.trees.nodesInRange(nearNodes, rect);
+	}
+
+	float getX(NodeRange r)
+	{
+		return r.render.getX(r.node);
+	}
+
+	float getY(NodeRange r)
+	{
+		return r.render.getY(r.node);
+	}
+
+	public void keyEvent(KeyEvent e)
+	{
+		if (e.getID() != KeyEvent.KEY_PRESSED)
+			return;
+		if (PhyloWidget.ui.context.isOpen())
+			return;
+		if (FocusManager.instance.getFocusedObject() != null)
+			return;
+		int code = e.getKeyCode();
+		// System.out.println(e);
+		switch (code)
+		{
+			case (KeyEvent.VK_LEFT):
+				navigate(LEFT);
+				break;
+			case (KeyEvent.VK_RIGHT):
+				navigate(RIGHT);
+				break;
+			case (KeyEvent.VK_UP):
+				navigate(UP);
+				break;
+			case (KeyEvent.VK_DOWN):
+				navigate(DOWN);
+				break;
+			case (KeyEvent.VK_ENTER):
+				// System.out.println("Open!");
+				if (getCurRange() != null)
+					openContextMenu();
+				break;
+		}
+	}
+
+	public void mouseEvent(MouseEvent e, Point screen, Point model)
+	{
+		mousePt.setLocation(screen);
+		pt.setLocation(screen);
+		Tool t = EventManager.instance.getToolManager().getCurrentTool();
+		if (t == null)
+			return;
+		if (PhyloWidget.ui.context.isOpen())
+			return;
+		if (getCurRange() == null)
+			return;
+		if (FocusManager.instance.getFocusedObject() != null)
+			return;
+		PhyloWidget.trees.getRenderer().setMouseLocation(pt);
+		setCurRange(getNearestNode((float) pt.getX(), (float) pt.getY()));
+		boolean containsPoint = containsPoint(getCurRange(), pt);
+		switch (e.getID())
+		{
+			case (MouseEvent.MOUSE_MOVED):
+			case (MouseEvent.MOUSE_DRAGGED):
+				PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
+				if (containsPoint && t.respondToOtherEvents())
+				{
+					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
+					tree.setHoveredNode(getCurRange().node);
+				} else
+				{
+					UIUtils.releaseCursor(this, p);
+					tree.setHoveredNode(null);
+				}
+				break;
+			case (MouseEvent.MOUSE_PRESSED):
+				if (containsPoint && t.respondToOtherEvents())
+				{
+					openContextMenu();
+					isGlowing = false;
+				}
+				break;
+		}
+		if (!t.respondToOtherEvents())
+		{
+			PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
+			tree.setHoveredNode(null);
+			setCurRange(null);
+		}
 	}
 
 	private void navigate(int dir)
@@ -109,8 +308,8 @@ public class NodeTraverser implements UIObject, TweenListener
 				break;
 		}
 
-		pt.setLocation(cur.node.x, cur.node.y);
-		getWithinRange(cur.node.x, cur.node.y, 200);
+		pt.setLocation(cur.node.getX(), cur.node.getY());
+		getWithinRange(cur.node.getX(), cur.node.getY(), 200);
 		Point pt2 = new Point();
 		float maxScore = -Float.MAX_VALUE;
 		NodeRange maxRange = null;
@@ -121,9 +320,8 @@ public class NodeTraverser implements UIObject, TweenListener
 				continue;
 			if (r.node == cur.node)
 				continue;
-			pt2.setLocation(r.node.x, r.node.y);
+			pt2.setLocation(r.node.getX(), r.node.getY());
 			float score = score(pt, pt2, base);
-			System.out.println(r.node + " " + score);
 			if (score > maxScore)
 			{
 				maxScore = score;
@@ -139,14 +337,9 @@ public class NodeTraverser implements UIObject, TweenListener
 		}
 	}
 
-	float score(Point me, Point him, Point dirV)
+	void openContextMenu()
 	{
-		him.translate(-me.x, -me.y);
-		float len = him.length();
-		float dot = dirV.dotProd(him);
-		if (dot / len < 0.1)
-			return -Float.MAX_VALUE;
-		return dot / len - len / 30;
+		PhyloWidget.ui.context.open(getCurRange());
 	}
 
 	private NodeRange rangeForNode(TreeRenderer tr, PhyloNode n)
@@ -154,30 +347,36 @@ public class NodeTraverser implements UIObject, TweenListener
 		return (NodeRange) tr.rangeForNode(n);
 	}
 
-	public NodeRange getCurRange()
+	private void resetGlow()
 	{
-		if (curNodeRange == null)
-		{
-			/*
-			 * If we haven't set a "focused" NodeRange yet, set it to the root
-			 * node.
-			 */
-			TreeRenderer render = PhyloWidget.trees.getRenderer();
-			RootedTree t = render.getTree();
-			PhyloNode n = (PhyloNode) t.getRoot();
-			curNodeRange = rangeForNode(render, n);
-		}
-		return curNodeRange;
+		glowTween.rewind();
+		glowTween.start();
 	}
 
-	public PhyloNode getCurrentNode()
+	float score(Point me, Point him, Point dirV)
 	{
-		NodeRange nr = getCurRange();
-		return nr.node;
+		him.translate((float) -me.getX(), (float) -me.getY());
+		float len = him.length();
+		float dot = dirV.dotProd(him);
+		if (dot / len < 0.1)
+			return -Float.MAX_VALUE;
+		return dot / len - len / 30;
 	}
 
 	public void setCurRange(NodeRange r)
 	{
+		if (r != null && r != curNodeRange)
+		{
+			Tool t = EventManager.instance.getToolManager().getCurrentTool();
+			if (t.respondToOtherEvents())
+			{
+				RootedTree tree = r.render.getTree();
+				PhyloWidget.ui.updateNodeInfo(tree, r.node);
+			}
+		}
+		/*
+		 * Logic for the glow resetting and whatnot.
+		 */
 		if (r == null)
 		{
 			isGlowing = false;
@@ -192,163 +391,6 @@ public class NodeTraverser implements UIObject, TweenListener
 			}
 			isGlowing = true;
 		}
-	}
-
-	Point pt = new Point();
-	UIRectangle rect = new UIRectangle();
-
-	private void getWithinRange(float x, float y, float radius)
-	{
-		float ratio = TreeManager.camera.getZ();
-		float rad = radius * ratio;
-
-		pt.setLocation(x, y);
-		rect.x = pt.x - rad;
-		rect.y = pt.y - rad;
-		rect.width = rad * 2;
-		rect.height = rad * 2;
-		UIUtils.screenToModel(pt);
-		UIUtils.screenToModel(rect);
-		nearNodes.clear();
-		PhyloWidget.trees.nodesInRange(nearNodes, rect);
-	}
-
-	private NodeRange getNearestNode(float x, float y)
-	{
-		getWithinRange(x, y, 40);
-		pt.setLocation(x, y);
-		float nearestDist = Float.MAX_VALUE;
-		NodeRange temp = null;
-		for (int i = 0; i < nearNodes.size(); i++)
-		{
-			NodeRange r = (NodeRange) nearNodes.get(i);
-			PhyloNode n = r.node;
-			switch (r.type)
-			{
-				case (NodeRange.NODE):
-					float dist = (float) pt.distance(n.x, n.y);
-					if (dist < nearestDist)
-					{
-						temp = r;
-						nearestDist = dist;
-					}
-					break;
-			}
-		}
-		return temp;
-	}
-
-	public void draw()
-	{
-		/*
-		 * Update the glowing circle's radius.
-		 */
-		if (isGlowing)
-		{
-			glowTween.update();
-			float glowRadius = PhyloWidget.trees.getRenderer().getTextSize();
-			glowRadius *= glowTween.getPosition();
-
-			p.noFill();
-			p.strokeWeight(glowRadius / 10f);
-			int color = RenderStyleSet.defaultStyle().hoverColor.getRGB();
-			p.stroke(color);
-			NodeRange r = getCurRange();
-			float cX = r.node.x;
-			float cY = r.node.y;
-			p.ellipse(cX, cY, glowRadius, glowRadius);
-		}
-	}
-
-	public void focusEvent(FocusEvent e)
-	{
-
-	}
-
-	public void keyEvent(KeyEvent e)
-	{
-		if (e.getID() != KeyEvent.KEY_PRESSED)
-			return;
-		if (PhyloWidget.ui.context.isOpen())
-			return;
-		if (FocusManager.instance.getFocusedObject() != null)
-			return;
-		int code = e.getKeyCode();
-		// System.out.println(e);
-		switch (code)
-		{
-			case (KeyEvent.VK_LEFT):
-				navigate(LEFT);
-				break;
-			case (KeyEvent.VK_RIGHT):
-				navigate(RIGHT);
-				break;
-			case (KeyEvent.VK_UP):
-				navigate(UP);
-				break;
-			case (KeyEvent.VK_DOWN):
-				navigate(DOWN);
-				break;
-			case (KeyEvent.VK_ENTER):
-				System.out.println("Open!");
-				if (getCurRange() != null)
-					openContextMenu();
-				break;
-		}
-	}
-
-	void openContextMenu()
-	{
-		PhyloWidget.ui.context.open(getCurRange());
-	}
-
-	public void mouseEvent(MouseEvent e, Point screen, Point model)
-	{
-		Tool t = EventManager.instance.getToolManager().getCurrentTool();
-		if (t != null && !t.respondToOtherEvents())
-			return;
-		if (PhyloWidget.ui.context.isOpen())
-			return;
-		if (getCurRange() == null)
-			return;
-		Point pt = model;
-		getWithinRange(screen.x, screen.y, 50);
-		setCurRange(getNearestNode(screen.x, screen.y));
-		boolean containsPoint = containsPoint(getCurRange(),pt);
-		switch (e.getID())
-		{
-			case (MouseEvent.MOUSE_MOVED):
-			case(MouseEvent.MOUSE_DRAGGED):
-				PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
-				if (containsPoint)
-				{
-					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
-					tree.setHoveredNode(getCurRange().node);
-				} else
-				{
-					UIUtils.releaseCursor(this, p);
-					tree.setHoveredNode(null);
-				}
-				break;
-			case (MouseEvent.MOUSE_PRESSED):
-				if (containsPoint)
-				{
-					openContextMenu();
-					isGlowing = false;
-				}
-				break;
-		}
-	}
-
-	Point tempPt = new Point();
-
-	private boolean containsPoint(NodeRange r, Point pt)
-	{
-		tempPt.setLocation(r.node.x, r.node.y);
-		float radius = r.render.getTextSize() / 2f;
-		float distance = (float) pt.distance(tempPt);
-//		System.out.println("rad:" + radius + " dist:" + distance);
-		return (distance < radius);
 	}
 
 	public void tweenEvent(Tween source, int eventType)

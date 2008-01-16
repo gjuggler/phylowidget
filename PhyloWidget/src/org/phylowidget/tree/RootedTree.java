@@ -45,10 +45,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * been set to be different from the defalut sort order.
 	 */
 	public HashMap sorting;
-	public static final Integer REVERSE = new Integer(-1);
-	public static final Integer FORWARD = new Integer(1);
+	public static final Integer REVERSE = new Integer(1);
+	public static final Integer FORWARD = new Integer(-1);
 	public Comparator sorter = new EnclosedLeavesComparator(-1);
-
+	public Comparator leafSorter = new DepthToRootComparator(1);
+	
 	public static final String INTERNAL_NODE_LABEL = "";
 
 	/*
@@ -307,6 +308,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		return maxDepth;
 	}
 
+	public int getDepthToRoot(Object vertex)
+	{
+		return getDepthToVertex(vertex,getRoot());
+	}
+	
 	int getDepthToVertex(Object vertex, Object target)
 	{
 		int depth = 0;
@@ -806,6 +812,40 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		root = newRoot;
 	}
 
+	class DepthToRootComparator implements Comparator
+	{
+		int dir;
+		
+		public DepthToRootComparator(int dir)
+		{
+			this.dir = dir;
+		}
+		
+		public int compare(Object o1, Object o2)
+		{
+			int a = getDepthToRoot(o1);
+			int b = getDepthToRoot(o2);
+			
+			if (dir == 1)
+			{
+				if (a > b)
+					return 1;
+				else if (a < b)
+					return -1;
+				else
+					return 0;
+			} else
+			{
+				if (a > b)
+					return -1;
+				else if (a < b)
+					return 1;
+				else
+					return 0;
+			}
+		}
+	}
+	
 	class EnclosedLeavesComparator implements Comparator
 	{
 		int dir;

@@ -16,6 +16,7 @@ import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.ToolDockItem;
 import org.andrewberman.ui.menu.Toolbar;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.net.NodeInfoUpdater;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderOutput;
 import org.phylowidget.render.RenderStyleSet;
@@ -43,6 +44,8 @@ public class PhyloUISetup
 	PhyloTextField text;
 	PhyloContextMenu context;
 	
+	NodeInfoUpdater nodeUpdater;
+	
 	public PhyloUISetup(PApplet p)
 	{
 		this.p = p;
@@ -55,8 +58,10 @@ public class PhyloUISetup
 	public void setup()
 	{
 		traverser = new NodeTraverser(p);
-		nearest = new NearestNodeFinder(p);
+//		nearest = new NearestNodeFinder(p);
 		text = new PhyloTextField(p);
+		
+		nodeUpdater = new NodeInfoUpdater();
 	
 		/*
 		 * Load the menu file.
@@ -83,15 +88,10 @@ public class PhyloUISetup
 			}
 		}
 	}
-
-	void setPropString(String property, String value)
-	{
-		
-	}
 	
-	void setPropFloat(String property, float value)
+	public void updateNodeInfo(RootedTree t, PhyloNode n)
 	{
-		
+		nodeUpdater.triggerUpdate(t, n);
 	}
 	
 	public CachedRootedTree getCurTree()
@@ -101,7 +101,7 @@ public class PhyloUISetup
 
 	public void layout()
 	{
-		PhyloWidget.trees.getRenderer().layout();
+		PhyloWidget.trees.getRenderer().layoutTrigger();
 	}
 
 	public Object curNode()

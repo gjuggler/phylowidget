@@ -41,7 +41,7 @@ public final class Point extends Point2D.Float
 		this.setLocation(dx + x, dy + y);
 		return this;
 	}
-
+	
 	public Point scale(float scaleX, float scaleY)
 	{
 		this.setLocation(x * scaleX, y * scaleY);

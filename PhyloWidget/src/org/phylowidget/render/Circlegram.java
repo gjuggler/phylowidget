@@ -11,7 +11,7 @@ import org.phylowidget.ui.PhyloNode;
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
 
-public class Circlegram extends Cladogram
+public class Circlegram extends BasicTreeRenderer
 {
 
 	HashMap<PhyloNode, Float> sines = new HashMap<PhyloNode, Float>();
@@ -24,20 +24,35 @@ public class Circlegram extends Cladogram
 	}
 
 	@Override
-	protected void layoutImpl()
-	{
-		super.layoutImpl();
-	}
-
-	@Override
 	protected void leafPosition(PhyloNode n, int index)
 	{
 		float theta = (float) index / (float) (leaves.size()) * PApplet.TWO_PI;
 		float sin = PApplet.sin(theta);
 		float cos = PApplet.cos(theta);
-		n.setUnscaledPosition(nodeXPosition(n), theta);
+		setRadius(n, nodeXPosition(n));
+		setTheta(n, theta);
 		sines.put(n, sin);
 		cosines.put(n, cos);
+	}
+
+	float getTheta(PhyloNode n)
+	{
+		return n.getTargetY();
+	}
+
+	void setTheta(PhyloNode n, float theta)
+	{
+		n.setY(theta);
+	}
+
+	float getRadius(PhyloNode n)
+	{
+		return n.getTargetX();
+	}
+
+	void setRadius(PhyloNode n, float rad)
+	{
+		n.setX(rad);
 	}
 
 	@Override
@@ -46,7 +61,7 @@ public class Circlegram extends Cladogram
 		if (tree.isLeaf(n))
 		{
 			// If N is a leaf, then it's already been laid out.
-			return n.getTargetY();
+			return getTheta(n);
 		} else
 		{
 			// If not:
@@ -61,7 +76,9 @@ public class Circlegram extends Cladogram
 			float theta = (float) sum / (float) children.size();
 			float r = 0;
 			r = nodeXPosition(n);
-			n.setUnscaledPosition(r, theta);
+			// n.setPosition(r, theta);
+			setRadius(n, r);
+			setTheta(n, theta);
 			sines.put(n, PApplet.sin(theta));
 			cosines.put(n, PApplet.cos(theta));
 			return theta;
@@ -69,11 +86,12 @@ public class Circlegram extends Cladogram
 	}
 
 	@Override
-	protected void drawRecalc()
+	protected void recalc()
 	{
 		// super.drawRecalc();
 		float circum = PApplet.PI;
 		rowSize = rect.height / (circum * numRows);
+//		rowSize = Math.min(5, rowSize);
 		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
 		textSize = rowSize * circum;
 		dotWidth = textSize * PhyloWidget.ui.nodeSize;
@@ -89,45 +107,118 @@ public class Circlegram extends Cladogram
 		// dy = 0;
 		dx += rect.getX();
 		dy += rect.getY();
-		textSize *= PhyloWidget.ui.textSize;
+//		textSize *= PhyloWidget.ui.textSize;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
+	}
+
+	@Override
+	protected void layout()
+	{
+		super.layout();
+		if (!needsLayout)
+			return;
+		needsLayout = false;
+		/*
+		 * Create a second set of noderanges if necessary.
+		 */
+		if (PhyloWidget.ui.useBranchLengths)
+		{
+			synchronized (list)
+			{
+//				list.clear();
+//				nodesToRanges.clear();
+				for (int i = 0; i < nodes.size(); i++)
+				{
+					PhyloNode n = (PhyloNode) nodes.get(i);
+					NodeRange r = new NodeRange();
+					r.node = n;
+					r.render = this;
+					float oldTheta = getTheta(n);
+					setTheta(n,1);
+					updateNode(n);
+					r.loX = getX(n) - dotWidth / 2;
+					float textHeight = (font.ascent() + font.descent()) * textSize;
+					r.loY = getY(n) - textHeight / 2;
+					r.hiY = getY(n) + textHeight / 2;
+					float textWidth = (float) n.unitTextWidth * textSize;
+					r.hiX = getX(n) + dotWidth / 2 + textWidth;
+					setTheta(n,oldTheta);
+					updateNode(n);
+					list.insert(r, false);
+				}
+				list.sortFull();
+			}
+		}
 	}
 
 	@Override
 	protected void updateNode(PhyloNode n)
 	{
-		n.update();
-		double r = n.getTargetX();
-		double theta = n.getTargetY();
-		float y = (float) (r * sines.get(n));
-		float x = (float) (r * cosines.get(n));
-		// System.out.println(n.getLabel() + " " +r + " "+theta);
-		n.x = (float) (x * scaleX + dx);
-		n.y = (float) (y * scaleY + dy);
+		if (mainRender)
+			n.update();
+		/*
+		 * Store the real, scaled x and y values.
+		 */
+		n.setRealX(calcRealX(n));
+		n.setRealY(calcRealY(n));
+
+		/*
+		 * Update the nodeRange.
+		 */
+		setRange(n,nodesToRanges.get(n));
+	}
+	
+	void setRange(PhyloNode n, NodeRange r)
+	{
+//		NodeRange r = nodesToRanges.get(n);
+		r.loX = getX(n) - dotWidth / 2;
+		float textHeight = (font.ascent() + font.descent()) * textSize;
+		r.loY = getY(n) - textHeight / 2;
+		r.hiY = getY(n) + textHeight / 2;
+		float textWidth = (float) n.unitTextWidth * textSize;
+		r.hiX = getX(n) + dotWidth / 2 + textWidth;
+	}
+
+	@Override
+	float calcRealX(PhyloNode n)
+	{
+		float r = n.getX();
+		// float theta = n.getY();
+		float x = r * PApplet.cos(getTheta(n));
+		return (float) (x * scaleX + dx);
+	}
+
+	@Override
+	float calcRealY(PhyloNode n)
+	{
+		float r = n.getX();
+		// float theta = n.getY();
+		float y = r * PApplet.sin(getTheta(n));
+		return (float) (y * scaleY + dy);
 	}
 
 	protected void drawLineImpl(PhyloNode p, PhyloNode n)
 	{
 		canvas.noFill();
 		canvas.ellipseMode(PApplet.RADIUS);
-		float pr = (float) p.getTargetX();
-		double loTheta = Math.min(p.getTargetY(), n.getTargetY());
-		double hiTheta = Math.max(p.getTargetY(), n.getTargetY());
+		float pr = (float) getRadius(p);
+		double loTheta = Math.min(getTheta(p), getTheta(n));
+		double hiTheta = Math.max(getTheta(p), getTheta(n));
 		canvas.arc((float) (dx), (float) (dy), (float) (scaleX * pr),
 				(float) (scaleY * pr), (float) loTheta, (float) hiTheta);
 		// canvas.ellipseMode(PApplet.CORNER);
-		double r = p.getTargetX();
+		double r = getRadius(p);
 		double x = r * cosines.get(n);
 		double y = r * sines.get(n);
 		double x1 = dx + scaleX * x;
 		double y1 = dy + scaleY * y;
-		canvas.line((float) x1, (float) y1, n.x, n.y);
+		canvas.line((float) x1, (float) y1, getX(n), getY(n));
 		if (tree.isLeaf(n))
 		{
 			double x2 = dx + scaleX * cosines.get(n);
 			double y2 = dy + scaleY * sines.get(n);
 			canvas.stroke(230);
-			canvas.line(n.x, n.y, (float) x2, (float) y2);
+			canvas.line(getX(n), getY(n), (float) x2, (float) y2);
 		}
 	}
 
@@ -142,7 +233,9 @@ public class Circlegram extends Cladogram
 	@Override
 	protected void drawLabelImpl(PhyloNode n)
 	{
-		float theta = (float) n.getTargetY();
+		// if (true == true)
+		// return;
+		float theta = (float) getTheta(n);
 		int degrees = (int) (theta / PApplet.TWO_PI * 360);
 
 		int textRotation = 0;
@@ -166,12 +259,14 @@ public class Circlegram extends Cladogram
 			textRotation = -45;
 		}
 
-		float oldR = n.getTargetX();
-		n.setUnscaledPosition(1, n.getTargetY());
-		updateNode(n);
+		float oldR = getRadius(n);
+		n.setPosition(1, getTheta(n));
+		// updateNode(n);
+		n.setRealX(calcRealX(n));
+		n.setRealY(calcRealY(n));
 
 		canvas.pushMatrix();
-		canvas.translate(n.x + dotWidth / 2 + textSize / 3, n.y);
+		canvas.translate(getX(n) + dotWidth / 2 + textSize / 3, getY(n));
 		canvas.rotate(PApplet.radians(textRotation));
 
 		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
@@ -188,7 +283,9 @@ public class Circlegram extends Cladogram
 
 		canvas.popMatrix();
 
-		n.setUnscaledPosition(oldR, n.getTargetY());
-		updateNode(n);
+		n.setPosition(oldR, getTheta(n));
+		// updateNode(n);
+		n.setRealX(calcRealX(n));
+		n.setRealY(calcRealY(n));
 	}
 }

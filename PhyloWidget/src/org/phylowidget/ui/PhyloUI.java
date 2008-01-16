@@ -34,15 +34,17 @@ public class PhyloUI extends PhyloUISetup
 	public String menuFile = "full-menus.xml";
 	public String clipJavascript = "updateClip";
 	public String treeJavascript = "updateTree";
+	public String nodeJavascript = "updateNode";
 	public String foreground = "(0,0,0)";
 	public String background = "(255,255,255)";
 	public String tree = "Homo Sapiens";
 
 	public float textRotation = 0;
-	public float textSize = 1;
+//	public float textSize = 1;
 	public float lineSize = 0.1f;
 	public float nodeSize = 0.3f;
 	public float renderThreshold = 300f;
+	public float minTextSize = 10;
 
 	public boolean showBranchLengths = false;
 	public boolean showCladeLabels = false;
@@ -107,7 +109,8 @@ public class PhyloUI extends PhyloUISetup
 		/*
 		 * Initialize the tree.
 		 */
-		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(), tree));
+		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
+				tree));
 	}
 
 	private void setField(Field f, String param)
@@ -152,7 +155,7 @@ public class PhyloUI extends PhyloUISetup
 	{
 		NodeRange r = curRange();
 		r.render.getTree().flipChildren(curNode());
-		r.render.layout();
+		r.render.layoutTrigger();
 	}
 
 	public void nodeFlipSubtree()
@@ -160,7 +163,7 @@ public class PhyloUI extends PhyloUISetup
 		NodeRange r = curRange();
 		r.render.getTree().reverseSubtree(curNode());
 		getCurTree().modPlus();
-		r.render.layout();
+		r.render.layoutTrigger();
 	}
 
 	public void nodeAddSister()
@@ -238,7 +241,7 @@ public class PhyloUI extends PhyloUISetup
 	{
 		PhyloWidget.trees.rectangleRender();
 	}
-	
+
 	public void viewDiagonal()
 	{
 		PhyloWidget.trees.diagonalRender();
@@ -248,7 +251,7 @@ public class PhyloUI extends PhyloUISetup
 	{
 		PhyloWidget.trees.circleRender();
 	}
-	
+
 	public void viewZoomToFull()
 	{
 		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
@@ -260,7 +263,8 @@ public class PhyloUI extends PhyloUISetup
 
 	public void treeNew()
 	{
-		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(), "Homo Sapiens"));
+		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
+				"Homo Sapiens"));
 		layout();
 	}
 
@@ -298,7 +302,7 @@ public class PhyloUI extends PhyloUISetup
 
 	public void treeMutateFast()
 	{
-		PhyloWidget.trees.startMutatingTree(100);
+		PhyloWidget.trees.startMutatingTree(50);
 	}
 
 	public void treeStopMutating()
@@ -309,13 +313,16 @@ public class PhyloUI extends PhyloUISetup
 	public void treeSave()
 	{
 		final File f = p.outputFile("Save tree as...");
+		if (f == null)
+			return;
 		setMessage("Saving tree...");
 		new Thread()
 		{
 			public void run()
 			{
 				p.noLoop();
-				String s = TreeIO.createNewickString(PhyloWidget.trees.getTree());
+				String s = TreeIO.createNewickString(PhyloWidget.trees
+						.getTree());
 				try
 				{
 					f.createNewFile();
@@ -342,10 +349,12 @@ public class PhyloUI extends PhyloUISetup
 			}
 		}.start();
 	}
-	
+
 	public void treeLoad()
 	{
 		final File f = p.inputFile("Select Newick-format text file...");
+		if (f == null)
+			return;
 		setMessage("Loading tree...");
 		new Thread()
 		{
@@ -363,7 +372,7 @@ public class PhyloUI extends PhyloUISetup
 	/*
 	 * File actions.
 	 */
-	
+
 	public void fileOutputSmall()
 	{
 		TreeRenderer tr = PhyloWidget.trees.getRenderer();

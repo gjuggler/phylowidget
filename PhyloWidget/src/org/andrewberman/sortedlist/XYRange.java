@@ -14,10 +14,7 @@ public class XYRange implements ItemI
 	
 	public float loX, hiX, loY, hiY = 0;
 	
-	public static final int LO_X = 0;
-	public static final int HI_X = 1;
-	public static final int LO_Y = 2;
-	public static final int HI_Y = 3;
+
 	
 	public XYRange(Object parent)
 	{

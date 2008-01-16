@@ -27,13 +27,17 @@ A:visited  { color: #3399CC; text-decoration: none; }
 A:active   { color: #3399CC; text-decoration: underline; }
 A:hover    { color: #3399CC; text-decoration: underline; }
 
+div {
+  border: 0px;
+
+}
+
 #content {
-  width: 600px;
   margin: auto;
 }
 
-#content div {
-  margin: auto;
+#content fieldset {
+  margin-top: 5px;
 }
 
 #comments {
@@ -44,10 +48,10 @@ input {
 }
 
 fieldset {
+  display:block;
   background:#CEE3F6;
   margin:auto;
   text-align:center;
-  margin-top: 5px;
 }
 
 legend {
@@ -59,19 +63,44 @@ legend {
 #treeText,#clipText {
   width:100%;
 }
+
+table {
+  text-align:left;
+}
+
+table .key {
+  text-align:right;
+  padding-right:10px;
+}
+
+table .val {
+ text-align:left;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<div id="content">
 
-<fieldset>
-<legend>PhyloWidget</legend>
-<div id="sketch">
+<div id="content" style="margin-top: 5px;width:750px;">
+
+<div style="float:right;width:300px;">
+<fieldset style="margin-top:0px;margin-left:5px;">
+<legend>Node Info</legend>
+<div id="nodeText" style="background:white;margin:5px;padding:5px;">
+Mouse over a node to view its detailed information here.
+</div>
+</fieldset>
+</div>
+
+<div style="">
+<fieldset style="height:450px;">
+<legend>${project.name}</legend>
 <applet
- name="PhyloWidget"
+ id="${project.name}"
+ name="${project.name}"
  code="${internal.launcherClass}" 
  archive="${internal.allJars}"
  width="${applet.width}" height="${applet.height}"
@@ -109,9 +138,10 @@ foreach ($_POST as $key => $value) {
 To view this content, you need to install Java from <A HREF="http://java.com">java.com</A>
 </applet>
 
-</div>
 </fieldset>
+</div>
 
+<div style="">
 <form>
 <fieldset>
 <legend>Tree Text</legend>
@@ -127,13 +157,16 @@ To view this content, you need to install Java from <A HREF="http://java.com">ja
 </fieldset>
 </form>
 
-<div id="comments" style="clear:left;margin-top:10px;">
+<div id="comments" style="">
 ${internal.appletComments}
 </div>
 
 <p>
 <a href="${internal.sourceZip}">Source code</a>
 </p>
+
+</div>
+
 
 </div>
 

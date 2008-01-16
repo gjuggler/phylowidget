@@ -1,4 +1,4 @@
-package org.phylowidget.net;
+package org.andrewberman.unsorted;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,9 +35,6 @@ public class JSObjectCrap
 			a[0] = PhyloWidget.p; /* this is the applet */
 			jso = getw.invoke(c, a); /* this yields the JSObject */
 			Object result = call.invoke(jso, new Object[] {command,new String[] {arg}});
-//			a[0] = command;
-//			Object result = eval.invoke(jso, a);
-//			System.out.println(result);
 		} catch (InvocationTargetException ite)
 		{
 			reflectionWorking = false;

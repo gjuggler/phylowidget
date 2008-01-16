@@ -41,7 +41,7 @@ public class PhyloTextField extends TextField
 
 	protected void startEditing(NodeRange r, int editMode)
 	{
-		PhyloWidget.ui.setMessage("Press Enter to commit, Esc to revert.");
+		PhyloWidget.ui.setMessage("Enter to commit, Esc to revert.");
 		this.editMode = editMode;
 		curRange = r;
 		RootedTree t = r.render.getTree();
@@ -103,11 +103,12 @@ public class PhyloTextField extends TextField
 					} catch (Exception e)
 					{
 						e.printStackTrace();
-						r.layout();
+						r.layoutTrigger();
 						return;
 					}
 			}
-			r.layout();
+			r.layoutTrigger();
+			PhyloWidget.ui.updateNodeInfo(r.getTree(), curRange.node);
 		}
 	}
 

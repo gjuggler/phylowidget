@@ -6,12 +6,12 @@ import java.util.Collections;
 
 import org.phylowidget.PhyloWidget;
 
-public class JSObjectCrap
+public class JSCaller
 {
 
-	public static boolean reflectionWorking = true;
+	public boolean reflectionWorking = true;
 	
-	public static void reflectJS(String command,String arg)
+	public void reflectJS(String command,String... args)
 	{
 		if (!reflectionWorking) return;
 		String jsresult = null;
@@ -34,7 +34,7 @@ public class JSObjectCrap
 			Object a[] = new Object[1];
 			a[0] = PhyloWidget.p; /* this is the applet */
 			jso = getw.invoke(c, a); /* this yields the JSObject */
-			Object result = call.invoke(jso, new Object[] {command,new String[] {arg}});
+			Object result = call.invoke(jso, new Object[] {command,args});
 		} catch (InvocationTargetException ite)
 		{
 			reflectionWorking = false;

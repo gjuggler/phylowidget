@@ -30,6 +30,15 @@ function updateNode(newtext)
 }
 
 /*
+ * This method calls Java's updateTree method, setting the tree to an arbitrary Newick
+ * string.
+ */
+function setTree(tree)
+{
+  document.PhyloWidget.updateTree(tree);
+}
+
+/*
  * This function calls Java's updateTree method to update PhyloWidget's
  * representation of the tree.
  */

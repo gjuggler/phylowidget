@@ -1,10 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
- "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
 <title>${project.name}: Built with Processing</title>
+<link rel="stylesheet" href="appletobject.css"></link>
 <style type="text/css">
 body {
   margin: 0px 0px 0px 0px;
@@ -98,11 +96,56 @@ table .val {
 
 <body>
 
-
 <div id="content" style="margin-top: 5px;width:750px;">
 
-
 <script type="text/javascript" src="phylowidget.js"></script>
+<script type="text/javascript" src="appletobject.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+function loadApplet(element_id)
+{
+  var ao = new AppletObject(
+	'${internal.launcherClass}',
+	[${internal.quotedJars}],
+	'${applet.width}',
+	'${applet.height}',
+	'0', // java version: 1.4.2
+	'true',  // mayscript
+	'',   // codebase
+	[], // additional params
+	AppletObjects.TAG_OBJECT
+  );
+  ao.addParams(['boxmessage','Loading ${project.name}...']);
+
+  ao.addParams(
+<?php
+
+foreach ($_GET as $key => $value) {
+	$key = stripslashes($key);
+	$key = str_replace("\"","",$key);
+	$value = stripslashes($value);
+	$value = str_replace("\"","",$value);
+	//echo("<param name=\"$key\" value=\"$value\">");
+	echo("[\'$key\',\'$value\']");
+  }
+
+foreach ($_POST as $key => $value) {
+	$key = stripslashes($key);
+	$key = str_replace("\"","",$key);
+	$value = stripslashes($value);
+	$value = str_replace("\"","",$value);
+	//echo("<param name=\"$key\" value=\"$value\">");
+	echo("[\'$key\',\'$value\']");
+}
+
+?>
+  );
+  ao.preload(element_id);
+}
+
+//]]>
+</script>
+
 <div style="float:right;width:300px;">
 <fieldset style="margin-top:0px;margin-left:5px;">
 <legend>Node Info</legend>
@@ -112,50 +155,21 @@ Mouse over a node to view its detailed information here.
 </fieldset>
 </div>
 
-<div id="div_applet">
+<div style="">
 <fieldset style="height:450px;">
 <legend>${project.name}</legend>
-<applet
- id="${project.name}"
- name="${project.name}"
- code="${internal.launcherClass}" 
- archive="${internal.allJars}"
- width="${applet.width}" height="${applet.height}"
- mayscript="true">
-<?php
-
-foreach ($_GET as $key => $value) {
-	$key = stripslashes($key);
-	$key = str_replace("\"","",$key);
-	$value = stripslashes($value);
-	$value = str_replace("\"","",$value);
-	echo("<param name=\"$key\" value=\"$value\">");
-  }
-
-foreach ($_POST as $key => $value) {
-	$key = stripslashes($key);
-	$key = str_replace("\"","",$key);
-	$value = stripslashes($value);
-	$value = str_replace("\"","",$value);
-	echo("<param name=\"$key\" value=\"$value\">");
-}
-
-?>
-<param name="image" value="loading.gif">
-<param name="boxmessage" value="Loading Processing software...">
-<param name="boxbgcolor" value="#FFFFFF">
-<param name="progressbar" value="true">
-<param name="subapplet.classname" VALUE="${project.class}"> 
-<param name="subapplet.displayname" VALUE="${project.name}"> 
-
-<!-- This is the message that shows up when people don't have
-     Java installed in their browser. Any HTML can go here
-     (i.e. if you wanted to include an image other links, 
-     or an anti-Microsoft diatribe. -->
-To view this content, you need to install Java from <A HREF="http://java.com">java.com</A>
-</applet>
+<div id="div_applet" style="height:400px;">
+<script type="text/javascript" >
+		//<![CDATA[
+			document.write(
+	'<a href="javascript:loadApplet(\'div_applet\')"><div class="rect" id="runbutton" style="display:table-cell;width:${applet.width}px;height:${applet.height}px;margin:auto;clear:both;vertical-align:middle;">Run ${project.name}</div></a>'
+	);
+	document.getElementById('runbutton').style.fontSize = (${applet.height} / 20) + "px";
+		//]]>
+</script>
 </div>
 </fieldset>
+</div>
 
 <div style="">
 <form>
@@ -174,7 +188,7 @@ To view this content, you need to install Java from <A HREF="http://java.com">ja
 </form>
 
 <div id="comments" style="">
-${internal.appletComments}
+${internal.appletcomments}
 </div>
 
 <p>

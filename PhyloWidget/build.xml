@@ -3,7 +3,7 @@
     on Toxi's P5 build script, with many enhancements (and probably a few new bugs).
     (see http://processing.org/discourse/yabb_beta/YaBB.cgi?board=Integrate;action=display;num=1117133941 )
     
-    last update : July 3, 2007
+    last update : Feb. 2, 2008
     author : Gregory Jordan (phylowidget@gmail.com)
     author : Toxi (info@toxi.co.uk)
 -->
@@ -25,7 +25,7 @@ This Ant task assumes a certain structure within your project directory:
    |    "archive" attribute of the <applet> tag in the resulting HTML.
    |->[opengl]: If you wish to enable opengl support, first grab the required .jar files
              from the Processing distribution and place them in this directory. Last
-             I saw they were "opengl.jar," "jogl.jar," and a bunch of "jogl-natives-XXX.jar".
+             I checked, they were "opengl.jar," "jogl.jar," and a bunch of "jogl-natives-XXX.jar".
 -->
 <project name="Processing Applet Export" default="dist" basedir=".">
 	<description>
@@ -44,10 +44,7 @@ This Ant task assumes a certain structure within your project directory:
 		<fail unless="applet.height">Please specify applet.height in the build.properties file.</fail>
 
 		<!-- Output debug info if desired. -->
-		<condition property="internal.debugOut">
-			<istrue value="${build.debug}" />
-		</condition>
-		<antcall target="outputDebug" />
+		<antcall target="outputdebug" />
 
 		<!-- Store folder locations within named properties. -->
 		<property name="src" location="src" />
@@ -58,22 +55,46 @@ This Ant task assumes a certain structure within your project directory:
 		<property name="html" location="html" />
 
 		<!-- Store the final jar and zip filenames. -->
-		<property name="internal.finalJar" value="${project.name}.jar" />
-		<property name="internal.sourceZip" value="${project.name}_src.zip" />
+		<property name="internal.finaljar" value="${project.name}.jar" />
+		<property name="internal.sourcezip" value="${project.name}_src.zip" />
+		<property name="internal.standalonezip" value="${project.name}_standalone.zip" />
+		
+		<condition property="cond.signjar">
+			<istrue value="${signjar}" />
+		</condition>
+		<condition property="cond.genkey">
+			<istrue value="${signjar.genkey}" />
+		</condition>
+		<condition property="cond.standalone">
+			<istrue value="${project.standalone}" />
+		</condition>
+		<condition property="cond.opensource">
+			<istrue value="${project.opensource}" />
+		</condition>
+		<condition property="cond.sourcezip">
+			<istrue value="${project.sourcezip}" />
+		</condition>
+		<condition property="cond.opengl">
+			<istrue value="${project.opengl}" />
+		</condition>
+		<condition property="cond.debug">
+			<istrue value="${build.debug}" />
+		</condition>
+		<available property="cond.dataexists" file="${data}" type="dir" />
 	</target>
-
+	
 	<!-- TARGET: BUILD -->
-	<target name="build" depends="init,clean" description="compile the source">
+	<target name="build" depends="init" description="compile the source">
 		<mkdir dir="${build}" />
 
 		<!-- Compile the java code from ${src} into ${build} -->
-		<condition property="internal.javaSource" value="${project.javatarget}" else="1.4">
+		<condition property="internal.javasource" value="${project.javatarget}" else="1.4">
 			<isset property="project.javatarget" />
 		</condition>
-		<echo>
-			${internal.javaSource}
-		</echo>
-		<javac srcdir="${src}" destdir="${build}" source="${internal.javaSource}" target="${internal.javaSource}">
+		<!--<echo>
+			${internal.javasource}
+		</echo>-->
+		<javac srcdir="${src}" destdir="${build}" source="${internal.javasource}" target="${internal.javasource}">
 			<classpath>
 				<fileset dir="${lib}" />
 			</classpath>
@@ -81,41 +102,60 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<!-- TARGET: DIST -->
-	<target name="dist" depends="build,loadJars" description="generate the distribution">
+	<target name="dist" depends="init,clean,build,loadjars" description="generate the distribution">
 		<mkdir dir="${applet}" />
 
 		<!-- COPY THE "DATA" DIRECTORY TO THE BUILD FOLDER -->
-		<available property="internal.dataExists" file="${data}" type="dir" />
-		<antcall target="copyData" />
+		<antcall target="copydata" />
 
-		<!-- JAR UP OUR COMPILED CLASES -->
-		<jar jarfile="${applet}/${internal.finalJar}" basedir="${build}">
+		<!-- IF OPEN SOURCE, COPY .JAVA FILES TO THE BUILD FOLDER -->
+		<antcall target="copysource" />
+		
+		<!-- JAR UP THE "BUILD" DIRECTORY -->
+		<jar jarfile="${applet}/${internal.finaljar}" basedir="${build}">
 			<manifest>
 				<attribute name="Main-Class" value="${project.class}" />
 			</manifest>
 		</jar>
 
-		<!-- ZIP UP OUR SOURCE -->
-		<zip destfile="${applet}/${internal.sourceZip}" basedir="${src}" />
-
 		<!-- COPY JARS FROM "LIB" TO "APPLET" -->
-		<antcall target="copyJars" inheritRefs="true" />
+		<antcall target="copyjars" inheritRefs="true" />
 
 		<!-- SIGN THIS JAR, IF NECESSARY -->
-		<condition property="internal.signJar">
-			<istrue value="${signjar}" />
-		</condition>
-		<condition property="internal.genKey">
-			<istrue value="${signjar.genkey}" />
-		</condition>
-		<antcall target="signJar" />
+		<antcall target="signjar" />
 
+		<!-- IF STANDALONE, MAKE A STANDALONE .ZIP -->
+		<antcall target="standalone" />
+		
 		<!-- CREATE THE HTML FILE -->
 		<antcall target="genHTML" />
+		
 	</target>
 
+	<!-- TARGET: STANDALONE -->
+	<target name="standalone" depends="loadjars" if="cond.standalone">
+		<pathconvert pathsep=";" property="temp.pathlist" refid="jarFilesNoNatives">
+			<flattenmapper />
+		</pathconvert>
+		<concat destfile="${applet}/${project.name}.bat">start javaw -cp ${temp.pathlist};${internal.finaljar} processing.core.PApplet ${project.class}</concat>
+		<pathconvert pathsep=":" property="temp.pathlist" refid="jarFilesNoNatives">
+			<flattenmapper />
+		</pathconvert>
+		<concat destfile="${applet}/${project.name}.sh">java -cp ${temp.pathlist}:${internal.finaljar} processing.core.PApplet ${project.class}</concat>
+		<zip destfile="${applet}/${internal.standalonezip}" includes="*.jar,*.sh,*.bat" basedir="${applet}"/>
+		<delete>
+			<fileset dir="${applet}" includes="${project.name}.bat,${project.name}.sh"/>
+		</delete>
+	</target>
+	
+	<!-- TARGET: SOURCECOPY -->
+	<target name="copysource" if="cond.opensource">
+		<!-- ZIP UP OUR SOURCE -->
+		<zip destfile="${applet}/${internal.sourcezip}" basedir="${src}" />
+	</target>
+	
 	<!-- TARGET: COPYDATA -->
-	<target name="copyData" if="internal.dataExists">
+	<target name="copydata" if="cond.dataexists">
 		<copy todir="${build}/data">
 			<fileset dir="${data}">
 				<include name="**/*.*" />
@@ -124,23 +164,23 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<!-- TARGET: COPYJARS -->
-	<target name="copyJars">
+	<target name="copyjars">
 		<copy todir="${applet}" flatten="true">
 			<fileset refid="jarFiles" />
 		</copy>
 	</target>
 
 	<!-- TARGET: SIGNJAR -->
-	<target name="signJar" if="internal.signJar">
-		<antcall target="genKey" />
-		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" lazy="false">
+	<target name="signjar" depends="loadjars" if="cond.signjar">
+		<antcall target="genkey" />
+		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" lazy="true">
 			<fileset refid="jarFiles" />
-			<fileset file="${applet}/${internal.finalJar}" />
+			<fileset file="${applet}/${internal.finaljar}" />
 		</signjar>
 	</target>
 
 	<!-- TARGET: GENKEY -->
-	<target name="genKey" if="internal.genKey">
+	<target name="genkey" if="cond.genkey">
 		<genkey alias="${signjar.alias}" storepass="${signjar.storepass}">
 			<dname>
 				<param name="CN" value="${signjar.cn}" />
@@ -152,7 +192,7 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<!-- TARGET: GENHTML -->
-	<target name="genHTML" depends="init">
+	<target name="genHTML">
 		<!-- Copy all non-HTML files normally. -->
 		<copy todir="${applet}">
 			<fileset dir="${html}">
@@ -168,9 +208,9 @@ This Ant task assumes a certain structure within your project directory:
 		</condition>
 
 		<!-- If the applet.comments refers to a valid filename, load it up. -->
-		<loadfile property="internal.appletComments" srcFile="${applet.comments}" failonerror="false" />
-		<condition property="internal.appletComments" value="${internal.appletComments}" else="${applet.comments}">
-			<isset property="${internal.appletComments}" />
+		<loadfile property="internal.appletcomments" srcFile="${applet.comments}" failonerror="false" />
+		<condition property="internal.appletcomments" value="${internal.appletcomments}" else="${applet.comments}">
+			<isset property="${internal.appletcomments}" />
 		</condition>
 
 		<!-- Let's be a little sneaky here: we expand out the current set
@@ -189,7 +229,7 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<!-- TARGET: CLEAN -->
-	<target name="clean" depends="init">
+	<target name="clean">
 		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${applet}" includes="" />
 		</delete>
@@ -201,7 +241,7 @@ This Ant task assumes a certain structure within your project directory:
 	<!-- MISCELLANEOUS OR "EXTRA" TARGETS GO HERE -->
 	<!-- **************************************** -->
 
-	<target name="outputDebug" if="internal.debugOut">
+	<target name="outputdebug" if="cond.debug">
 		<echo>
 		Script Filename:	${ant.file}
 		Project Home:	${basedir}
@@ -220,9 +260,9 @@ This Ant task assumes a certain structure within your project directory:
 	</echo>
 	</target>
 
-	<target name="loadJars" depends="init">
+	<target name="loadjars" depends="init">
 		<!-- Create a fileset that includes all the library jar files. -->
-		<condition property="internal.includeOpengl" value="opengl/*.jar">
+		<condition property="internal.includeopengl" value="opengl/*.jar" else="">
 			<istrue value="${project.opengl}" />
 		</condition>
 		<fileset id="jarFiles" dir="${lib}" casesensitive="no">
@@ -231,19 +271,23 @@ This Ant task assumes a certain structure within your project directory:
 		</fileset>
 		<fileset id="jarFilesNoNatives" dir="${lib}" casesensitive="no">
 			<include name="*.jar" />
-			<include name="${internal.includeOpengl}" />
+			<include name="${internal.includeopengl}" />
 			<exclude name="**/*native*.jar" />
 		</fileset>
 
 		<!-- Create a property that is a comma-separated list of the jarFilesNoNatives fileset. -->
-		<pathconvert pathsep="," property="internal.jarList" refid="jarFilesNoNatives">
+		<pathconvert pathsep="," property="internal.jarlist" refid="jarFilesNoNatives">
 			<flattenmapper />
 		</pathconvert>
-		<property name="internal.allJars" value="${internal.finalJar},${internal.jarList}" />
+		<property name="internal.allJars" value="${internal.finaljar},${internal.jarlist}" />
+		<pathconvert pathsep="','" property="temp.quotedJarList" refid="jarFilesNoNatives">
+			<flattenmapper />
+		</pathconvert>
+		<property name="internal.quotedJars" value="'${temp.quotedJarList}','${internal.finaljar}'"/>
 	</target>
 
 	<target name="upload" depends="dist">
-		<scp todir="${project.serverDest}" trust="true" failonerror="false" verbose="true">
+		<scp todir="${project.serverdest}" trust="true" failonerror="false" verbose="true">
 			<fileset id="allFiles" dir="${applet}" casesensitive="no"/>
 		</scp>
 

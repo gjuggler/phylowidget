@@ -1,3 +1,21 @@
+/**************************************************************************
+ * Copyright (c) 2007, 2008 Gregory Jordan
+ * 
+ * This file is part of PhyloWidget.
+ * 
+ * PhyloWidget is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * PhyloWidget is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.phylowidget;
 
 import java.awt.RenderingHints;
@@ -49,21 +67,21 @@ public class PhyloWidget extends PApplet
 
 	public void setup()
 	{
-		size(this.width, this.height);
+		if (frame != null)
+		{
+			/*
+			 * We're in standalone / application mode.
+			 */
+			frame.setResizable(true);
+			size(400, 400);
+		} else
+		{
+			size(width, height);
+		}
+
 		frameRate(FRAMERATE);
 
 		p = this;
-
-		// Load the properties file.
-		// props = new Properties();
-		// try
-		// {
-		// props.load(this.openStream("phylowidget.properties"));
-		// } catch (IOException e)
-		// {
-		// e.printStackTrace();
-		// return;
-		// }
 
 		// Creates, manages, and renders trees.
 		trees = new TreeManager(this);
@@ -117,10 +135,10 @@ public class PhyloWidget extends PApplet
 		textAlign(PApplet.LEFT);
 		textFont(FontLoader.instance.vera);
 		textSize(10);
-		fill(255,0,0);
-		text(nleaves,width - 100, height - 10);
+		fill(255, 0, 0);
+		text(nleaves, width - 100, height - 10);
 	}
-	
+
 	void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
@@ -194,6 +212,6 @@ public class PhyloWidget extends PApplet
 
 	static public void main(String args[])
 	{
-		PApplet.main(new String[] { "PhyloWidget" });
+		PApplet.main(new String[] { "org.phylowidget.PhyloWidget" });
 	}
 }

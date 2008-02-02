@@ -1,3 +1,21 @@
+/**************************************************************************
+ * Copyright (c) 2007, 2008 Gregory Jordan
+ * 
+ * This file is part of PhyloWidget.
+ * 
+ * PhyloWidget is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * PhyloWidget is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.phylowidget.ui;
 
 import java.io.BufferedWriter;
@@ -40,7 +58,7 @@ public class PhyloUI extends PhyloUISetup
 	public String tree = "Homo Sapiens";
 
 	public float textRotation = 0;
-//	public float textSize = 1;
+	// public float textSize = 1;
 	public float lineSize = 0.1f;
 	public float nodeSize = 0.3f;
 	public float renderThreshold = 300f;
@@ -74,13 +92,19 @@ public class PhyloUI extends PhyloUISetup
 		/*
 		 * PRIORITY 2: APPLET TAGS
 		 */
-		for (Field f : fields)
+		try
 		{
-			String param = p.getParameter(f.getName());
-			if (param != null)
+			for (Field f : fields)
 			{
-				setField(f, param);
+				String param = p.getParameter(f.getName());
+				if (param != null)
+				{
+					setField(f, param);
+				}
 			}
+		} catch (Exception e)
+		{
+			// e.printStackTrace();
 		}
 
 		/*
@@ -220,7 +244,10 @@ public class PhyloUI extends PhyloUISetup
 	{
 		NodeRange r = curRange();
 		RootedTree g = r.render.getTree();
-		g.deleteNode(curNode());
+		synchronized (g)
+		{
+			g.deleteNode(curNode());
+		}
 	}
 
 	public void nodeDeleteSubtree()
@@ -286,7 +313,10 @@ public class PhyloUI extends PhyloUISetup
 	public void treeRemoveElbows()
 	{
 		RootedTree tree = getCurTree();
-		tree.cullElbowsBelow(tree.getRoot());
+		synchronized (tree)
+		{
+			tree.cullElbowsBelow(tree.getRoot());
+		}
 		layout();
 	}
 

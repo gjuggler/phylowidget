@@ -1,3 +1,21 @@
+/**************************************************************************
+ * Copyright (c) 2007, 2008 Gregory Jordan
+ * 
+ * This file is part of PhyloWidget.
+ * 
+ * PhyloWidget is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * PhyloWidget is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.phylowidget.render;
 
 import java.awt.FontMetrics;
@@ -85,7 +103,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	/**
 	 * Width of the node label gutter.
 	 */
-	protected float gutterWidth = 0;
+	protected float biggestStringWidth = 0;
 
 	/**
 	 * Leaf nodes in the associated tree.
@@ -733,7 +751,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
 		 * tree's leaves, i.e. in the correct ordering from top to bottom.
 		 */
-		gutterWidth = 0;
+		biggestStringWidth = 0;
 		biggestString = "";
 		if (UIUtils.isJava2D(canvas))
 			fm = UIUtils.getMetrics(canvas, font.font, 100);
@@ -771,9 +789,9 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				}
 			}
 			n.unitTextWidth = width;
-			if (width > gutterWidth)
+			if (width > biggestStringWidth)
 			{
-				gutterWidth = width;
+				biggestStringWidth = width;
 				biggestString = n.getLabel();
 			}
 		}
@@ -783,7 +801,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		if (biggestString.length() == 0)
 		{
 			biggestString = "P";
-			gutterWidth = fm.stringWidth(biggestString) / 100f;
+			biggestStringWidth = fm.stringWidth(biggestString) / 100f;
 		}
 		/*
 		 * Now, set the branch positions.
@@ -864,13 +882,13 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Figure out the ideal row size.
 		 */
-		float overhang = gutterWidth
+		float overhang = biggestStringWidth
 				* (float) Math
 						.sin(PApplet.radians(PhyloWidget.ui.textRotation));
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
-		textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
-		colSize = rect.width / (numCols + 1 + gutterWidth);
+		textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
+		colSize = rect.width / (numCols + 1 + biggestStringWidth);
 		// System.out.println("height:"+rect.width);
 		if (!PhyloWidget.ui.fitTreeToWindow)
 		{
@@ -881,7 +899,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		textSize = Math.min(rowSize, textSize);
 		if (PhyloWidget.ui.fitTreeToWindow)
 		{
-			scaleX = rect.width - gutterWidth * textSize - 10;
+			scaleX = rect.width - biggestStringWidth * textSize - 10;
 			scaleY = rect.height - absOverhang * textSize;
 		}
 		// System.out.println(scaleX);
@@ -889,7 +907,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;
-		dx = (rect.width - scaleX - gutterWidth * textSize - textSize / 2) / 2;
+		dx = (rect.width - scaleX - biggestStringWidth * textSize - textSize / 2) / 2;
 		dy = (rect.height - scaleY - overhang * textSize) / 2;
 		dx += rect.getX();
 		dy += rect.getY();
@@ -993,6 +1011,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * Update the nodeRange.
 		 */
 		NodeRange r = nodesToRanges.get(n);
+		if (r == null)
+			return;
 		float realTextSize = textSize * n.zoomTextSize;
 		r.loX = getX(n) - dotWidth / 2;
 		float textHeight = (font.ascent() + font.descent()) * realTextSize;

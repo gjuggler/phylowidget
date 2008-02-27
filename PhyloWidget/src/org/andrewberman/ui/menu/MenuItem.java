@@ -18,6 +18,9 @@
  */
 package org.andrewberman.ui.menu;
 
+import java.awt.BasicStroke;
+import java.awt.Font;
+import java.awt.Stroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -26,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import org.andrewberman.ui.Action;
+import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.ShortcutManager;
@@ -148,7 +152,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		 * Set the sub-item's parent to this item, and its menu to our menu.
 		 */
 		item.setParent(this);
-		item.setMenu(menu);
+//		item.setMenu(menu);
 		/*
 		 * Layout the entire menu so things look nice.
 		 */
@@ -416,6 +420,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	protected void setParent(MenuItem item)
 	{
 		parent = item;
+		setMenu(item.menu);
 	}
 
 	protected void performAction()
@@ -533,9 +538,9 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
-			float curWidth = item.height;
-			if (curWidth > max)
-				max = curWidth;
+			float curHeight = item.getHeight();
+			if (curHeight > max)
+				max = curHeight;
 		}
 		return max;
 	}
@@ -546,10 +551,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 
 	protected float getTextHeight()
 	{
-		PFont font = menu.style.font;
-		float fontSize = menu.style.fontSize;
+		int padY = menu.style.getI("f.padY");
+		PFont font = (PFont) menu.style.getO("font");
+		float fontSize = menu.style.getF("f.fontSize");
 		return UIUtils.getTextHeight(menu.buff, font, fontSize, name, true)
-				+ menu.style.padY * 2;
+				+ padY * 2;
 	}
 
 	protected void itemMouseEvent(MouseEvent e, Point tempPt)
@@ -824,4 +830,40 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		return height;
 	}
+	
+	public PFont getFont()
+	{
+		return getStyle().getFont("font");
+	}
+	
+	public float getPadX()
+	{
+		return getStyle().getF("f.padX");
+	}
+	
+	public float getPadY()
+	{
+		return getStyle().getF("f.padY");
+	}
+	
+	public float getFontSize()
+	{
+		return getStyle().getF("f.fontSize");
+	}
+	
+	public Color getStrokeColor()
+	{
+		return getStyle().getC("c.foreground");
+	}
+	
+	public MenuStyle getStyle()
+	{
+		return menu.style;
+	}
+	
+	public Stroke getStroke()
+	{
+		return new BasicStroke(getStyle().getF("f.strokeWeight"));
+	}
+	
 }

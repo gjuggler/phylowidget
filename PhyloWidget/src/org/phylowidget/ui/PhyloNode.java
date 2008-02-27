@@ -37,7 +37,9 @@ public class PhyloNode extends CachedVertex implements Comparable
 	public static final int NONE = 0;
 	public static final int CUT = 1;
 	public static final int COPY = 2;
-
+	
+	public boolean found = false;
+	
 	static TweenFriction fric = TweenFriction
 			.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
 

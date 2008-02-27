@@ -18,6 +18,8 @@
  */
 package org.phylowidget.render;
 
+import java.awt.BasicStroke;
+import java.awt.Stroke;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
@@ -39,6 +41,11 @@ public class RenderStyleSet
 
 	public Color copyColor;
 	public float copyStroke;
+	
+	public Color foundColor;
+	public float foundStroke;
+	public Color foundBackground;
+	public Color foundForeground;
 
 	public float nodeSizeMultiplier;
 	public float lineThicknessMultiplier;
@@ -69,12 +76,21 @@ public class RenderStyleSet
 
 		copyColor = new Color(255, 0, 0);
 		copyStroke = 2f;
+		
+		Color c = new Color(255,155,0);
+		foundColor = c;
+		foundStroke = 4f;
+		foundForeground = new Color(255,255,255);
+		foundBackground = foundColor;
 
 		nodeSizeMultiplier = 0.5f;
 		lineThicknessMultiplier = 1f;
 	}
 
-	
+	public Stroke stroke(float weight)
+	{
+		return new BasicStroke(weight);
+	}
 	
 //	private void loadFromProperties()
 //	{

@@ -70,12 +70,14 @@ public class DockItem extends MenuItem implements TweenListener
 	{
 		tween.update();
 
+		float px = menu.style.getF("f.padX");
+		
 		if (icon != null)
 		{
 			/*
 			 * Figure out the correctly scaled size of the icon.
 			 */
-			float pad = menu.style.padX;
+			float pad = px;
 			float effectiveW = width - pad*2;
 			float effectiveH = height - pad*2;
 			float xOffset = pad;
@@ -133,6 +135,18 @@ public class DockItem extends MenuItem implements TweenListener
 		tween.continueTo(w);
 	}
 
+	public void forceSize(float w, float h)
+	{
+		setSize(w,h);
+		tween.fforward();
+		tween.update();
+	}
+	
+	public String getLabel()
+	{
+		return getName();
+	}
+	
 	public void tweenEvent(Tween source, int eventType)
 	{
 		if (source == tween)

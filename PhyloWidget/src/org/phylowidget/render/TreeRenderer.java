@@ -28,6 +28,7 @@ import org.andrewberman.sortedlist.SortedXYRangeList;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
@@ -50,6 +51,8 @@ public interface TreeRenderer
 
 	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender);
 
+	public UIRectangle getVisibleRect();
+	
 	public void layoutTrigger();
 
 	public void setTree(RootedTree t);

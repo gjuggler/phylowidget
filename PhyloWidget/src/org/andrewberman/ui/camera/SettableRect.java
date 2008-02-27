@@ -18,7 +18,11 @@
  */
 package org.andrewberman.ui.camera;
 
+import java.awt.geom.Rectangle2D;
+
 public interface SettableRect
 {
 	public void setRect(float x, float y, float w, float h);
+	
+	public Rectangle2D getVisibleRect();
 }

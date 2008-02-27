@@ -30,6 +30,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 
 public class CheckBox extends MenuItem
 {
@@ -95,10 +96,13 @@ public class CheckBox extends MenuItem
 	{
 		super.drawMyself();
 
-		float curX = x + menu.style.padX;
+		float px = menu.style.getF("f.padX");
+		float py = menu.style.getF("f.padY");
+		
+		float curX = x + px;
 		MenuUtils.drawLeftText(this, getName() + ":", curX);
 //		curX += tWidth;
-		curX = getX() + getWidth() - menu.style.padX - nWidth;
+		curX = getX() + getWidth() - px - nWidth;
 		
 		if (getState() == MenuItem.UP)
 		{
@@ -153,29 +157,35 @@ public class CheckBox extends MenuItem
 	protected void calcPreferredSize()
 	{
 		super.calcPreferredSize();
+		
+		PFont font = menu.style.getFont("font");
+		float fontSize = menu.style.getF("f.fontSize");
+		float px = menu.style.getF("f.padX");
+		float py = menu.style.getF("f.padY");
+		
 		/*
 		 * For the height, let's use the height of some capital letters.
 		 */
-		float tHeight = UIUtils.getTextHeight(menu.buff, menu.style.font,
-				menu.style.fontSize, "XYZ", true);
+		float tHeight = UIUtils.getTextHeight(menu.buff, font,
+				fontSize, "XYZ", true);
 		/*
 		 * Calculate the text rectangle size.
 		 */
 		if (getName().length() > 0)
 		{
-			tWidth = UIUtils.getTextWidth(menu.buff, menu.style.font,
-					menu.style.fontSize, getName() + ":", true);
-			tWidth += menu.style.padX;
+			tWidth = UIUtils.getTextWidth(menu.buff, font,
+					fontSize, getName() + ":", true);
+			tWidth += px;
 		}
 
-		setHeight(tHeight + 2 * menu.style.padY);
+		setHeight(tHeight + 2 * py);
 		
-		nOffsetX = getWidth() - menu.style.padX - nWidth;
+		nOffsetX = getWidth() - px - nWidth;
 		nHeight = tHeight * CHECKBOX_SIZE;
 		nWidth = nHeight;
 		nOffsetY = (getHeight() - nHeight)/2f;
 
-		setWidth(menu.style.padX + tWidth + nWidth + menu.style.padX);
+		setWidth(px + tWidth + nWidth + px);
 		
 	}
 
@@ -222,8 +232,9 @@ public class CheckBox extends MenuItem
 
 	protected boolean containsPoint(Point p)
 	{
-		buffRoundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
-				menu.style.roundOff);
+		float ro = menu.style.getF("f.roundOff");
+		buffRoundRect.setRoundRect(x, y, width, height, ro,
+				ro);
 //		buffRoundRect.setRoundRect(x + nOffsetX, y + nOffsetY, nWidth, nHeight,
 //				menu.style.roundOff, menu.style.roundOff);
 		return buffRoundRect.contains(p);

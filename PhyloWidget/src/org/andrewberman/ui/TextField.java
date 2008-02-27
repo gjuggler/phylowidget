@@ -18,6 +18,7 @@
  */
 package org.andrewberman.ui;
 
+import java.awt.BasicStroke;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -28,8 +29,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.ui.ifaces.Malleable;
-import org.andrewberman.ui.ifaces.Positionable;
-import org.andrewberman.ui.menu.StyleSet;
+import org.andrewberman.ui.menu.MenuStyle;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -88,7 +88,7 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	PApplet canvas;
 	PGraphicsJava2D pg;
-	StyleSet style;
+	TextFieldStyle style;
 	PFont pFont;
 	Font font;
 	float fontSize;
@@ -128,10 +128,10 @@ public class TextField extends AbstractUIObject implements Malleable
 		Blinker.lazyLoad();
 
 		canvas = p;
-		style = StyleSet.defaultStyle();
-		fontSize = 12;
-		pFont = style.font;
-		font = pFont.font.deriveFont(fontSize);
+		style = new TextFieldStyle();
+		style.set("f.fontSize",12);
+		pFont = style.getFont("font");
+		font = pFont.font;
 		blinker = Blinker.instance;
 		clipRect = new Rectangle2D.Float(0, 0, 0, 0);
 		buffRect = new Rectangle2D.Float(0, 0, 0, 0);
@@ -179,8 +179,8 @@ public class TextField extends AbstractUIObject implements Malleable
 		/*
 		 * Size me up.
 		 */
-		ascent = UIUtils.getTextAscent(pg, style.font, fontSize, true);
-		descent = UIUtils.getTextDescent(pg, style.font, fontSize, true);
+		ascent = UIUtils.getTextAscent(pg, pFont, fontSize, true);
+		descent = UIUtils.getTextDescent(pg, pFont, fontSize, true);
 		float textHeight = ascent + descent;
 		pad = textHeight * TEXT_BORDER_MULT;
 		height = textHeight;
@@ -259,14 +259,17 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	protected void doTheDrawing()
 	{
+		Color bgFill = style.getC("c.backgroundFill");
+		Color stroke = style.getC("c.foreground");
+		
 		/*
 		 * Draw the padded outer region of the textarea.
 		 */
 		clipRect.setRect(x, y, width + 2 * pad, height + 2 * pad);
 		pg.g2.setPaint(Color.white);
 		pg.g2.fill(clipRect);
-		pg.g2.setPaint(style.strokeColor);
-		pg.g2.setStroke(style.stroke);
+		pg.g2.setPaint(stroke);
+		pg.g2.setStroke(new BasicStroke(style.getF("f.strokeWeight")));
 		pg.g2.draw(clipRect);
 		/*
 		 * Draw the actual text.
@@ -274,7 +277,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		clipRect.setRect(x + pad, y + pad, width, height);
 		pg.g2.setClip(clipRect);
 		pg.g2.setFont(pFont.font.deriveFont(fontSize));
-		pg.g2.setPaint(style.textColor);
+		pg.g2.setPaint(stroke);
 		synchronized (this)
 		{
 			pg.g2.drawString(text.substring(viewLo, viewHi), x + pad + offsetX,
@@ -290,10 +293,10 @@ public class TextField extends AbstractUIObject implements Malleable
 			float loX = getPosForIndex(lo);
 			float selWidth = getWidth(lo, hi);
 			clipRect.setRect(x + loX + pad, y + pad, selWidth, height);
-			pg.g2.setPaint(style.selectionColor);
+			pg.g2.setPaint(style.getC("c.highlight"));
 			pg.g2.fill(clipRect);
 			pg.g2.setClip(clipRect);
-			pg.g2.setPaint(style.textColor.inverse());
+			pg.g2.setPaint(stroke.inverse());
 			synchronized (this)
 			{
 				pg.g2.drawString(text.substring(lo, hi), x + pad + loX, y + pad
@@ -307,8 +310,8 @@ public class TextField extends AbstractUIObject implements Malleable
 				&& selHi - selLo == 0)
 		{
 			// System.out.println("Heyoo");
-			pg.g2.setStroke(style.stroke);
-			pg.g2.setPaint(Color.black);
+			pg.g2.setStroke(new BasicStroke(1));
+			pg.g2.setPaint(stroke);
 			int caretX = (int) (x + pad + getPosForIndex(caret));
 			if (caret == text.length() && caret != 0)
 				caretX--;
@@ -604,7 +607,7 @@ public class TextField extends AbstractUIObject implements Malleable
 			return;
 //		text.deleteCharAt(pos - 1);
 		deleteAt(pos-1);
-		moveCaretTo(pos);
+		moveCaretTo(pos-1);
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
@@ -668,6 +671,12 @@ public class TextField extends AbstractUIObject implements Malleable
 		insert(s, caret);
 	}
 
+	public void replaceText(String replacement)
+	{
+	selectAll();
+	insert(replacement, 0);
+	}
+	
 	public String getText(int lo,int hi)
 	{
 		return text.substring(lo, hi);
@@ -993,4 +1002,16 @@ public class TextField extends AbstractUIObject implements Malleable
 		return text;
 	}
 	
+	
+	class TextFieldStyle extends MenuStyle
+	{
+
+		public TextFieldStyle()
+		{
+			super();
+			set("c.highlight",new Color(40, 40, 255));
+			set("c.backgroundFill",new Color(255,255,255));
+		}
+		
+	}
 }

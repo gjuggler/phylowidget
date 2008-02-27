@@ -32,7 +32,6 @@ import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.ToolManager;
 
 import processing.core.PApplet;
-import processing.opengl.PGraphicsOpenGL;
 
 /**
  * The <code>EventManager</code> class, along with <code>FocusManager</code>,
@@ -90,11 +89,11 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		if (p.g.getClass().getName().equals(PApplet.OPENGL))
 		{
-			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
-			gl.canvas.addMouseListener(this);
-			gl.canvas.addMouseMotionListener(this);
-			gl.canvas.addKeyListener(this);
-			gl.canvas.addMouseWheelListener(this);
+//			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
+//			gl.canvas.addMouseListener(this);
+//			gl.canvas.addMouseMotionListener(this);
+//			gl.canvas.addKeyListener(this);
+//			gl.canvas.addMouseWheelListener(this);
 		} else
 		{
 			p.addMouseListener(this);
@@ -195,6 +194,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void keyEvent(KeyEvent e)
 	{
+		boolean modal = FocusManager.instance.isModal();
 		/*
 		 * We only send keyboard events to the focused object.
 		 */
@@ -203,7 +203,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		/*
 		 * If modal, return early.
 		 */
-		if (FocusManager.instance.isModal())
+		if (modal)
 			return;
 		/*
 		 * Then, if the focus isn't modal and the object wasn't consumed,

@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.ui;
 
@@ -27,9 +27,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import org.andrewberman.ui.menu.MenuItem;
+import org.andrewberman.unsorted.FieldSetter;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderOutput;
@@ -56,6 +59,7 @@ public class PhyloUI extends PhyloUISetup
 	public String foreground = "(0,0,0)";
 	public String background = "(255,255,255)";
 	public String tree = "Homo Sapiens";
+	public String search = "";
 
 	public float textRotation = 0;
 	// public float textSize = 1;
@@ -75,23 +79,12 @@ public class PhyloUI extends PhyloUISetup
 	@Override
 	public void setup()
 	{
-		/*
-		 * Load the preferences.
-		 * Note that preferences should be loaded from the following settings sources
-		 * with the specified priority order:
-		 * 5. hard-coded default (set below)
-		 * 4. Menu XML file (loaded in the above setup() method call)
-		 * 3. URL parsing (get / post variables) (done via PHP, put into applet tags)
-		 * 2. applet tag
-		 * 1. phylowidget.properties
-		 */
-
-		Field[] fArray = PhyloUI.class.getDeclaredFields();
-		List<Field> fields = Arrays.asList(fArray);
-
+		HashMap<String,String> map = new HashMap<String,String>();
+		
 		/*
 		 * PRIORITY 2: APPLET TAGS
 		 */
+		Field[] fields = this.getClass().getDeclaredFields();
 		try
 		{
 			for (Field f : fields)
@@ -99,12 +92,12 @@ public class PhyloUI extends PhyloUISetup
 				String param = p.getParameter(f.getName());
 				if (param != null)
 				{
-					setField(f, param);
+					map.put(f.getName(), param);
 				}
 			}
 		} catch (Exception e)
 		{
-			// e.printStackTrace();
+//			 e.printStackTrace();
 		}
 
 		/*
@@ -116,48 +109,32 @@ public class PhyloUI extends PhyloUISetup
 			props.load(p.openStream("phylowidget.properties"));
 		} catch (IOException e)
 		{
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
-		for (Field f : fields)
+		for (Object k : props.keySet())
 		{
-			if (props.containsKey(f.getName()))
-			{
-				setField(f, props.getProperty(f.getName()));
-			}
+			map.put((String)k, props.getProperty((String)k));
 		}
+		
+		FieldSetter.setFields(this, map);
+		
 		/*
 		 * Run the PhyloUISetup's setup() method. Note that this method
 		 * loads the menus and their associated default values.
 		 */
 		super.setup();
+		
 		/*
-		 * Initialize the tree.
+		 * Initialize the tree and search field.
 		 */
 		PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
 				tree));
+		
+		if (super.search != null)
+			super.search.tf.replaceText(PhyloWidget.ui.search);
 	}
 
-	private void setField(Field f, String param)
-	{
-		try
-		{
-			Class<?> c = f.getType();
-			if (c == String.class)
-				f.set(this, param);
-			else if (c == Boolean.TYPE)
-				f.setBoolean(this, Boolean.parseBoolean(param));
-			else if (c == Float.TYPE)
-				f.setFloat(this, Float.parseFloat(param));
-			else if (c == Integer.TYPE)
-				f.setInt(this, Integer.parseInt(param));
-			else if (c == Double.TYPE)
-				f.setDouble(this, Double.parseDouble(param));
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			return;
-		}
-	}
+	
 
 	public void nodeEditBranchLength()
 	{
@@ -281,7 +258,8 @@ public class PhyloUI extends PhyloUISetup
 
 	public void viewZoomToFull()
 	{
-		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
+		//		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
+		TreeManager.camera.fillScreen();
 	}
 
 	/*
@@ -418,15 +396,6 @@ public class PhyloUI extends PhyloUISetup
 	public void fileOutputPDF()
 	{
 		final TreeRenderer tr = PhyloWidget.trees.getRenderer();
-		setMessage("Outputting PDF...");
-		new Thread()
-		{
-			public void run()
-			{
-				RenderOutput.savePDF(p, getCurTree(), tr);
-				setMessage("");
-			}
-		}.start();
-
+		RenderOutput.savePDF(p, getCurTree(), tr);
 	}
 }

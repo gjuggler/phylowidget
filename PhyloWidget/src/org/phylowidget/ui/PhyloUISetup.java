@@ -59,8 +59,10 @@ public class PhyloUISetup
 	public NearestNodeFinder nearest;
 	public NodeTraverser traverser;
 	
-	PhyloTextField text;
-	PhyloContextMenu context;
+	public PhyloTextField text;
+	public PhyloContextMenu context;
+	public Toolbar toolbar;
+	public SearchBox search;
 	
 	NodeInfoUpdater nodeUpdater;
 	
@@ -87,6 +89,9 @@ public class PhyloUISetup
 		String menuFile = (String) "menus/"+PhyloWidget.ui.menuFile;
 		ArrayList menus = MenuIO.loadFromXML(p, menuFile, this);
 
+		/*
+		 * Some special handling of specific menus.
+		 */
 		for (int i = 0; i < menus.size(); i++)
 		{
 			Menu menu = (Menu) menus.get(i);
@@ -94,16 +99,27 @@ public class PhyloUISetup
 			{
 				context = (PhyloContextMenu) menu;
 			}
+			
+			if (menu.getClass() == Toolbar.class)
+			{
+				toolbar = (Toolbar) menu;
+			}
 			/*
 			 * Set a callback for the "use branch lengths" property.
 			 */
 			MenuItem item = menu.get("Use Branch Lengths");
 			if (item != null)
 			{
-				System.out.println("GOT IT");
 				CheckBox cb = (CheckBox) item;
 				cb.setAction(this,"layout");
 			}
+			
+			MenuItem s = menu.get("Search:");
+			if (s != null)
+			{
+				search = (SearchBox) s; 
+			}
+			
 		}
 	}
 	

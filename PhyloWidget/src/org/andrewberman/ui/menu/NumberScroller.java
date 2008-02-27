@@ -30,6 +30,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 
 public class NumberScroller extends MenuItem
 {
@@ -147,12 +148,15 @@ public class NumberScroller extends MenuItem
 			 */
 			menu.layout();
 		}
+		
+		float px = menu.style.getF("f.padX");
+		float py = menu.style.getF("f.padY");
 
-		float curX = x + menu.style.padX;
+		float curX = x + px;
 		MenuUtils.drawLeftText(this, getName() + ":", curX);
 		curX += tWidth;
 
-		curX = getX() + getWidth() - menu.style.padX - nWidth;
+		curX = getX() + getWidth() - px - nWidth;
 		MenuUtils.drawSingleGradientRect(this, curX, y, nWidth, height);
 		/*
 		 * update the "value" object using Reflection.
@@ -181,19 +185,25 @@ public class NumberScroller extends MenuItem
 	protected void calcPreferredSize()
 	{
 		super.calcPreferredSize();
+		
+		PFont font = menu.style.getFont("font");
+		float fs = menu.style.getF("f.fontSize");
+		float px = menu.style.getF("f.padX");
+		float py = menu.style.getF("f.padY");
+		
 		/*
 		 * For the height, let's use the height of some capital letters.
 		 */
-		float tHeight = UIUtils.getTextHeight(menu.buff, menu.style.font,
-				menu.style.fontSize, "XYZ", true);
+		float tHeight = UIUtils.getTextHeight(menu.buff, font,
+				fs, "XYZ", true);
 		/*
 		 * Calculate the text rectangle size.
 		 */
 		if (getName().length() > 0)
 		{
-			tWidth = UIUtils.getTextWidth(menu.buff, menu.style.font,
-					menu.style.fontSize, getName() + ":", true);
-			tWidth += menu.style.padX;
+			tWidth = UIUtils.getTextWidth(menu.buff, font,
+					fs, getName() + ":", true);
+			tWidth += px;
 		}
 
 		String s = stringValue;
@@ -202,14 +212,14 @@ public class NumberScroller extends MenuItem
 		 * Store the beginning point for the number area.
 		 */
 		nWidth = 0;
-		nWidth += UIUtils.getTextWidth(menu.buff, menu.style.font,
-				menu.style.fontSize * .75f, s, true);
-		nWidth += 2 * menu.style.padX;
+		nWidth += UIUtils.getTextWidth(menu.buff, font,
+				fs, s, true);
+		nWidth += 2 * px;
 
-		nOffset = getWidth() - menu.style.padX - nWidth;
+		nOffset = getWidth() - px - nWidth;
 
-		setWidth(menu.style.padX + tWidth + nWidth + menu.style.padX);
-		setHeight(tHeight + 2 * menu.style.padY);
+		setWidth(px + tWidth + nWidth + px);
+		setHeight(tHeight + 2 * py);
 	}
 
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
@@ -275,8 +285,9 @@ public class NumberScroller extends MenuItem
 	{
 		if (scrolling)
 			return true;
-		buffRoundRect.setRoundRect(x, y, width, height, menu.style.roundOff,
-				menu.style.roundOff);
+		float ro = menu.style.getF("f.roundOff");
+		buffRoundRect.setRoundRect(x, y, width, height, ro,
+				ro);
 		// buffRoundRect.setRoundRect(x + nOffset, y, nWidth, height,
 		// menu.style.roundOff, menu.style.roundOff);
 		return buffRoundRect.contains(p);

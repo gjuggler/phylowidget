@@ -29,7 +29,9 @@ import org.andrewberman.ui.FontLoader;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
+import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
@@ -55,10 +57,10 @@ public class PhyloWidget extends PApplet
 	public static boolean openGL;
 	public static boolean isOutputting;
 
-	private PWTreeUpdater treeUpdater;
-	private PWClipUpdater clipUpdater;
+	private static PWTreeUpdater treeUpdater;
+	private static PWClipUpdater clipUpdater;
 
-	private String messageString = new String();
+	private static String messageString = new String();
 
 	public PhyloWidget()
 	{
@@ -90,8 +92,8 @@ public class PhyloWidget extends PApplet
 		treeUpdater = new PWTreeUpdater();
 		clipUpdater = new PWClipUpdater();
 
-		ui.setup();
 		trees.setup();
+		ui.setup();
 
 		bgColor = Color.parseColor(PhyloWidget.ui.background).getRGB();
 	}
@@ -102,10 +104,15 @@ public class PhyloWidget extends PApplet
 	{
 		background(bgColor);
 		trees.update();
+		if (frameCount - messageFrame > (frameRateTarget*messageDecay))
+			messageString = "";
 		if (messageString.length() != 0)
 			drawMessage();
-		drawNumLeaves();
-		drawFrameRate();
+		
+//		ui.toolbar.style.set("f.fontSize", ui.minTextSize);
+//		ui.toolbar.layout();
+//		drawNumLeaves();
+//		drawFrameRate();
 	}
 
 	public void stop()
@@ -148,9 +155,12 @@ public class PhyloWidget extends PApplet
 		text(messageString, 5, height - 10);
 	}
 
-	public void setMessage(String s)
+	static int messageFrame;
+	static float messageDecay = 15;
+	public static void setMessage(String s)
 	{
 		messageString = s;
+		messageFrame = p.frameCount;
 	}
 
 	public void size(int w, int h)

@@ -1,25 +1,27 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -32,6 +34,7 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PGraphics;
 
 /**
@@ -99,7 +102,7 @@ public class Dock extends Menu
 	public Dock(PApplet app)
 	{
 		super(app);
-		inset = style.padX;
+		inset = style.getF("f.padX");
 
 		drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 		mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
@@ -108,7 +111,6 @@ public class Dock extends Menu
 		rotation.setRotation(BOTTOM);
 
 		setWidth(40);
-		layout();
 		open();
 	}
 
@@ -143,28 +145,21 @@ public class Dock extends Menu
 
 		float newOffset = 0;
 		float pos = origLow;
-		for (int i = 0; i < items.size(); i++)
+		for (MenuItem item : items)
 		{
 			float mid = pos + origWidth / 2;
 			float scale = bulge(mid - mousePos);
-			MenuItem item = (MenuItem) items.get(i);
+			item.setSize(origWidth * scale, origWidth * scale);
 			newOffset += item.getHeight();
-			if (isActivated)
-			{
-				item.setSize(origWidth * scale, origWidth * scale);
-			} else
-				item.setSize(origWidth, origWidth);
 			pos += origWidth;
 		}
 		curLow = origLow - (newOffset - origHeight)
 				* (mouseOffset / origHeight);
-
 		pos = curLow;
 		float maxWidth = 0;
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
-			// item.setPosition(inset, pos);
 			rotation.positionItem(item, pos);
 			pos += item.getHeight();
 			if (item.getWidth() > maxWidth)
@@ -174,11 +169,6 @@ public class Dock extends Menu
 		curWidth = maxWidth;
 	}
 
-	public void close()
-	{
-		// Do nothing.
-	}
-
 	float mousePos()
 	{
 		return rotation.getMousePos(mousePt);
@@ -186,8 +176,12 @@ public class Dock extends Menu
 
 	float bulge(float b)
 	{
-		return 1.0f + bulgeAmount
-				* PApplet.exp(-b * b / (bulgeWidth * bulgeWidth));
+		if (isActivated)
+		{
+			return 1.0f + bulgeAmount
+					* PApplet.exp(-b * b / (bulgeWidth * bulgeWidth));
+		} else
+			return 1.0f;
 	}
 
 	public void setOffsetFromCenter(float offset)
@@ -229,21 +223,39 @@ public class Dock extends Menu
 			return (DockItem) lastPressed;
 	}
 
+	void resetPosition()
+	{
+		for (MenuItem item : items)
+		{
+			DockItem d = (DockItem) item;
+			d.forceSize(origWidth, origWidth);
+		}
+		layout();
+	}
+
 	public void drawBefore()
 	{
 		layout();
 		rotation.setRect(drawRect, origWidth);
+		
+		Color strokeC = menu.style.getC("c.foreground");
+		float sw = menu.style.getF("f.strokeWeight");
+		Stroke stroke = new BasicStroke(sw);
+		float px = menu.style.getF("f.padX");
+		float py = menu.style.getF("f.padY");
+		PFont font = menu.style.getFont("font");
+		
 		/*
 		 * Draw a nice-looking background gradient.
 		 */
 		if (usesJava2D)
 		{
 			Graphics2D g2 = menu.buff.g2;
-			g2.setPaint(menu.style.getGradient(0, (float) drawRect.getMinY(),
+			g2.setPaint(menu.style.getGradient(MenuItem.UP, 0, (float) drawRect.getMinY(),
 					0, (float) drawRect.getMaxY()));
 			g2.fill(drawRect);
-			g2.setStroke(menu.style.stroke);
-			g2.setPaint(menu.style.strokeColor);
+			g2.setStroke(stroke);
+			g2.setPaint(strokeC);
 			RenderingHints rh = g2.getRenderingHints();
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
@@ -255,15 +267,15 @@ public class Dock extends Menu
 			int color;
 			Color c;
 			canvas.beginShape(PApplet.QUADS);
-			canvas.stroke(canvas.color(style.strokeColor.getRGB(), alpha));
-			c = style.menuGradLo;
+			canvas.stroke(canvas.color(strokeC.getRGB(), alpha));
+			c = style.getC("c.gradientLo");
 			color = canvas.color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 			canvas.fill(color);
 			canvas.vertex((float) drawRect.getMinX(), (float) drawRect
 					.getMinY());
 			canvas.vertex((float) drawRect.getMaxX(), (float) drawRect
 					.getMinY());
-			c = style.menuGradHi;
+			c = style.getC("c.gradientHi");
 			color = canvas.color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 			canvas.fill(color);
 			canvas.vertex((float) drawRect.getMaxX(), (float) drawRect
@@ -275,15 +287,15 @@ public class Dock extends Menu
 
 		if (hovered != null)
 		{
-			MenuItem i = hovered;
-			float fontSize = origWidth/2f;
+			DockItem i = (DockItem) hovered;
+			float fontSize = origWidth / 2f;
 			float ascent = UIUtils.getTextAscent(menu.canvas.g,
-					menu.style.font, fontSize, false);
+					font, fontSize, false);
 			float descent = UIUtils.getTextDescent(menu.canvas.g,
-					menu.style.font, fontSize, false);
+					font, fontSize, false);
 			float tHeight = (ascent + descent);
-			float tWidth = UIUtils.getTextWidth(menu.canvas.g, menu.style.font,
-					fontSize, i.getName(), false);
+			float tWidth = UIUtils.getTextWidth(menu.canvas.g, font,
+					fontSize, i.getLabel(), false);
 
 			float tX = 0;
 			float tY = 0;
@@ -291,44 +303,46 @@ public class Dock extends Menu
 			{
 				case (LEFT):
 					menu.canvas.textAlign(PApplet.LEFT);
-					tX = inset + maxPossibleWidth + menu.style.padX;
+					tX = inset + maxPossibleWidth + px;
 					tY = i.getY() + i.getHeight() / 2 + tHeight / 2 - descent
 							/ 2;
 					break;
 				case (RIGHT):
 					menu.canvas.textAlign(PApplet.LEFT);
 					tX = menu.canvas.width - inset - maxPossibleWidth
-							- menu.style.padX - tWidth;
+							- px - tWidth;
 					tY = i.getY() + i.getHeight() / 2 + tHeight / 2 - descent
 							/ 2;
 					break;
 				case (TOP):
 					menu.canvas.textAlign(PApplet.CENTER);
 					tX = i.getX() + i.getWidth() / 2;
-					tY = inset + maxPossibleWidth + menu.style.padX + tHeight
+					tY = inset + maxPossibleWidth + px + tHeight
 							- descent;
 					break;
 				case (BOTTOM):
 					menu.canvas.textAlign(PApplet.CENTER);
 					tX = i.getX() + i.getWidth() / 2;
 					tY = menu.canvas.width - inset - maxPossibleWidth
-							- menu.style.padX;
+							- px;
 					break;
 			}
 
 			if (usesJava2D)
 			{
-				MenuUtils.drawWhiteTextRect(this, tX-menu.style.padX, tY-ascent-menu.style.padX,tWidth+menu.style.padX*2,tHeight+menu.style.padX*2);
+				MenuUtils.drawWhiteTextRect(this, tX - px, tY
+						- ascent - px, tWidth + px
+						* 2, tHeight + px * 2);
 			}
-			
-			Color c = menu.style.textColor;
+
+			Color c = strokeC;
 			int alpha = (int) (menu.alpha * 255);
 			menu.canvas.fill(menu.canvas.color(c.getRed(), c.getGreen(), c
 					.getBlue(), alpha));
 			// menu.canvas.fill(0,alpha);
 			menu.canvas.textFont(FontLoader.instance.vera);
 			menu.canvas.textSize(fontSize);
-			menu.canvas.text(i.getName(), tX, tY);
+			menu.canvas.text(i.getLabel(), tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);
 		}
 
@@ -337,7 +351,7 @@ public class Dock extends Menu
 			MenuItem i = lastPressed;
 			PGraphics pg = canvas.g;
 			int alpha = (int) (menu.alpha * 255);
-			Color c = menu.style.strokeColor;
+			Color c = strokeC;
 			pg.fill(menu.canvas.color(c.getRed(), c.getGreen(), c.getBlue(),
 					alpha));
 
@@ -346,27 +360,27 @@ public class Dock extends Menu
 			{
 				case (LEFT):
 					float cy = i.getY() + i.getHeight() / 2;
-					float cx = inset + menu.style.padX;
+					float cx = inset + px;
 					pg.triangle(cx, cy + height, cx, cy - height, cx + height,
 							cy);
 					i.setPosition(i.getX() + height, i.getY());
 					break;
 				case (RIGHT):
 					cy = i.getY() + i.getHeight() / 2;
-					cx = canvas.width - inset - menu.style.padX;
+					cx = canvas.width - inset - px;
 					pg.triangle(cx, cy + height, cx, cy - height, cx - height,
 							cy);
 					i.setPosition(i.getX() - height, i.getY());
 					break;
 				case (TOP):
-					cy = inset + menu.style.padY;
+					cy = inset + py;
 					cx = i.getX() + i.getWidth() / 2;
 					pg.triangle(cx + height, cy, cx - height, cy, cx, cy
 							+ height);
 					i.setPosition(i.getX(), i.getY() + height);
 					break;
 				case (BOTTOM):
-					cy = canvas.width - inset - menu.style.padY;
+					cy = canvas.width - inset - py;
 					cx = i.getX() + i.getWidth() / 2;
 					pg.triangle(cx + height, cy, cx - height, cy, cx, cy
 							- height);
@@ -395,6 +409,15 @@ public class Dock extends Menu
 	public void setState(MenuItem i, int s)
 	{
 		super.setState(i, s);
+	}
+
+	public void setHidden(String s)
+	{
+		if (s.startsWith("t"))
+		{
+			close();
+		} else
+			open();
 	}
 	
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
@@ -462,6 +485,14 @@ public class Dock extends Menu
 		add(addMe);
 		return addMe;
 	}
+	
+	@Override
+	public MenuItem add(MenuItem item)
+	{
+		super.add(item);
+		resetPosition();
+		return item;
+	}
 
 	class DockRotationHandler
 	{
@@ -519,12 +550,8 @@ public class Dock extends Menu
 		void setRect(RoundRectangle2D.Float rect, float width)
 		{
 			float r = origWidth / 4;
-			rect.setRoundRect(inset, curLow, width, curHeight, r, r);
 			switch (rot)
 			{
-				case (LEFT):
-					rect.setRoundRect(inset, curLow, width, curHeight, r, r);
-					break;
 				case (RIGHT):
 					rect.setRoundRect(canvas.width - inset - width, curLow,
 							width, curHeight, r, r);
@@ -536,6 +563,9 @@ public class Dock extends Menu
 					rect.setRoundRect(curLow, canvas.height - inset - width,
 							curHeight, width, r, r);
 					break;
+				case (LEFT):
+				default:
+					rect.setRoundRect(inset, curLow, width, curHeight, r, r);
 			}
 		}
 

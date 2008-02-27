@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -96,14 +96,17 @@ public class Toolbar extends Menu
 		/*
 		 * Do some automatic positioning.
 		 */
+
+		float sw = style.getF("f.strokeWeight");
+
 		if (fullWidth)
 		{
-			x = style.strokeWidth;
-			y = style.strokeWidth;
+			x = sw;
+			y = sw;
 		} else if (!useCameraCoordinates)
 		{
-			x = style.strokeWidth;
-			y = style.strokeWidth;
+			x = sw;
+			y = sw;
 		}
 	}
 
@@ -166,15 +169,17 @@ public class Toolbar extends Menu
 
 	public void layout()
 	{
-		float xOffset = style.padX;
-		float yOffset = style.padY;
+		float px = style.getF("f.padX");
+		float py = style.getF("f.padY");
+		float xOffset = px;
+		float yOffset = py;
 
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
 			item.calcPreferredSize();
-			float itemWidth = item.width;
-			float itemHeight = item.height;
+			float itemWidth = item.getWidth();
+			float itemHeight = item.getHeight();
 			if (item instanceof Positionable)
 			{
 				Positionable pos = (Positionable) item;
@@ -185,45 +190,39 @@ public class Toolbar extends Menu
 				xOffset += itemWidth;
 			else
 				yOffset += itemHeight;
-			/*
-			 * I had been using the following line for adding padding between
-			 * toolbar items, but it looks better without any space, so I got rid of it.
-			 */
-			// if (i < items.size() - 1)
-			// xOffset += 0;
 		}
+		
 		/*
 		 * Set this Toolbar's width and height.
 		 */
-		if (fullWidth)
-			setFullWidth();
-		else
-		{
-			if (orientation == HORIZONTAL)
-			{
-				width = xOffset + style.padX;
-				float maxHeight = getMaxHeight();
-				height = maxHeight + style.padY * 2;
-			} else
-			{
-				height = yOffset + style.padY;
-				float maxWidth = getMaxWidth();
-				width = maxWidth + style.padX * 2;
-			}
-		}
+		float maxHeight = getMaxHeight();
+		float maxWidth = getMaxWidth();
 
+		if (orientation == HORIZONTAL)
+		{
+			if (!fullWidth)
+				setWidth(xOffset + px);
+			else
+				setFullWidth();
+			setHeight(maxHeight + py * 2);
+		} else
+		{
+			setHeight(yOffset + py);
+			setWidth(maxWidth + px * 2);
+		}
+		
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = items.get(i);
 			if (orientation == HORIZONTAL)
 			{
-				item.setHeight(getMaxHeight());
+				item.setHeight(maxHeight);
 			} else
 			{
-				item.setWidth(getMaxWidth());
+				item.setWidth(maxWidth);
 			}
 		}
-
+		
 		/*
 		 * Trigger the recursive layout.
 		 */
@@ -232,12 +231,14 @@ public class Toolbar extends Menu
 
 	void setFullWidth()
 	{
+		float sw = style.getF("f.strokeWeight");
+
 		if (orientation == HORIZONTAL)
 		{
-			width = canvas.width - style.strokeWidth * 2;
+			width = canvas.width - sw * 2;
 		} else
 		{
-			height = canvas.height - style.strokeWidth * 2;
+			height = canvas.height - sw * 2;
 		}
 	}
 
@@ -360,7 +361,7 @@ public class Toolbar extends Menu
 							if (m.isAncestorOf(kbFocus))
 							{
 								focusWrap(m, 1);
-								System.out.println(kbFocus);
+//								System.out.println(kbFocus);
 								focusToItem(kbFocus.items.get(0));
 								break;
 							}

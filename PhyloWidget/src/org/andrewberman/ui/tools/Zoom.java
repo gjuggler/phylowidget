@@ -72,7 +72,7 @@ public class Zoom extends Tool
 				p.stroke(255,0,0,150);
 				p.strokeWeight(1.0f*ratio);
 				p.noFill();
-				p.ellipse((float)downPoint.x, (float)downPoint.y, ratio*5,ratio*5);
+				p.ellipse((float)downPoint.x, (float)downPoint.y, ratio*20,ratio*20);
 			}
 			zoomTween.continueTo((float) zoomFactor);
 		}

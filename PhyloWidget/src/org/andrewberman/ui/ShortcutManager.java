@@ -23,10 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import org.phylowidget.PhyloWidget;
-
 import processing.core.PApplet;
-import processing.opengl.PGraphicsOpenGL;
 
 /**
  * The <code>ShortcutManager</code> class is used to detect keyboard shortcut
@@ -66,8 +63,8 @@ public class ShortcutManager implements KeyListener
 	{
 		if (p.g.getClass().getName().equals(PApplet.OPENGL))
 		{
-			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
-			gl.canvas.addKeyListener(this);
+//			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
+//			gl.canvas.addKeyListener(this);
 		} else
 		{
 			p.addKeyListener(this);

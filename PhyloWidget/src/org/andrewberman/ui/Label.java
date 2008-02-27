@@ -18,17 +18,9 @@
  */
 package org.andrewberman.ui;
 
-import java.awt.BasicStroke;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-
 import org.andrewberman.ui.ifaces.Malleable;
-import org.andrewberman.ui.ifaces.Positionable;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 
 public class Label extends AbstractUIObject implements Malleable
 {

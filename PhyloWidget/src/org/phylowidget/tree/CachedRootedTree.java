@@ -148,7 +148,7 @@ public class CachedRootedTree extends RootedTree
 			if (super.isLeaf(cv))
 			{
 				// If this vertex is a leaf, set the base cached values.
-				cv.setNumEnclosed(1);
+				cv.setNumEnclosed(0);
 				cv.setNumLeaves(1);
 				cv.setMaxDepthToLeaf(0);
 				cv.setMaxHeightToLeaf(0);
@@ -292,7 +292,7 @@ public class CachedRootedTree extends RootedTree
 		if (inSync())
 		{
 			CachedVertex cv = (CachedVertex) vertex;
-			return cv.getNumLeaves() <= 1;
+			return cv.getNumEnclosed() == 0;
 		} else
 			return super.isLeaf(vertex);
 	}

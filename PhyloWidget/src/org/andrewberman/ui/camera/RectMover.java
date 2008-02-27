@@ -18,6 +18,10 @@
  */
 package org.andrewberman.ui.camera;
 
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenQuad;
 
@@ -29,7 +33,7 @@ import processing.core.PApplet;
  */
 public class RectMover extends MovableCamera
 {
-	protected SettableRect r;
+	protected Rectangle2D.Float r = new Rectangle2D.Float();
 
 	protected Tween wTween;
 	protected Tween hTween;
@@ -38,15 +42,12 @@ public class RectMover extends MovableCamera
 	 * Convenience variables, storing the current position of each of the tweens.
 	 */
 	float cx, cy, w, h = 0;
-
-	protected boolean constrainToScreen = true;
 	
 	float border = 100;
 	
-	public RectMover(PApplet app, SettableRect r)
+	public RectMover(PApplet app)
 	{
 		super(app);
-		this.r = r;
 		
 		wTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
 		hTween = new Tween(null, TweenQuad.tween, Tween.OUT, 1f, 1f, FRAMES);
@@ -72,7 +73,7 @@ public class RectMover extends MovableCamera
 	}
 	
 	/**
-	 * cx and cy are the CENTER coordinates of this TreeMover, in order to make
+	 * cx and cy are the CENTER coordinates of this RectMover, in order to make
 	 * it more closely resemble a camera.
 	 */
 	public void zoomCenterTo(float cx, float cy, float w, float h)
@@ -92,7 +93,7 @@ public class RectMover extends MovableCamera
 	
 	public void fillScreen()
 	{
-		zoomCenterTo(0, 0, p.width, p.height);
+		zoomCenterTo(0, 0, p.getWidth(), p.getHeight());
 	}
 	
 	public float getZ()
@@ -115,10 +116,14 @@ public class RectMover extends MovableCamera
 		updateConvenienceVariables();
 		constrainToScreen();
 		// Set our associated object's rectangle.
-		if (r != null)
-			r.setRect(-cx * getZ() - w/2.0f, -cy * getZ() - h/2.0f, w, h);
+		r.setRect(-cx * getZ() - w/2.0f, -cy * getZ() - h/2.0f, w, h);
 	}
 
+	public Rectangle2D.Float getRect()
+	{
+		return r;
+	}
+	
 	private void updateConvenienceVariables()
 	{	
 		/*
@@ -132,62 +137,17 @@ public class RectMover extends MovableCamera
 	
 	private void constrainToScreen()
 	{
-		if (!this.constrainToScreen) return;
-		
-		border = Math.min(p.width*.9f,p.height*.9f);
-		
-		float effectiveWidth = Math.max(10,p.width - border);
-		float effectiveHeight = Math.max(10,p.height - border);
-		
-		float oX = (w - effectiveWidth)/2 - cx*getZ();
-		if (oX < 0)
-		{
-			xTween.continueTo((w - effectiveWidth)/2 / getZ());
-			xTween.fforward();
-		} else if (oX > (w - effectiveWidth))
-		{
-			xTween.continueTo(-(w - effectiveWidth)/2 / getZ());
-			xTween.fforward();
-		}
-		
-		float oY = (h - effectiveHeight)/2 - cy*getZ();
-		if (oY < 0)
-		{
-			yTween.continueTo((h - effectiveHeight)/2 / getZ());
-			yTween.fforward();
-		} else if (oY > (h - effectiveHeight))
-		{
-			yTween.continueTo(-(h - effectiveHeight)/2 / getZ());
-			yTween.fforward();
-		}
-		
-		
-		/**
-		 * Make the rectangle never shrink below the stage size.
-		 */
-		if (w < effectiveWidth || h < effectiveHeight)
-		{
-			xTween.continueTo(0);
-			yTween.continueTo(0);
-			wTween.continueTo(effectiveWidth);
-			hTween.continueTo(effectiveHeight);
-			xTween.fforward();
-			yTween.fforward();
-			wTween.fforward();
-			hTween.fforward();
-		}
-		
 		float minZoom = 0.2f;
 		if (getZ() < minZoom)
 		{
-//			fillScreen();
+			nudgeTo(xTween.getBegin(),yTween.getBegin());
 			zoomTo(minZoom);
+			
 			xTween.fforward();
 			yTween.fforward();
 			wTween.fforward();
 			hTween.fforward();
 		}
-//		System.out.println(getZ());
 		
 		updateConvenienceVariables();
 	}

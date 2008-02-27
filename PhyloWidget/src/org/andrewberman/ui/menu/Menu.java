@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.Style;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Positionable;
@@ -41,6 +42,7 @@ import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
@@ -103,8 +105,9 @@ public abstract class Menu extends MenuItem implements UIObject
 	private int offsetX = 0;
 	private int offsetY = 0;
 
-	public StyleSet style;
+	public MenuStyle style;
 
+	
 	/**
 	 * Our UIListeners.
 	 */
@@ -248,8 +251,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		EventManager.instance.add(this); // Add ourselves to EventManager.
 		canvas = app;
 		setMenu(this);
-		style = new StyleSet();
-		style.loadDefaults();
+		style = new MenuStyle();
 		/*
 		 * Give our subclasses a chance to set their options before we start
 		 * initing stuff.
@@ -270,6 +272,13 @@ public abstract class Menu extends MenuItem implements UIObject
 					15);
 	}
 
+	@Override
+	protected void setParent(MenuItem item)
+	{
+		super.setParent(item);
+		
+	}
+	
 	public void setOptions()
 	{
 		useCameraCoordinates = true;
@@ -290,8 +299,9 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	public void setFontSize(float newSize)
 	{
-		style.fontSize = newSize;
-		style.font.font = style.font.font.deriveFont(newSize);
+		style.set("f.fontSize", newSize);
+//		PFont curFont = (PFont) style.get("font");
+//		curFont.font = curFont.font.deriveFont(newSize);
 		layout();
 	}
 

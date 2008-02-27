@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.render;
 
@@ -35,6 +35,7 @@ import org.andrewberman.ui.Color;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.menu.MenuUtils;
 import org.andrewberman.unsorted.BulgeUtil;
@@ -245,12 +246,17 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	int colorForNode(PhyloNode n)
 	{
+		if (n.found)
+		{
+			return style.foundColor.getRGB();
+		}
 		switch (n.getState())
 		{
 			case (PhyloNode.CUT):
 				return style.dimColor.getRGB();
 			case (PhyloNode.COPY):
 				return style.copyColor.getRGB();
+				
 			case (PhyloNode.NONE):
 			default:
 				return style.foregroundColor.getRGB();
@@ -261,6 +267,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	{
 
 	}
+
+	ArrayList<PhyloNode> foundItems = new ArrayList<PhyloNode>();
 
 	protected void draw()
 	{
@@ -280,6 +288,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * "threshold" status.
 		 * Also set each node's drawMe flag to FALSE.
 		 */
+		foundItems.clear();
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			PhyloNode n = nodes.get(i);
@@ -289,8 +298,10 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			n.drawMe = false;
 			n.labelWasDrawn = false;
 			n.isWithinScreen = isNodeWithinScreen(n);
-//			n.isWithinScreen = true;
+			//			n.isWithinScreen = true;
 			n.zoomTextSize = 1;
+			if (n.found && n.isWithinScreen)
+				foundItems.add(n);
 		}
 		fforwardMe = false;
 		list.sortFull();
@@ -303,7 +314,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * threshold number of nodes has been drawn.
 		 */
 		int nodesDrawn = 0;
-		ArrayList<PhyloNode> nodesToDraw = new ArrayList<PhyloNode>(nodes.size());
+		ArrayList<PhyloNode> nodesToDraw = new ArrayList<PhyloNode>(nodes
+				.size());
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			PhyloNode n = nodes.get(i);
@@ -348,7 +360,6 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * 
 		 * 
 		 */
-		// System.out.println("Nodes:");
 		overlap.clear();
 
 		/*
@@ -368,12 +379,29 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				else
 					h.zoomTextSize = 1f;
 				updateNode(h);
-				
+
 				drawLabel(h);
 				h.labelWasDrawn = true;
 				NodeRange r = nodesToRanges.get(h);
-				if (r != null)
+				if (r != null && r.node.getLabel().length() > 0)
 					overlap.insert(r.loY, r.hiY);
+			}
+		}
+
+		/*
+		 * Also always try to draw nodes that are "found".
+		 */
+		for (PhyloNode n : foundItems)
+		{
+			NodeRange r = nodesToRanges.get(n);
+			if (!overlap.overlaps(r.loY, r.hiY) || !useOverlapDetector())
+			{
+				if (n.getLabel().length() > 0)
+				{
+					overlap.insert(r.loY, r.hiY);
+					drawLabel(n);
+					n.labelWasDrawn = true;
+				}
 			}
 		}
 
@@ -381,10 +409,10 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		for (int i = 0; i < sigLeaves.size(); i++)
 		{
 			PhyloNode n = sigLeaves.get(i);
-			if (!n.isWithinScreen)
+			if (!n.isWithinScreen || n.labelWasDrawn)
 				continue;
 			NodeRange r = nodesToRanges.get(n);
-			if (!overlap.overlaps(r.loY, r.hiY))
+			if (!overlap.overlaps(r.loY, r.hiY) || !useOverlapDetector())
 			{
 				overlap.insert(r.loY, r.hiY);
 				drawLabel(n);
@@ -401,10 +429,16 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		unhint();
 	}
 
+	protected boolean useOverlapDetector()
+	{
+		return true;
+	}
+
 	protected void drawLabel(PhyloNode n)
 	{
 		n.labelWasDrawn = true;
 
+		canvas.strokeWeight(strokeForNode(n));
 		drawLabelImpl(n);
 	}
 
@@ -413,51 +447,51 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		canvas.pushMatrix();
 		canvas.translate(getX(n) + dotWidth / 2 + textSize / 3, getY(n));
 		canvas.rotate(PApplet.radians(PhyloWidget.ui.textRotation));
-		if (RenderOutput.isOutputting)
+		//		if (RenderOutput.isOutputting)
+		//		{
+
+		//			canvas.textFont(FontLoader.instance.vera);
+		//			canvas.textSize(textSize*n.zoomTextSize);
+		//			canvas.textAlign(PConstants.LEFT, PConstants.BASELINE);
+		//			canvas.textSize(textSize);
+		//			canvas.text(n.getLabel(), 0, 0 + dFont);
+		//		} else
+		//		{
+
+		float curTextSize = textSize * n.zoomTextSize;
+
+		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
+		Graphics2D g2 = pgj.g2;
+		if (n.found)
 		{
-			canvas.textFont(FontLoader.instance.veraNonNative);
-			canvas.textAlign(PConstants.LEFT, PConstants.BOTTOM);
-			canvas.textSize(textSize);
-			canvas.text(n.getLabel(), 0, 0 + dFont);
+			/*
+			 * Draw a background rect.
+			 */
+			//			canvas.stroke(0);
+			//			canvas.strokeWeight(textSize / 10);
+			canvas.noStroke();
+			canvas.fill(style.foundBackground.getRGB());
+			canvas.rect(0, -curTextSize / 2,
+					(float) (n.unitTextWidth * curTextSize), curTextSize);
+			//			g2.setPaint(style.foundBackground);
+			//			g2.setStroke(style.stroke(.5f));
+			//			g2.fillRect((int) - 1, (int) (-curTextSize / 2 - 1),
+			//					(int) (n.unitTextWidth * curTextSize) + 1, (int) curTextSize + 1);
+			//			g2.setPaint(Color.BLACK);
+			//			g2.drawRect((int) - 1, (int) (-curTextSize / 2 - 1),
+			//					(int) (n.unitTextWidth * curTextSize) + 1, (int) curTextSize + 1);
+			g2.setPaint(style.foundForeground);
 		} else
 		{
-			PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
-			Graphics2D g2 = pgj.g2;
-			/*
-			 * If it's not a leaf, then draw the white background.
-			 */
-//			if (!tree.isLeaf(n))
-//			{
-//				/*
-//				 * This is simply for drawing non-leaf nodes.
-//				 */
-//				float ratio = (float) tree.getNumEnclosedLeaves(n)
-//						/ (float) tree.getNumEnclosedLeaves(tree.getRoot());
-//				ratio = (float) Math.sqrt(ratio);
-//				ratio = 1;
-//				g2.setFont(font.font.deriveFont(textSize * ratio));
-//				// float tw = UIUtils.getTextWidth(canvas, font, textSize *
-//				// ratio,
-//				// n.getLabel(), true);
-//				g2.setPaint(Color.black);
-//				float ascent = UIUtils.getTextAscent(canvas, font, textSize
-//						* ratio, true);
-//				float descent = UIUtils.getTextDescent(canvas, font, textSize
-//						* ratio, true);
-//				float df = (ascent - descent) / 2f;
-//				g2.drawString(n.getLabel(), 0, 0 + df);
-//			} else
-//			{
-				/*
-				 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
-				 */
-				float newTextSize = textSize * n.zoomTextSize;
-				g2.setFont(font.font.deriveFont(newTextSize));
-				g2.setPaint(style.foregroundColor);
-				g2.drawString(n.getLabel(), 0, 0 + dFont * newTextSize
-						/ textSize);
-//			}
+			g2.setPaint(style.foregroundColor);
 		}
+
+		//			/*
+		//			 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
+		//			 */
+		g2.setFont(font.font.deriveFont(curTextSize));
+		g2.drawString(n.getLabel(), 0, 0 + dFont * curTextSize / textSize);
+		//		}
 		canvas.popMatrix();
 	}
 
@@ -657,7 +691,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
-		canvas.noSmooth();
+//		canvas.noSmooth();
 	}
 
 	boolean isAnyParentDrawn(PhyloNode n)
@@ -723,7 +757,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 */
 		Collections.sort(nodes, tree.sorter);
 		/*
-		 * Sort the leaves by "leaf" significance (i.e. least dist to root)
+		 * Sort the leaves by "leaf" significance (first leaf = least depth to root)
 		 */
 		sigLeaves.addAll(leaves);
 		Collections.sort(sigLeaves, tree.leafSorter);
@@ -878,16 +912,12 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void recalc()
 	{
-		tsf = Math.max(1, PhyloWidget.ui.minTextSize * numRows / rect.height);
-		/*
-		 * Figure out the ideal row size.
-		 */
-		float overhang = biggestStringWidth
-				* (float) Math
-						.sin(PApplet.radians(PhyloWidget.ui.textRotation));
+		overhang = biggestStringWidth
+				* PApplet.sin(PApplet.radians(PhyloWidget.ui.textRotation));
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
 		textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
+		tsf = Math.max(1, PhyloWidget.ui.minTextSize / textSize);
 		colSize = rect.width / (numCols + 1 + biggestStringWidth);
 		// System.out.println("height:"+rect.width);
 		if (!PhyloWidget.ui.fitTreeToWindow)
@@ -935,7 +965,18 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		}
 	}
 
+	public UIRectangle getVisibleRect()
+	{
+		float rx = (float) dx;
+		float ry = (float) (dy + (overhang < 0 ? overhang * textSize : 0));
+		float sx = (float) (scaleX + biggestStringWidth * textSize + dotWidth * 2);
+		float sy = (float) (scaleY + Math.abs(overhang * textSize));
+		return new UIRectangle(rx, ry, sx, sy);
+	}
+
 	Point mousePt = new Point();
+
+	private float overhang;
 
 	public void setMouseLocation(Point pt)
 	{
@@ -961,6 +1002,11 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	float strokeForNode(PhyloNode n)
 	{
 		float stroke = baseStroke;
+		if (n.found)
+		{
+			stroke *= style.foundStroke;
+			return stroke;
+		}
 		switch (n.getState())
 		{
 			case (PhyloNode.CUT):
@@ -1005,7 +1051,6 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * If this is the hovered node, think about doing a little bulging.
 		 */
-
 
 		/*
 		 * Update the nodeRange.

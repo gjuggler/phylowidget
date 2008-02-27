@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.render;
 
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.andrewberman.ui.Color;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 
@@ -39,6 +40,12 @@ public class Circlegram extends BasicTreeRenderer
 	protected void setOptions()
 	{
 		super.setOptions();
+	}
+
+	@Override
+	protected boolean useOverlapDetector()
+	{
+		return false;
 	}
 
 	@Override
@@ -109,7 +116,7 @@ public class Circlegram extends BasicTreeRenderer
 		// super.drawRecalc();
 		float circum = PApplet.PI;
 		rowSize = rect.height / (circum * numRows);
-//		rowSize = Math.min(5, rowSize);
+		//		rowSize = Math.min(5, rowSize);
 		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
 		textSize = rowSize * circum;
 		dotWidth = textSize * PhyloWidget.ui.nodeSize;
@@ -125,7 +132,7 @@ public class Circlegram extends BasicTreeRenderer
 		// dy = 0;
 		dx += rect.getX();
 		dy += rect.getY();
-//		textSize *= PhyloWidget.ui.textSize;
+		//		textSize *= PhyloWidget.ui.textSize;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 	}
 
@@ -143,8 +150,8 @@ public class Circlegram extends BasicTreeRenderer
 		{
 			synchronized (list)
 			{
-//				list.clear();
-//				nodesToRanges.clear();
+				//				list.clear();
+				//				nodesToRanges.clear();
 				for (int i = 0; i < nodes.size(); i++)
 				{
 					PhyloNode n = (PhyloNode) nodes.get(i);
@@ -152,15 +159,16 @@ public class Circlegram extends BasicTreeRenderer
 					r.node = n;
 					r.render = this;
 					float oldTheta = getTheta(n);
-					setTheta(n,1);
+					setTheta(n, 1);
 					updateNode(n);
 					r.loX = getX(n) - dotWidth / 2;
-					float textHeight = (font.ascent() + font.descent()) * textSize;
+					float textHeight = (font.ascent() + font.descent())
+							* textSize;
 					r.loY = getY(n) - textHeight / 2;
 					r.hiY = getY(n) + textHeight / 2;
 					float textWidth = (float) n.unitTextWidth * textSize;
 					r.hiX = getX(n) + dotWidth / 2 + textWidth;
-					setTheta(n,oldTheta);
+					setTheta(n, oldTheta);
 					updateNode(n);
 					list.insert(r, false);
 				}
@@ -183,12 +191,12 @@ public class Circlegram extends BasicTreeRenderer
 		/*
 		 * Update the nodeRange.
 		 */
-		setRange(n,nodesToRanges.get(n));
+		setRange(n, nodesToRanges.get(n));
 	}
-	
+
 	void setRange(PhyloNode n, NodeRange r)
 	{
-//		NodeRange r = nodesToRanges.get(n);
+		//		NodeRange r = nodesToRanges.get(n);
 		r.loX = getX(n) - dotWidth / 2;
 		float textHeight = (font.ascent() + font.descent()) * textSize;
 		r.loY = getY(n) - textHeight / 2;
@@ -235,7 +243,7 @@ public class Circlegram extends BasicTreeRenderer
 		{
 			double x2 = dx + scaleX * cosines.get(n);
 			double y2 = dy + scaleY * sines.get(n);
-			canvas.stroke(230);
+			canvas.stroke(180);
 			canvas.line(getX(n), getY(n), (float) x2, (float) y2);
 		}
 	}
@@ -283,21 +291,48 @@ public class Circlegram extends BasicTreeRenderer
 		n.setRealX(calcRealX(n));
 		n.setRealY(calcRealY(n));
 
+		float gapOffset = dotWidth / 2 + textSize / 3;
+
 		canvas.pushMatrix();
-		canvas.translate(getX(n) + dotWidth / 2 + textSize / 3, getY(n));
+		canvas.translate(getX(n), getY(n));
 		canvas.rotate(PApplet.radians(textRotation));
 
 		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 		Graphics2D g2 = pgj.g2;
 		g2.setFont(font.font.deriveFont(textSize));
 		g2.setPaint(style.foregroundColor);
+		float drawX = 0;
+		float drawY = 0;
 		if (!alignRight)
-			g2.drawString(n.getLabel(), 0, 0 + dFont);
-		else
+		{
+			drawX = gapOffset;
+			drawY = 0;
+		} else
 		{
 			float width = (float) (n.unitTextWidth * textSize);
-			g2.drawString(n.getLabel(), -width, 0 + dFont);
+			drawX = -width - gapOffset;
+			drawY = 0;
 		}
+
+		if (n.found)
+		{
+			canvas.stroke(0);
+			canvas.strokeWeight(textSize/10);
+			canvas.fill(style.foundBackground.getRGB());
+			canvas.rect(drawX, drawY-textSize/2, (float) (n.unitTextWidth*textSize), textSize);
+//			g2.setPaint(style.foundBackground);
+//			g2.setStroke(style.stroke(.5f));
+//			g2.fillRect((int) drawX - 1, (int) (drawY -textSize / 2 - 1),
+//					(int) (n.unitTextWidth * textSize) + 1, (int) textSize + 1);
+//			g2.setPaint(Color.BLACK);
+//			g2.drawRect((int) drawX - 1, (int) (drawY -textSize / 2 - 1),
+//					(int) (n.unitTextWidth * textSize) + 1, (int) textSize + 1);
+			g2.setPaint(style.foundForeground);
+		} else
+		{
+			g2.setPaint(style.foregroundColor);
+		}
+		g2.drawString(n.getLabel(), drawX, drawY + dFont);
 
 		canvas.popMatrix();
 

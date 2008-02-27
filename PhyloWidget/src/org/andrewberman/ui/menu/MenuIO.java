@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Stack;
 
+import org.andrewberman.ui.tools.Tool;
 import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
@@ -65,7 +66,7 @@ public class MenuIO
 				if (curEl.getName().equalsIgnoreCase("menu"))
 				{
 					// If curEl is a menu, parse it and add it to the ArrayList.
-					menus.add(menuElement(null, curEl));
+					menus.add(processElement(null, curEl));
 				} else
 				{
 					// If not, keep going through the XML tree and search for
@@ -84,11 +85,12 @@ public class MenuIO
 		return menus;
 	}
 
-	public static MenuItem menuElement(MenuItem parent, XMLElement el)
+	public static MenuItem processElement(MenuItem parent, XMLElement el)
 	{
 		MenuItem newItem = null;
 		String elName = el.getName();
 		String itemName = el.getStringAttribute("name");
+		el.removeAttribute("name");
 		if (el.hasAttribute("type"))
 		{
 			/*
@@ -96,6 +98,7 @@ public class MenuIO
 			 * create a new Menu or MenuItem from scratch.
 			 */
 			String type = el.getStringAttribute("type");
+			el.removeAttribute("type");
 			newItem = createMenu(type);
 			// Set this Menu's name.
 			if (itemName != null)
@@ -103,30 +106,43 @@ public class MenuIO
 			else
 				newItem.setName("");
 		}
+
+		/*
+		 * If this is any other element (I expect it to be <item>), then
+		 * let's make sure it has a parent Menu or MenuItem:
+		 */
+		if (parent == null && !elName.equalsIgnoreCase("menu"))
+			throw new RuntimeException("[MenuIO] XML menu parsing error on "
+					+ elName
+					+ " element: <item> requires a parent <menu> or <item>!");
+
 		if (elName.equalsIgnoreCase("item"))
 		{
 			/*
-			 * If this is any other element (I expect it to be <item>), then
-			 * let's make sure it has a parent Menu or MenuItem:
+			 * If all is well, then we use the parent item's add() method to
+			 * create this new Item element.
 			 */
-			if (parent != null)
+			if (newItem != null)
+				newItem = parent.add(newItem);
+			else
+				newItem = parent.add(itemName);
+		} else if (elName.equalsIgnoreCase("methodcall"))
+		{
+			String mName = el.getStringAttribute("method");
+			String p = el.getStringAttribute("param");
+			el.removeAttribute("method");
+			el.removeAttribute("param");
+			try
 			{
-				/*
-				 * If all is well, then we use the parent item's add() method to
-				 * create this new Item element.
-				 */
-				if (newItem != null)
-					newItem = parent.add(newItem);
-				else
-					newItem = parent.add(itemName);
-			} else
+				Method m = parent.getClass().getMethod(mName,
+						new Class[] { String.class });
+				m.invoke(parent, new Object[] { p });
+			} catch (Exception e)
 			{
-				throw new RuntimeException(
-						"[MenuIO] XML menu parsing error on "
-								+ elName
-								+ " element: <item> requires a parent <menu> or <item>!");
+				e.printStackTrace();
 			}
 		}
+
 		/*
 		 * At this point, we have a good "newItem" MenuItem. Now we need to
 		 * populate its attributes using a bean-like Reflection scheme. Every
@@ -136,19 +152,20 @@ public class MenuIO
 		{
 			String attr = (String) attrs.nextElement();
 			/*
-			 * Skip the "name" and "type" attributes -- we already used them to
-			 * create this menuitem.
+			 * Skip the attributes that we already used to do something with.
 			 */
-			if (attr.equalsIgnoreCase("name"))
-				continue;
-			if (attr.equalsIgnoreCase("type"))
-				continue;
+			//			if (attr.equalsIgnoreCase("name") || 
+			//					attr.equalsIgnoreCase("type") ||
+			//					attr.equalsIgnoreCase("method") ||
+			//					attr.equalsIgnoreCase("param"))
+			//				continue;
 			/*
 			 * For all other attributes, call the set[Attribute] method of the
 			 * MenuItem.
 			 */
 			setAttribute(newItem, attr, el.getStringAttribute(attr));
 		}
+
 		/*
 		 * Now, keep the recursion going: go through the current XMLElement's
 		 * children and call menuElement() on each one.
@@ -157,12 +174,13 @@ public class MenuIO
 		for (int i = 0; i < els.length; i++)
 		{
 			XMLElement child = els[i];
-			menuElement(newItem, child);
+			processElement(newItem, child);
 		}
 		return newItem;
 	}
 
 	static final String menuPackage = Menu.class.getPackage().getName();
+	static final String toolPackage = Tool.class.getPackage().getName();
 
 	/**
 	 * Uses Reflection to create a Menu of the given class type.
@@ -186,18 +204,15 @@ public class MenuIO
 		try
 		{
 			c = Class.forName(fullClass);
-		} catch (ClassNotFoundException e)
+		} catch (java.lang.ClassNotFoundException e1)
 		{
-			/*
-			 * If we couldn't find a class for this name, see if we don't have a
-			 * fully-qualified class name already.
-			 */
+
 			try
 			{
 				c = Class.forName(classType);
-			} catch (ClassNotFoundException e1)
+			} catch (java.lang.ClassNotFoundException e2)
 			{
-				e1.printStackTrace();
+				e2.printStackTrace();
 			}
 		}
 
@@ -209,7 +224,7 @@ public class MenuIO
 			return (Menu) newMenu;
 		} catch (Exception e)
 		{
-//			 e.printStackTrace();
+			//			 e.printStackTrace();
 			try
 			{
 				construct = c.getConstructor(new Class[] {});

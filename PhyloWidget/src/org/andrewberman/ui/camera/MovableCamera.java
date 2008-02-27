@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.camera;
 
@@ -79,8 +79,6 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		applyTransformations();
 	}
 
-
-
 	public void scroll()
 	{
 		/*
@@ -127,23 +125,25 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 	{
 		this.zTween.stop();
 
-		float rotVal = (float) Math.abs(e.getWheelRotation());
-		rotVal = Math.min(rotVal, 1);
+		//		float rotVal = (float) Math.abs(e.getWheelRotation());
+		//		rotVal = Math.min(rotVal, 1);
+		float rotVal = 1.5f;
 		// System.out.println(rotVal);
 		// int rotDir = (int) Math.signum(e.getWheelRotation());
-		int rotDir = (e.getWheelRotation() > 0 ? 1 : -1);
-		float mult = (float) Math.pow(rotVal * .75, rotDir);
-		this.zoomBy(mult);
+		int rotDir = (e.getWheelRotation() < 0 ? 1 : -1);
+		float mult = (float) Math.pow(rotVal, rotDir);
 
 		pt.setLocation(e.getX(), e.getY());
 		float dx = p.width / 2 - pt.x;
 		float dy = p.height / 2 - pt.y;
 
-		// if endzoom is bigger, we want to make dx smaller.
-		dx *= rotDir * .75;
-		dy *= rotDir * .75;
-
-		this.nudge(dx / getZ(), dy / getZ());
+		//		dx = -dx / getZ() / (float)Math.pow(mult, rotDir) * rotDir;
+		//		dy = -dy / getZ() / (float)Math.pow(mult, rotDir) * rotDir;
+		float destZ = getZ() * mult;
+		dx = dx / destZ * (1 - mult);
+		dy = dy / destZ * (1 - mult);
+		this.zoomBy(mult);
+		this.nudge(dx, dy);
 	}
 
 	public void keyEvent(KeyEvent e)
@@ -157,16 +157,16 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		switch (code)
 		{
 			case (81): // Q
-			// this.zoomBy(2);
+				// this.zoomBy(2);
 				break;
 			case (87): // W
-			// this.zoomBy(.5f);
+				// this.zoomBy(.5f);
 				break;
 			case (37): // Left
-			// this.nudge(-10, 0);
+				// this.nudge(-10, 0);
 				break;
 			case (39): // Right
-			// this.nudge(10, 0);
+				// this.nudge(10, 0);
 				break;
 		}
 

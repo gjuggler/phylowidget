@@ -73,9 +73,9 @@ public class ToolDockItem extends DockItem
 		return this;
 	}
 	
-	public String getName()
+	public String getLabel()
 	{
-		return super.getName() + " (" + tool.getShortcut().label + ")";
+		return getName() + " (" + tool.getShortcut().label + ")";
 	}
 	
 	protected void performAction()

@@ -127,8 +127,10 @@ public class RadialMenuItem extends MenuItem
 			g2.setPaint(menu.style.getGradient(getState(), x - rHi, y - rHi, x
 					+ rHi, y + rHi));
 		g2.fill(wedge);
-		g2.setStroke(menu.style.stroke);
-		g2.setPaint(menu.style.strokeColor);
+		
+		
+		g2.setStroke(getStroke());
+		g2.setPaint(getStrokeColor());
 
 		g2.draw(wedge);
 		/*
@@ -144,9 +146,9 @@ public class RadialMenuItem extends MenuItem
 					+ dx, outerY + dy);
 			at.scale(scale, scale);
 			at.rotate(theta);
-			Area tri = menu.style.subTriangle;
+			Area tri = (Area) menu.style.get("subTriangle");
 			Area newTri = tri.createTransformedArea(at);
-			g2.setPaint(menu.style.strokeColor);
+			g2.setPaint(getStrokeColor());
 			g2.fill(newTri);
 		}
 	}
@@ -154,19 +156,21 @@ public class RadialMenuItem extends MenuItem
 	void drawText()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		Font f = menu.style.font.font.deriveFont(fontSize);
+		PFont pf = menu.style.getFont("font");
+		Font f = pf.font.deriveFont(fontSize);
 		g2.setFont(f);
-		g2.setPaint(menu.style.textColor);
+		g2.setPaint(menu.style.getC("c.foreground"));
 		g2.drawString(displayLabel, textX, textY);
 	}
 
 	void drawHint()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		Font f = menu.style.font.font.deriveFont(fontSize);
+		PFont pf = menu.style.getFont("font");
+		Font f = pf.font.deriveFont(fontSize);
 		f = f.deriveFont(hintSize);
 		g2.setFont(f);
-		g2.setPaint(menu.style.textColor);
+		g2.setPaint(menu.style.getC("c.foreground"));
 		g2.drawString(String.valueOf(hint), hintX, hintY);
 	}
 
@@ -248,7 +252,7 @@ public class RadialMenuItem extends MenuItem
 		outerY = y + sin * rHi;
 		innerX = x + cos * rLo;
 		innerY = y + sin * rLo;
-		PFont font = menu.style.font;
+		PFont font = menu.style.getFont("font");
 		FontMetrics fm = UIUtils.getMetrics(menu.buff, font.font, 1);
 		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2)
 				.getHeight();
@@ -273,7 +277,7 @@ public class RadialMenuItem extends MenuItem
 		// Calculate the necessary x and y offsets for the text.
 		float outX = x + cos * (rHi + textHeight);
 		float outY = y + sin * (rHi + textHeight);
-		float pad = menu.style.padX;
+		float pad = menu.style.getF("f.padX");
 		rectW = textWidth + 2 * pad;
 		rectH = textHeight + 2 * pad;
 		rectX = outX + cos * rectW / 2 - rectW / 2;

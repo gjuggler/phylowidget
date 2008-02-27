@@ -23,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.EventManager;
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
@@ -66,6 +67,8 @@ public class ToolManager implements UIObject
 
 	public void keyEvent(KeyEvent e)
 	{
+		if (FocusManager.instance.isModal())
+			return;
 		parent.checkToolShortcuts(e);
 		if (curTool != null)
 			curTool.keyEvent(e);

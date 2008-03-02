@@ -192,8 +192,9 @@ ${internal.appletcomments}
 </div>
 
 <p>
-<a href="${internal.sourceZip}">Source code</a>
-</p>
+${internal.sourcehtml}
+<p>
+${internal.standalonehtml}
 
 </div>
 

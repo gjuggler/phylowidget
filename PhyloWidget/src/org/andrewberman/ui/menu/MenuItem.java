@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -102,12 +102,15 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
 	}
-	
+
 	public MenuItem setAction(Object object, String method)
 	{
+		System.out.println(this.name);
 		action = new Action(object, method);
 		if (shortcut != null)
+		{
 			shortcut.action = action;
+		}
 		menu.layout();
 		return this;
 	}
@@ -130,7 +133,12 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		shortcut = ShortcutManager.instance.createShortcut(s);
 		if (action != null)
+		{
 			shortcut.action = action;
+		} else
+		{
+			shortcut.action = new Action(this,"performAction");
+		}
 		menu.layout();
 		return this;
 	}
@@ -152,7 +160,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		 * Set the sub-item's parent to this item, and its menu to our menu.
 		 */
 		item.setParent(this);
-//		item.setMenu(menu);
+		//		item.setMenu(menu);
 		/*
 		 * Layout the entire menu so things look nice.
 		 */
@@ -244,10 +252,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		this.enabled = enabled;
 	}
-	
+
 	public boolean isOpen()
 	{
-		if (items.size() == 0) return false;
+		if (items.size() == 0)
+			return false;
 		return isOpen;
 	}
 
@@ -255,10 +264,10 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		return items.size() > 0;
 	}
-	
+
 	public boolean hasOpenChildren()
 	{
-		for (int i=0; i < items.size(); i++)
+		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
 			if (item.isOpen())
@@ -266,7 +275,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Draws this MenuItem to the current root menu's PGraphics object.
 	 */
@@ -354,25 +363,23 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	/**
 	 * Shows this MenuItem and its direct sub-MenuItems.
 	 */
-//	private void open()
-//	{
-////		if (isOpen)
-////			close();
-////		isOpen = true;
-//		menu.open(this);
-//	}
-
-//	private void close()
-//	{
-////		for (int i = 0; i < items.size(); i++)
-////		{
-////			MenuItem item = (MenuItem) items.get(i);
-////			item.close();
-////		}
-////		isOpen = false;
-//		menu.close(this);
-//	}
-
+	//	private void open()
+	//	{
+	////		if (isOpen)
+	////			close();
+	////		isOpen = true;
+	//		menu.open(this);
+	//	}
+	//	private void close()
+	//	{
+	////		for (int i = 0; i < items.size(); i++)
+	////		{
+	////			MenuItem item = (MenuItem) items.get(i);
+	////			item.close();
+	////		}
+	////		isOpen = false;
+	//		menu.close(this);
+	//	}
 	public void closeMyChildren()
 	{
 		for (int i = 0; i < items.size(); i++)
@@ -423,7 +430,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		setMenu(item.menu);
 	}
 
-	protected void performAction()
+	public void performAction()
 	{
 		if (!isEnabled())
 			return; // Do nothing if disabled.
@@ -544,7 +551,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		}
 		return max;
 	}
-	
+
 	protected void calcPreferredSize()
 	{
 	}
@@ -587,39 +594,36 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		}
 	}
 
-	
-//	private void setState(int state)
-//	{
-//		menu.setState(this, state);
-		
-//		if (this.state == state)
-//			return;
-//		this.state = state;
-//		if (nearestMenu.hoverNavigable)
-//		{
-//			if (state == MenuItem.OVER || state == MenuItem.DOWN)
-//				timer.setMenuItem(this);
-//			else if (state == MenuItem.UP)
-//				timer.unsetMenuItem(this);
-//		}
-//		if (state == MenuItem.DOWN)
-//		{
-//			menu.lastPressed = this;
-//			menu.hovered = this;
-////			menu.currentlyFocused = this;
-////			menu.lastHovered = this;
-//		} else if (state == MenuItem.OVER)
-//		{
-////			menu.lastHovered = this;
-//			menu.hovered = this;
-//		} else if (state == MenuItem.UP && menu.hovered == this)
-//		{
-////			menu.hovered = null;
-//		}
-//	}
+	//	private void setState(int state)
+	//	{
+	//		menu.setState(this, state);
 
-	
-	
+	//		if (this.state == state)
+	//			return;
+	//		this.state = state;
+	//		if (nearestMenu.hoverNavigable)
+	//		{
+	//			if (state == MenuItem.OVER || state == MenuItem.DOWN)
+	//				timer.setMenuItem(this);
+	//			else if (state == MenuItem.UP)
+	//				timer.unsetMenuItem(this);
+	//		}
+	//		if (state == MenuItem.DOWN)
+	//		{
+	//			menu.lastPressed = this;
+	//			menu.hovered = this;
+	////			menu.currentlyFocused = this;
+	////			menu.lastHovered = this;
+	//		} else if (state == MenuItem.OVER)
+	//		{
+	////			menu.lastHovered = this;
+	//			menu.hovered = this;
+	//		} else if (state == MenuItem.UP && menu.hovered == this)
+	//		{
+	////			menu.hovered = null;
+	//		}
+	//	}
+
 	protected int getState()
 	{
 		if (!isEnabled())
@@ -632,7 +636,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		state = s;
 	}
-	
+
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
 		if (!isEnabled())
@@ -645,10 +649,10 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 			case MouseEvent.MOUSE_MOVED:
 				if (containsPoint)
 				{
-					menu.setState(this,MenuItem.OVER);
+					menu.setState(this, MenuItem.OVER);
 				} else
 				{
-					menu.setState(this,MenuItem.UP);
+					menu.setState(this, MenuItem.UP);
 				}
 				break;
 			case MouseEvent.MOUSE_PRESSED:
@@ -661,9 +665,9 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 			case MouseEvent.MOUSE_DRAGGED:
 				if (containsPoint)
 				{
-					menu.setState(this,MenuItem.DOWN);
+					menu.setState(this, MenuItem.DOWN);
 				} else
-					menu.setState(this,MenuItem.UP);
+					menu.setState(this, MenuItem.UP);
 				break;
 			case MouseEvent.MOUSE_RELEASED:
 				if (containsPoint)
@@ -672,9 +676,9 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 						performAction();
 					// setState(MenuItem.OVER);
 					if (getState() == MenuItem.DOWN)
-						menu.setState(this,MenuItem.OVER);
+						menu.setState(this, MenuItem.OVER);
 				} else
-					menu.setState(this,MenuItem.UP);
+					menu.setState(this, MenuItem.UP);
 			default:
 				break;
 		}
@@ -684,11 +688,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		if (!isOpen())
 			return;
-//		for (int i = 0; i < items.size(); i++)
-//		{
-//			MenuItem seg = (MenuItem) items.get(i);
-//			seg.keyEvent(e);
-//		}
+		//		for (int i = 0; i < items.size(); i++)
+		//		{
+		//			MenuItem seg = (MenuItem) items.get(i);
+		//			seg.keyEvent(e);
+		//		}
 	}
 
 	public int getZ()
@@ -772,7 +776,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		return menu;
 	}
-	
+
 	public String getName()
 	{
 		return name;
@@ -830,40 +834,40 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		return height;
 	}
-	
+
 	public PFont getFont()
 	{
 		return getStyle().getFont("font");
 	}
-	
+
 	public float getPadX()
 	{
 		return getStyle().getF("f.padX");
 	}
-	
+
 	public float getPadY()
 	{
 		return getStyle().getF("f.padY");
 	}
-	
+
 	public float getFontSize()
 	{
 		return getStyle().getF("f.fontSize");
 	}
-	
+
 	public Color getStrokeColor()
 	{
 		return getStyle().getC("c.foreground");
 	}
-	
+
 	public MenuStyle getStyle()
 	{
 		return menu.style;
 	}
-	
+
 	public Stroke getStroke()
 	{
 		return new BasicStroke(getStyle().getF("f.strokeWeight"));
 	}
-	
+
 }

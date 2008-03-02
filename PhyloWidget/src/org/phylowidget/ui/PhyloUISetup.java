@@ -104,15 +104,6 @@ public class PhyloUISetup
 			{
 				toolbar = (Toolbar) menu;
 			}
-			/*
-			 * Set a callback for the "use branch lengths" property.
-			 */
-			MenuItem item = menu.get("Use Branch Lengths");
-			if (item != null)
-			{
-				CheckBox cb = (CheckBox) item;
-				cb.setAction(this,"layout");
-			}
 			
 			MenuItem s = menu.get("Search:");
 			if (s != null)

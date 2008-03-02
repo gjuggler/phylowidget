@@ -78,7 +78,7 @@ public class ToolDockItem extends DockItem
 		return getName() + " (" + tool.getShortcut().label + ")";
 	}
 	
-	protected void performAction()
+	public void performAction()
 	{
 		super.performAction();
 		if (nearestMenu instanceof ToolDock)

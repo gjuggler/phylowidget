@@ -69,7 +69,7 @@ public class PhyloUI extends PhyloUISetup
 	public float minTextSize = 10;
 
 	public boolean showBranchLengths = false;
-	public boolean showCladeLabels = false;
+	public boolean showCladeLabels = true;
 	public boolean outputAllInnerNodes = false;
 	public boolean enforceUniqueLabels = false;
 	public boolean fitTreeToWindow = false;

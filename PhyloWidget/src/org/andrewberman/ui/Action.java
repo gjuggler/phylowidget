@@ -69,13 +69,28 @@ public class Action
 		{
 			try
 			{
+				/*
+				 * Try to get the public method (inherited or otherwise).
+				 */
 				m = o.getClass().getMethod(s, new Class[]{});
 			} catch (SecurityException e)
 			{
 				e.printStackTrace();
 			} catch (NoSuchMethodException e)
 			{
-				e.printStackTrace();
+				try
+				{
+					/*
+					 * Try to get the public/protected/private declared method (this WILL NOT pick up inherited methods).
+					 */
+					m = o.getClass().getDeclaredMethod(s, new Class[]{});
+				} catch (SecurityException e1)
+				{
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1)
+				{
+					e1.printStackTrace();
+				}
 			}
 		}
 	}

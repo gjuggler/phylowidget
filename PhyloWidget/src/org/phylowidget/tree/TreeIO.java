@@ -1,26 +1,25 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.tree;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -47,10 +46,9 @@ public class TreeIO
 			InputStream is = url.openStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			return parseReader(t,br);
+			return parseReader(t, br);
 		} catch (Exception e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -60,18 +58,28 @@ public class TreeIO
 	{
 		String line;
 		StringBuffer buff = new StringBuffer();
+
+		boolean isNexus = false;
 		try
 		{
 			while ((line = br.readLine()) != null)
 			{
+				if (line.indexOf("#NEXUS") != -1)
+				{
+					isNexus = true;
+				}
 				buff.append(line);
 			}
-		} catch (IOException e)
+		} catch (Exception e)
 		{
 			e.printStackTrace();
 			return null;
 		}
-		return parseNewickString(t,buff.toString());
+		if (isNexus)
+		{
+			return parseNewickString(t,getNewickFromNexus(buff.toString()));
+		}
+		return parseNewickString(t, buff.toString());
 	}
 
 	public static RootedTree parseNewickString(RootedTree tree, String s)
@@ -86,7 +94,7 @@ public class TreeIO
 		/*
 		 * String buffer which we'll be parsing from.
 		 */
-		StringBuffer sb = new StringBuffer(s);
+		//		StringBuffer sb = new StringBuffer(s);
 		/*
 		 * Contains an Integer of the number of items for each depth level.
 		 */
@@ -127,9 +135,9 @@ public class TreeIO
 		StringBuffer temp = new StringBuffer();
 		String curLabel = new String();
 		double curLength = 1;
-		for (int i = 0; i < sb.length(); i++)
+		for (int i = 0; i < s.length(); i++)
 		{
-			char c = sb.charAt(i);
+			char c = s.charAt(i);
 			if (withinEscapedString)
 			{
 				temp.append(c);
@@ -181,8 +189,8 @@ public class TreeIO
 					}
 					// Create a vertex for the current label and length.
 					curLabel = parseNexusLabel(curLabel);
-					Object curNode = newNode(tree,curLabel);
-//					Object curNode = tree.createAndAddVertex(curLabel);
+					Object curNode = newNode(tree, curLabel);
+					//					Object curNode = tree.createAndAddVertex(curLabel);
 					if (c == ';')
 					{
 						// Can't forget to store which node is the root!
@@ -266,17 +274,18 @@ public class TreeIO
 		oldTree = null;
 		if (tree instanceof CachedRootedTree)
 		{
-			((CachedRootedTree)tree).modPlus();
+			((CachedRootedTree) tree).modPlus();
 		}
 		return tree;
 	}
 
 	static RootedTree oldTree;
+
 	public static void setOldTree(RootedTree t)
 	{
 		oldTree = t;
 	}
-	
+
 	static Object newNode(RootedTree t, String s)
 	{
 		Object newNode = null;
@@ -291,7 +300,7 @@ public class TreeIO
 		t.addVertex(newNode);
 		return newNode;
 	}
-	
+
 	public static String createNewickString(RootedTree tree)
 	{
 		StringBuffer sb = new StringBuffer();
@@ -398,5 +407,107 @@ public class TreeIO
 		label = label.replace('_', ' ');
 		label = label.trim();
 		return label;
+	}
+
+	/*
+	 * Nexus parsing stuff...
+	 */
+
+	static Pattern createPattern(String pattern)
+	{
+		return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE
+				| Pattern.DOTALL);
+	}
+
+	static String removeComments(String s)
+	{
+		Pattern commentFinder = createPattern("(\\[.*?\\])");
+		Matcher m = commentFinder.matcher(s);
+		String output = m.replaceAll("");
+		return output;
+	}
+
+	static String matchGroup(String s, String pattern, int groupNumber)
+	{
+		Pattern p = createPattern(pattern);
+		Matcher m = p.matcher(s);
+		m.find();
+		try
+		{
+			return m.group(groupNumber);
+		} catch (Exception e)
+		{
+			return "";
+		}
+	}
+
+	static String getTreesBlock(String s)
+	{
+		return matchGroup(s, "begin trees;(.*)end;", 1);
+	}
+
+	static String getTranslateBlock(String s)
+	{
+		/*
+		 * The "?" is important here: we want to 
+		 */
+		return matchGroup(s, "translate(.*?);", 1);
+	}
+
+	static public String getTreeFromTrees(String treesBlock)
+	{
+		return matchGroup(treesBlock, "tree(.*?);", 1);
+	}
+
+	static public String translateFirstTree(String treesBlock)
+	{
+		String trans = getTranslateBlock(treesBlock);
+		HashMap<String, String> map = new HashMap<String, String>();
+
+		if (trans.length() > 0)
+		{
+			String[] pairs = trans.split(",");
+			for (String pair : pairs)
+			{
+				pair = pair.trim();
+				String[] twoS = pair.split("[\\s]+");
+				String from = twoS[0].trim();
+				String to = twoS[1].trim();
+				map.put(from, to);
+			}
+		}
+		/*
+		 * Get the first tree from the trees block.
+		 */
+		String tree = getTreeFromTrees(treesBlock);
+
+		for (String key : map.keySet())
+		{
+			tree = tree.replaceAll(key, map.get(key));
+		}
+
+		return tree;
+	}
+
+	static public String getNewickFromNexus(String s)
+	{
+		/*
+		 * First, remove all comments from the Nexus string.
+		 */
+		s = removeComments(s);
+
+		/*
+		 * Now, grab the Trees block from the file.
+		 */
+		s = getTreesBlock(s);
+
+		/*
+		 * Grab the first tree out of the trees block and translate it (if applicable)
+		 */
+		s = translateFirstTree(s);
+
+		s = s.substring(s.indexOf("=") + 1);
+		s = s.trim();
+		return s;
 	}
 }

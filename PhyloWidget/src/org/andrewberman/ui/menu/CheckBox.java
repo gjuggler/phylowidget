@@ -126,11 +126,8 @@ public class CheckBox extends MenuItem
 		{
 			useReflection = false;
 			e.printStackTrace();
-		} finally
-		{
-//			MenuUtils.drawText(this, Boolean.toString(value), true, true, curX, y, nWidth,
-//					height);
 		}
+		
 		/*
 		 * Draw the check mark, if necessary.
 		 */
@@ -138,6 +135,8 @@ public class CheckBox extends MenuItem
 		{
 			drawCheckMark();
 		}
+		
+		
 	}
 
 	private void drawCheckMark()
@@ -196,10 +195,9 @@ public class CheckBox extends MenuItem
 		super.getRect(rect, buff);
 	}
 
-	protected void performAction()
+	public void performAction()
 	{
 		setVal(!value);
-		
 		super.performAction();
 	}
 
@@ -249,11 +247,9 @@ public class CheckBox extends MenuItem
 		switch (e.getKeyCode())
 		{
 			case (KeyEvent.VK_SPACE):
-//				setVal(!value);
 				performAction();
 				break;
 			case (KeyEvent.VK_ENTER):
-//				setVal(!value);
 				break;
 		}
 	}

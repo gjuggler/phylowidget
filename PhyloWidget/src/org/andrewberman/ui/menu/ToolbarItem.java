@@ -339,11 +339,11 @@ public class ToolbarItem extends MenuItem
 		{
 			MenuItem item = (MenuItem) items.get(i);
 			item.setPosition(curX, curY);
-			if (layoutMode == LAYOUT_BELOW)
-				item.setWidth(maxWidth);
-			else
-				item.setHeight(maxHeight);
-//			item.setSize(maxWidth, maxHeight);
+//			if (layoutMode == LAYOUT_BELOW)
+//				item.setWidth(maxWidth);
+//			else
+//				item.setHeight(maxHeight);
+			item.setSize(maxWidth, maxHeight);
 			curY += item.getHeight();
 		}
 		curY += py;

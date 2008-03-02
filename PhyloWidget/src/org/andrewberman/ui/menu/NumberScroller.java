@@ -229,7 +229,7 @@ public class NumberScroller extends MenuItem
 		super.getRect(rect, buff);
 	}
 
-	protected void performAction()
+	public void performAction()
 	{
 		// super.performAction();
 	}

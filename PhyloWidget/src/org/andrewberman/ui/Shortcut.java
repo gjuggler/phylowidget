@@ -105,9 +105,18 @@ public class Shortcut
 		keyCode = code;
 		label = new String();
 		if (keyMask != 0)
-			label += KeyEvent.getModifiersExText(keyMask) + "+";
+		{
+			String modS = KeyEvent.getModifiersExText(keyMask);
+			if (modS.equalsIgnoreCase("command"))
+			{
+				modS = "Cmd";
+			}
+			label +=  modS + "+";
+		}
 		if (keyCode != 0)
+		{
 			label += KeyEvent.getKeyText(keyCode);
+		}
 //		System.out.println(label);
 //		 System.out.println(KeyEvent.getModifiersExText(keyMask));
 		// System.out.println(KeyEvent.getKeyText(keyCode));
@@ -126,7 +135,9 @@ public class Shortcut
 	public void performAction()
 	{
 		if (action != null)
+		{
 			action.performAction();
+		}
 	}
 
 }

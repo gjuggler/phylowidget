@@ -16,6 +16,18 @@ public class PhyloConfig
 {
 	PApplet p;
 	
+	/*
+	 * URL API Configuration
+	 * 
+	 * The following parameters may be set using PhyloWidget's URL-based API.
+	 * 
+	 * In order to set a property, just append the desired parameter to the original PhyloWidget URL.
+	 * 
+	 * <b>Some examples:</b>
+	 *  
+	 * http://phylowidget.org/lite/index.html?tree="(a,(b,c));"
+	 * 
+	 */
 	public String menuFile = "full.xml";
 	public String foreground = "(0,0,0)";
 	public String background = "(255,255,255)";
@@ -36,6 +48,13 @@ public class PhyloConfig
 	public boolean stretchToFit = false;
 	public boolean antialias = false;
 	public boolean useBranchLengths = false;
+	
+	/*
+	 * END: URL API Configuration
+	 * 
+	 * The rest is all just code...
+	 */
+	
 	
 	public PhyloConfig(PApplet p)
 	{

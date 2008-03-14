@@ -19,11 +19,10 @@ public class PhyloConfig
 	/*
 	 * URL API Configuration
 	 * 
-	 * The following parameters may be set using PhyloWidget's URL-based API.
-	 * 
-	 * In order to set a property, just append the desired parameter to the original PhyloWidget URL.
-	 * 
-	 * You may combine properties as in any URL query by using the "&" character.
+	 * Information:
+	 * -- The following parameters may be set using PhyloWidget's URL-based API.
+	 * -- In order to set a property, just append the desired parameter to the original PhyloWidget URL.
+	 * -- You may combine properties as in any URL query by using the "&" character.
 	 * 
 	 * Some examples:
 	 * 

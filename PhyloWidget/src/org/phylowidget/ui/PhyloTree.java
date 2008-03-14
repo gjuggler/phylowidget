@@ -19,16 +19,18 @@
 package org.phylowidget.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
-import org.andrewberman.unsorted.SearchIndex;
+import org.andrewberman.ui.unsorted.SearchIndex;
+import org.jgrapht.Graphs;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.graph.SimpleGraph;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
-import org.phylowidget.tree.Labelable;
+import org.phylowidget.tree.RootedTree;
 
 public class PhyloTree extends CachedRootedTree
 {
@@ -43,7 +45,7 @@ public class PhyloTree extends CachedRootedTree
 	public PhyloTree()
 	{
 		super();
-		boolean unique = PhyloWidget.ui.enforceUniqueLabels;
+		boolean unique = PhyloWidget.cfg.enforceUniqueLabels;
 		setEnforceUniqueLabels(unique);
 	}
 
@@ -86,11 +88,15 @@ public class PhyloTree extends CachedRootedTree
 		super.setLabel(vertex, label);
 		index.add((PhyloNode) vertex);
 	}
-	
+
 	public void updateNewick()
 	{
-		if (synchronizedWithJS)
-			updater.triggerUpdate(this);
+		if (isValid())
+		{
+			PhyloWidget.ui.search();
+			if (synchronizedWithJS)
+				updater.triggerUpdate(this);
+		}
 	}
 
 	void removeFound()
@@ -107,16 +113,14 @@ public class PhyloTree extends CachedRootedTree
 	public void search(String s)
 	{
 		removeFound();
-		
+
 		String[] searches = s.split(";");
-		
+
 		ArrayList<PhyloNode> matches = new ArrayList<PhyloNode>();
 		for (String s2 : searches)
 		{
-			matches.addAll(index.search(s2));	
+			matches.addAll(index.search(s2));
 		}
-		
-
 		for (PhyloNode n : matches)
 		{
 			PhyloNode cur = n;
@@ -125,42 +129,48 @@ public class PhyloTree extends CachedRootedTree
 				cur.found = true;
 				cur = (PhyloNode) getParentOf(cur);
 			}
-			
-//			if (n.getState() == PhyloNode.NONE)
-//			{
-//				n.setState(PhyloNode.FOUND);
-//			}
+
+			//			if (n.getState() == PhyloNode.NONE)
+			//			{
+			//				n.setState(PhyloNode.FOUND);
+			//			}
 		}
 	}
 
-	
-	
 	@Override
 	public boolean removeVertex(Object o)
 	{
-		index.remove((PhyloNode) o);
-		return super.removeVertex(o);
+		boolean b = super.removeVertex(o);
+		if (b)
+			index.remove((PhyloNode) o);
+		return b;
 	}
-	
+
 	@Override
 	public boolean addVertex(Object o)
 	{
-		index.add((PhyloNode)o);
-		return super.addVertex(o);
+		boolean b = super.addVertex(o);
+		if (b)
+			index.add((PhyloNode) o);
+		return b;
 	}
-	
+
 	class NewickUpdater implements GraphListener
 	{
 		public void edgeAdded(GraphEdgeChangeEvent e)
 		{
 			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
+			{
 				updateNewick();
+			}
 		}
 
 		public void edgeRemoved(GraphEdgeChangeEvent e)
 		{
 			if (e.getType() == GraphEdgeChangeEvent.EDGE_REMOVED)
+			{
 				updateNewick();
+			}
 		}
 
 		public void vertexAdded(GraphVertexChangeEvent e)
@@ -175,11 +185,10 @@ public class PhyloTree extends CachedRootedTree
 		{
 			if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
 			{
-				index.remove((PhyloNode) e.getVertex());
+				//				index.remove((PhyloNode) e.getVertex());
 				updateNewick();
 			}
 		}
-
 	}
 
 	public boolean isSynchronizedWithJS()
@@ -195,5 +204,27 @@ public class PhyloTree extends CachedRootedTree
 			updater = new JSTreeUpdater();
 			addGraphListener(new NewickUpdater());
 		}
+	}
+
+	public static void main(String... args)
+	{
+		SimpleDirectedGraph<String, String> g = new SimpleDirectedGraph<String, String>(
+				String.class);
+		g.addVertex("Hello");
+		g.addVertex("World!");
+		g.addEdge("World!", "Hello");
+
+		SimpleDirectedGraph<String, String> g2 = new SimpleDirectedGraph<String, String>(
+				String.class)
+		{
+			public boolean addVertex(String s)
+			{
+				System.out.println(s);
+				return super.addVertex(s);
+			}
+		};
+		System.out.println(g2);
+		Graphs.addGraph(g2, g);
+		System.out.println(g2);
 	}
 }

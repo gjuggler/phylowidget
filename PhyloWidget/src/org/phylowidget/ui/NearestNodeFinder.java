@@ -83,7 +83,7 @@ public class NearestNodeFinder implements UIObject
 		if (!needsUpdate)
 			return;
 
-		System.out.println("Hey");
+//		System.out.println("Hey");
 
 		// float ratio = TreeManager.getVisibleRect().width /
 		// PhyloWidget.p.width;

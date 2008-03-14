@@ -16,6 +16,8 @@ public class SearchBox extends TextBox implements UIListener
 	
 	Label label;
 	
+	float myWidth;
+	
 	public SearchBox(PApplet p)
 	{
 		super(p);
@@ -60,11 +62,11 @@ public class SearchBox extends TextBox implements UIListener
 	}
 	
 	@Override
-	public void setWidth(float width)
+	public void setWidth(float newWidth)
 	{
-		super.setWidth(width);
-		width -= label.getWidth();
-		tf.setWidth(width);
+		super.setWidth(newWidth);
+		tf.setWidth(newWidth - label.getWidth());
+		menu.layout();
 	}
 	
 	@Override
@@ -73,13 +75,22 @@ public class SearchBox extends TextBox implements UIListener
 		super.getRect(rect, buff);
 	}
 	
+	public String getText()
+	{
+		return tf.getText();
+	}
+	
+	public void setText(String s)
+	{
+		tf.replaceText(s);
+	}
+	
 	public void uiEvent(UIEvent e)
 	{
 		if (e.getID() == UIEvent.TEXT_VALUE)
 		{
-			PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
-			if (tree != null)
-				tree.search(tf.getText());
+			PhyloWidget.cfg.search = getText();
+			PhyloWidget.ui.search();
 		}
 	}
 	

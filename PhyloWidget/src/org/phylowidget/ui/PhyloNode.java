@@ -1,25 +1,26 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.ui;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
+import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.CachedVertex;
 
@@ -32,16 +33,17 @@ public class PhyloNode extends CachedVertex implements Comparable
 	public boolean drawMe, isWithinScreen;
 
 	public float zoomTextSize = 1;
-	
+
 	private int state = 0;
 	public static final int NONE = 0;
 	public static final int CUT = 1;
 	public static final int COPY = 2;
-	
+
 	public boolean found = false;
-	
+
 	static TweenFriction fric = TweenFriction
 			.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
+	static TweenQuad quad = TweenQuad.tween;
 
 	static final float mult = 10000f;
 
@@ -52,21 +54,31 @@ public class PhyloNode extends CachedVertex implements Comparable
 	public PhyloNode(Object o)
 	{
 		super(o);
-		xTween = new Tween(null, fric, Tween.OUT, 0f, 0f, 0f);
-		yTween = new Tween(null, fric, Tween.OUT, 0f, 0f, 0f);
+		xTween = new Tween(null, quad, Tween.OUT, (float) x, (float) x, 20f);
+		yTween = new Tween(null, quad, Tween.OUT, (float) y, (float) y, 20f);
+		
+		if (o instanceof PhyloNode)
+		{
+			PhyloNode n = (PhyloNode) o;
+			setPosition(n);
+		}
+		
+		//		xTween = new Tween(null, fric, Tween.OUT, (float)x, (float)x, 0f);
+		//		yTween = new Tween(null, fric, Tween.OUT, (float)y, (float)y, 0f);
 	}
 
-	public boolean isStationaryX()
+	public void setPosition(PhyloNode n)
 	{
-//		return (!xTween.isTweening() && !yTween.isTweening());
-		float ratio = (xTween.getPosition() - xTween.getBegin()) / xTween.getChange();
-		return (ratio > .8);
+		if (n == null)
+			return;
+		setPosition(n.getX(),n.getY());
+		fforward();
 	}
-	
+
 	public void update()
 	{
-//		zoomTextSize *= 0.9f;
-		
+		//		zoomTextSize *= 0.9f;
+
 		xTween.update();
 		yTween.update();
 		x = xTween.getPosition() / mult;

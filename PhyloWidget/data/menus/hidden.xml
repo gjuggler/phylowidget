@@ -1,10 +1,10 @@
 <menuset name="PhyloWidget Menus">
-	<menu type="Toolbar" fontsize="11" x="2" y="2">
+	<menu type="Toolbar" fontSize="11" x="2" y="2" hidden="true">
 		<item name="File">
 			<item name="New Tree" action="treeNew" shortcut="control-n"/>
 			<item name="Load Tree..." action="treeLoad"/>
 			<item name="Save Tree..." action="treeSave"/>
-			<item name="Export Image">
+			<item name="Export Image" >
 				<item name="Large (1600x1200)" action="fileOutputBig"/>
 				<item name="Small (640 x 480)" action="fileOutputSmall"/>
 				<item name="PDF" action="fileOutputPDF"/>
@@ -18,14 +18,15 @@
 				<item name="Circular" action="viewCircular" shortcut="control-3"/>
 			</item>
 			<item name="Style">
-				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" default="0" min="-45" max="45"/>
-				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" default=".2" min="0" max=".5"/>
-				<item name="Line Weight" type="NumberScroller" property="lineSize" increment =".001" default=".1" min="0" max=".5"/>
+				<item name="Text Multiplier" type="NumberScroller" property="textSize" increment=".02" min="0.05" max="2"/>
+				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" min="-45" max="45"/>
+				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" min="0" max=".5"/>
+				<item name="Line Weight" type="NumberScroller" property="lineSize" increment =".001" min="0" max=".5"/>
 			</item>
-			<item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" default="150" min="5" max="1000"/>
-			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" default="10" min="0" max="36"/>
-			<!-- <item name="Stretch Tree to Fit" type="CheckBox" property="fitTreeToWindow" /> -->
-			<item name="Use Branch Lengths" type="CheckBox" property="useBranchLengths" value="false" shortcut="ctrl-b" />
+			<item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" min="5" max="1000"/>
+			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="36"/>
+			<item name="Stretch Tree to Fit" type="CheckBox" methodCall="setStretchToFit" />
+			<item name="Use Branch Lengths" type="CheckBox" methodCall="setUseBranchLengths" value="false" shortcut="ctrl-b" />
 		</item>
 		<item name="Tree">
 			<item name="Mutator (for fun!)">
@@ -34,22 +35,25 @@
 				<item name="Mutate Fast" action="treeMutateFast"/>
 				<item name="Stop Mutating" action="treeStopMutating" shortcut="control-shift-m"/>
 			</item>
+			<item name="Enforce Unique Labels" type="CheckBox" methodCall="enforceUniqueLabels" value="false" />
 			<item name="Flip Tree" action="treeFlip" shortcut="control-R"/>
 			<item name="Auto-sort Tree" action="treeAutoSort" shortcut="control-L"/>
 			<item name="Remove Elbows" action="treeRemoveElbows" shortcut="control-E"/>
 		</item>
 		<item type="Spacer" spaceWidth="5" />
-		<item type="org.phylowidget.ui.SearchBox" name="Search:" width="130" />
+		<!-- <item type="org.phylowidget.ui.SearchBox" name="Search:" width="140" /> -->
 	</menu>
 
 	<!-- If you want the user to be able to interact with the tree AT ALL (including through the context menu),
 		then you must have a ToolDock with the associated tools. You can set the "hidden" attribute of the
 		ToolDock element to "True" if you want to have the tools but keep the dock hidden. -->
-	<menu name="dock" type="ToolDock" width="30" rotation="left" hidden="false">
+	<menu name="dock" type="ToolDock" width="30" rotation="left" hidden="true">
 	<!-- the "rotation" parameter can have the values: left, right, top, bottom -->
-		<item name="Arrow" tool="arrow" shortcut="a" icon="dock/arrow.png"/>
-		<item name="Scroll" tool="scroll" shortcut="s" icon="dock/grab.png"/>
-		<item name="Zoom" tool="zoom" shortcut="z" icon="dock/zoom.png"/>
+		<item name="Arrow" tool="Arrow" shortcut="a" icon="dock/arrow.png"/>
+		<item name="Scroll" tool="Scroll" shortcut="s" icon="dock/grab.png"/>
+		<item name="Zoom" tool="Zoom" shortcut="z" icon="dock/zoom.png"/>
+		
+		<!-- Look at this nifty methodcall tag! Not worth the effort, you say? I probably agree. --> 
 		<methodcall method="selectTool" param="Arrow"/>
 	</menu>
 
@@ -73,6 +77,7 @@
 			<item name="Cut" action="nodeCut" hint="x"/>
 			<item name="Copy" action="nodeCopy" hint="c"/>
 			<item name="Paste" action="nodePaste" hint="v"/>
+			<item name="Swap" action="nodeSwap" hint="s"/>
 			<item name="Clear" action="nodeClearClipboard" hint="r"/>
 		</item>
 		<item name="Node Edit" hint="e">

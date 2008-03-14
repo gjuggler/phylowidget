@@ -1,0 +1,14 @@
+<menuset name="PhyloWidget Menus">
+	<!-- If you want the user to be able to interact with the tree AT ALL (including through the context menu),
+		then you must have a ToolDock with the associated tools. You can set the "hidden" attribute of the
+		ToolDock element to "True" if you want to have the tools but keep the dock hidden. -->
+	<menu name="dock" type="ToolDock" width="30" rotation="left" hidden="false">
+	<!-- the "rotation" parameter can have the values: left, right, top, bottom -->
+		<item name="Arrow" tool="Arrow" shortcut="a" icon="dock/arrow.png"/>
+		<item name="Scroll" tool="Scroll" shortcut="s" icon="dock/grab.png"/>
+		<item name="Zoom" tool="Zoom" shortcut="z" icon="dock/zoom.png"/>
+		
+		<!-- Look at this nifty methodcall tag! Not worth the effort, you say? I probably agree. --> 
+		<methodcall method="selectTool" param="Arrow"/>
+	</menu>
+</menuset>

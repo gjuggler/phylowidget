@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget</title>
+
+<link rel="stylesheet" href="style.css"/>
+<script src="scripts/phylowidget.js"></script>
+
+</head>
+<body class="yui-skin-sam">
+
+<div id="content-wrapper">
+
+<!--
+<div id="header">
+${project.name}
+</div>
+-->
+
+<div id="content">
+
+<div id="floater" style="float:left;">
+<h1>${project.name}</h1>
+<div id="PhyloWidget" style="width:${applet.width}px;">
+</div>
+</div>
+
+<div id="floater2" style="width:300px;float:right;">
+<h1>${project.name} Toolbox</h1>
+<div id="toolbox"></div>
+</div>
+
+</div>
+<script type="text/javascript">
+	loadSimplePhyloWidget();
+	loadToolbox('toolbox');
+
+/*
+  // Applies the settings to the YUI panel. 
+  var pw = function() {
+    var c = {context:['wide_div','tl','tl']};
+  	PW.PhyloWidget.cfg.applyConfig(c);
+  };
+  // Loads the PhyloWidget panel into the PW.PhyloWidget variable.
+  loadPhyloWidget(pw); 
+  
+  // Applies the settings to the YUI panel.
+  var tb = function() {
+  	var cfg = {context:['wide_div','tr','tr']};
+  	PW.toolbox.cfg.applyConfig(cfg);
+  }
+  // Loads the Toolbar panel into the PW.toolbar variable.
+  loadToolbox(tb);
+  
+  // Does some JSObject connection crap once the applet is loaded.
+  loadYahoo(function () {
+  	YAHOO.util.Event.onContentReady('PhyloWidget',function() {
+		connectToJava();
+  	});
+  });
+*/
+</script>
+
+<div id="footer">
+Copyright © 2008 <a href="http://www.andrewberman.org/">Gregory Jordan</a>. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</body>
+</html>

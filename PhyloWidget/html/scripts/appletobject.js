@@ -1,4 +1,7 @@
 /*
+ * Built on ${TODAY} for ${project.name}
+ * 
+ *
  *  AppletObject
  *
  *  Florian Jenett, Stephen Williams, Aaron Steed
@@ -569,6 +572,9 @@ AppletObjects =
         return javaVersion;
     },
     
+    
+    
+    
     /**
      *         setCookie(nameOfCookie, value, expireHours);
      *         
@@ -768,6 +774,8 @@ function AppletObject ( )
                       ? arguments[8]
                       : AppletObjects.TAG_OBJECT; // [fjen] changed that to object as default
     
+    this.tagID = arguments[9] ? arguments[9] : 'AppletObject';
+    
     this.fallback    = 'To view this content, you need to install '+
                        'Java from <A HREF="http://java.com">java.com</A>';
                        
@@ -931,8 +939,9 @@ AppletObject.prototype.onstep = function(perc)
  
 AppletObject.prototype.onload = function()
 {
-    //this.debug( element_id );
+    //this.debug( this.element_id );
     this.writeToElement( this.element_id );
+    //alert("appletobject ready!");
 };
 
 
@@ -1075,7 +1084,7 @@ AppletObject.prototype._loadNext = function ()
 									   'codebase="' + this.codebase + '" ' : '' ) +
 									 'width="1"'+
 									 'height="1"'+
-									 'mayscript="true">'+
+									 'mayscript="true" name="'+this.tagID+'">'+
 							'<param name="AObject" value="'+this.id+'" />'+
 							'<param name="boxbgcolor" value="'+this.getParam('boxbgcolor')+'" />'+
 						'</applet>' 
@@ -1083,7 +1092,7 @@ AppletObject.prototype._loadNext = function ()
     
     this.timeLastPreload = (new Date()).getTime();
     
-    //alert( this.preloadContainer.innerHTML );
+//    alert( this.preloadContainer.innerHTML );
 };
 
 
@@ -1180,7 +1189,8 @@ AppletObject.prototype.create = function ()
 AppletObject.prototype.createTagApplet = function ()
 {
 	var codebaseString = ( this.codebase )? 'codebase="' + this.codebase+'" ' : '' ;
-	var tag = '<applet code="'      + this.code
+	var tag = '<applet ' + 'id="' + this.tagID + '" name="' +this.tagID
+					+ '" code="'      + this.code
  				  + '" archive="'   + this.archives.implode(', ')
             	  + '" ' 			+ codebaseString
 				  + '  width="'     + this.width 
@@ -1211,8 +1221,8 @@ AppletObject.prototype.createTagObject = function ()
         return this.createTagObjectIE();
         
     var jarchives = this.archives.implode(", ");
-    
-    var tag = '<object classid="java:'+this.code+'.class" '+
+    var tag = '<object ' + 'id="'+this.tagID+'" name="'+this.tagID + '" '+
+    					'classid="java:'+this.code+'.class" '+
                       'type="application/x-java-applet" '+
                       'archive="'   + jarchives+'" '+
                         ( this.codebase 
@@ -1223,6 +1233,7 @@ AppletObject.prototype.createTagObject = function ()
                       '>'+
                         ( this.codebase ?
                       '<param name="codebase"   value="'+ this.codebase+'" />' : '' ) +
+                    '<param name="name" value="'+this.tagID+'" />' +
                     '<param name="archive"    value="'+jarchives+'" />'+
                     '<param name="mayscript"  value="'+this.mayscript+'" />'+
                     '<param name="scriptable" value="'+this.mayscript+'" />';
@@ -1251,6 +1262,7 @@ AppletObject.prototype.createTagObjectIE = function ()
     var jarchives = this.archives.implode(", ");
     
     var tag = '<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" '+
+    					'id="'+this.tagID+'" name="'+this.tagID+'" ' +
                       'type="application/x-java-applet" '+
                       'archive="'   + jarchives+'" '+
                         'codebase="http://java.sun.com/update/1.4.2/jinstall-1_4_2_09-windows-i586.cab" ' +
@@ -1258,6 +1270,7 @@ AppletObject.prototype.createTagObjectIE = function ()
                       'height="'    + this.height +'" '+
                       'standby="Loading applet ..." '+
                       '>'+
+                      '<param name="name"       value="'+this.tagID+'" />'+
                     '<param name="code"       value="'+this.code+'" />'+
                         ( this.codebase  ?
                       '<param name="codebase"   value="'+ this.codebase+'" />' : '' ) +
@@ -1285,7 +1298,8 @@ AppletObject.prototype.createTagEmbed = function ()
 {
     var jarchives = this.archives.implode(", ");
     
-    var tag = '<embed code="'       + this.code+'.class" '+
+    var tag = '<embed ' + 'id="'+this.tagID+'" '+
+    					'code="'       + this.code+'.class" '+
                       'type="application/x-java-applet" '+
                       'archive="'   + jarchives+'" '+
                         ( this.codebase 

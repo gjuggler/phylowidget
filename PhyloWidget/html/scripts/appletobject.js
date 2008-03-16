@@ -1262,7 +1262,8 @@ AppletObject.prototype.createTagObjectIE = function ()
     var jarchives = this.archives.implode(", ");
     
     var tag = '<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" '+
-    					'id="'+this.tagID+'" name="'+this.tagID+'" ' +
+    					//'id="'+this.tagID+'" name="'+this.tagID+'" ' +
+    					'name="'+this.tagID+'" ' +
                       'type="application/x-java-applet" '+
                       'archive="'   + jarchives+'" '+
                         'codebase="http://java.sun.com/update/1.4.2/jinstall-1_4_2_09-windows-i586.cab" ' +
@@ -1270,11 +1271,11 @@ AppletObject.prototype.createTagObjectIE = function ()
                       'height="'    + this.height +'" '+
                       'standby="Loading applet ..." '+
                       '>'+
-                      '<param name="name"       value="'+this.tagID+'" />'+
+                      //'<param name="name"       value="'+this.tagID+'" />'+
                     '<param name="code"       value="'+this.code+'" />'+
                         ( this.codebase  ?
                       '<param name="codebase"   value="'+ this.codebase+'" />' : '' ) +
-                    '<param name="archive"    value="'+jarchives+'" />'+
+                    //'<param name="archive"    value="'+jarchives+'" />'+
                     '<param name="mayscript"  value="'+this.mayscript+'" />'+
                     '<param name="scriptable" value="'+this.mayscript+'" />';
     for(var i = 0; i < this.params.length; i++)

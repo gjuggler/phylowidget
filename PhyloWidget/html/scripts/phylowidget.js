@@ -1,6 +1,6 @@
 /*
  * YUI LOADER 
- * from dev.yahoo.com -- Thanks, Yahoo. I really owe you one.
+ * from dev.yahoo.com -- Thanks, Yahoo. I really owe you one. Seriously.
  * 
  */
 

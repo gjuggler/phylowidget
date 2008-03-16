@@ -159,22 +159,24 @@ public class PhyloUI
 		// Create a SecurityChecker object.
 		SecurityChecker sc = new SecurityChecker(PhyloWidget.p);
 
-		MenuItem s = toolbar.get("Search:");
-		if (s != null)
+		if (toolbar != null)
 		{
-			search = (SearchBox) s;
-			search.setText(PhyloWidget.cfg.search);
+			MenuItem s = toolbar.get("Search:");
+			if (s != null)
+			{
+				search = (SearchBox) s;
+				search.setText(PhyloWidget.cfg.search);
+			}
+			s = toolbar.get("Load Tree...");
+			if (s != null)
+				s.setEnabled(sc.canReadFiles());
+			s = toolbar.get("Save Tree...");
+			if (s != null)
+				s.setEnabled(sc.canWriteFiles());
+			s = toolbar.get("Export Image");
+			if (s != null)
+				s.setEnabled(sc.canWriteFiles());
 		}
-		s = toolbar.get("Load Tree...");
-		if (s != null)
-			s.setEnabled(sc.canReadFiles());
-		s = toolbar.get("Save Tree...");
-		if (s != null)
-			s.setEnabled(sc.canWriteFiles());
-		s = toolbar.get("Export Image");
-		if (s != null)
-			s.setEnabled(sc.canWriteFiles());
-
 	}
 
 	public void updateNodeInfo(RootedTree t, PhyloNode n)

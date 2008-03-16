@@ -27,7 +27,7 @@ This Ant task assumes a certain structure within your project directory:
              from the Processing distribution and place them in this directory. Last
              I checked, they were "opengl.jar," "jogl.jar," and a bunch of "jogl-natives-XXX.jar".
 -->
-<project name="Processing Applet Export" default="dist" basedir=".">
+<project name="Processing Applet Export" default="PhyloWidget" basedir=".">
 	<description>
         Processing applet output script.
 		http://processing.org/
@@ -39,12 +39,15 @@ This Ant task assumes a certain structure within your project directory:
 	  </classpath>
 	</taskdef>
 	
-	<target name="init">
+	<target name="init" unless="skipinit">
 		<!-- Import properties from build.properties -->
 		<property file="build.properties" />
 
+		<tstamp />
+		
 		<!-- Check if the minimum properties are set, terminate if necessary -->
 		<fail unless="project.name">Please specify a project name in build.properties.</fail>
+		<fail unless="project.safename">Please specify a project safe name in build.properties.</fail>
 		<fail unless="project.class">Please specify a Main class to be called (i.e. org.foo.BarApplication or somesuch).</fail>
 		<fail unless="applet.width">Please specify applet.width in the build.properties file.</fail>
 		<fail unless="applet.height">Please specify applet.height in the build.properties file.</fail>
@@ -53,18 +56,22 @@ This Ant task assumes a certain structure within your project directory:
 		<antcall target="outputdebug" />
 
 		<!-- Store folder locations within named properties. -->
-		<property name="src" location="src" />
-		<property name="build" location="build" />
-		<property name="applet" location="applet" />
-		<property name="data" location="data" />
-		<property name="lib" location="lib" />
-		<property name="html" location="html" />
+		<property name="src" value="src" />
+		<property name="build" value="build" />
+		<property name="applet" value="applet" />
+		<property name="data" value="data" />
+		<property name="lib" value="lib" />
+		<property name="html" value="html" />
+		<property name="zip" value="zip" />
 
 		<!-- Create properties for the filenames of the final jar, source and standalone .zips -->
-		<property name="internal.finaljar" value="${project.name}.jar" />
-		<property name="internal.sourcezip" value="${project.name}_src.zip" />
-		<property name="internal.standalonezip" value="${project.name}_standalone.zip" />
-		<property name="internal.projectzip" value="${project.name}_project.zip" />
+		<property name="internal.finaljar" value="${project.safename}.jar" />
+		<property name="internal.sourcezip" value="${zip}/${project.safename}_src.zip" />
+		<property name="internal.standalonezip" value="${zip}/${project.safename}_standalone.zip" />
+		<property name="internal.projectzip" value="${zip}/${project.safename}_project.zip" />
+		
+		<!-- Some behavior-modifying properties -->
+		<property name="internal.overwrite" value="true" />
 		
 		<!-- Create some conditional properties based on the values specified in build.properties.
 			We need to do this because the "if" parameter of the target definition only responds to 
@@ -96,13 +103,20 @@ This Ant task assumes a certain structure within your project directory:
 	
 	<!-- TARGET: BUILD -->
 	<target name="build" depends="init" description="compile the source">
+		<if><istrue value="${project.cleanbeforebuild}"/><then>
+		<antcall target="clean"/>
+		</then></if>
+		
 		<mkdir dir="${build}" />
-
+		
 		<!-- Compile the java code from ${src} into ${build} -->
 		<condition property="internal.javasource" value="${project.javatarget}" else="1.4">
 			<isset property="project.javatarget" />
 		</condition>
-		<javac srcdir="${src}" destdir="${build}" source="${internal.javasource}" target="${internal.javasource}" compiler='modern' fork='yes'>
+		
+		<depend srcdir="${src}" destdir="${build}" closure="yes"/>
+		
+		<javac srcdir="${src}" destdir="${build}" source="${internal.javasource}" target="${internal.javasource}" compiler='modern' fork='yes' >
 			<classpath>
 				<fileset dir="${lib}" />
 			</classpath>
@@ -110,62 +124,57 @@ This Ant task assumes a certain structure within your project directory:
 		
 		<!-- If "Open Source", copy the .java files into ${build} as well. -->
 		<if><istrue value="${project.sourcezip}"/><then>
-			<copy todir="${build}">
+			<copy todir="${build}" overwrite="true">
 				<fileset dir="${src}">
 					<include name="**/*.*" />
 				</fileset>
 			</copy>
 		</then></if>
+				
+		<!-- COPY THE "DATA" DIRECTORY TO THE BUILD FOLDER -->
+		<antcall target="copydata" inheritRefs="true"/>
 	</target>
 
 	<!-- TARGET: DIST -->
-	<target name="dist" depends="init,clean,loadjars,build" description="generate the distribution">
+	<target name="dist" depends="build,loadjars" description="generate the distribution">
 		<mkdir dir="${applet}" />
-
-		<!-- COPY THE "DATA" DIRECTORY TO THE BUILD FOLDER -->
-		<antcall target="copydata" />
+		<mkdir dir="${applet}/${zip}" />
+		<mkdir dir="${applet}/${lib}" />
 
 		<!-- IF OPEN SOURCE, COPY .JAVA FILES TO THE BUILD FOLDER -->
-		<antcall target="createzips" />
-		
-		<!-- JAR UP THE "BUILD" DIRECTORY -->
-		<jar jarfile="${applet}/${internal.finaljar}" basedir="${build}">
-			<manifest>
-				<attribute name="Main-Class" value="${project.class}" />
-			</manifest>
-		</jar>
-
-		<!-- COPY JARS FROM "LIB" TO "APPLET" -->
-		<antcall target="copyjars" inheritRefs="true" />
+		<antcall target="createzips" inheritRefs="true"/>
 
 		<!-- SIGN THIS JAR, IF NECESSARY -->
-		<antcall target="signjar" />
+		<antcall target="signjar" inheritRefs="true"/>
 		
 		<!-- CREATE THE HTML FILE -->
-		<antcall target="genHTML" />
+		<antcall target="genHTML" inheritRefs="true"/>
 		
 	</target>
 
 	<!-- TARGET: STANDALONE -->
 	<target name="standalone">
 		<!-- Create the Windows-specific .bat file. Requires SEMICOLON-separated jar names. -->
-		<pathconvert pathsep=";" property="temp.pathlist" refid="jarFilesNoNatives">
-			<flattenmapper />
+		<pathconvert pathsep=";" property="temp.pathlist" refid="appletlibsnonatives">
+			<chainedmapper><flattenmapper/><globmapper from="*" to="${lib}/*" /></chainedmapper>
 		</pathconvert>
-		<concat destfile="${applet}/${project.name}.bat">start javaw -cp ${temp.pathlist};${internal.finaljar} processing.core.PApplet ${project.class}</concat>
+		<concat destfile="${applet}/${project.name}.bat">start javaw -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
 		
 		<!-- Create the Unix .sh file. Requires COLON-separated jar names. -->
-		<pathconvert pathsep=":" property="temp.pathlist" refid="jarFilesNoNatives">
-			<flattenmapper />
+		<pathconvert pathsep=":" property="temp.pathlist" refid="appletlibsnonatives">
+			<chainedmapper><flattenmapper/><globmapper from="*" to="${lib}/*" /></chainedmapper>
 		</pathconvert>
-		<concat destfile="${applet}/${project.name}.sh">java -cp ${temp.pathlist}:${internal.finaljar} processing.core.PApplet ${project.class}</concat>
+		<concat destfile="${applet}/${project.name}.sh">java -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
 	
 		<!-- Zip up the necessary files in the applet directory into the standalone .zip -->
-		<zip destfile="${applet}/${internal.standalonezip}" includes="*.jar,*.sh,*.bat" basedir="${applet}"/>
+		<zip destfile="${applet}/${internal.standalonezip}" includes="${lib}/*.jar,*.sh,*.bat" basedir="${applet}"/>
 		
 		<!-- Delete the .sh and .bat files, from the applet directory (no longer needed). -->
 		<delete>
-			<fileset dir="${applet}" includes="${project.name}.bat,${project.name}.sh"/>
+			<fileset dir="${applet}">
+				<include name="${project.name}.bat"/>
+				<include name="${project.name}.sh"/>
+			</fileset>
 		</delete>
 	</target>
 	
@@ -181,7 +190,7 @@ This Ant task assumes a certain structure within your project directory:
 		</then></if>
 		
 		<if><istrue value="${project.standalonezip}"/><then>
-			<antcall target="standalone"/>
+			<antcall target="standalone" inheritRefs="true"/>
 		</then></if>
 		
 	</target>
@@ -191,32 +200,23 @@ This Ant task assumes a certain structure within your project directory:
 		<!-- Copies all the files in the "data" directory to "build/data" directory.
 			Ultimately, this will all end up in the final jar file.
 		-->
-		<copy todir="${build}/data">
+		<copy todir="${build}/data" overwrite="true">
 			<fileset dir="${data}">
 				<include name="**/*.*" />
 			</fileset>
 		</copy>
 	</target>
 
-	<!-- TARGET: COPYJARS -->
-	<target name="copyjars">
-		<!-- Copy all the jar files from the lib directory into the applet directory. -->
-		<copy todir="${applet}" flatten="true">
-			<fileset refid="jarFiles" />
-		</copy>
-		<fileset id="copiedJars" dir="${applet}" casesensitive="no">
-			<include name="*.jar" />
-		</fileset>
-	</target>
-
 	<!-- TARGET: SIGNJAR -->
-	<target name="signjar" depends="loadjars" if="cond.signjar">
-		<!-- Signs the jar files, so that you can get beyond the Applet sandbox with your code if necessary. -->
-		<antcall target="genkey" />
-		<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" lazy="true">
-			<fileset refid="copiedJars" />
-			<!-- <fileset file="${applet}/${internal.finaljar}" /> -->
-		</signjar>
+	<target name="signjar">
+		<if><istrue value="${project.signjar}"/><then>
+			<!-- Signs the jar files, so that you can get beyond the Applet sandbox with your code if necessary. -->
+			<antcall target="genkey" />
+			<signjar alias="${signjar.alias}" storepass="${signjar.storepass}" lazy="true">
+				<fileset refid="appletlibsnonatives" />
+				<!-- <fileset file="${applet}/${internal.finaljar}" /> -->
+			</signjar>
+		</then></if>
 	</target>
 
 	<!-- TARGET: GENKEY -->
@@ -238,7 +238,8 @@ This Ant task assumes a certain structure within your project directory:
 		<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
 			<istrue value="${project.opengl}" />
 		</condition>
-
+		<echo>${internal.launcherClass}</echo>
+		
 	<!-- If the applet.comments refers to a valid filename, load it up. -->
 		<loadfile property="internal.appletcomments" srcFile="${html.comments}" failonerror="false" />
 		<condition property="internal.appletcomments" value="${internal.appletcomments}" else="${html.comments}">
@@ -261,16 +262,16 @@ This Ant task assumes a certain structure within your project directory:
 			<li><a href="${internal.projectzip}">Download complete project (.zip)</a></li>
 			]]>
 		</echo>
-		<loadfile srcFile="${applet}/opensource.html" property="internal.sourcehtml"/>
-		<loadfile srcFile="${applet}/standalone.html" property="internal.standalonehtml"/>
-		<loadfile srcFile="${applet}/project.html" property="internal.projecthtml"/>
-		<condition property="internal.sourcehtml" value="internal.sourcehtml" else="">
+		<loadfile srcFile="${applet}/opensource.html" property="internal.sourcehtmltemp"/>
+		<loadfile srcFile="${applet}/standalone.html" property="internal.standalonehtmltemp"/>
+		<loadfile srcFile="${applet}/project.html" property="internal.projecthtmltemp"/>
+		<condition property="internal.sourcehtml" value="${internal.sourcehtmltemp}" else="">
 			<istrue value="${project.sourcezip}"/>
 		</condition>
-		<condition property="internal.standalonehtml" value="internal.standalonehtml" else="">
+		<condition property="internal.standalonehtml" value="${internal.standalonehtmltemp}" else="">
 			<istrue value="${project.standalonezip}"/>
 		</condition>
-		<condition property="internal.projecthtml" value="internal.projecthtml" else="">
+		<condition property="internal.projecthtml" value="${internal.projecthtmltemp}" else="">
 			<istrue value="${project.projectzip}"/>
 		</condition>
 		<delete quiet="true">
@@ -283,7 +284,7 @@ This Ant task assumes a certain structure within your project directory:
 	of properties, and use the <filterchain> to automatically replace
 	the property names (i.e. applet.width) with the values (i.e. 400)
 	within all html files that we're copying. -->
-		<copy todir="${applet}">
+		<copy todir="${applet}" overwrite="${internal.overwrite}">
 			<fileset dir="${html}">
 				<patternset id="only.html.files">
 					<include name="**/*.html" />
@@ -299,7 +300,7 @@ This Ant task assumes a certain structure within your project directory:
 		
 		<!-- Copy all non-HTML files normally.
 			This will copy the .gif,.js, etc. etc .files from /html to /applet. -->
-		<copy todir="${applet}">
+		<copy todir="${applet}" overwrite="${internal.overwrite}">
 			<fileset dir="${html}">
 				<exclude name="**/*.html" />
 				<exclude name="**/*.php" />
@@ -312,44 +313,69 @@ This Ant task assumes a certain structure within your project directory:
 
 	<!-- TARGET: CLEAN -->
 	<target name="clean">
-		<delete includeemptydirs="false" quiet="false">
+		<delete includeemptydirs="false" quiet="true">
 			<fileset dir="${applet}" includes="" />
 		</delete>
-		<delete includeemptydirs="false" quiet="false">
+		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${build}" includes="" />
 		</delete>
 	</target>
 
-	<!-- TARGET: LOADJARS -->
-	<target name="loadjars" depends="init">
+	<target name="loadjars">
+		
 		<!-- Create a fileset that includes all the library jar files. -->
-		<condition property="internal.includeopengl" value="opengl/*.jar" else="">
+		<condition property="internal.includeopengl" value="opengl/*.jar" else="NOTHING">
 			<istrue value="${project.opengl}" />
 		</condition>
-		<condition property="internal.excludeopengl" value="" else="opengl/*.jar">
-			<istrue value="${project.opengl}" />
-		</condition>
-		<fileset id="jarFiles" dir="${lib}" casesensitive="no">
-			<include name="**/*.jar" />
-			<include name="${internal.includeopengl}" />
-			<exclude name="${internal.excludeopengl}" />			
+		<fileset id="libFiles" dir="" casesensitive="no" excludes="${ignoreJars}">
+			<include name="${lib}/*.jar" />
+			<include name="${lib}/${internal.includeopengl}" />
 		</fileset>
-		<fileset id="jarFilesNoNatives" dir="${lib}" casesensitive="no">
-			<include name="*.jar" />
-			<include name="${internal.includeopengl}" />
-			<exclude name="${internal.excludeopengl}" />
-			<exclude name="**/*native*.jar" />
-		</fileset>
+		
+		<!-- Copy all the jar files from the lib directory into the applet/lib directory. -->
+		<copy todir="${applet}/${lib}" overwrite="${internal.overwrite}">
+			<fileset refid="libFiles"/>
+			<mapper type="flatten"/>
+		</copy>
+		
+		<!-- Jar up the 'build' directory and send to applet/lib -->
+		<jar jarfile="${applet}/${lib}/${internal.finaljar}" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="${project.class}" />
+			</manifest>
+		</jar>
 
-		<!-- Create a property that is a comma-separated list of the jarFilesNoNatives fileset. -->
-		<pathconvert pathsep="," property="internal.jarlist" refid="jarFilesNoNatives">
-			<flattenmapper />
+		<fileset id="appletlibs" dir="${applet}" casesensitive="no">
+			<include name="${lib}/**/*.jar" />
+			<exclude name="**/*ZZZZ*" />
+		</fileset>
+		<fileset id="appletlibsnonatives" dir="${applet}" casesensitive="no">
+			<include name="${lib}/**/*.jar" />
+			<exclude name="**/*natives*" />
+			<exclude name="**/*ZZZZ*" />
+		</fileset>
+		
+		
+		<!-- Create a property that is a comma-separated list of the libFilesNoNatives fileset. -->
+		<pathconvert pathsep="," property="internal.allJars" refid="appletlibsnonatives">
+			<chainedmapper>
+				<flattenmapper/>
+			</chainedmapper>
 		</pathconvert>
-		<property name="internal.allJars" value="${internal.finaljar},${internal.jarlist}" />
-		<pathconvert pathsep="','" property="temp.quotedJarList" refid="jarFilesNoNatives">
-			<flattenmapper />
+		<pathconvert pathsep="','" property="temp.quotedJarList" refid="appletlibsnonatives">
+			<chainedmapper>
+				<flattenmapper/>
+			</chainedmapper>
 		</pathconvert>
-		<property name="internal.quotedJars" value="'${temp.quotedJarList}','${internal.finaljar}'"/>
+		<pathconvert pathsep="','" property="temp.quotedPrefixedJarList" refid="appletlibsnonatives">
+					<chainedmapper>
+						<flattenmapper/>
+						<globmapper from="*" to="${lib}/*" />
+					</chainedmapper>
+				</pathconvert>
+		<property name="internal.quotedJars" value="'${temp.quotedJarList}'"/>
+		<property name="internal.quotedPrefixedJars" value="'${temp.quotedPrefixedJarList}'"/>
+		
 	</target>
 
 	<!-- TARGET: UPLOAD -->
@@ -360,6 +386,50 @@ This Ant task assumes a certain structure within your project directory:
 
 	</target>
 
+	<target name="PhyloWidget" depends="init">
+		
+		<mkdir dir="web"/>
+		<property name="applet_full" value="web/full"/>
+		<property name="applet_lite" value="web/lite"/>
+		
+		<property name="skipinit" id="skipinit" value="true"/>
+		
+		<!-- 'LITE' BUILD -->
+		<antcall target="dist" inheritRefs="true">
+			<param name="project.name" value="PhyloWidget Lite"/>
+			<param name="project.signjar" value="false"/>
+			<param name="applet" value="${applet_lite}"/>
+			<param name="ignoreJars" value="lib/itext.jar,lib/pdf.jar" />
+		</antcall>
+		
+		
+		<!-- FULL BUILD --> 
+		<antcall target="dist" inheritRefs="true">
+			<param name="project.name" value="PhyloWidget Full"/>
+			<param name="project.signjar" value="true"/>
+			<param name="project.sourcezip" value="true"/>
+			<param name="project.projectzip" value="false"/>
+			<param name="project.standalonezip" value="true"/>
+			<param name="applet" id="applet" value="${applet_full}"/>
+		</antcall>
+
+		<!-- COPY FULL SCRIPTS TO THE WEB/SCRIPTS DIRECTORY -->
+		<copy todir="web/scripts" overwrite="true">
+			<fileset dir="${applet_full}/scripts/"/>
+		</copy>
+		<copy todir="web/zip" overwrite="true">
+			<fileset dir="${applet_full}/${zip}"/>
+		</copy>
+		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/**/*.*,build/**/*.*" basedir="."/>
+		
+		<!-- UPLOAD THE WEB DIRECTORY TO THE SERVER -->
+		<!--
+		<scp todir="${project.serverdest}" trust="true" failonerror="false" verbose="true">
+			<fileset dir="web"/>
+		</scp>
+		-->
+		
+	</target>
 	
 	<!-- MISCELLANEOUS OR "EXTRA" TARGETS GO HERE -->
 	<!-- **************************************** -->

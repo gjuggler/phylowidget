@@ -280,7 +280,10 @@ public class MenuUtils
 		float fs = style.getF("f.fontSize");
 
 		g2.setFont(font.font.deriveFont(fs));
-		g2.setPaint(style.getC("c.foreground"));
+		if (!item.isEnabled())
+			g2.setPaint(style.getC("c.foreground").brighter(120));
+		else
+			g2.setPaint(style.getC("c.foreground"));
 		g2.setStroke(new BasicStroke(style.getF("f.strokeWeight")));
 		g2.drawString(s, x + xOffset, y + yOffset);
 	}

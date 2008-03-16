@@ -72,24 +72,18 @@ public class Action
 				/*
 				 * Try to get the public method (inherited or otherwise).
 				 */
-				m = o.getClass().getMethod(s, new Class[]{});
-			} catch (SecurityException e)
-			{
-				e.printStackTrace();
-			} catch (NoSuchMethodException e)
+				m = o.getClass().getMethod(s);
+			} catch (Exception e)
 			{
 				try
 				{
 					/*
 					 * Try to get the public/protected/private declared method (this WILL NOT pick up inherited methods).
 					 */
-					m = o.getClass().getDeclaredMethod(s, new Class[]{});
-				} catch (SecurityException e1)
+					m = o.getClass().getDeclaredMethod(s);
+				} catch (Exception e1)
 				{
-					e1.printStackTrace();
-				} catch (NoSuchMethodException e1)
-				{
-					e1.printStackTrace();
+					throw new RuntimeException("Error setting action!");
 				}
 			}
 		}

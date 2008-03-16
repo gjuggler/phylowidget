@@ -92,7 +92,7 @@ public class Toolbar extends Menu
 		autoDim = false;
 
 		fullWidth = false;
-		// isModal = true;
+		 isModal = true;
 		/*
 		 * Do some automatic positioning.
 		 */
@@ -128,7 +128,8 @@ public class Toolbar extends Menu
 	public void close(MenuItem item)
 	{
 		super.close(item);
-		FocusManager.instance.removeFromFocus(this);
+		if (!isActive())
+			FocusManager.instance.removeFromFocus(this);
 	}
 
 	@Override
@@ -345,7 +346,7 @@ public class Toolbar extends Menu
 					focusWrap(kbFocus, 1);
 				} else
 				{
-					if (kbFocus.hasChildren())
+					if (kbFocus.hasChildren() && kbFocus.isEnabled())
 					{
 						focusToItem(kbFocus.items.get(0));
 					} else

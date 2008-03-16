@@ -16,27 +16,47 @@
  * You should have received a copy of the GNU General Public License
  * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.andrewberman.ui.tools;
+package org.andrewberman.ui.unsorted;
 
-import processing.core.PApplet;
+import java.applet.Applet;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 
-public class Arrow extends Tool
+public class JSPrintStream extends OutputStream
 {
 
-	public Arrow(PApplet p)
+	public static final int BUFFER = 50;
+	
+	StringWriter wr = new StringWriter();
+	JSCaller caller;
+	String method;
+
+	public JSPrintStream(Applet app, String methodToCall)
 	{
-		super(p);
+		caller = new JSCaller(app);
+		method = methodToCall;
+		caller.reflectJS(method, "");
 	}
 
-	public boolean respondToOtherEvents()
+	@Override
+	public void flush() throws IOException
 	{
-		return true;
+		if (caller.reflectionWorking)
+			caller.reflectJS(method, wr.toString());
+		else
+			System.out.print(wr.toString());
+		wr.getBuffer().replace(0, wr.getBuffer().length(), "");
 	}
 	
 	@Override
-	public boolean modalFocusWhileDragging()
+	public void write(int b) throws IOException
 	{
-		return false;
+		wr.write(b);
+		if (wr.getBuffer().length() > BUFFER)
+			flush();
+//		caller.reflectJS(method, id, (char)b, b));
 	}
+	
 
 }

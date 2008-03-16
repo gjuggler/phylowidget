@@ -34,7 +34,7 @@ import processing.xml.XMLElement;
 public class MenuIO
 {
 	static PApplet app;
-	static Object actionObject;
+	static Object[] actionObjects;
 
 	/**
 	 * 
@@ -46,11 +46,11 @@ public class MenuIO
 	 * @return
 	 */
 	public static ArrayList loadFromXML(PApplet p, String filename,
-			Object actionHolder)
+			Object... actionHolders)
 	{
 		ArrayList menus = new ArrayList();
 		app = p;
-		actionObject = actionHolder;
+		actionObjects = actionHolders;
 		InputStream in = p.openStream(filename);
 		/*
 		 * Search depth-first through the XML tree, adding the highest-level
@@ -59,7 +59,8 @@ public class MenuIO
 		Stack s = new Stack();
 		try
 		{
-			s.push(new XMLElement(in));
+			XMLElement x = new XMLElement(in);
+			s.push(x);
 			while (!s.isEmpty())
 			{
 				XMLElement curEl = (XMLElement) s.pop();
@@ -151,21 +152,9 @@ public class MenuIO
 		while (attrs.hasMoreElements())
 		{
 			String attr = (String) attrs.nextElement();
-			/*
-			 * Skip the attributes that we already used to do something with.
-			 */
-			//			if (attr.equalsIgnoreCase("name") || 
-			//					attr.equalsIgnoreCase("type") ||
-			//					attr.equalsIgnoreCase("method") ||
-			//					attr.equalsIgnoreCase("param"))
-			//				continue;
-			/*
-			 * For all other attributes, call the set[Attribute] method of the
-			 * MenuItem.
-			 */
 			setAttribute(newItem, attr, el.getStringAttribute(attr));
 		}
-
+		
 		/*
 		 * Now, keep the recursion going: go through the current XMLElement's
 		 * children and call menuElement() on each one.
@@ -251,72 +240,80 @@ public class MenuIO
 	 */
 	private static void setAttribute(MenuItem item, String attr, String value)
 	{
-		attr = attr.toLowerCase();
+		String attrL = attr.toLowerCase();
 		String upperFirst = "set" + upperFirst(attr);
+
+		/*
+		 * Special case: setAction(String s, Object o)
+		 */
+		if (attrL.matches("(action|property|methodcall)"))
+		{
+			setWithObjectRef(item, attr, value);
+			return;
+		}
+
+		Class c = item.getClass();
+
 		try
 		{
-			Class[] argC = null;
-			Object[] args = null;
-			if (attr.equalsIgnoreCase("action"))
-			{
-				/*
-				 * If this attribute is an Action, then we need to include a
-				 * reference to our actionObject so the correct method can be
-				 * called by this menuItem's action.
-				 */
-				argC = new Class[] { Object.class, String.class };
-				args = new Object[] { actionObject, value };
-			} else if (attr.equalsIgnoreCase("tool"))
-			{
-				/*
-				 * If this attribute is a Tool, then we need to set the first
-				 * letter to upper-case.
-				 */
-				argC = new Class[] { String.class };
-				args = new Object[] { upperFirst(value) };
-			} else if (attr.equalsIgnoreCase("property"))
-			{
-				/*
-				 * If this is a setProperty command, include a reference to the
-				 * actionObject.
-				 */
-				argC = new Class[] { Object.class, String.class };
-				args = new Object[] { actionObject, value };
-			} else
-			{
-				/*
-				 * EVERYTHING ELSE: we simply call the setXXX(value) method
-				 * using Java's reflection API.
-				 */
-				argC = new Class[] { String.class };
-				args = new Object[] { value };
-			}
-			Method curMethod = null;
+			/*
+			 * Start with the bread-and-butter, setXXX(String s) method call.
+			 */
+			Method m = c.getMethod(upperFirst, String.class);
+			m.invoke(item, value);
+		} catch (Exception e)
+		{
 			try
 			{
 				/*
-				 * First, try it with the straight String parameter.
+				 * Ok, that didn't work... let's parse to a float.
 				 */
-				Method[] methods = item.getClass().getMethods();
-				for (int i = 0; i < methods.length; i++)
-				{
-					if (methods[i].getName().equalsIgnoreCase(upperFirst))
-					{
-						curMethod = methods[i];
-						curMethod.invoke(item, args);
-						break;
-					}
-				}
-			} catch (Exception e)
+				Method m = c.getMethod(upperFirst, Float.TYPE);
+				m.invoke(item, Float.parseFloat(value));
+			} catch (Exception e2)
 			{
-				/*
-				 * If the String didn't work, try parsing the String to a float.
-				 */
-				curMethod.invoke(item, new Object[] { new Float(value) });
+				try
+				{
+					/*
+					 * Ok, let's parse to a boolean.
+					 */
+					Method m = c.getMethod(upperFirst, Boolean.TYPE);
+					m.invoke(item, Boolean.parseBoolean(value));
+				} catch (Exception e3)
+				{
+					/*
+					 * Dammit, nothing worked. Let's let loose on the console.
+					 */
+					e.printStackTrace();
+					e2.printStackTrace();
+					e3.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private static void setWithObjectRef(MenuItem item, String attr, String value)
+	{
+		String methodS = "set"+upperFirst(attr);
+		Class c = item.getClass();
+		try
+		{
+			Method m = c.getMethod(methodS, Object.class, String.class);
+			for (Object ao : actionObjects)
+			{
+				try
+				{
+					m.invoke(item, ao, value);
+					break;
+				} catch (Exception e)
+				{
+//					e.printStackTrace();
+					continue;
+				}
 			}
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 	}
 

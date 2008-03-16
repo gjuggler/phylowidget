@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -75,25 +75,25 @@ public class ToolbarItem extends MenuItem
 	{
 		super();
 	}
+
 	protected void calcPreferredSize()
 	{
 		super.calcPreferredSize();
-		
+
 		PFont font = getFont();
 		float fs = getFontSize();
 		float px = getPadX();
 		float py = getPadY();
-		
+
 		/*
 		 * Calculate the text rectangle size.
 		 */
-		tWidth = UIUtils.getTextWidth(menu.canvas.g, font,
-				fs, getName(), true);
+		tWidth = UIUtils.getTextWidth(menu.canvas.g, font, fs, getName(), true);
 		/*
 		 * For the height, let's use the height of some capital letters.
 		 */
-		float tHeight = UIUtils.getTextHeight(menu.canvas.g, font,
-				fs, "XYZ", true);
+		float tHeight = UIUtils.getTextHeight(menu.canvas.g, font, fs, "XYZ",
+				true);
 
 		float triangleWidth = 0;
 		if (drawChildrenTriangle && items.size() > 0
@@ -113,21 +113,21 @@ public class ToolbarItem extends MenuItem
 		if (shortcut != null)
 		{
 			shortcutWidth = px
-					+ UIUtils.getTextWidth(menu.buff, font,
-							fs * shortcutTextSize,
-							shortcut.label, true);
+					+ UIUtils.getTextWidth(menu.buff, font, fs
+							* shortcutTextSize, shortcut.label, true);
 		}
 
 		setWidth(tWidth + triangleWidth + shortcutWidth + 2 * px);
 		setHeight(tHeight + 2 * py);
 	}
+
 	protected boolean containsPoint(Point p)
 	{
 		float ro = menu.style.getF("f.roundOff");
-		buffRoundRect.setRoundRect(x, y, width, height, ro,
-				ro);
+		buffRoundRect.setRoundRect(x, y, width, height, ro, ro);
 		return buffRoundRect.contains(p);
 	}
+
 	/**
 	 * Normally, the MenuItem's create() method just defers back to the nearest
 	 * Menu it can use to create an item, but here we want to change some
@@ -156,14 +156,17 @@ public class ToolbarItem extends MenuItem
 		Stroke stroke = getStroke();
 		float px = menu.style.getF("f.padX");
 		float py = menu.style.getF("f.padY");
-		
-		roundRect.setRoundRect(x, y, width, height, ro,
-				ro);
+
+		roundRect.setRoundRect(x, y, width, height, ro, ro);
 		Graphics2D g2 = menu.buff.g2;
 
 		/*
 		 * Set the correct fill gradient
 		 */
+		//		if (!isEnabled())
+		//		{
+		//			g2.setPaint(menu.style.getC("c.disabled"));
+		//		} else 
 		if (isOpen() && parent == menu)
 		{
 			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
@@ -176,27 +179,31 @@ public class ToolbarItem extends MenuItem
 		/*
 		 * Only perform the fill if the mood is right.
 		 */
-		if (getState() != MenuItem.UP || isOpen())
+//		if (getState() != MenuItem.UP || isOpen())
+//		{
+//			if (!isEnabled())
+//			{
+//				;
+//			} else if (menu.hovered != null && menu.hovered != this
+//					&& !isAncestorOfHovered())
+//			{
+//				;
+//			} else
+//			{
+//				g2.fill(roundRect);
+//				g2.setPaint(strokeC);
+//				g2.setStroke(stroke);
+//				g2.draw(roundRect);
+//			}
+//		}
+		if (shouldPerformFill())
 		{
-			if (getState() == MenuItem.DISABLED)
-			{
-				g2.fill(roundRect);
-				g2.setPaint(strokeC);
-				g2.setStroke(stroke);
-				g2.draw(roundRect);
-			} else if (menu.hovered != null && menu.hovered != this
-					&& !isAncestorOfHovered())
-			{
-				;
-			} else
-			{
-				g2.fill(roundRect);
-				g2.setPaint(strokeC);
-				g2.setStroke(stroke);
-				g2.draw(roundRect);
-			}
+			g2.fill(roundRect);
+			g2.setPaint(strokeC);
+			g2.setStroke(stroke);
+			g2.draw(roundRect);
 		}
-
+		
 		/*
 		 * Draw the text, triangle, and shortcut.
 		 */
@@ -207,17 +214,17 @@ public class ToolbarItem extends MenuItem
 		{
 			PFont font = menu.style.getFont("font");
 			float fs = menu.style.getF("f.fontSize");
-			
+
 			float rightX = getX() + getWidth();
 			curX = rightX - shortcutWidth;
 			// curX += menu.style.padX;
 			float shortSize = fs * shortcutTextSize;
-			float descent = UIUtils.getTextDescent(menu.buff, font,
-					shortSize, true);
+			float descent = UIUtils.getTextDescent(menu.buff, font, shortSize,
+					true);
 			g2.setFont(font.font.deriveFont(shortSize));
 			g2.setPaint(strokeC.brighter(100));
-			float ht = UIUtils.getTextHeight(menu.canvas.g, font,
-					shortSize, shortcut.label, true);
+			float ht = UIUtils.getTextHeight(menu.canvas.g, font, shortSize,
+					shortcut.label, true);
 			float yOffset = (height - ht) / 2f + descent;
 			yOffset += ht / 2;
 			g2.drawString(shortcut.label, curX, y + yOffset);
@@ -307,10 +314,10 @@ public class ToolbarItem extends MenuItem
 	{
 		if (menu == null)
 			return;
-		
+
 		float px = getPadX();
 		float py = getPadY();
-		
+
 		float curX = 0, curY = 0;
 		switch (layoutMode)
 		{
@@ -339,10 +346,10 @@ public class ToolbarItem extends MenuItem
 		{
 			MenuItem item = (MenuItem) items.get(i);
 			item.setPosition(curX, curY);
-//			if (layoutMode == LAYOUT_BELOW)
-//				item.setWidth(maxWidth);
-//			else
-//				item.setHeight(maxHeight);
+			//			if (layoutMode == LAYOUT_BELOW)
+			//				item.setWidth(maxWidth);
+			//			else
+			//				item.setHeight(maxHeight);
 			item.setSize(maxWidth, maxHeight);
 			curY += item.getHeight();
 		}
@@ -350,7 +357,7 @@ public class ToolbarItem extends MenuItem
 
 		subItemRect.width = maxWidth + px * 2;
 		subItemRect.height = curY - subItemRect.y;
-		
+
 		/*
 		 * Trigger the recursive layout.
 		 */

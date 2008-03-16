@@ -49,7 +49,7 @@ public class DockItem extends MenuItem implements TweenListener
 	public DockItem()
 	{
 		super();
-		tween = new Tween(this, TweenFriction.tween, Tween.OUT, 0, 0, 6);
+		tween = new Tween(this, TweenFriction.tween(.6f), Tween.OUT, 0, 0, 6);
 	}
 
 	public void setIcon(String file)

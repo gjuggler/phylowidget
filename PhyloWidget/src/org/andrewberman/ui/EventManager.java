@@ -134,7 +134,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void draw()
 	{
-		UIUtils.setMatrix(p);
+//		UIUtils.setMatrix(p);
 
 		for (int i = 0; i < delegates.size(); i++)
 		{
@@ -194,34 +194,16 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void keyEvent(KeyEvent e)
 	{
-		boolean modal = FocusManager.instance.isModal();
 		/*
 		 * We only send keyboard events to the focused object.
 		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 			((UIObject) FocusManager.instance.getFocusedObject()).keyEvent(e);
-		/*
-		 * If modal, return early.
-		 */
-		if (modal)
-			return;
-		/*
-		 * Then, if the focus isn't modal and the object wasn't consumed,
-		 * continue sending the mouse event to the other uiobjects.
-		 */
-		for (int i = delegates.size() - 1; i >= 0; i--)
-		{
-			if (e.isConsumed())
-				break;
-			UIObject ui = (UIObject) delegates.get(i);
-			if (ui == FocusManager.instance.getFocusedObject())
-				continue;
-			ui.keyEvent(e);
-		}
+
 		/*
 		 * Lastly, dispatch to the tool manager if not consumed.
 		 */
-		if (!e.isConsumed())
+		if (FocusManager.instance.getFocusedObject() == null)
 		{
 			if (toolManager != null)
 				toolManager.keyEvent(e);

@@ -34,19 +34,24 @@ import processing.core.PFont;
 
 public class NumberScroller extends MenuItem
 {
-	private float value = 0, defaultValue = 0, increment = 1, scrollSpeed = 1;
-	private float min = -Float.MAX_VALUE, max = Float.MAX_VALUE;
-	// private int minDigits, maxDigits;
-	private String stringValue;
+	static RoundRectangle2D.Float buffRoundRect = new RoundRectangle2D.Float(0,
+			0, 0, 0, 0, 0);
 	private DecimalFormat df;
-
 	private Field field;
 	private Object fieldObj;
-	private boolean useReflection;
 
-	private float tWidth, nWidth, nOffset;
+	static float NaN = Float.NaN;
+	
+	private float min = -Float.MAX_VALUE, max = Float.MAX_VALUE;
 	boolean scrolling;
 	float startY, startVal;
+
+	// private int minDigits, maxDigits;
+	private String stringValue;
+	private float tWidth, nWidth, nOffset;
+	private boolean useReflection;
+
+	private float value, defaultValue, increment, scrollSpeed;
 
 	public NumberScroller()
 	{
@@ -55,141 +60,26 @@ public class NumberScroller extends MenuItem
 		df = new DecimalFormat("#######0.0#");
 		df.setDecimalSeparatorAlwaysShown(false);
 
+		value = 0;
+		defaultValue = NaN;
+		increment = 1;
+		scrollSpeed = 1;
+		
 		setIncrement(increment);
-		setDefault(defaultValue);
 		setValue(value);
 		setScrollSpeed(scrollSpeed);
 		
 		stringValue = new String();
 	}
 
-	public float getValue()
-	{
-		float oldValue = value;
-		try
-		{
-			if (useReflection)
-				value = field.getFloat(fieldObj);
-		} catch (Exception e)
-		{
-			useReflection = false;
-			e.printStackTrace();
-		}
-		if (value != oldValue)
-			updateString();
-		return value;
-	}
-
-	void updateString()
-	{
-		stringValue = df.format(value);
-	}
-
-	public void setDefault(float def)
-	{
-		defaultValue = def;
-		setValue(defaultValue);
-	}
-
-	public void setMin(float min)
-	{
-		this.min = min;
-	}
-
-	public void setMax(float max)
-	{
-		this.max = max;
-	}
-
-	public void setProperty(Object obj, String prop)
-	{
-		try
-		{
-			field = obj.getClass().getField(prop);
-			fieldObj = obj;
-			useReflection = true;
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			field = null;
-			return;
-		}
-		setValue(defaultValue);
-	}
-
-	public void setIncrement(float inc)
-	{
-		increment = inc;
-		/*
-		 * Try and auto-detect number of decimal places from the increment.
-		 */
-		int numDecimals = (int) Math.ceil((float) -Math.log10(increment));
-		// System.out.println(Math.log10(increment)+ " "+getName() + " " +
-		// increment + " " + numDecimals);
-		df.setMinimumFractionDigits(numDecimals);
-		df.setMaximumFractionDigits(numDecimals);
-
-		setValue(value);
-	}
-
-	public void setScrollSpeed(float changePerPixel)
-	{
-		scrollSpeed = changePerPixel;
-	}
-
-	protected void drawMyself()
-	{
-		super.drawMyself();
-		getValue();
-		if (scrolling)
-		{
-			/*
-			 * Cause the menu to re-layout in case we've changed preferred size.
-			 */
-			menu.layout();
-		}
-		
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
-
-		float curX = x + px;
-		MenuUtils.drawLeftText(this, getName() + ":", curX);
-		curX += tWidth;
-
-		curX = getX() + getWidth() - px - nWidth;
-		MenuUtils.drawSingleGradientRect(this, curX, y, nWidth, height);
-		/*
-		 * update the "value" object using Reflection.
-		 */
-		MenuUtils.drawText(this, stringValue, true, true, curX, y, nWidth,
-				height);
-	}
-
-	public void setValue(float val)
-	{
-		float oldValue = value;
-		value = PApplet.constrain(val, min, max);
-		if (useReflection)
-		{
-			try
-			{
-				field.setFloat(fieldObj, value);
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		updateString();
-	}
-
 	protected void calcPreferredSize()
 	{
 		super.calcPreferredSize();
 		
-		PFont font = menu.style.getFont("font");
-		float fs = menu.style.getF("f.fontSize");
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
+		PFont font = menu.getStyle().getFont("font");
+		float fs = menu.getStyle().getF("f.fontSize");
+		float px = menu.getStyle().getF("f.padX");
+		float py = menu.getStyle().getF("f.padY");
 		
 		/*
 		 * For the height, let's use the height of some capital letters.
@@ -222,6 +112,47 @@ public class NumberScroller extends MenuItem
 		setHeight(tHeight + 2 * py);
 	}
 
+	protected boolean containsPoint(Point p)
+	{
+		if (scrolling)
+			return true;
+		float ro = menu.getStyle().getF("f.roundOff");
+		buffRoundRect.setRoundRect(x, y, width, height, ro,
+				ro);
+		// buffRoundRect.setRoundRect(x + nOffset, y, nWidth, height,
+		// menu.getStyle().roundOff, menu.getStyle().roundOff);
+		return buffRoundRect.contains(p);
+	}
+
+	protected void drawMyself()
+	{
+		super.drawMyself();
+		getValue();
+		if (scrolling)
+		{
+			/*
+			 * Cause the menu to re-layout in case we've changed preferred size.
+			 */
+			menu.layout();
+		}
+		
+		float px = menu.getStyle().getF("f.padX");
+		float py = menu.getStyle().getF("f.padY");
+
+		float curX = x + px;
+		MenuUtils.drawLeftText(this, getName() + ":", curX);
+		curX += tWidth;
+
+		curX = getX() + getWidth() - px - nWidth;
+		if (shouldPerformFill())
+			MenuUtils.drawSingleGradientRect(this, curX, y, nWidth, height);
+		/*
+		 * update the "value" object using Reflection.
+		 */
+		MenuUtils.drawText(this, stringValue, true, true, curX, y, nWidth,
+				height);
+	}
+
 	protected void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
 	{
 		buff.setFrame(x, y, width, height);
@@ -229,15 +160,118 @@ public class NumberScroller extends MenuItem
 		super.getRect(rect, buff);
 	}
 
+	public float getValue()
+	{
+		float oldValue = value;
+		try
+		{
+			if (useReflection)
+				value = field.getFloat(fieldObj);
+		} catch (Exception e)
+		{
+			useReflection = false;
+			e.printStackTrace();
+		}
+		if (value != oldValue)
+			updateString();
+		return value;
+	}
+
 	public void performAction()
 	{
 		// super.performAction();
 	}
 
+	public void setDefault(float def)
+	{
+		defaultValue = def;
+		setValue(defaultValue);
+	}
+
+	public void setIncrement(float inc)
+	{
+		increment = inc;
+		/*
+		 * Try and auto-detect number of decimal places from the increment.
+		 */
+		int numDecimals = (int) Math.ceil((float) -Math.log10(increment));
+		// System.out.println(Math.log10(increment)+ " "+getName() + " " +
+		// increment + " " + numDecimals);
+		df.setMinimumFractionDigits(numDecimals);
+		df.setMaximumFractionDigits(numDecimals);
+
+		setValue(getValue());
+	}
+
+	public void setMax(float max)
+	{
+		this.max = max;
+	}
+
+	public void setMin(float min)
+	{
+		this.min = min;
+	}
+
+	public void setProperty(Object obj, String prop)
+	{
+//		System.out.println(name+"  "+defaultValue);
+		try
+		{
+			field = obj.getClass().getField(prop);
+			fieldObj = obj;
+			useReflection = true;
+//			System.out.println(field.getFloat(fieldObj));
+		} catch (Exception e)
+		{
+//			e.printStackTrace();
+			field = null;
+			fieldObj = null;
+			useReflection = false;
+			throw new RuntimeException();
+		}
+		if (Float.isNaN(defaultValue))
+		{
+			setDefault(getValue());
+		} else
+		{
+			setValue(defaultValue);
+		}
+	}
+
+	public void setScrollSpeed(float changePerPixel)
+	{
+		scrollSpeed = changePerPixel;
+	}
+
+	public void setValue(float val)
+	{
+		float oldValue = value;
+		value = PApplet.constrain(val, min, max);
+		if (useReflection)
+		{
+			try
+			{
+				field.setFloat(fieldObj, value);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		updateString();
+	}
+
+	void updateString()
+	{
+		stringValue = df.format(value);
+	}
+
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
 		super.visibleMouseEvent(e, tempPt);
-
+		if (!isEnabled())
+			return;
+		
 		if (mouseInside)
 		{
 			menu.setCursor(Cursor.N_RESIZE_CURSOR);
@@ -276,21 +310,6 @@ public class NumberScroller extends MenuItem
 				}
 				break;
 		}
-	}
-
-	static RoundRectangle2D.Float buffRoundRect = new RoundRectangle2D.Float(0,
-			0, 0, 0, 0, 0);
-
-	protected boolean containsPoint(Point p)
-	{
-		if (scrolling)
-			return true;
-		float ro = menu.style.getF("f.roundOff");
-		buffRoundRect.setRoundRect(x, y, width, height, ro,
-				ro);
-		// buffRoundRect.setRoundRect(x + nOffset, y, nWidth, height,
-		// menu.style.roundOff, menu.style.roundOff);
-		return buffRoundRect.contains(p);
 	}
 
 }

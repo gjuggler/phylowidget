@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui;
 
@@ -27,7 +27,7 @@ public class Label extends AbstractUIObject implements Malleable
 	PApplet app;
 
 	String label;
-	
+
 	Color color;
 	float fontSize;
 	float x, y;
@@ -63,7 +63,8 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void draw()
 	{
-		app.smooth();
+		if (UIUtils.isJava2D(app))
+			app.smooth();
 		app.fill(color.getRGB());
 		app.textFont(FontLoader.instance.vera);
 		app.textSize(fontSize);
@@ -85,10 +86,10 @@ public class Label extends AbstractUIObject implements Malleable
 	{
 		fontSize = f;
 	}
-	
+
 	public void setPosition(float x, float y)
 	{
-		setPositionByCornerNW(x,y);
+		setPositionByCornerNW(x, y);
 	}
 
 	public void setPositionByBaseline(float x, float y)
@@ -96,21 +97,21 @@ public class Label extends AbstractUIObject implements Malleable
 		this.x = x;
 		this.y = y;
 	}
-	
+
 	public void setPositionByCornerNW(float west, float north)
 	{
 		cache();
 		x = west; // Nothing fancy here
 		y = north + cacheA;
 	}
-	
-//	public void setPositionByCornerSW(float west, float south)
-//	{
-//		cache();
-//		x = west;
-//		y = south - cacheD;
-//	}
-	
+
+	//	public void setPositionByCornerSW(float west, float south)
+	//	{
+	//		cache();
+	//		x = west;
+	//		y = south - cacheD;
+	//	}
+
 	public void setX(float f)
 	{
 		x = f;
@@ -126,7 +127,7 @@ public class Label extends AbstractUIObject implements Malleable
 	{
 		y = f;
 	}
-	
+
 	public float getHeight()
 	{
 		cache();
@@ -139,18 +140,23 @@ public class Label extends AbstractUIObject implements Malleable
 			return;
 		cacheS = label;
 		cacheFS = fontSize;
-		cacheH = UIUtils.getTextHeight(app.g, FontLoader.instance.vera, fontSize, label, true);
-		cacheW = UIUtils.getTextWidth(app.g, FontLoader.instance.vera, fontSize, label, true);
-		cacheA = UIUtils.getTextAscent(app.g, FontLoader.instance.vera, fontSize, true);
-		cacheD = UIUtils.getTextDescent(app.g, FontLoader.instance.vera, fontSize, true);
+		cacheH = UIUtils.getTextHeight(app.g, FontLoader.instance.vera,
+				fontSize, label, true);
+		cacheW = UIUtils.getTextWidth(app.g, FontLoader.instance.vera,
+				fontSize, label, true);
+		cacheA = UIUtils.getTextAscent(app.g, FontLoader.instance.vera,
+				fontSize, true);
+		cacheD = UIUtils.getTextDescent(app.g, FontLoader.instance.vera,
+				fontSize, true);
 	}
-	
+
 	float cacheFS;
 	String cacheS;
 	float cacheW;
 	float cacheH;
 	float cacheA;
 	float cacheD;
+
 	public float getWidth()
 	{
 		cache();
@@ -159,14 +165,14 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void setHeight(float h)
 	{
-		setFontSize(getFontSize() * h/getHeight());
+		setFontSize(getFontSize() * h / getHeight());
 	}
 
 	public void setWidth(float w)
 	{
-		setFontSize(getFontSize() * w/getWidth());
+		setFontSize(getFontSize() * w / getWidth());
 	}
-	
+
 	private float getFontSize()
 	{
 		return fontSize;
@@ -174,9 +180,9 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void setColor(int r, int g, int b)
 	{
-		color = new Color(r,g,b);
+		color = new Color(r, g, b);
 	}
-	
+
 	public void setSize(float w, float h)
 	{
 	}

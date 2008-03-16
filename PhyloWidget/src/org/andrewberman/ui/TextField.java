@@ -823,7 +823,7 @@ public class TextField extends AbstractUIObject implements Malleable
 				 * Consume the event so the ToolManager doesn't dispatch the
 				 * event to any tools.
 				 */
-				e.consume();
+//				e.consume();
 			}
 		}
 	}

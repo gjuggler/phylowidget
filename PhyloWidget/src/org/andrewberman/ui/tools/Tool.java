@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.tools;
 
@@ -26,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.AbstractUIObject;
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.UIUtils;
@@ -40,7 +41,7 @@ public abstract class Tool extends AbstractUIObject
 
 	Camera camera;
 
-	Shortcut shortcut, toggle;
+	Shortcut shortcut;
 	Point downPoint, curPoint;
 	boolean mousePressed, mouseDragging, controlPressed;
 
@@ -53,7 +54,7 @@ public abstract class Tool extends AbstractUIObject
 
 	public void setToggleKey(String s)
 	{
-		toggle = new Shortcut(s);
+		setShortcut(s);
 	}
 
 	public void setShortcut(String s)
@@ -72,7 +73,15 @@ public abstract class Tool extends AbstractUIObject
 	 * 
 	 * @return
 	 */
-	public abstract boolean respondToOtherEvents();
+	public boolean respondToOtherEvents()
+	{
+		return false;
+	}
+
+	public boolean modalFocusWhileDragging()
+	{
+		return true;
+	}
 
 	public Cursor getCursor()
 	{
@@ -132,9 +141,13 @@ public abstract class Tool extends AbstractUIObject
 				pressReset(e, screen, model);
 				break;
 			case (MouseEvent.MOUSE_RELEASED):
+				if (modalFocusWhileDragging())
+					FocusManager.instance.removeFromFocus(this);
 				mousePressed = false;
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
+				if (modalFocusWhileDragging())
+					FocusManager.instance.setModalFocus(this);
 			case (MouseEvent.MOUSE_MOVED):
 				curPoint = (Point) screen.clone();
 				break;

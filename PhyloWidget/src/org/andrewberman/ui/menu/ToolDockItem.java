@@ -18,6 +18,7 @@
  */
 package org.andrewberman.ui.menu;
 
+import java.awt.event.KeyEvent;
 import java.lang.reflect.Constructor;
 
 import org.andrewberman.ui.tools.Tool;
@@ -29,6 +30,8 @@ public class ToolDockItem extends DockItem
 	private String toolString;
 	private Tool tool;
 
+	String shortcutString;
+	
 	public void setTool(String s)
 	{
 		toolString = s;
@@ -43,6 +46,8 @@ public class ToolDockItem extends DockItem
 						.getConstructor(new Class[] { PApplet.class });
 				Object instance = c.newInstance(new Object[] { p });
 				this.tool = (Tool) instance;
+				if (shortcutString != null)
+					tool.setShortcut(shortcutString);
 			} catch (Exception e)
 			{
 				e.printStackTrace();
@@ -67,10 +72,18 @@ public class ToolDockItem extends DockItem
 	
 	public MenuItem setShortcut(String s)
 	{
-		super.setShortcut(s);
+		// Tools have "global" shortcuts, so we don't add a menu-specific one here.
+		// Instead, we store a separate string and use that to build the tool's shortcut.
+		shortcutString = s;
 		if (tool != null)
-			tool.setShortcut(s);
+			tool.setShortcut(shortcutString);
 		return this;
+	}
+	
+	@Override
+	public void keyEvent(KeyEvent e)
+	{
+		super.keyEvent(e);
 	}
 	
 	public String getLabel()

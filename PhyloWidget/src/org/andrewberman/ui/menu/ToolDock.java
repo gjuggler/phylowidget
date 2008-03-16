@@ -23,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.EventManager;
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.UIUtils;
@@ -62,12 +63,16 @@ public class ToolDock extends Dock implements ToolManager.ToolShortcuts
 
 	public void keyEvent(KeyEvent e)
 	{
-		super.keyEvent(e);
 		checkToolShortcuts(e);
 	}
 
 	public void checkToolShortcuts(KeyEvent e)
 	{
+		Object o = FocusManager.instance.getFocusedObject();  
+		if (o != null && o != this)
+		{
+			return;
+		}
 		if (e.getID() != KeyEvent.KEY_PRESSED)
 			return;
 		ToolDockItem activeItem = null;

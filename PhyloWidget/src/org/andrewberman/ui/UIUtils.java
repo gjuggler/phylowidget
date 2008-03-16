@@ -48,7 +48,7 @@ import processing.core.PMatrix;
  * 
  * @author Greg
  */
-public class UIUtils
+public final class UIUtils
 {
 	private static PMatrix camera = new PMatrix();
 	private static PMatrix cameraInv = new PMatrix();

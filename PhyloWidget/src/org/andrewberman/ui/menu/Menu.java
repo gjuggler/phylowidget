@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -100,61 +100,126 @@ import processing.core.PGraphicsJava2D;
  */
 public abstract class Menu extends MenuItem implements UIObject
 {
+	public static final int CLICKAWAY_COLLAPSES = 1;
+
+	public static final int CLICKAWAY_HIDES = 0;
+	public static final int CLICKAWAY_IGNORED = 2;
+
+	static final int PAD = 10;
+
 	public static final int START_SIZE = 50;
-
-	private int offsetX = 0;
-	private int offsetY = 0;
-
-	public MenuStyle style;
-
-	
 	/**
-	 * Our UIListeners.
+	 * If true, this menu's items will act like a "menu" and open up on the
+	 * mouse down event, as opposed to the more "button"-like behavior of
+	 * opening on the mouse up event.
 	 */
-	protected ArrayList listeners = new ArrayList(1);
+	protected boolean actionOnMouseDown;
+	/**
+	 * The current alpha value for this menu.
+	 */
+	public float alpha = 1.0f;
+	/**
+	 * A Tween for the alpha value. Only created if <code>autoDim</code> is
+	 * set to true.
+	 */
+	protected PropertyTween aTween;
+	// protected boolean hideOnAction = true;
+	/**
+	 * If true, this menu will dim to loAlpha if the mouse is not inside the
+	 * menu or any of its sub-items.
+	 */
+	protected boolean autoDim;
+	/**
+	 * The graphics2D object to which we may be drawing.
+	 */
+	protected PGraphicsJava2D buff;
+	Rectangle2D.Float buffRect = new Rectangle2D.Float(0, 0, 0, 0);
 	/**
 	 * The current "canvas" PApplet object.
 	 */
 	protected PApplet canvas;
 	/**
-	 * The graphics2D object to which we may be drawing.
+	 * Defines the behavior of a click that occurs outside the bounds of the
+	 * menu and all of its sub-menus).
 	 */
-	protected PGraphicsJava2D buff;
+	protected int clickAwayBehavior;
 	/**
-	 * A RenderingHints object, used during the <code>draw()</code> cycle to
-	 * store and reload the rendering hints on the graphics2D object being used.
+	 * If true, a click will hide a submenu as well as show it. This option
+	 * works best when set to the OPPOSITE of the above hoverNavigable option.
 	 */
-	RenderingHints origRH;
+	protected boolean clickToggles;
+	public boolean consumeEvents;
+
+	protected boolean hidden;
+
+	public void setHidden(boolean hideMe)
+	{
+		hidden = hideMe;
+	}
+
+	protected int cursor;
+	/**
+	 * The "dim" alpha value to drop to. Only effective when
+	 * <code>autodim</code> is true.
+	 */
+	public float dimAlpha = .3f;
+	/**
+	 * If set to true, then this menu will grab focus when the show() function
+	 * is called. It will then also release focus when the hide() function is
+	 * called.
+	 */
+	public boolean focusOnShow;
+	/**
+	 * The full alpha value to jump to when the mouse is over this menu. Only
+	 * effective when <code>autoDim</code> is true.
+	 */
+	public float fullAlpha = 1f;
+	/**
+	 * References to a few relevant MenuItems.
+	 */
+	protected MenuItem hovered, lastPressed, kbFocus;
+	/**
+	 * If true, a mouse hover will expand a menu item. If false, a menu item
+	 * requires a click to expand.
+	 */
+	protected boolean hoverNavigable;
+	/**
+	 * Our UIListeners.
+	 */
+	protected ArrayList listeners = new ArrayList(1);
+	/**
+	 * If set to true, then this menu grabs modal focus when opened.
+	 */
+	public boolean modalFocus;
+	/**
+	 * One Point object which will be passed to the sub-items during the
+	 * mouseEvent() cycle.
+	 */
+	Point mousePt = new Point(0, 0);
+	private float offsetX = 0;
+	private float offsetY = 0;
+
 	/**
 	 * A Composite object, used to store and reload the Graphics2D's original
 	 * composite state during the draw cycle.
 	 */
 	Composite origComp;
 	/**
+	 * A RenderingHints object, used during the <code>draw()</code> cycle to
+	 * store and reload the rendering hints on the graphics2D object being used.
+	 */
+	RenderingHints origRH;
+	/**
 	 * Two Rectangle objects which are passed to the sub-items during the
 	 * getRect() phase of the draw cycle.
 	 */
 	Rectangle2D.Float rect = new Rectangle2D.Float(0, 0, 0, 0);
-	Rectangle2D.Float buffRect = new Rectangle2D.Float(0, 0, 0, 0);
 	/**
-	 * One Point object which will be passed to the sub-items during the
-	 * mouseEvent() cycle.
+	 * If true, only one of this MenuItem's submenus will be allowed to be shown
+	 * at once. Generally best left set to true.
 	 */
-	Point mousePt = new Point(0, 0);
-	/**
-	 * A Tween for the alpha value. Only created if <code>autoDim</code> is
-	 * set to true.
-	 */
-	protected PropertyTween aTween;
-	/**
-	 * References to a few relevant MenuItems.
-	 */
-	protected MenuItem hovered, lastPressed, kbFocus;
-	/**
-	 * The current alpha value for this menu.
-	 */
-	public float alpha = 1.0f;
-
+	protected boolean singletNavigation;
+	public MenuStyle style;
 	/*
 	 * =============================== GENERAL OPTIONS FOR SUBCLASSES
 	 */
@@ -173,6 +238,13 @@ public abstract class Menu extends MenuItem implements UIObject
 	 * overriding the <code>setOptions</code> method.
 	 */
 	public boolean useCameraCoordinates;
+
+	/**
+	 * If true, this Menu will change to the hand cursor when one of its
+	 * constituent sub-MenuItems is selected. I am the walrus.
+	 */
+	protected boolean useHandCursor;
+
 	/**
 	 * This parameter signals that the sub-classing menu is going to draw itself
 	 * using Java2D. As such, if the base canvas isn't Java2D, then we will draw
@@ -181,68 +253,6 @@ public abstract class Menu extends MenuItem implements UIObject
 	 * draw directly to the on-screen PGraphics canvas. Schweet!
 	 */
 	protected boolean usesJava2D;
-	/**
-	 * If true, a mouse hover will expand a menu item. If false, a menu item
-	 * requires a click to expand.
-	 */
-	protected boolean hoverNavigable;
-	/**
-	 * If true, a click will hide a submenu as well as show it. This option
-	 * works best when set to the OPPOSITE of the above hoverNavigable option.
-	 */
-	protected boolean clickToggles;
-	/**
-	 * If true, only one of this MenuItem's submenus will be allowed to be shown
-	 * at once. Generally best left set to true.
-	 */
-	protected boolean singletNavigation;
-	/**
-	 * If true, this menu's items will act like a "menu" and open up on the
-	 * mouse down event, as opposed to the more "button"-like behavior of
-	 * opening on the mouse up event.
-	 */
-	protected boolean actionOnMouseDown;
-	/**
-	 * Defines the behavior of a click that occurs outside the bounds of the
-	 * menu and all of its sub-menus).
-	 */
-	protected int clickAwayBehavior;
-	public static final int CLICKAWAY_HIDES = 0;
-	public static final int CLICKAWAY_COLLAPSES = 1;
-	public static final int CLICKAWAY_IGNORED = 2;
-	/**
-	 * If true, this Menu will change to the hand cursor when one of its
-	 * constituent sub-MenuItems is selected. I am the walrus.
-	 */
-	protected boolean useHandCursor;
-
-	// protected boolean hideOnAction = true;
-	/**
-	 * If true, this menu will dim to loAlpha if the mouse is not inside the
-	 * menu or any of its sub-items.
-	 */
-	protected boolean autoDim;
-	/**
-	 * The "dim" alpha value to drop to. Only effective when
-	 * <code>autodim</code> is true.
-	 */
-	public float dimAlpha = .3f;
-	/**
-	 * The full alpha value to jump to when the mouse is over this menu. Only
-	 * effective when <code>autoDim</code> is true.
-	 */
-	public float fullAlpha = 1f;
-	/**
-	 * If set to true, then this menu will grab focus when the show() function
-	 * is called. It will then also release focus when the hide() function is
-	 * called.
-	 */
-	public boolean focusOnShow;
-	/**
-	 * If set to true, then this menu grabs modal focus when opened.
-	 */
-	public boolean modalFocus;
-	public boolean consumeEvents;
 
 	public Menu(PApplet app)
 	{
@@ -260,76 +270,25 @@ public abstract class Menu extends MenuItem implements UIObject
 		init();
 	}
 
-	protected void init()
+	public void addListener(UIListener o)
 	{
-		if (UIUtils.isJava2D(canvas))
-			buff = (PGraphicsJava2D) canvas.g;
-		else if (usesJava2D)
-			createBuffer(START_SIZE, START_SIZE);
-		if (autoDim)
-			aTween = new PropertyTween(this, "alpha",
-					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, fullAlpha,
-					15);
+		listeners.add(o);
 	}
 
-	@Override
-	protected void setParent(MenuItem item)
+	protected void clickaway()
 	{
-		super.setParent(item);
-		
-	}
-	
-	public void setOptions()
-	{
-		useCameraCoordinates = true;
-		usesJava2D = true;
-		hoverNavigable = false;
-		clickToggles = false;
-		singletNavigation = true;
-		actionOnMouseDown = false;
-		clickAwayBehavior = CLICKAWAY_HIDES;
-		useHandCursor = true;
-		autoDim = false;
-		focusOnShow = false;
-		modalFocus = false;
-		consumeEvents = true;
-
-		// Subclassers should put changes in the boolean options here.
-	}
-
-	public void setFontSize(float newSize)
-	{
-		style.set("f.fontSize", newSize);
-//		PFont curFont = (PFont) style.get("font");
-//		curFont.font = curFont.font.deriveFont(newSize);
-		layout();
-	}
-
-	protected void createBuffer(int w, int h)
-	{
-		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
-	}
-
-	public float getX()
-	{
-		return x;
-	}
-
-	public float getY()
-	{
-		return y;
-	}
-
-	public abstract MenuItem create(String label);
-
-	public void open()
-	{
-		open(this);
-		if (modalFocus)
-			FocusManager.instance.setModalFocus(this);
-		else if (focusOnShow)
-			FocusManager.instance.setFocus(this);
-		fireEvent(UIEvent.MENU_OPENED);
+		switch (clickAwayBehavior)
+		{
+			case (CLICKAWAY_HIDES):
+				close();
+				break;
+			case (CLICKAWAY_COLLAPSES):
+				closeMyChildren();
+				break;
+			case (CLICKAWAY_IGNORED):
+			default:
+				break;
+		}
 	}
 
 	public void close()
@@ -353,13 +312,6 @@ public abstract class Menu extends MenuItem implements UIObject
 		fireEvent(UIEvent.MENU_CLOSED);
 	}
 
-	public void open(MenuItem i)
-	{
-		if (i.isOpen())
-			close();
-		i.isOpen = true;
-	}
-
 	public void close(MenuItem item)
 	{
 		ArrayList items = item.items;
@@ -372,34 +324,23 @@ public abstract class Menu extends MenuItem implements UIObject
 		item.isOpen = false;
 	}
 
-	public boolean isRootMenu()
+	protected boolean containsPoint(Point pt)
 	{
-		return (menu == this);
+		return false;
 	}
 
-	public void setMenu(Menu m)
-	{
-		super.setMenu(m);
-		if (!isRootMenu())
-		{
-			/*
-			 * If we're no longer the root menu, then remove ourselves from the
-			 * EventManager's control.
-			 */
-			EventManager.instance.remove(this);
-		}
-	}
+	public abstract MenuItem create(String label);
 
-	public void layout()
+	protected void createBuffer(int w, int h)
 	{
-		hint();
-		super.layout();
-		unhint();
+		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
 	}
 
 	public void draw()
 	{
 		// System.out.println(hovered);
+		if (hidden)
+			return;
 		if (!isRootMenu())
 		{
 			super.draw();
@@ -443,7 +384,7 @@ public abstract class Menu extends MenuItem implements UIObject
 			resizeBuffer();
 			hint();
 			buff.beginDraw();
-			buff.background(255, 0);
+			buff.background(menu.getStyle().getC("c.background").getRGB(), 0);
 			buff.translate(-x, -y);
 			buff.translate(-offsetX, -offsetY);
 			// buff.translate(offsetX, offsetX);
@@ -453,38 +394,6 @@ public abstract class Menu extends MenuItem implements UIObject
 			drawToCanvas();
 			unhint();
 		}
-	}
-
-	protected void hint()
-	{
-		origRH = buff.g2.getRenderingHints();
-		origComp = buff.g2.getComposite();
-		buff.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		buff.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-				RenderingHints.VALUE_STROKE_PURE);
-		// buff.g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
-		// buff.g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-		// RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		// buff.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-		// RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
-		buff.g2.setComposite(AlphaComposite.getInstance(
-				AlphaComposite.SRC_OVER, alpha));
-	}
-
-	protected void unhint()
-	{
-		buff.g2.setRenderingHints(origRH);
-		buff.g2.setComposite(origComp);
-	}
-
-	protected void resetMatrix(PGraphics graphics)
-	{
-		if (useCameraCoordinates)
-			return;
-		UIUtils.resetMatrix(graphics);
 	}
 
 	protected void drawToCanvas()
@@ -510,7 +419,173 @@ public abstract class Menu extends MenuItem implements UIObject
 		// canvas.rect(x+offsetX,y+offsetY,w,h);
 	}
 
-	static final int PAD = 10;
+	public void fireEvent(int id)
+	{
+		UIEvent e = new UIEvent(this, id);
+		for (int i = 0; i < listeners.size(); i++)
+		{
+			((UIListener) listeners.get(i)).uiEvent(e);
+		}
+	}
+
+	public void focusEvent(FocusEvent e)
+	{
+		if (e.getID() == FocusEvent.FOCUS_LOST)
+		{
+			close();
+		}
+	}
+
+	public float getX()
+	{
+		return x;
+	}
+
+	public float getY()
+	{
+		return y;
+	}
+
+	protected void hint()
+	{
+		origRH = buff.g2.getRenderingHints();
+		origComp = buff.g2.getComposite();
+		buff.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		buff.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+				RenderingHints.VALUE_STROKE_PURE);
+		// buff.g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+		//		 buff.g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+		//		 RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		// buff.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+		// RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+		buff.g2.setComposite(AlphaComposite.getInstance(
+				AlphaComposite.SRC_OVER, alpha));
+	}
+
+	protected void init()
+	{
+		if (UIUtils.isJava2D(canvas))
+			buff = (PGraphicsJava2D) canvas.g;
+		else if (usesJava2D)
+			createBuffer(START_SIZE, START_SIZE);
+		if (autoDim)
+			aTween = new PropertyTween(this, "alpha",
+					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, fullAlpha,
+					15);
+	}
+
+	public boolean isRootMenu()
+	{
+		return (menu == this);
+	}
+
+	protected void itemMouseEvent(MouseEvent e, Point pt)
+	{
+		if (hidden)
+			return;
+		super.itemMouseEvent(e, pt);
+		if (mouseInside && consumeEvents)
+		{
+			e.consume();
+		}
+		if (autoDim)
+		{
+			if (mouseInside)
+			{
+				aTween.continueTo(fullAlpha);
+			} else if (menu.hovered == null)
+			{
+				aTween.continueTo(dimAlpha);
+			}
+		}
+	}
+
+	public void keyEvent(KeyEvent e)
+	{
+		switch (e.getKeyCode())
+		{
+			case (KeyEvent.VK_ESCAPE):
+				close();
+				break;
+		}
+		if (kbFocus != null)
+			kbFocus.keyEvent(e);
+		super.keyEvent(e);
+	}
+
+	public void layout()
+	{
+		hint();
+		super.layout();
+		unhint();
+	}
+
+	public void mouseEvent(MouseEvent e, Point screen, Point model)
+	{
+		Point useMe = model;
+		if (isRootMenu() && !useCameraCoordinates)
+			useMe = screen;
+		/*
+		 * create a copy of the point we decided to use, and translate it
+		 * accordingly.
+		 */
+		mousePt.setLocation(useMe);
+		// mousePt.translate(-x, -y);
+		/*
+		 * Send the mouse events through the tree of sub-items.
+		 */
+		setCursor(-1);
+		itemMouseEvent(e, mousePt);
+		if (!mouseInside && isOpen() && e.getID() == MouseEvent.MOUSE_PRESSED)
+		{
+			clickaway();
+		}
+
+		if (useHandCursor && isOpen() && cursor == -1)
+		{
+			if (mouseInside)
+			{
+				UIUtils.setCursor(this, canvas, Cursor.HAND_CURSOR);
+			} else
+			{
+				UIUtils.releaseCursor(this, canvas);
+			}
+		}
+	}
+
+	public void open()
+	{
+		open(this);
+		if (modalFocus)
+			FocusManager.instance.setModalFocus(this);
+		else if (focusOnShow)
+			FocusManager.instance.setFocus(this);
+		fireEvent(UIEvent.MENU_OPENED);
+	}
+
+	public void open(MenuItem i)
+	{
+		if (!i.isEnabled())
+			return;
+		if (i.isOpen())
+			close();
+		i.isOpen = true;
+	}
+
+	public void removeListener(UIListener o)
+	{
+		listeners.remove(o);
+	}
+
+	protected void resetMatrix(PGraphics graphics)
+	{
+		if (useCameraCoordinates)
+			return;
+		UIUtils.resetMatrix(graphics);
+	}
 
 	protected void resizeBuffer()
 	{
@@ -548,9 +623,69 @@ public abstract class Menu extends MenuItem implements UIObject
 		}
 	}
 
-	protected boolean containsPoint(Point pt)
+	protected void setCursor(int c)
 	{
-		return false;
+		cursor = c;
+		if (c != -1)
+		{
+			UIUtils.setCursor(this, canvas, c);
+		}
+	}
+
+	public void setFontSize(float newSize)
+	{
+		style.set("f.fontSize", newSize);
+		//		PFont curFont = (PFont) style.get("font");
+		//		curFont.font = curFont.font.deriveFont(newSize);
+		layout();
+	}
+
+	public void setMenu(Menu m)
+	{
+		super.setMenu(m);
+		if (!isRootMenu())
+		{
+			/*
+			 * If we're no longer the root menu, then remove ourselves from the
+			 * EventManager's control.
+			 */
+			EventManager.instance.remove(this);
+		}
+	}
+
+	public void setOptions()
+	{
+		useCameraCoordinates = true;
+		usesJava2D = true;
+		hoverNavigable = false;
+		clickToggles = false;
+		singletNavigation = true;
+		actionOnMouseDown = false;
+		clickAwayBehavior = CLICKAWAY_HIDES;
+		useHandCursor = true;
+		autoDim = false;
+		focusOnShow = false;
+		modalFocus = false;
+		consumeEvents = true;
+
+		// Subclassers should put changes in the boolean options here.
+	}
+
+	@Override
+	protected void setParent(MenuItem item)
+	{
+		super.setParent(item);
+
+	}
+
+	/*
+	 * No multiple inheritance allowed, so I had to copy this boilerplate code
+	 * from AbstractUIObject instead of inheriting it. Crap!
+	 */
+
+	protected void setState(int state)
+	{
+		// Do nothing.
 	}
 
 	public void setState(MenuItem item, int newState)
@@ -598,133 +733,10 @@ public abstract class Menu extends MenuItem implements UIObject
 		}
 	}
 
-	public void keyEvent(KeyEvent e)
+	protected void unhint()
 	{
-		switch (e.getKeyCode())
-		{
-			case (KeyEvent.VK_ESCAPE):
-				close();
-				break;
-		}
-		if (kbFocus != null)
-			kbFocus.keyEvent(e);
-		super.keyEvent(e);
-	}
-
-	public void mouseEvent(MouseEvent e, Point screen, Point model)
-	{
-		Point useMe = model;
-		if (isRootMenu() && !useCameraCoordinates)
-			useMe = screen;
-		/*
-		 * create a copy of the point we decided to use, and translate it
-		 * accordingly.
-		 */
-		mousePt.setLocation(useMe);
-		// mousePt.translate(-x, -y);
-		/*
-		 * Send the mouse events through the tree of sub-items.
-		 */
-		setCursor(-1);
-		itemMouseEvent(e, mousePt);
-		if (!mouseInside && isOpen() && e.getID() == MouseEvent.MOUSE_PRESSED)
-		{
-			clickaway();
-		}
-
-		if (useHandCursor && isOpen() && cursor == -1)
-		{
-			if (mouseInside)
-			{
-				UIUtils.setCursor(this, canvas, Cursor.HAND_CURSOR);
-			} else
-			{
-				UIUtils.releaseCursor(this, canvas);
-			}
-		}
-	}
-
-	protected int cursor;
-
-	protected void setCursor(int c)
-	{
-		cursor = c;
-		if (c != -1)
-		{
-			UIUtils.setCursor(this, canvas, c);
-		}
-	}
-
-	protected void clickaway()
-	{
-		switch (clickAwayBehavior)
-		{
-			case (CLICKAWAY_HIDES):
-				close();
-				break;
-			case (CLICKAWAY_COLLAPSES):
-				closeMyChildren();
-				break;
-			case (CLICKAWAY_IGNORED):
-			default:
-				break;
-		}
-	}
-
-	protected void itemMouseEvent(MouseEvent e, Point pt)
-	{
-		super.itemMouseEvent(e, pt);
-		if (mouseInside && consumeEvents)
-		{
-			e.consume();
-		}
-		if (autoDim)
-		{
-			if (mouseInside)
-			{
-				aTween.continueTo(fullAlpha);
-			} else if (menu.hovered == null)
-			{
-				aTween.continueTo(dimAlpha);
-			}
-		}
-	}
-
-	protected void setState(int state)
-	{
-		// Do nothing.
-	}
-
-	public void focusEvent(FocusEvent e)
-	{
-		if (e.getID() == FocusEvent.FOCUS_LOST)
-		{
-			close();
-		}
-	}
-
-	/*
-	 * No multiple inheritance allowed, so I had to copy this boilerplate code
-	 * from AbstractUIObject instead of inheriting it. Crap!
-	 */
-
-	public void addListener(UIListener o)
-	{
-		listeners.add(o);
-	}
-
-	public void removeListener(UIListener o)
-	{
-		listeners.remove(o);
-	}
-
-	public void fireEvent(int id)
-	{
-		UIEvent e = new UIEvent(this, id);
-		for (int i = 0; i < listeners.size(); i++)
-		{
-			((UIListener) listeners.get(i)).uiEvent(e);
-		}
+		buff.g2.setRenderingHints(origRH);
+		buff.g2.setComposite(origComp);
 	}
 
 }

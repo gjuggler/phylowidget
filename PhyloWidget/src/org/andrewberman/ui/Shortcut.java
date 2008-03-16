@@ -54,6 +54,7 @@ public class Shortcut
 	public int keyMask;
 	public int keyCode;
 	public String label;
+	String origS;
 
 	static String control = "(control|ctrl|meta|cmd|command|apple)";
 	static String alt = "(alt)";
@@ -64,6 +65,7 @@ public class Shortcut
 	public Shortcut(String s)
 	{
 //		ShortcutManager.instance.add(this);
+		origS = s;
 		parseString(s);
 	}
 

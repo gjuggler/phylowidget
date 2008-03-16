@@ -16,27 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.andrewberman.ui.tools;
+package org.andrewberman.ui.unsorted;
 
-import processing.core.PApplet;
-
-public class Arrow extends Tool
+public class BulgeUtil
 {
 
-	public Arrow(PApplet p)
+	public static float bulge(float dist, float bulgeAmount,float bulgeWidth)
 	{
-		super(p);
-	}
-
-	public boolean respondToOtherEvents()
-	{
-		return true;
+		return (float)(1.0 + bulgeAmount
+		*Math.exp(-dist * dist / (bulgeWidth * bulgeWidth)));
 	}
 	
-	@Override
-	public boolean modalFocusWhileDragging()
-	{
-		return false;
-	}
-
 }

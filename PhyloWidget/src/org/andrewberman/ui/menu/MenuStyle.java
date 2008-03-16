@@ -21,7 +21,7 @@ public class MenuStyle extends Style
 		defaults.set("c.background", new Color(245, 245, 255));
 		defaults.set("c.foreground", new Color(0,0,0));
 		
-		defaults.set("c.disabled", new Color(220, 230, 255).darker(45));
+		defaults.set("c.disabled", new Color(245, 245, 255).darker(10));
 		defaults.set("c.gradientLo", new Color(245, 245, 255));
 		defaults.set("c.gradientHi", new Color(190, 210, 245));
 

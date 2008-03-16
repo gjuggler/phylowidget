@@ -42,7 +42,13 @@ public class Style extends HashMap<Object, Object>
 
 	public float getF(Object key)
 	{
-		return ((Float) get(key));
+		float f;
+		try{
+			f = ((Float) get(key));
+		} catch (Exception e){
+			f = ((Integer)get(key));
+		}
+		return f;
 	}
 
 	public Color getC(Object key)

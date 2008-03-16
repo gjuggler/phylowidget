@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 
 import org.andrewberman.ui.Point;
@@ -34,11 +35,13 @@ import processing.core.PFont;
 
 public class CheckBox extends MenuItem
 {
-	public final static float CHECKBOX_SIZE = .9f;
+	public final static float CHECKBOX_SIZE = .8f;
 	
 	private boolean value;
 
 	private Field field;
+	private Method method;
+	private Object methodObj;
 	private Object fieldObj;
 	private boolean useReflection;
 
@@ -59,13 +62,28 @@ public class CheckBox extends MenuItem
 			useReflection = true;
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+//			e.printStackTrace();
 			field = null;
-			return;
+			throw new RuntimeException();
 		}
-		// setVal(defaultValue);
 	}
 
+	public void setMethodCall(Object obj, String meth)
+	{
+		try {
+			method = obj.getClass().getMethod(meth,Boolean.TYPE);
+			methodObj = obj;
+			useReflection = true;
+		} catch (Exception e)
+		{
+//			e.printStackTrace();
+			method = null;
+			methodObj = null;
+			useReflection = false;
+			throw new RuntimeException();
+		}
+	}
+	
 	public void setValue(String s)
 	{
 		setVal(Boolean.parseBoolean(s));
@@ -79,7 +97,16 @@ public class CheckBox extends MenuItem
 		{
 			try
 			{
-				field.setBoolean(fieldObj, value);
+				if (field != null)
+					field.setBoolean(fieldObj, value);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			try 
+			{
+				if (method != null)
+					method.invoke(methodObj, value);
 			} catch (Exception e)
 			{
 				e.printStackTrace();
@@ -113,14 +140,15 @@ public class CheckBox extends MenuItem
 //			MenuUtils.drawBlankRect(this, curX, y+nOffsetY, nWidth, nHeight);
 		} else
 		{
-			MenuUtils.drawSingleGradientRect(this, curX, y+nOffsetY, nWidth, nHeight,0);
+			if (shouldPerformFill())
+				MenuUtils.drawSingleGradientRect(this, curX, y+nOffsetY, nWidth, nHeight,0);
 		}
 		/*
 		 * update the "value" object using Reflection.
 		 */
 		try
 		{
-			if (useReflection)
+			if (field != null)
 				value = field.getBoolean(fieldObj);
 		} catch (Exception e)
 		{
@@ -205,6 +233,9 @@ public class CheckBox extends MenuItem
 	{
 		super.visibleMouseEvent(e, tempPt);
 
+		if (!isEnabled())
+			return;
+		
 		if (mouseInside)
 		{
 			menu.setCursor(Cursor.HAND_CURSOR);

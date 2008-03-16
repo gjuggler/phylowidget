@@ -70,12 +70,12 @@ public class Dock extends Menu
 	/**
 	 * The amount by which the icons "bulge" when approached.
 	 */
-	public float bulgeAmount = .5f;
+	public float bulgeAmount = .7f;
 	/**
 	 * The "rolloff" factor for the icons' bulge. Play around with it to find a
 	 * value that you like.
 	 */
-	public float bulgeWidth = 50.0f;
+	public float bulgeWidth = 20.0f;
 
 	/**
 	 * If set to true, then this Dock will automatically center itself to the
@@ -174,12 +174,12 @@ public class Dock extends Menu
 		return rotation.getMousePos(mousePt);
 	}
 
-	float bulge(float b)
+	float bulge(float dist)
 	{
 		if (isActivated)
 		{
 			return 1.0f + bulgeAmount
-					* PApplet.exp(-b * b / (bulgeWidth * bulgeWidth));
+					* PApplet.exp(-dist * dist / (bulgeWidth * bulgeWidth));
 		} else
 			return 1.0f;
 	}
@@ -411,14 +411,14 @@ public class Dock extends Menu
 		super.setState(i, s);
 	}
 
-	public void setHidden(String s)
-	{
-		if (s.startsWith("t"))
-		{
-			close();
-		} else
-			open();
-	}
+//	public void setHidden(String s)
+//	{
+//		if (s.startsWith("t"))
+//		{
+//			close();
+//		} else
+//			open();
+//	}
 	
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
@@ -589,5 +589,25 @@ public class Dock extends Menu
 					break;
 			}
 		}
+	}
+
+	public float getBulgeAmount()
+	{
+		return bulgeAmount;
+	}
+
+	public void setBulgeAmount(float bulgeAmount)
+	{
+		this.bulgeAmount = bulgeAmount;
+	}
+
+	public float getBulgeWidth()
+	{
+		return bulgeWidth;
+	}
+
+	public void setBulgeWidth(float bulgeWidth)
+	{
+		this.bulgeWidth = bulgeWidth;
 	}
 }

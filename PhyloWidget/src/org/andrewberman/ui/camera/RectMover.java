@@ -91,9 +91,9 @@ public class RectMover extends MovableCamera
 		hTween.fforward();
 	}
 	
-	public void fillScreen()
+	public void fillScreen(float f)
 	{
-		zoomCenterTo(0, 0, p.getWidth(), p.getHeight());
+		zoomCenterTo(0, 0, p.getWidth()*f, p.getHeight()*f);
 	}
 	
 	public float getZ()

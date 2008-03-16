@@ -94,9 +94,11 @@ h1 {
 }
 
 h2 {
-	color:brighter;
 	font-size:125%;
 	font-style:italic;
+}
+
+h2,h3,h4 {
 	margin-left:2em;
 }
 
@@ -142,6 +144,7 @@ h3 {
 }
 
 input {
+  margin-top:10px;
   padding:3px;
   width:80%;
 }

@@ -16,8 +16,10 @@ public class PhyloConfig
 {
 	PApplet p;
 
+	
+	
 	/*
-	 * URL API Configuration
+	 * URL API CONFIGURATION
 	 * 
 	 * If you are running a database that works with phylogenetic information, the easiest way to "integrate"
 	 * PhyloWidget with your service is to create "View in PhyloWidget" links using PhyloWidget's simple URL-based

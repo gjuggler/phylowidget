@@ -20,8 +20,8 @@ package org.phylowidget.net;
 
 import java.util.ArrayList;
 
-import org.andrewberman.unsorted.DelayedAction;
-import org.andrewberman.unsorted.JSCaller;
+import org.andrewberman.ui.unsorted.DelayedAction;
+import org.andrewberman.ui.unsorted.JSCaller;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloNode;
@@ -36,7 +36,7 @@ public class NodeInfoUpdater extends DelayedAction
 
 	public NodeInfoUpdater()
 	{
-		jsCall = PhyloWidget.ui.nodeJavascript;
+		jsCall = "updateNode";
 	}
 
 	public void triggerUpdate(RootedTree t, PhyloNode n)

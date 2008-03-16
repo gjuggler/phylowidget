@@ -18,7 +18,8 @@
  */
 package org.phylowidget.net;
 
-import org.andrewberman.unsorted.DelayedAction;
+import org.andrewberman.ui.unsorted.DelayedAction;
+import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeClipboard;
 
 public class PWClipUpdater extends DelayedAction
@@ -27,11 +28,12 @@ public class PWClipUpdater extends DelayedAction
 	public void triggerUpdate(String s)
 	{
 		parseMe = s;
-		trigger(200);
+		trigger(100);
 	}
 	
 	public void run()
 	{
-		TreeClipboard.instance().setClip(parseMe);
+		TreeClipboard.instance().setClipFromJS(parseMe);
+		PhyloWidget.setMessage("Clipboard text set to: "+parseMe);
 	}
 }

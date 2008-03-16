@@ -18,8 +18,8 @@
  */
 package org.phylowidget.net;
 
-import org.andrewberman.unsorted.DelayedAction;
-import org.andrewberman.unsorted.JSCaller;
+import org.andrewberman.ui.unsorted.DelayedAction;
+import org.andrewberman.ui.unsorted.JSCaller;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
@@ -35,12 +35,12 @@ public class JSTreeUpdater extends DelayedAction
 	{
 		tree = t;
 		trigger(200);
-		jsCall = PhyloWidget.ui.treeJavascript;
+		jsCall = "updateTree";
 	}
 
 	public void run()
 	{
-		String s = TreeIO.createNewickString(tree);
+		String s = TreeIO.createNewickString(tree,false);
 		String cmd = jsCall;
 		caller.reflectJS(cmd, s);
 	}

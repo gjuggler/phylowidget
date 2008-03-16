@@ -18,8 +18,8 @@
  */
 package org.phylowidget.net;
 
-import org.andrewberman.unsorted.DelayedAction;
-import org.andrewberman.unsorted.JSCaller;
+import org.andrewberman.ui.unsorted.DelayedAction;
+import org.andrewberman.ui.unsorted.JSCaller;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
@@ -36,7 +36,7 @@ public class JSClipUpdater extends DelayedAction
 	public void triggerUpdate(String s)
 	{
 		trigger(200);
-		jsCall = PhyloWidget.ui.clipJavascript;
+		jsCall = "updateClip";
 		newClip = s;
 	}
 

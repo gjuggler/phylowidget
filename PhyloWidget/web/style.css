@@ -1,0 +1,147 @@
+
+body {
+  margin: 0px 0px 0px 0px;
+  padding: 10px 0px 0px 0px;
+  font-family: verdana, geneva, arial, helvetica, sans-serif;
+  font-size: small;
+  background-color: white;
+  text-decoration: none;
+  font-weight: normal;
+  line-height: normal;
+}
+ 
+A          { color: #3399CC; text-decoration: none; }
+A:link     { color: #3399CC; text-decoration: none; }
+A:visited  { color: #3399CC; text-decoration: none; }
+A:active   { color: #3399CC; text-decoration: underline; }
+A:hover    { color: #3399CC; text-decoration: underline; }
+
+img {
+  vertical-align:middle;
+}
+
+#screenshots {
+	text-align:center;
+}
+
+#screenshots img {
+  border: 2px solid black;
+  padding:2px;
+  margin:5px;
+}
+
+#screenshots a:hover img{
+  border: 2px solid #3399CC;
+}
+
+#content-wrapper {
+  width:700px;
+  margin:auto;
+  background-color:white;
+  text-align:center;
+}
+
+#footer, #footer2 {
+  font-size:smaller;
+  padding-left:25px;
+  padding-top:3px;
+  padding-bottom:3px;
+  border:1px solid black;
+}
+
+#footer {
+  clear:both;
+  background-color:#dde5fa;
+  color:black;
+}
+
+#footer2 {
+  foreground:black;
+  background: #F2F2F2;
+  border-top:0px;
+}
+
+#quickstart{
+	margin:auto;
+	text-align:center;
+	margin-top:20px;
+	margin-bottom:20px;
+}
+
+#content {
+  text-align:left;
+  color:#0e4c92;
+}
+
+#content p{
+	padding-left:4em;
+	padding-right:0em;
+}
+
+.innerlist {
+	padding-left:6em;
+}
+
+.brd {
+	border: 2px solid #999;
+}
+
+h1 {
+	background:#F2F2F2;
+	border: 1px solid #0e4c92;
+	padding: .15em;
+	font-size:130%;
+}
+
+h2 {
+	color:brighter;
+	font-size:125%;
+	font-style:italic;
+	margin-left:2em;
+}
+
+h3 {
+	font-size:115%;
+}
+
+.boxlist {
+	margin:0px;
+	padding:0px;
+	margin-bottom:10px;
+	margin-top: 10px;
+	padding:5px;
+}
+
+.boxlist li {
+	display:inline;
+	padding-right:10px;
+}
+
+.boxlist a {
+	padding: 10px 5px;
+	#padding: 3px;
+	color:#0e4c92;
+	background-color: white;
+	border: 2px solid #0e4c92;
+	text-decoration:none;
+}
+
+.boxlist img {
+  border:none;
+  padding-right:5px;
+}
+
+.boxlist a, .boxlist a:visited{
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.boxlist a:hover {
+	color:#005;
+	background-color: #cce;
+}
+
+input {
+  padding:3px;
+  width:80%;
+}

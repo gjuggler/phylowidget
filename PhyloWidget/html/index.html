@@ -11,57 +11,25 @@
 
 </head>
 <body class="yui-skin-sam">
-
 <div id="content-wrapper">
-
-<!--
-<div id="header">
-${project.name}
-</div>
--->
 
 <div id="content">
 
 <div id="floater" style="float:left;">
-<h1>${project.name}</h1>
-<div id="PhyloWidget" style="width:${applet.width}px;">
+	<h1>${project.name}</h1>
+	<div id="PhyloWidget" style="width:${applet.width}px;"></div>
 </div>
+	<div id="floater2" style="width:300px;float:right;">
+		<h1>${project.name} Toolbox</h1>
+		<div id="toolbox"></div>
+	</div>
 </div>
 
-<div id="floater2" style="width:300px;float:right;">
-<h1>${project.name} Toolbox</h1>
-<div id="toolbox"></div>
-</div>
-
-</div>
 <script type="text/javascript">
-	loadSimplePhyloWidget();
+// This is all it takes to load PhyloWidget into the DIV named 'PhyloWidget'... really!
+	loadPhyloWidget('PhyloWidget');
+// Ditto for the toolbox... it's that simple!
 	loadToolbox('toolbox');
-
-/*
-  // Applies the settings to the YUI panel. 
-  var pw = function() {
-    var c = {context:['wide_div','tl','tl']};
-  	PW.PhyloWidget.cfg.applyConfig(c);
-  };
-  // Loads the PhyloWidget panel into the PW.PhyloWidget variable.
-  loadPhyloWidget(pw); 
-  
-  // Applies the settings to the YUI panel.
-  var tb = function() {
-  	var cfg = {context:['wide_div','tr','tr']};
-  	PW.toolbox.cfg.applyConfig(cfg);
-  }
-  // Loads the Toolbar panel into the PW.toolbar variable.
-  loadToolbox(tb);
-  
-  // Does some JSObject connection crap once the applet is loaded.
-  loadYahoo(function () {
-  	YAHOO.util.Event.onContentReady('PhyloWidget',function() {
-		connectToJava();
-  	});
-  });
-*/
 </script>
 
 <div id="footer">

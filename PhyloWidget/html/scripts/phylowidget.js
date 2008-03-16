@@ -182,10 +182,10 @@ function stopApplet(el_id)
 // Global phylowidget object.
 var PW = {};
 
-function loadSimplePhyloWidget()
+function loadPhyloWidget(id)
 {
 	var props = getQueryParameters();
-	loadAppletObject('PhyloWidget','PhyloWidget',props);
+	loadAppletObject(id,'PhyloWidget',props);
 }
 
 function loadToolbox(dest_id)
@@ -207,7 +207,7 @@ function getTextFieldHTML(id,fnToCall,msg)
 	return "<input type='text' id='"+id+"' onblur='javascript:"+fnToCall+";updateFooter(\"\");' onfocus='javascript:updateFooter(\""+msg+"\");'></input>"; 
 }
 
-function loadPhyloWidget(callback)
+function loadPhyloWidget_old(callback)
 {
 	var id = 'PhyloWidget';
 	var myF = function() {

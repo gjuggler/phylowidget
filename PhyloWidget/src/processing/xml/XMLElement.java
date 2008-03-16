@@ -240,7 +240,7 @@ public class XMLElement
      */
     public XMLElement()
     {
-        this(new Hashtable(), false, true, true);
+        this(new Hashtable(), false, true, false);
     }
 
 

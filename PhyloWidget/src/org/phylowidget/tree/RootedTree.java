@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.tree;
 
@@ -67,7 +67,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	public static final Integer FORWARD = new Integer(-1);
 	public Comparator sorter = new EnclosedLeavesComparator(-1);
 	public Comparator leafSorter = new DepthToRootComparator(1);
-	
+
 	public static final String INTERNAL_NODE_LABEL = "";
 
 	/*
@@ -89,6 +89,13 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 */
 	private UniqueLabeler uniqueLabeler;
 
+	private boolean isValid = true;
+
+	public boolean isValid()
+	{
+		return isValid;
+	}
+
 	public RootedTree()
 	{
 		// super(new SimpleDirectedWeightedGraph(DefaultWeightedEdge.class));
@@ -97,6 +104,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		if (useNeighborIndex)
 			createNeighborIndex();
 		sorting = new HashMap();
+		isValid = true;
 	}
 
 	void createNeighborIndex()
@@ -140,7 +148,19 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		{
 			uniqueLabeler = new UniqueLabeler();
 			uniqueLabeler.resetVertexLabels(this);
+		} else
+		{
+			uniqueLabeler.removeDuplicateTags(this);
 		}
+	}
+
+	public boolean isLabelSignificant(String s)
+	{
+		if (enforceUniqueLabels)
+		{
+			return uniqueLabeler.isLabelSignificant(s);
+		} else
+			return s.length() > 0;
 	}
 
 	/**
@@ -169,7 +189,8 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	{
 		if (enforceUniqueLabels)
 		{
-			return uniqueLabeler.getNodeForLabel(label);
+			Object o = uniqueLabeler.getNodeForLabel(label);
+			return o;
 		} else
 			return null;
 	}
@@ -187,6 +208,11 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			return;
 		Object edge = getEdge(parent, vertex);
 		setEdgeWeight(edge, weight);
+	}
+
+	public void resetVertexLabels()
+	{
+		uniqueLabeler.resetVertexLabels(this);
 	}
 
 	/**
@@ -211,16 +237,24 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 
 	public boolean addVertex(Object o)
 	{
-		if (enforceUniqueLabels)
-			uniqueLabeler.addLabel(o);
-		return super.addVertex(o);
+		if (super.addVertex(o))
+		{
+			if (enforceUniqueLabels)
+				uniqueLabeler.addLabel(o);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean removeVertex(Object o)
 	{
-		if (enforceUniqueLabels)
-			uniqueLabeler.removeLabel(o);
-		return super.removeVertex(o);
+		if (super.removeVertex(o))
+		{
+			if (enforceUniqueLabels)
+				uniqueLabeler.removeLabel(o);
+			return true;
+		}
+		return false;
 	}
 
 	public Object createAndAddVertex(Object o)
@@ -244,7 +278,12 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			l.addAll(neighbors.successorsOf(vertex));
 		} else
 			l = Graphs.successorListOf(this, vertex);
-		return sortChildrenList(vertex,l,sorter);
+		return sortChildrenList(vertex, l, sorter);
+	}
+
+	public void modPlus()
+	{
+
 	}
 
 	List sortChildrenList(Object vertex, List l, Comparator sorter)
@@ -253,13 +292,12 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		Collections.sort(l, sorter);
 		if (sorting.containsKey(vertex))
 		{
-			Integer i = (Integer) sorting.get(vertex);
-			if (i == REVERSE)
+			if (sorting.get(vertex) == REVERSE)
 				Collections.reverse(l);
 		}
 		return l;
 	}
-	
+
 	public Object getFirstLeaf(Object vertex)
 	{
 		Object cur = vertex;
@@ -269,7 +307,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 		return cur;
 	}
-	
+
 	public Object getFirstChild(Object vertex)
 	{
 		return getChildrenOf(vertex).get(0);
@@ -290,7 +328,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		}
 		return cur;
 	}
-	
+
 	public Object getParentOf(Object child)
 	{
 		// Special case: this vertex has no parents, i.e. it is the root.
@@ -328,9 +366,9 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 
 	public int getDepthToRoot(Object vertex)
 	{
-		return getDepthToVertex(vertex,getRoot());
+		return getDepthToVertex(vertex, getRoot());
 	}
-	
+
 	int getDepthToVertex(Object vertex, Object target)
 	{
 		int depth = 0;
@@ -425,7 +463,10 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			} else
 			{
 				List children = getChildrenOf(v);
-				s.addAll(children);
+				for (int i = children.size() - 1; i >= 0; i--)
+				{
+					s.add(children.get(i));
+				}
 			}
 			if (nodes != null)
 				nodes.add(v);
@@ -460,14 +501,16 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	{
 		if (vertex == getRoot())
 		{
-			Object newRoot = createAndAddVertex("[new root]");
+			Object newRoot = createAndAddVertex("");
 			setRoot(newRoot);
 		}
 		List nodes = getEnclosedVertices(vertex);
-		for (int i = 0; i < nodes.size(); i++)
+		synchronized (this)
 		{
-//			deleteNode(nodes.get(i));
-			removeVertex(nodes.get(i));
+			for (int i = 0; i < nodes.size(); i++)
+			{
+				removeVertex(nodes.get(i));
+			}
 		}
 	}
 
@@ -488,7 +531,9 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			removeVertex(vertex);
 		} else
 		{
-			// Do nothing -- how would I delete the root node?
+			Object newRoot = createAndAddVertex("");
+			setRoot(newRoot);
+			removeVertex(vertex);
 		}
 	}
 
@@ -603,8 +648,9 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	 * 
 	 * @param pivot
 	 */
-	public synchronized void reroot(Object pivot)
+	public void reroot(Object pivot)
 	{
+		isValid = false;
 		// System.out.println("Rerooting tree...");
 		// System.out.println("Step 1...");
 		// System.out.println(this);
@@ -612,7 +658,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 		if (pivot == root || getParentOf(pivot) == root)
 			return;
 		/**
-		 * Ok, let's do this.
+		 * Ok, let's do this thang.
 		 * 
 		 * Here's the plan:
 		 * <p>
@@ -713,6 +759,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			}
 			seen.put(curNode, stupidInt);
 		}
+		isValid = true;
 	}
 
 	/**
@@ -833,17 +880,17 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 	class DepthToRootComparator implements Comparator
 	{
 		int dir;
-		
+
 		public DepthToRootComparator(int dir)
 		{
 			this.dir = dir;
 		}
-		
+
 		public int compare(Object o1, Object o2)
 		{
 			int a = getDepthToRoot(o1);
 			int b = getDepthToRoot(o2);
-			
+
 			if (dir == 1)
 			{
 				if (a > b)
@@ -863,7 +910,7 @@ public class RootedTree extends ListenableDirectedWeightedGraph
 			}
 		}
 	}
-	
+
 	class EnclosedLeavesComparator implements Comparator
 	{
 		int dir;

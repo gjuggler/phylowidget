@@ -38,7 +38,7 @@ import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.menu.MenuUtils;
-import org.andrewberman.unsorted.BulgeUtil;
+import org.andrewberman.ui.unsorted.BulgeUtil;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
@@ -256,7 +256,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				return style.dimColor.getRGB();
 			case (PhyloNode.COPY):
 				return style.copyColor.getRGB();
-				
+
 			case (PhyloNode.NONE):
 			default:
 				return style.foregroundColor.getRGB();
@@ -272,7 +272,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void draw()
 	{
-		baseStroke = getRowHeight() * PhyloWidget.ui.lineSize;
+		baseStroke = getRowHeight() * PhyloWidget.cfg.lineSize;
 		canvas.noStroke();
 		canvas.fill(0);
 
@@ -320,7 +320,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		{
 			PhyloNode n = nodes.get(i);
 			// n.isWithinScreen = isNodeWithinScreen(n);
-			if (nodesDrawn >= PhyloWidget.ui.renderThreshold)
+			if (nodesDrawn >= PhyloWidget.cfg.renderThreshold)
 				break;
 			if (!n.isWithinScreen)
 				continue;
@@ -374,17 +374,23 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				Point point = new Point(getX(h), getY(h));
 				float dist = (float) point.distance(mousePt);
 				float bulgedSize = BulgeUtil.bulge(dist, .7f, 30);
-				if (textSize <= 12)
-					h.zoomTextSize = bulgedSize;
-				else
-					h.zoomTextSize = 1f;
+				if (tree.isLeaf(h))
+				{
+					if (textSize <= 14)
+						h.zoomTextSize = bulgedSize;
+					else
+						h.zoomTextSize = 1f;
+				}
 				updateNode(h);
 
 				drawLabel(h);
 				h.labelWasDrawn = true;
 				NodeRange r = nodesToRanges.get(h);
-				if (r != null && r.node.getLabel().length() > 0)
-					overlap.insert(r.loY, r.hiY);
+				if (r != null && tree.isLeaf(r.node))
+				{
+//					if (UniqueLabeler.isLabelSignificant(r.node.getLabel()))
+						overlap.insert(r.loY, r.hiY);
+				}
 			}
 		}
 
@@ -396,9 +402,12 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			NodeRange r = nodesToRanges.get(n);
 			if (!overlap.overlaps(r.loY, r.hiY) || !useOverlapDetector())
 			{
-				if (n.getLabel().length() > 0)
+				if (tree.isLeaf(n))
 				{
 					overlap.insert(r.loY, r.hiY);
+				}
+				if (tree.isLabelSignificant(n.getLabel()))
+				{
 					drawLabel(n);
 					n.labelWasDrawn = true;
 				}
@@ -420,8 +429,6 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				asdf++;
 			}
 		}
-
-		// System.out.println(asdf);
 
 		/*
 		 * Finally, unhint the canvas.
@@ -446,52 +453,40 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	{
 		canvas.pushMatrix();
 		canvas.translate(getX(n) + dotWidth / 2 + textSize / 3, getY(n));
-		canvas.rotate(PApplet.radians(PhyloWidget.ui.textRotation));
-		//		if (RenderOutput.isOutputting)
-		//		{
-
-		//			canvas.textFont(FontLoader.instance.vera);
-		//			canvas.textSize(textSize*n.zoomTextSize);
-		//			canvas.textAlign(PConstants.LEFT, PConstants.BASELINE);
-		//			canvas.textSize(textSize);
-		//			canvas.text(n.getLabel(), 0, 0 + dFont);
-		//		} else
-		//		{
+		canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
 
 		float curTextSize = textSize * n.zoomTextSize;
 
-		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
-		Graphics2D g2 = pgj.g2;
-		if (n.found)
+		if (tree.isLeaf(n) && n.found)
 		{
 			/*
 			 * Draw a background rect.
 			 */
-			//			canvas.stroke(0);
-			//			canvas.strokeWeight(textSize / 10);
 			canvas.noStroke();
 			canvas.fill(style.foundBackground.getRGB());
 			canvas.rect(0, -curTextSize / 2,
 					(float) (n.unitTextWidth * curTextSize), curTextSize);
-			//			g2.setPaint(style.foundBackground);
-			//			g2.setStroke(style.stroke(.5f));
-			//			g2.fillRect((int) - 1, (int) (-curTextSize / 2 - 1),
-			//					(int) (n.unitTextWidth * curTextSize) + 1, (int) curTextSize + 1);
-			//			g2.setPaint(Color.BLACK);
-			//			g2.drawRect((int) - 1, (int) (-curTextSize / 2 - 1),
-			//					(int) (n.unitTextWidth * curTextSize) + 1, (int) curTextSize + 1);
-			g2.setPaint(style.foundForeground);
+		}
+		/*
+		 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
+		 */
+		canvas.textFont(font);
+		canvas.textSize(curTextSize);
+		canvas.fill(style.foregroundColor.getRGB());
+
+		if (!tree.isLeaf(n))
+		{
+			//			curTextSize = rowSize;
+			//			canvas.textSize(rowSize);
+			canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
+			float s = strokeForNode(n);
+			canvas.text(n.getLabel(), -dotWidth - curTextSize / 3 - s, -s
+					- curTextSize / 5);
 		} else
 		{
-			g2.setPaint(style.foregroundColor);
+			canvas.textAlign(canvas.LEFT, canvas.BASELINE);
+			canvas.text(n.getLabel(), 0, 0 + dFont * curTextSize / textSize);
 		}
-
-		//			/*
-		//			 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
-		//			 */
-		g2.setFont(font.font.deriveFont(curTextSize));
-		g2.drawString(n.getLabel(), 0, 0 + dFont * curTextSize / textSize);
-		//		}
 		canvas.popMatrix();
 	}
 
@@ -651,8 +646,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			 * Now, we want to draw this inner node's label if it's significant
 			 * and we are set to show clade labels.
 			 */
-			if (UniqueLabeler.isLabelSignificant(n.getLabel())
-					&& PhyloWidget.ui.showCladeLabels)
+			if (tree.isLabelSignificant(n.getLabel())
+					&& PhyloWidget.cfg.showCladeLabels)
 			{
 				drawLabel(n);
 			}
@@ -690,8 +685,10 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 					RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_OFF);
+			canvas.noHint(PApplet.ENABLE_NATIVE_FONTS);
+			canvas.smooth();
 		}
-//		canvas.noSmooth();
+
 	}
 
 	boolean isAnyParentDrawn(PhyloNode n)
@@ -787,8 +784,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 */
 		biggestStringWidth = 0;
 		biggestString = "";
-		if (UIUtils.isJava2D(canvas))
-			fm = UIUtils.getMetrics(canvas, font.font, 100);
+		//		if (UIUtils.isJava2D(canvas))
+		//			fm = UIUtils.getMetrics(canvas, font.font, 100);
 		/*
 		 * Set the leaf positions.
 		 */
@@ -812,7 +809,9 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			{
 				// width = fm.stringWidth(n.getName());
 				Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
-				width = (float) fm.getStringBounds(n.getLabel(), g2).getWidth() / 100f;
+				//				width = (float) fm.getStringBounds(n.getLabel(), g2).getWidth() / 100f;
+				width = UIUtils.getTextWidth(canvas, font, 100, n.getLabel(),
+						true) / 100f;
 			} else
 			{
 				char[] chars = n.getLabel().toCharArray();
@@ -835,7 +834,9 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		if (biggestString.length() == 0)
 		{
 			biggestString = "P";
-			biggestStringWidth = fm.stringWidth(biggestString) / 100f;
+			//			biggestStringWidth = fm.stringWidth(biggestString) / 100f;
+			biggestStringWidth = UIUtils.getTextWidth(canvas, font, 100,
+					biggestString, true) / 100f;
 		}
 		/*
 		 * Now, set the branch positions.
@@ -860,7 +861,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 */
 		float yPos = ((float) (index + .5f) / (float) (leaves.size()));
 		float xPos = 1;
-		if (PhyloWidget.ui.useBranchLengths)
+		if (PhyloWidget.cfg.useBranchLengths)
 			xPos = nodeXPosition(n);
 		n.setPosition(xPos, yPos);
 	}
@@ -875,7 +876,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected float nodeXPosition(PhyloNode n)
 	{
-		if (PhyloWidget.ui.useBranchLengths)
+		if (PhyloWidget.cfg.useBranchLengths)
 		{
 			if (tree.getParentOf(n) == null)
 				return 0;
@@ -895,14 +896,23 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	public void positionText(PhyloNode n, TextField tf)
 	{
+		float textSize = this.textSize * n.zoomTextSize;
 		tf.setTextSize(textSize);
 		float tfWidth = UIUtils.getTextWidth(canvas, font, textSize, tf
 				.getText(), true);
 		float textWidth = (float) Math.max(n.unitTextWidth * textSize + 5,
 				tfWidth);
 		tf.setWidth(textWidth);
-		tf.setPositionByBaseline(getX(n) + dotWidth / 2 + textSize / 3, getY(n)
-				+ dFont);
+		if (tree.isLeaf(n))
+		{
+			tf.setPositionByBaseline(getX(n) + dotWidth / 2 + textSize / 3,
+					getY(n) + dFont);
+		} else
+		{
+			float s = strokeForNode(n);
+			tf.setPositionByBaseline(getX(n) - (float) n.unitTextWidth
+					* textSize - s, getY(n) - s);
+		}
 	}
 
 	public Object rangeForNode(Object n)
@@ -913,27 +923,29 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	protected void recalc()
 	{
 		overhang = biggestStringWidth
-				* PApplet.sin(PApplet.radians(PhyloWidget.ui.textRotation));
+				* PApplet.sin(PApplet.radians(PhyloWidget.cfg.textRotation));
 		float absOverhang = Math.abs(overhang);
 		rowSize = rect.height / (numRows + absOverhang);
 		textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
-		tsf = Math.max(1, PhyloWidget.ui.minTextSize / textSize);
+		tsf = PhyloWidget.cfg.textSize;
+		tsf *= Math.max(1, PhyloWidget.cfg.minTextSize / textSize);
+		
 		colSize = rect.width / (numCols + 1 + biggestStringWidth);
 		// System.out.println("height:"+rect.width);
-		if (!PhyloWidget.ui.fitTreeToWindow)
+		if (!PhyloWidget.cfg.stretchToFit)
 		{
 			rowSize = colSize = Math.min(rowSize, colSize) * .9f;
 			scaleX = colSize * numCols;
 			scaleY = rowSize * numRows;
 		}
 		textSize = Math.min(rowSize, textSize);
-		if (PhyloWidget.ui.fitTreeToWindow)
+		if (PhyloWidget.cfg.stretchToFit)
 		{
 			scaleX = rect.width - biggestStringWidth * textSize - 10;
 			scaleY = rect.height - absOverhang * textSize;
 		}
 		// System.out.println(scaleX);
-		dotWidth = textSize * PhyloWidget.ui.nodeSize;
+		dotWidth = textSize * PhyloWidget.cfg.nodeSize;
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;

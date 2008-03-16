@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.tree;
 
@@ -32,7 +32,7 @@ import javax.swing.tree.TreeNode;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 
-public class RandomTreeMutator implements Runnable
+public class RandomTreeMutator
 {
 	private RootedTree tree;
 	private Thread wrapper;
@@ -63,57 +63,57 @@ public class RandomTreeMutator implements Runnable
 
 	public void start()
 	{
-		wrapper = new Thread(this);
-		wrapper.setName("PhyloWidget-tree-mutator");
-		wrapper.start();
+//		wrapper = new Thread(this);
+//		wrapper.setName("PhyloWidget-tree-mutator");
+//		wrapper.start();
 	}
 
-	public void run()
-	{
-		Thread thisThread = null;
-		try
-		{
-			thisThread = Thread.currentThread();
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		while (wrapper == thisThread)
-		{
-			try
-			{
-				Thread.sleep(delay);
-			} catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			PhyloWidget.trees.triggerMutation();
-		}
-	}
+//	public void run()
+//	{
+//		Thread thisThread = null;
+//		try
+//		{
+//			thisThread = Thread.currentThread();
+//		} catch (Exception e)
+//		{
+//			e.printStackTrace();
+//		}
+//		while (wrapper == thisThread)
+//		{
+//			try
+//			{
+//				Thread.sleep(delay);
+//			} catch (InterruptedException e)
+//			{
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			PhyloWidget.trees.triggerMutation();
+//		}
+//	}
 
 	private ArrayList allNodes = new ArrayList(100);
 
-	public synchronized void randomlyMutateTree()
+	public void randomlyMutateTree()
 	{
 		String taxonName = DEFAULT_NAME;
 		// taxonName = getRemoteNCBITaxon();
 		taxonName = getLocalNCBITaxon();
-		 synchronized (tree)
-		 {
-		allNodes.clear();
-		tree.getAll(tree.getRoot(), null, allNodes);
-		int i = random.nextInt(allNodes.size());
-		Object vertex = allNodes.get(i);
-		PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
-		tree.addSisterNode(vertex, sis);
+		synchronized (tree)
+		{
+			allNodes.clear();
+			tree.getAll(tree.getRoot(), null, allNodes);
+			int i = random.nextInt(allNodes.size());
+			Object vertex = allNodes.get(i);
+			PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
+			tree.addSisterNode(vertex, sis);
 
-		tree.setBranchLength(vertex, randomBranch());
-		tree.setBranchLength(sis, randomBranch());
-		tree.setBranchLength(tree.getParentOf(sis), randomBranch());
-		mutations++;
-		 }
-//		PhyloWidget.trees.fforward(true, true);
+			tree.setBranchLength(vertex, randomBranch());
+			tree.setBranchLength(sis, randomBranch());
+			tree.setBranchLength(tree.getParentOf(sis), randomBranch());
+			mutations++;
+		}
+		//		PhyloWidget.trees.fforward(true, true);
 	}
 
 	private double randomBranch()

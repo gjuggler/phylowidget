@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.UIRectangle;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.camera.RectMover;
 import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.PhyloWidget;
@@ -42,8 +43,11 @@ public class TreeManager
 
 	public static RectMover camera;
 	public static UIRectangle cameraRect;
-	protected ArrayList trees;
-	protected ArrayList renderers;
+	//	protected ArrayList trees;
+	//	protected ArrayList renderers;
+
+	TreeRenderer r;
+	RootedTree t;
 
 	// public Navigator nav;
 	private RandomTreeMutator mutator;
@@ -55,22 +59,23 @@ public class TreeManager
 	public TreeManager(PApplet p)
 	{
 		this.p = p;
+		UIUtils.loadUISinglets(p);
 	}
 
 	public void setup()
 	{
-		trees = new ArrayList();
-		renderers = new ArrayList();
 		cameraRect = new UIRectangle(0, 0, 0, 0);
 		camera = new RectMover(p);
-		camera.fillScreen();
+		camera.fillScreen(.8f);
 		camera.fforward();
 		/*
 		 * We need to let the ToolManager know our current Camera object.
 		 */
-		// EventManager.lazyLoad(p);
 		EventManager.instance.setCamera(camera);
+
+		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
 		rectangleRender();
+		
 	}
 
 	public void update()
@@ -78,26 +83,8 @@ public class TreeManager
 		camera.update();
 		cameraRect.setRect(camera.getRect());
 		cameraRect.translate(p.width / 2, p.height / 2);
-
-		for (int i = 0; i < renderers.size(); i++)
-		{
-			TreeRenderer r = (TreeRenderer) renderers.get(i);
-
-			// float oldThresh = PhyloWidget.ui.renderThreshold;
-			// PhyloWidget.ui.renderThreshold = 50;
-			// r.render(p.g, p.width*.75f, p.height*.75f, p.width*.25f,
-			// p.height*.25f, false);
-			// PhyloWidget.ui.renderThreshold = oldThresh;
-			//			
-			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
-					cameraRect.height, true);
-		}
-
-		//		if (fforwardMe)
-		//		{
-		//			fforward(true, true);
-		//			fforwardMe = false;
-		//		}
+		r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
+				cameraRect.height, true);
 
 		if (mutateMe)
 		{
@@ -105,21 +92,17 @@ public class TreeManager
 			mutateMe = false;
 		}
 
-		if (runMe != null)
-		{
-			Runnable r = runMe;
-			runMe = null;
-			r.run();
-		}
+//		if (runMe != null)
+//		{
+//			Runnable r = runMe;
+//			runMe = null;
+//			r.run();
+//		}
 	}
 
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect)
 	{
-		for (int i = 0; i < renderers.size(); i++)
-		{
-			TreeRenderer r = (TreeRenderer) renderers.get(i);
 			r.nodesInRange(list, rect);
-		}
 	}
 
 	// public void nodesTouchingPoint(ArrayList list, Point2D.Float pt)
@@ -138,7 +121,7 @@ public class TreeManager
 	public void startMutatingTree(int delay)
 	{
 		mutator.stop();
-		mutator = new RandomTreeMutator((RootedTree) trees.get(0));
+		mutator = new RandomTreeMutator(t);
 		mutator.setDelay(delay);
 		mutator.start();
 	}
@@ -148,44 +131,26 @@ public class TreeManager
 		mutator.stop();
 	}
 
-	public CachedRootedTree getTree()
+	public RootedTree getTree()
 	{
-		if (trees.size() == 0)
-			return null;
-		return (CachedRootedTree) trees.get(0);
+		return t;
 	}
 
 	public TreeRenderer getRenderer()
 	{
-		synchronized (renderers)
-		{
-			return (TreeRenderer) renderers.get(0);
-		}
+		return r;
 	}
 
-	//
-	//	public void fforward(boolean upX, boolean upY)
-	//	{
-	//		// update();
-	//		for (int i = 0; i < trees.size(); i++)
-	//		{
-	//			RootedTree tree = (RootedTree) trees.get(i);
-	//			ArrayList nodes = new ArrayList();
-	//			tree.getAll(tree.getRoot(), null, nodes);
-	//			for (int j = 0; j < nodes.size(); j++)
-	//			{
-	//				PhyloNode n = (PhyloNode) nodes.get(j);
-	//				n.fforward();
-	//			}
-	//		}
-	//
-	//	}
-
+	public void setTree(String s)
+	{
+		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
+	}
+	
 	public void setTree(final RootedTree tree)
 	{
-		trees.clear();
-		trees.add(tree);
-		getRenderer().setTree(tree);
+		this.t = tree;
+		if (getRenderer() != null)
+			getRenderer().setTree(tree);
 		if (tree instanceof PhyloTree)
 		{
 			PhyloTree pt = (PhyloTree) tree;
@@ -212,12 +177,10 @@ public class TreeManager
 
 	void setRenderer(TreeRenderer r)
 	{
-		synchronized (renderers)
-		{
-			renderers.clear();
+		this.r = r;
+		if (getTree() != null)
 			r.setTree(getTree());
-			renderers.add(r);
-		}
+		PhyloWidget.ui.search();
 	}
 
 	public void triggerMutation()

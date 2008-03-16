@@ -64,8 +64,8 @@ public class RenderStyleSet
 
 	private void loadDefaults()
 	{
-		foregroundColor = Color.parseColor(PhyloWidget.ui.foreground);
-		backgroundColor = Color.parseColor(PhyloWidget.ui.background);
+		foregroundColor = PhyloWidget.cfg.getForeground();
+		backgroundColor = PhyloWidget.cfg.getBackground();
 		regStroke = 1f;
 
 		dimColor = foregroundColor.brighter(200);

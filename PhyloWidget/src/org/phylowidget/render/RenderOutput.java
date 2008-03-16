@@ -48,8 +48,8 @@ public class RenderOutput
 		 * Change the rendering threshold to the size of the tree.
 		 */
 		float numNodes = t.vertexSet().size();
-		float oldThreshold = PhyloWidget.ui.renderThreshold;
-		PhyloWidget.ui.renderThreshold = numNodes;
+		float oldThreshold = PhyloWidget.cfg.renderThreshold;
+		PhyloWidget.cfg.renderThreshold = numNodes;
 		try
 		{
 			PhyloWidget.setMessage("Outputting PDF...");
@@ -72,7 +72,7 @@ public class RenderOutput
 			PhyloWidget.setMessage("PDF output failed!");
 		} finally
 		{
-			PhyloWidget.ui.renderThreshold = oldThreshold;
+			PhyloWidget.cfg.renderThreshold = oldThreshold;
 			isOutputting = false;
 			p.loop();
 		}

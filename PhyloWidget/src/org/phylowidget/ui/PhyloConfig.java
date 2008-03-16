@@ -19,22 +19,24 @@ public class PhyloConfig
 	/*
 	 * URL API Configuration
 	 * 
-	 * Information:
-	 * -- The following parameters may be set using PhyloWidget's URL-based API.
-	 * -- In order to set a property, just append the desired parameter to the original PhyloWidget URL.
-	 * -- You may combine properties as in any URL query by using the "&" character.
+	 * If you are running a database that works with phylogenetic information, the easiest way to "integrate"
+	 * PhyloWidget with your service is to create "View in PhyloWidget" links using PhyloWidget's simple URL-based
+	 * API. This allows you to customize the look, feel, and functionality of PhyloWidget without having to host
+	 * the applet on your own site.
+	 * 
+	 * The API is simple: just choose from one of the configuration parameters listed below, and call the 
+	 * PhyloWidget URL with the desired value appended to the end, as you would any normal GET parameters.
+	 * The applet will then read in the configuration parameters and modify its settings accordingly. 
 	 * 
 	 * Some examples:
-	 * 
-	 * - Set the initial tree.
+	 * - Set the tree that PhyloWidget shows upon startup.
 	 *		http://www.phylowidget.org/lite/index.html?tree="(a,(b,c));"
 	 * - Set the foreground color, using (R,G,B) format
 	 *		http://www.phylowidget.org/lite/index.html?foreground="(255,0,0);"
 	 * - Start up PhyloWidget with a preset tree and search string.
 	 *		http://www.phylowidget.org/lite/index.html?tree="(a,(b,c));"&search="a"
 	 * 
-	 * 
-	 * The parameters are displayed below, generally in order from most to least useful. Enjoy!
+	 * The configurable parameters are displayed below, generally in order from most to least useful. Enjoy!
 	 */
 
 	/*
@@ -62,6 +64,12 @@ public class PhyloConfig
 	 *   - "none.xml", Shows no menus at all.
 	 */
 	public String menuFile = "full.xml";
+	
+	/*
+	 * Colors: You can modify the foreground and background colors which PhyloWidget uses.
+	 * 
+	 * The new value should be formatted as below; a triplet of integer RGB values enclosed in parentheses.
+	 */
 	public String foreground = "(0,0,0)";
 	public String background = "(255,255,255)";
 	

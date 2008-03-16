@@ -18,13 +18,16 @@
  */
 package org.phylowidget.tree;
 
-public class DefaultVertex implements Labelable
+public class DefaultVertex implements Labelable, Cloneable
 {
 	public String label;
 
 	public DefaultVertex(Object o)
 	{
-		label = o.toString();
+		if (o == null)
+			label = new String();
+		else
+			label = o.toString();
 	}
 	
 	public String getLabel()

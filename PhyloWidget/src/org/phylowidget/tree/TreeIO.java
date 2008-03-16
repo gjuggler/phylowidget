@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -77,7 +78,7 @@ public class TreeIO
 		}
 		if (isNexus)
 		{
-			return parseNewickString(t,getNewickFromNexus(buff.toString()));
+			return parseNewickString(t, getNewickFromNexus(buff.toString()));
 		}
 		return parseNewickString(t, buff.toString());
 	}
@@ -85,16 +86,43 @@ public class TreeIO
 	public static RootedTree parseNewickString(RootedTree tree, String s)
 	{
 		Object root = null;
+
+		/*
+		 * See if this String is a valid URL... if it is, then load up the resource!
+		 * 
+		 *  Some good Nexus test files online here:
+		 *  http://www.molevol.org/camel/projects/nexus/NEXUS/
+		 */
+		int endInd = Math.min(10, s.length() - 1);
+		String test = s.substring(0, endInd).toLowerCase();
+		if (test.startsWith("http://") || test.startsWith("ftp://")
+				|| test.startsWith("file://"))
+		{
+			try
+			{
+				URL url = new URL(s);
+				BufferedReader r = new BufferedReader(new InputStreamReader(url
+						.openStream()));
+				return TreeIO.parseReader(tree, r);
+			} catch (SecurityException e)
+			{
+				PhyloWidget
+						.setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
+			} catch (MalformedURLException e)
+			{
+				// Do nothing! Just continue as if we never did that...				
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
 		/*
 		 * Pre-process the string as a whole.
 		 */
 		if (s.indexOf(';') == -1)
 			s = s + ';';
-		// System.out.println("input: " + s);
-		/*
-		 * String buffer which we'll be parsing from.
-		 */
-		//		StringBuffer sb = new StringBuffer(s);
+
 		/*
 		 * Contains an Integer of the number of items for each depth level.
 		 */
@@ -262,16 +290,20 @@ public class TreeIO
 			Object p = dfi.next();
 			if (!tree.isLeaf(p))
 			{
-				tree.sorting.put(p, RootedTree.REVERSE);
 				List l = tree.getChildrenOf(p);
 				if (l.get(0) != firstChildren.get(p))
-					tree.sorting.put(p, RootedTree.FORWARD);
+				{
+					tree.sorting.put(p, RootedTree.REVERSE);
+				}
 			}
 		}
 		/*
 		 * If the oldTree was set, unset it.
 		 */
 		oldTree = null;
+		/*
+		 * ModPlus if we're a cached tree.
+		 */
 		if (tree instanceof CachedRootedTree)
 		{
 			((CachedRootedTree) tree).modPlus();
@@ -288,27 +320,27 @@ public class TreeIO
 
 	static Object newNode(RootedTree t, String s)
 	{
-		Object newNode = null;
 		if (oldTree != null)
 		{
-			newNode = oldTree.getVertexForLabel(s);
+			Object existingNode = oldTree.getVertexForLabel(s);
+			if (existingNode != null)
+				return existingNode;
 		}
-		if (newNode == null)
-		{
-			newNode = t.createVertex(s);
-		}
-		t.addVertex(newNode);
-		return newNode;
+		Object o = t.createAndAddVertex(s);
+		return o;
+
 	}
 
-	public static String createNewickString(RootedTree tree)
+	public static String createNewickString(RootedTree tree,
+			boolean includeStupidLabels)
 	{
 		StringBuffer sb = new StringBuffer();
-		outputVertex(tree, sb, tree.getRoot());
+		outputVertex(tree, sb, tree.getRoot(), includeStupidLabels);
 		return sb.toString();
 	}
 
-	private static void outputVertex(RootedTree tree, StringBuffer sb, Object v)
+	private static void outputVertex(RootedTree tree, StringBuffer sb,
+			Object v, boolean includeStupidLabels)
 	{
 		/*
 		 * Ok, I was gonna make this one iterative instead of recursive (like
@@ -321,7 +353,7 @@ public class TreeIO
 			List l = tree.getChildrenOf(v);
 			for (int i = 0; i < l.size(); i++)
 			{
-				outputVertex(tree, sb, l.get(i));
+				outputVertex(tree, sb, l.get(i), includeStupidLabels);
 				if (i != l.size() - 1)
 					sb.append(',');
 			}
@@ -329,7 +361,7 @@ public class TreeIO
 		}
 		// Call this to make the vertex's label nicely formatted for Nexus
 		// output.
-		String s = getNexusCompliantLabel(tree, v);
+		String s = getNexusCompliantLabel(tree, v, includeStupidLabels);
 		if (s.length() != 0)
 			sb.append(s);
 		Object p = tree.getParentOf(v);
@@ -354,7 +386,8 @@ public class TreeIO
 
 	static Pattern quotePattern = Pattern.compile("'");
 
-	private static String getNexusCompliantLabel(RootedTree t, Object v)
+	private static String getNexusCompliantLabel(RootedTree t, Object v,
+			boolean includeStupidLabels)
 	{
 		String s = v.toString();
 		Matcher m = naughtyPattern.matcher(s);
@@ -380,9 +413,9 @@ public class TreeIO
 		 * is an unlabeled node, and the number was just inserted by PhyloWidget
 		 * to keep the node labels unique.
 		 */
-		if (!UniqueLabeler.isLabelSignificant(s) && !t.isLeaf(v))
+		if (!includeStupidLabels && !t.isLabelSignificant(s) && !t.isLeaf(v))
 		{
-			boolean pr = PhyloWidget.ui.outputAllInnerNodes;
+			boolean pr = PhyloWidget.cfg.outputAllInnerNodes;
 			if (!pr)
 			{
 				s = "";

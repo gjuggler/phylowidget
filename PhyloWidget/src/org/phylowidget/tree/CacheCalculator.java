@@ -18,7 +18,7 @@
  */
 package org.phylowidget.tree;
 
-import org.andrewberman.unsorted.DelayedAction;
+import org.andrewberman.ui.unsorted.DelayedAction;
 
 public class CacheCalculator extends DelayedAction
 {

@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.tree;
 
@@ -41,7 +41,7 @@ public class CachedRootedTree extends RootedTree
 	private static final long serialVersionUID = 1L;
 	protected boolean inSync;
 
-	public Comparator sorter = new CachedEnclosedLeavesComparator(-1);
+	public Comparator enclSorter = new CachedEnclosedLeavesComparator(-1);
 
 	public CachedRootedTree()
 	{
@@ -71,6 +71,13 @@ public class CachedRootedTree extends RootedTree
 		inSync = true;
 	}
 
+	boolean holdCalculations;
+
+	public void setHoldCalculations(boolean holdMe)
+	{
+		holdCalculations = holdMe;
+	}
+
 	private List getChildrenOfNoSort(Object vertex)
 	{
 		List l;
@@ -85,7 +92,8 @@ public class CachedRootedTree extends RootedTree
 
 	protected void calculateStuff()
 	{
-
+		if (holdCalculations)
+			return;
 		/*
 		 * Everything should be able to be cached by first sweeping from root to
 		 * leaves, then from leaves to root.
@@ -163,14 +171,7 @@ public class CachedRootedTree extends RootedTree
 				int maxChildEnc = 0;
 				double maxHeight = 0;
 				List children = getChildrenOfNoSort(cv);
-				// Collections.sort(children,sorter);
-				sortChildrenList(cv, children, sorter);
-				// if (sorting.containsKey(cv))
-				// {
-				// Integer i = (Integer) sorting.get(cv);
-				// if (i == REVERSE)
-				// Collections.reverse(children);
-				// }
+				sortChildrenList(cv, children, enclSorter);
 				for (int i = 0; i < children.size(); i++)
 				{
 					CachedVertex child = (CachedVertex) children.get(i);
@@ -240,7 +241,7 @@ public class CachedRootedTree extends RootedTree
 		} else
 			return super.getDepthToRoot(vertex);
 	}
-	
+
 	public double getHeightToRoot(Object vertex)
 	{
 		sync();
@@ -329,6 +330,7 @@ public class CachedRootedTree extends RootedTree
 
 	public void modPlus()
 	{
+		super.modPlus();
 		inSync = false;
 	}
 

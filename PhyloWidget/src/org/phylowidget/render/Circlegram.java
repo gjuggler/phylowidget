@@ -119,7 +119,7 @@ public class Circlegram extends BasicTreeRenderer
 		//		rowSize = Math.min(5, rowSize);
 		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
 		textSize = rowSize * circum;
-		dotWidth = textSize * PhyloWidget.ui.nodeSize;
+		dotWidth = textSize * PhyloWidget.cfg.nodeSize;
 		rad = dotWidth / 2;
 		float gutter = biggestStringWidth * textSize;
 		float minSide = Math.min(rect.width - 2 * gutter, rect.height - 2
@@ -146,7 +146,7 @@ public class Circlegram extends BasicTreeRenderer
 		/*
 		 * Create a second set of noderanges if necessary.
 		 */
-		if (PhyloWidget.ui.useBranchLengths)
+		if (PhyloWidget.cfg.useBranchLengths)
 		{
 			synchronized (list)
 			{
@@ -191,7 +191,9 @@ public class Circlegram extends BasicTreeRenderer
 		/*
 		 * Update the nodeRange.
 		 */
-		setRange(n, nodesToRanges.get(n));
+		NodeRange o = nodesToRanges.get(n);
+		if (o != null)
+			setRange(n, o);
 	}
 
 	void setRange(PhyloNode n, NodeRange r)
@@ -261,6 +263,9 @@ public class Circlegram extends BasicTreeRenderer
 	{
 		// if (true == true)
 		// return;
+		if (!tree.isLeaf(n))
+			return;
+		
 		float theta = (float) getTheta(n);
 		int degrees = (int) (theta / PApplet.TWO_PI * 360);
 

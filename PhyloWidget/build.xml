@@ -238,7 +238,7 @@ This Ant task assumes a certain structure within your project directory:
 		<condition property="internal.launcherClass" value="com.sun.opengl.util.JOGLAppletLauncher" else="${project.class}">
 			<istrue value="${project.opengl}" />
 		</condition>
-		<echo>${internal.launcherClass}</echo>
+		<!--<echo>${internal.launcherClass}</echo>-->
 		
 	<!-- If the applet.comments refers to a valid filename, load it up. -->
 		<loadfile property="internal.appletcomments" srcFile="${html.comments}" failonerror="false" />
@@ -322,61 +322,99 @@ This Ant task assumes a certain structure within your project directory:
 	</target>
 
 	<target name="loadjars">
+			<!-- Create a fileset that includes all the library jar files. -->
+			<condition property="internal.includeopengl" value="opengl/*.jar" else="NOTHING">
+				<istrue value="${project.opengl}" />
+			</condition>
+			<fileset id="libFiles" dir="" casesensitive="no">
+				<include name="${lib}/*.jar" />
+				<include name="${lib}/${internal.includeopengl}" />
+			</fileset>
+			
+			<!-- Copy all the jar files from the lib directory into the applet/lib directory. -->
+			<copy todir="${applet}/${lib}" overwrite="${internal.overwrite}">
+				<fileset refid="libFiles"/>
+				<mapper type="flatten"/>
+			</copy>
+			
+			
+			<!-- Copies all the files in the "data" directory to "build/data" directory.
+				Ultimately, this will all end up in the final jar file.
+			-->
+			<copy todir="${build}/data" overwrite="true">
+				<fileset dir="${data}">
+					<include name="**/*.*" />
+				</fileset>
+			</copy>
+			<!-- Jar up the 'build' directory and send to applet/lib -->
+			<jar jarfile="${applet}/${lib}/${internal.finaljar}" basedir="${build}">
+				<manifest>
+					<attribute name="Main-Class" value="${project.class}" />
+				</manifest>
+			</jar>
 		
-		<!-- Create a fileset that includes all the library jar files. -->
-		<condition property="internal.includeopengl" value="opengl/*.jar" else="NOTHING">
-			<istrue value="${project.opengl}" />
-		</condition>
-		<fileset id="libFiles" dir="" casesensitive="no" excludes="${ignoreJars}">
-			<include name="${lib}/*.jar" />
-			<include name="${lib}/${internal.includeopengl}" />
-		</fileset>
+			<!-- PRELOADER SNEAKINESS!!!
+					What we'll do here is create a list of all .java files larger than 10kb, and store
+					it in a property to be used by the HTML later on. -->
+			<fileset id="rootAbsolutePath" dir="${basedir}" includes="build.xml" />
+				<pathconvert pathsep="" property="internal.absPath" refid="rootAbsolutePath">
+				<globmapper from="*build.xml" to="*"/>
+			</pathconvert>
+			<fileset id="sourceFiles" dir="${src}" casesensitive="no">
+				<include name="**/*.java"/>
+				<size value="25" units="k" when="more"/>
+			</fileset>
+			<pathconvert pathsep="," property="internal.preloadList" refid="sourceFiles">
+				<chainedmapper>
+				<mapper type="package" from="${internal.absPath}src${file.separator}*.java" to="*"/>
+				</chainedmapper>
+			</pathconvert>
+			<!-- Done with the really sneaky stuff. -->
+			
 		
-		<!-- Copy all the jar files from the lib directory into the applet/lib directory. -->
-		<copy todir="${applet}/${lib}" overwrite="${internal.overwrite}">
-			<fileset refid="libFiles"/>
-			<mapper type="flatten"/>
-		</copy>
+			<fileset id="appletlibs" dir="${applet}" casesensitive="no">
+				<include name="${lib}/**/*.jar" />
+			</fileset>
+			<fileset id="appletlibsnonatives" dir="${applet}" casesensitive="no">
+				<include name="${lib}/**/*.jar" />
+				<exclude name="**/*natives*" />
+			</fileset>
+			
+			<!-- Create a property that is a comma-separated list of the libFilesNoNatives fileset. -->
+			<pathconvert pathsep="," property="internal.allJars" refid="appletlibsnonatives">
+				<chainedmapper>
+					<flattenmapper/>
+				</chainedmapper>
+			</pathconvert>
+			<pathconvert pathsep=" " property="temp.spaceJarList" refid="appletlibs">
+				<chainedmapper>
+					<flattenmapper/>
+				</chainedmapper>
+			</pathconvert>
+			<pathconvert pathsep="','" property="temp.quotedJarList" refid="appletlibsnonatives">
+				<chainedmapper>
+					<flattenmapper/>
+				</chainedmapper>
+			</pathconvert>
+			<pathconvert pathsep="','" property="temp.quotedPrefixedJarList" refid="appletlibsnonatives">
+						<chainedmapper>
+							<flattenmapper/>
+							<globmapper from="*" to="${lib}/*" />
+						</chainedmapper>
+					</pathconvert>
+			<property name="internal.quotedJars" value="'${temp.quotedJarList}'"/>
+			<property name="internal.quotedPrefixedJars" value="'${temp.quotedPrefixedJarList}'"/>
+			
+			<!-- PRELOADER SNEAKINESS!!!
+				We need to modify the Manifest of the freeloader.jar file.
+				-->
+			<jar jarfile="${applet}/${lib}/freeloader.jar" update="true">
+				<manifest>
+					<attribute name="Class-Path" value="${temp.spaceJarList}" />
+				</manifest>
+			</jar>
 		
-		<!-- Jar up the 'build' directory and send to applet/lib -->
-		<jar jarfile="${applet}/${lib}/${internal.finaljar}" basedir="${build}">
-			<manifest>
-				<attribute name="Main-Class" value="${project.class}" />
-			</manifest>
-		</jar>
-
-		<fileset id="appletlibs" dir="${applet}" casesensitive="no">
-			<include name="${lib}/**/*.jar" />
-			<exclude name="**/*ZZZZ*" />
-		</fileset>
-		<fileset id="appletlibsnonatives" dir="${applet}" casesensitive="no">
-			<include name="${lib}/**/*.jar" />
-			<exclude name="**/*natives*" />
-			<exclude name="**/*ZZZZ*" />
-		</fileset>
-		
-		
-		<!-- Create a property that is a comma-separated list of the libFilesNoNatives fileset. -->
-		<pathconvert pathsep="," property="internal.allJars" refid="appletlibsnonatives">
-			<chainedmapper>
-				<flattenmapper/>
-			</chainedmapper>
-		</pathconvert>
-		<pathconvert pathsep="','" property="temp.quotedJarList" refid="appletlibsnonatives">
-			<chainedmapper>
-				<flattenmapper/>
-			</chainedmapper>
-		</pathconvert>
-		<pathconvert pathsep="','" property="temp.quotedPrefixedJarList" refid="appletlibsnonatives">
-					<chainedmapper>
-						<flattenmapper/>
-						<globmapper from="*" to="${lib}/*" />
-					</chainedmapper>
-				</pathconvert>
-		<property name="internal.quotedJars" value="'${temp.quotedJarList}'"/>
-		<property name="internal.quotedPrefixedJars" value="'${temp.quotedPrefixedJarList}'"/>
-		
-	</target>
+		</target>
 
 	<!-- TARGET: UPLOAD -->
 	<target name="upload" depends="dist">
@@ -412,7 +450,6 @@ This Ant task assumes a certain structure within your project directory:
 			<param name="project.standalonezip" value="true"/>
 			<param name="applet" id="applet" value="${applet_full}"/>
 		</antcall>
-
 		<!-- COPY FULL SCRIPTS TO THE WEB/SCRIPTS DIRECTORY -->
 		<copy todir="web/scripts" overwrite="true">
 			<fileset dir="${applet_full}/scripts/"/>
@@ -420,8 +457,8 @@ This Ant task assumes a certain structure within your project directory:
 		<copy todir="web/zip" overwrite="true">
 			<fileset dir="${applet_full}/${zip}"/>
 		</copy>
-		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/**/*.*,build/**/*.*" basedir="."/>
-		
+		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/**/*.*,build/**/*.*,applet/**/*.*" basedir="."/>
+
 		<!-- UPLOAD THE WEB DIRECTORY TO THE SERVER -->
 		<!--
 		<scp todir="${project.serverdest}" trust="true" failonerror="false" verbose="true">

@@ -104,6 +104,11 @@ h2,h3,h4 {
 
 h3 {
 	font-size:115%;
+	padding-left:1.5em;
+}
+
+xmp {
+	margin-left:2em;
 }
 
 .boxlist {

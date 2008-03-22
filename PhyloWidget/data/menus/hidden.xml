@@ -20,8 +20,8 @@
 			<item name="Style">
 				<item name="Text Multiplier" type="NumberScroller" property="textSize" increment=".02" min="0.05" max="2"/>
 				<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" min="-45" max="45"/>
-				<item name="Node Size" type="NumberScroller" property="nodeSize" increment =".005" min="0" max=".5"/>
-				<item name="Line Weight" type="NumberScroller" property="lineSize" increment =".001" min="0" max=".5"/>
+				<item name="Node Size" type="NumberScroller" property="nodeSize" increment ="0.1" min="0" max="10"/>
+				<item name="Line Weight" type="NumberScroller" property="lineSize" increment ="0.1" min="0" max="10"/>
 			</item>
 			<item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" min="5" max="1000"/>
 			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="36"/>

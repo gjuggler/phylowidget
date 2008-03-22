@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Testbed</title>
+<link rel="stylesheet" href="style.css"/>
+
+<script src="http://www.phylowidget.org/scripts/phylowidget.js"></script>
+</head>
+<body>
+
+<div id="content-wrapper">
+
+<div id="header">
+<h1>PhyloWidget Testbed</h1>
+</div>
+
+<div id="content" style="">
+<div id="PhyloWidget" style="margin:auto;"></div>
+<div style="width:100%;text-align:center;margin:auto;margin-top:15px;margin-bottom:15px;">
+<textarea id="text" style="width:100%;height:200px;font-size:small;">
+PhyloWidget.useLite(); // Use the "lite" version
+// PhyloWidget.useFull();  // Use the full version
+
+var params = {
+	width:400,
+	height:400,
+	tree:'(a,(b,c));'
+};
+
+PhyloWidget.loadWidgetPanel(params); // Loads into a new floating panel
+
+// PhyloWidget.loadWidget('PhyloWidget',params); // Loads into the given HTML element
+</textarea>
+<input type="button" value="Run the Javascript" style="width:175px;height:50px;" onclick="javascript:eval(document.getElementById('text').value);"/>
+</div>
+<p>
+This page demonstrates PhyloWidget's "remote hosting" capabilities. Along with a simple reference to the PhyloWidget javascript (located <a href="http://www.phylowidget.org/scripts/phylowidget.js">here</a>),
+all that's being executed is the Javascript you see above. Try changing the parameters to see what happens!
+<p>
+If you don't believe that there's no trickery going on, try saving this HTML page locally and viewing it in your browser. It works just the same!
+
+</div>
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

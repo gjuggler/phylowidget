@@ -47,9 +47,6 @@ public class RenderStyleSet
 	public Color foundBackground;
 	public Color foundForeground;
 
-	public float nodeSizeMultiplier;
-	public float lineThicknessMultiplier;
-	
 	private static RenderStyleSet defaultSet;
 
 	public static RenderStyleSet defaultStyle()
@@ -69,22 +66,19 @@ public class RenderStyleSet
 		regStroke = 1f;
 
 		dimColor = foregroundColor.brighter(200);
-		dimStroke = 2f;
+		dimStroke = 1f;
 
 		hoverColor = new Color(100, 150, 255);
-		hoverStroke = 2f;
+		hoverStroke = 1.5f;
 
 		copyColor = new Color(255, 0, 0);
-		copyStroke = 2f;
+		copyStroke = 1f;
 		
 		Color c = new Color(255,155,0);
 		foundColor = c;
-		foundStroke = 4f;
+		foundStroke = 3f;
 		foundForeground = new Color(255,255,255);
 		foundBackground = foundColor;
-
-		nodeSizeMultiplier = 0.5f;
-		lineThicknessMultiplier = 1f;
 	}
 
 	public Stroke stroke(float weight)

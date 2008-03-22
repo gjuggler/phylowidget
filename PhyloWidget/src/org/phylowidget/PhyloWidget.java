@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget;
 
@@ -60,6 +60,8 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
+	boolean DEBUG = false;
+
 	public PhyloWidget()
 	{
 		super();
@@ -74,10 +76,11 @@ public class PhyloWidget extends PApplet
 			 */
 			frame.setResizable(true);
 			frame.setTitle("PhyloWidget Standalone");
-			SwingUtilities.invokeLater(new Runnable() {
+			SwingUtilities.invokeLater(new Runnable()
+			{
 				public void run()
 				{
-					size(500,500);
+					size(500, 500);
 				}
 			});
 		} else
@@ -85,16 +88,14 @@ public class PhyloWidget extends PApplet
 			/*
 			 * We're locked into an applet. Don't fight it.
 			 */
-			size(getWidth(),getHeight());
+			size(getWidth(), getHeight());
 		}
-		
-		
 		PGraphicsJava2D pg = (PGraphicsJava2D) g;
-		 pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-		 RenderingHints.VALUE_RENDER_SPEED);
-		 
-		frameRate(FRAMERATE);
+		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//		pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+//				RenderingHints.VALUE_RENDER_SPEED);
 
+		frameRate(FRAMERATE);
 		p = this;
 
 		trees = new TreeManager(this);
@@ -107,18 +108,21 @@ public class PhyloWidget extends PApplet
 		ui.setup();
 		trees.setup();
 	}
-	
-	public void draw()
+
+	public synchronized void draw()
 	{
-		background(PhyloWidget.cfg.getBackground().getRGB());
-		trees.update();
-		if (frameCount - messageFrame > (frameRateTarget*messageDecay))
+		background(PhyloWidget.cfg.getBackground().getRGB(), 1.0f);
+
+		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 			messageString = "";
 		if (messageString.length() != 0)
 			drawMessage();
 
-		drawNumLeaves();
-		drawFrameRate();
+		if (DEBUG)
+		{
+			drawNumLeaves();
+			drawFrameRate();
+		}
 	}
 
 	public void stop()
@@ -163,44 +167,46 @@ public class PhyloWidget extends PApplet
 
 	static int messageFrame;
 	static float messageDecay = 15;
+
 	public static void setMessage(String s)
 	{
 		messageString = s;
 		messageFrame = p.frameCount;
 	}
 
-//	public void size(int w, int h)
-//	{
-//		super.size(w,h);
-////		if (width != w || h != h)
-////			size(w, h, JAVA2D);
-//		// size(w,h,P3D);
-//		// size(w,h,OPENGL);
-//			// pg.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-//			// RenderingHints.VALUE_STROKE_PURE);
-//			// p.smooth();
-//	}
-	
-//	@Override
-//	public void resize(int w, int h)
-//	{
-////		super.resize(width, height);
-//		if (g != null && (getWidth()!=w || getHeight()!=h))
-//		{
-//			size(w,h);
-//		}
-////		setup();
-//		System.out.println("resize!"+width);
-////		size(width,height);
-//	}
-	
+	//	public void size(int w, int h)
+	//	{
+	//		super.size(w,h);
+	////		if (width != w || h != h)
+	////			size(w, h, JAVA2D);
+	//		// size(w,h,P3D);
+	//		// size(w,h,OPENGL);
+	//			// pg.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+	//			// RenderingHints.VALUE_STROKE_PURE);
+	//			// p.smooth();
+	//	}
+
+	//	@Override
+	//	public void resize(int w, int h)
+	//	{
+	////		super.resize(width, height);
+	//		if (g != null && (getWidth()!=w || getHeight()!=h))
+	//		{
+	//			size(w,h);
+	//		}
+	////		setup();
+	//		System.out.println("resize!"+width);
+	////		size(width,height);
+	//	}
+
 	public boolean jsTest()
 	{
 		return true;
 	}
-	
+
 	public boolean updateTree(String s)
 	{
+		System.out.println("Hey!");
 		treeUpdater.triggerUpdate(s);
 		return true;
 	}
@@ -215,7 +221,8 @@ public class PhyloWidget extends PApplet
 	{
 		try
 		{
-			Method m = cfg.getClass().getMethod(s, new Class[] { String.class });
+			Method m = cfg.getClass()
+					.getMethod(s, new Class[] { String.class });
 			m.invoke(cfg, new Object[] { p });
 		} catch (Exception e)
 		{
@@ -237,7 +244,7 @@ public class PhyloWidget extends PApplet
 	{
 		return "PhyloWidget!";
 	}
-	
+
 	static public void main(String args[])
 	{
 		PApplet.main(new String[] { "org.phylowidget.PhyloWidget" });

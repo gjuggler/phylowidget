@@ -22,13 +22,14 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 
-public class ToolManager implements UIObject
+public class ToolManager extends AbstractUIObject
 {
 	ToolShortcuts parent;
 	Tool curTool;

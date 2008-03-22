@@ -52,6 +52,7 @@ public class PropertyTween extends Tween
 	{
 		float value = super.update();
 		if (field == null) return value;
+		if (fieldClass == null) return value;
 		try
 		{
 			if (fieldClass == float.class)

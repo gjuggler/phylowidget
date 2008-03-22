@@ -32,7 +32,7 @@ import javax.swing.tree.TreeNode;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.PhyloNode;
 
-public class RandomTreeMutator
+public class RandomTreeMutator implements Runnable
 {
 	private RootedTree tree;
 	private Thread wrapper;
@@ -63,34 +63,34 @@ public class RandomTreeMutator
 
 	public void start()
 	{
-//		wrapper = new Thread(this);
-//		wrapper.setName("PhyloWidget-tree-mutator");
-//		wrapper.start();
+		wrapper = new Thread(this);
+		wrapper.setName("PhyloWidget-tree-mutator");
+		wrapper.start();
 	}
 
-//	public void run()
-//	{
-//		Thread thisThread = null;
-//		try
-//		{
-//			thisThread = Thread.currentThread();
-//		} catch (Exception e)
-//		{
-//			e.printStackTrace();
-//		}
-//		while (wrapper == thisThread)
-//		{
-//			try
-//			{
-//				Thread.sleep(delay);
-//			} catch (InterruptedException e)
-//			{
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			PhyloWidget.trees.triggerMutation();
-//		}
-//	}
+	public void run()
+	{
+		Thread thisThread = null;
+		try
+		{
+			thisThread = Thread.currentThread();
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		while (wrapper == thisThread)
+		{
+			try
+			{
+				Thread.sleep(delay);
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			PhyloWidget.trees.triggerMutation();
+		}
+	}
 
 	private ArrayList allNodes = new ArrayList(100);
 

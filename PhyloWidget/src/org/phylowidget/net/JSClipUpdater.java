@@ -36,13 +36,19 @@ public class JSClipUpdater extends DelayedAction
 	public void triggerUpdate(String s)
 	{
 		trigger(200);
-		jsCall = "updateClip";
+		jsCall = "PhyloWidget.updateClip";
 		newClip = s;
 	}
 
 	public void run()
 	{
 		String cmd = jsCall;
-		caller.reflectJS(cmd, newClip);
+		try {
+			Object o = caller.getMember("PhyloWidget");
+			caller.callWithObject(o, jsCall, newClip);
+		} catch (Exception e)
+		{
+//			e.printStackTrace();
+		}
 	}
 }

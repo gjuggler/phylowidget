@@ -258,7 +258,7 @@ public abstract class Menu extends MenuItem implements UIObject
 	{
 		super();
 		UIUtils.loadUISinglets(app);
-		EventManager.instance.add(this); // Add ourselves to EventManager.
+
 		canvas = app;
 		setMenu(this);
 		style = new MenuStyle();
@@ -268,6 +268,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		 */
 		setOptions();
 		init();
+		EventManager.instance.add(this); // Add ourselves to EventManager.
 	}
 
 	public void addListener(UIListener o)
@@ -336,7 +337,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		buff = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
 	}
 
-	public void draw()
+	public synchronized void draw()
 	{
 		// System.out.println(hovered);
 		if (hidden)
@@ -491,14 +492,18 @@ public abstract class Menu extends MenuItem implements UIObject
 		{
 			e.consume();
 		}
+		//		if (true)
+		//			return;
 		if (autoDim)
 		{
 			if (mouseInside)
 			{
-				aTween.continueTo(fullAlpha);
+				if (aTween != null)
+					aTween.continueTo(fullAlpha);
 			} else if (menu.hovered == null)
 			{
-				aTween.continueTo(dimAlpha);
+				if (aTween != null)
+					aTween.continueTo(dimAlpha);
 			}
 		}
 	}
@@ -516,11 +521,9 @@ public abstract class Menu extends MenuItem implements UIObject
 		super.keyEvent(e);
 	}
 
-	public void layout()
+	public synchronized void layout()
 	{
-		hint();
 		super.layout();
-		unhint();
 	}
 
 	public void mouseEvent(MouseEvent e, Point screen, Point model)

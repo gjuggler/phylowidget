@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
 import org.andrewberman.ui.Color;
+import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
@@ -36,6 +37,7 @@ import org.andrewberman.ui.UIUtils;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
+import processing.core.PGraphicsJava2D;
 
 /**
  * The <code>Dock</code> class is a close approximation of Apple's infamous
@@ -61,8 +63,11 @@ public class Dock extends Menu
 	public static final int BOTTOM = 3;
 	DockRotationHandler rotation;
 
-	RoundRectangle2D.Float mouseRect, drawRect;
-	Point mousePt;
+	RoundRectangle2D.Float drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0,
+			0);
+	RoundRectangle2D.Float mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0,
+			0, 0);
+	Point mousePt = new Point(0, 0);
 	float origWidth, inset, offset, maxPossibleWidth;
 	float curWidth, curHeight, curLow;
 	boolean isActivated;
@@ -104,9 +109,6 @@ public class Dock extends Menu
 		super(app);
 		inset = style.getF("f.padX");
 
-		drawRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
-		mouseRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
-		mousePt = new Point(0, 0);
 		rotation = new DockRotationHandler();
 		rotation.setRotation(BOTTOM);
 
@@ -132,7 +134,7 @@ public class Dock extends Menu
 		consumeWhenActive = true;
 	}
 
-	public void layout()
+	public synchronized void layout()
 	{
 		mousePt.setLocation(canvas.mouseX, canvas.mouseY);
 		if (useCameraCoordinates)
@@ -233,26 +235,26 @@ public class Dock extends Menu
 		layout();
 	}
 
-	public void drawBefore()
+	public synchronized void drawMyself()
 	{
 		layout();
 		rotation.setRect(drawRect, origWidth);
-		
+
 		Color strokeC = menu.style.getC("c.foreground");
 		float sw = menu.style.getF("f.strokeWeight");
 		Stroke stroke = new BasicStroke(sw);
 		float px = menu.style.getF("f.padX");
 		float py = menu.style.getF("f.padY");
 		PFont font = menu.style.getFont("font");
-		
+
 		/*
 		 * Draw a nice-looking background gradient.
 		 */
 		if (usesJava2D)
 		{
-			Graphics2D g2 = menu.buff.g2;
-			g2.setPaint(menu.style.getGradient(MenuItem.UP, 0, (float) drawRect.getMinY(),
-					0, (float) drawRect.getMaxY()));
+			Graphics2D g2 = ((PGraphicsJava2D) menu.canvas.g).g2;
+			g2.setPaint(menu.style.getGradient(MenuItem.UP, 0, (float) drawRect
+					.getMinY(), 0, (float) drawRect.getMaxY()));
 			g2.fill(drawRect);
 			g2.setStroke(stroke);
 			g2.setPaint(strokeC);
@@ -289,13 +291,13 @@ public class Dock extends Menu
 		{
 			DockItem i = (DockItem) hovered;
 			float fontSize = origWidth / 2f;
-			float ascent = UIUtils.getTextAscent(menu.canvas.g,
-					font, fontSize, false);
-			float descent = UIUtils.getTextDescent(menu.canvas.g,
-					font, fontSize, false);
+			float ascent = UIUtils.getTextAscent(menu.canvas.g, font, fontSize,
+					false);
+			float descent = UIUtils.getTextDescent(menu.canvas.g, font,
+					fontSize, false);
 			float tHeight = (ascent + descent);
-			float tWidth = UIUtils.getTextWidth(menu.canvas.g, font,
-					fontSize, i.getLabel(), false);
+			float tWidth = UIUtils.getTextWidth(menu.canvas.g, font, fontSize,
+					i.getLabel(), false);
 
 			float tX = 0;
 			float tY = 0;
@@ -309,30 +311,27 @@ public class Dock extends Menu
 					break;
 				case (RIGHT):
 					menu.canvas.textAlign(PApplet.LEFT);
-					tX = menu.canvas.width - inset - maxPossibleWidth
-							- px - tWidth;
+					tX = menu.canvas.width - inset - maxPossibleWidth - px
+							- tWidth;
 					tY = i.getY() + i.getHeight() / 2 + tHeight / 2 - descent
 							/ 2;
 					break;
 				case (TOP):
 					menu.canvas.textAlign(PApplet.CENTER);
 					tX = i.getX() + i.getWidth() / 2;
-					tY = inset + maxPossibleWidth + px + tHeight
-							- descent;
+					tY = inset + maxPossibleWidth + px + tHeight - descent;
 					break;
 				case (BOTTOM):
 					menu.canvas.textAlign(PApplet.CENTER);
 					tX = i.getX() + i.getWidth() / 2;
-					tY = menu.canvas.width - inset - maxPossibleWidth
-							- px;
+					tY = menu.canvas.width - inset - maxPossibleWidth - px;
 					break;
 			}
 
 			if (usesJava2D)
 			{
-				MenuUtils.drawWhiteTextRect(this, tX - px, tY
-						- ascent - px, tWidth + px
-						* 2, tHeight + px * 2);
+				MenuUtils.drawWhiteTextRect(this, tX - px, tY - ascent - px,
+						tWidth + px * 2, tHeight + px * 2);
 			}
 
 			Color c = strokeC;
@@ -411,15 +410,15 @@ public class Dock extends Menu
 		super.setState(i, s);
 	}
 
-//	public void setHidden(String s)
-//	{
-//		if (s.startsWith("t"))
-//		{
-//			close();
-//		} else
-//			open();
-//	}
-	
+	//	public void setHidden(String s)
+	//	{
+	//		if (s.startsWith("t"))
+	//		{
+	//			close();
+	//		} else
+	//			open();
+	//	}
+
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		if (useCameraCoordinates)
@@ -440,7 +439,6 @@ public class Dock extends Menu
 			}
 		}
 		super.mouseEvent(e, screen, model);
-
 		if (isActivated && consumeWhenActive)
 		{
 			e.consume();
@@ -449,6 +447,8 @@ public class Dock extends Menu
 
 	public boolean containsPoint(Point pt)
 	{
+		if (mouseRect == null || rotation == null)
+			return false;
 		rotation.setRect(mouseRect, curWidth);
 		return mouseRect.contains(pt);
 	}
@@ -485,7 +485,7 @@ public class Dock extends Menu
 		add(addMe);
 		return addMe;
 	}
-	
+
 	@Override
 	public MenuItem add(MenuItem item)
 	{

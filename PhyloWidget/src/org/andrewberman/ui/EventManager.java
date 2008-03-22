@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui;
 
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.ifaces.UIObject;
+import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.tools.ToolManager;
 
 import processing.core.PApplet;
@@ -89,11 +90,11 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		if (p.g.getClass().getName().equals(PApplet.OPENGL))
 		{
-//			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
-//			gl.canvas.addMouseListener(this);
-//			gl.canvas.addMouseMotionListener(this);
-//			gl.canvas.addKeyListener(this);
-//			gl.canvas.addMouseWheelListener(this);
+			//			PGraphicsOpenGL gl = (PGraphicsOpenGL) p.g;
+			//			gl.canvas.addMouseListener(this);
+			//			gl.canvas.addMouseMotionListener(this);
+			//			gl.canvas.addKeyListener(this);
+			//			gl.canvas.addMouseWheelListener(this);
 		} else
 		{
 			p.addMouseListener(this);
@@ -107,9 +108,12 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		p.registerDraw(this);
 	}
 
+	ArrayList<UIObject> delegatesToAdd = new ArrayList();
+
 	public void add(UIObject o)
 	{
-		delegates.add(o);
+		//		delegates.add(o);
+		delegatesToAdd.add(o);
 	}
 
 	public void setToolManager(ToolManager t)
@@ -121,12 +125,12 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		return toolManager;
 	}
-	
+
 	public void setCamera(Camera c)
 	{
 		toolCamera = c;
 	}
-	
+
 	public void remove(UIObject o)
 	{
 		delegates.remove(o);
@@ -134,11 +138,12 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void draw()
 	{
-//		UIUtils.setMatrix(p);
+		//		UIUtils.setMatrix(p);
 
 		for (int i = 0; i < delegates.size(); i++)
 		{
-			((UIObject) delegates.get(i)).draw();
+			UIObject o = (UIObject) delegates.get(i);
+				o.draw();
 		}
 
 		/*
@@ -146,6 +151,13 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (toolManager != null)
 			toolManager.draw();
+		
+		for (int i = 0; i < delegatesToAdd.size(); i++)
+		{
+			UIObject o = delegatesToAdd.get(i);
+			delegatesToAdd.remove(i);
+			delegates.add(o);
+		}
 	}
 
 	public void mouseEvent(MouseEvent e)
@@ -153,15 +165,15 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		screen.setLocation(e.getX(), e.getY());
 		model.setLocation(screen.x, screen.y);
 		UIUtils.screenToModel(model);
-
+		
 		/*
 		 * First, send the event directly to the focused object.
 		 */
 		if (FocusManager.instance.getFocusedObject() instanceof UIObject)
 		{
+			UIObject o = (UIObject) FocusManager.instance.getFocusedObject();
 			// System.out.println(FocusManager.instance.getFocusedObject());
-			((UIObject) FocusManager.instance.getFocusedObject()).mouseEvent(e,
-					screen, model);
+				o.mouseEvent(e, screen, model);
 		}
 		/*
 		 * If the FocusManager is in a modal state, return without further
@@ -177,6 +189,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 			if (toolManager != null)
 				toolManager.mouseEvent(e, screen, model);
 		}
+		
 		/*
 		 * Then, if the focus isn't modal and the object wasn't consumed,
 		 * continue sending the mouse event to the other uiobjects.
@@ -188,7 +201,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 			UIObject ui = (UIObject) delegates.get(i);
 			if (ui == FocusManager.instance.getFocusedObject())
 				continue;
-			ui.mouseEvent(e, screen, model);
+				ui.mouseEvent(e, screen, model);
 		}
 	}
 

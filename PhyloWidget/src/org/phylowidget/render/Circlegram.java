@@ -116,10 +116,11 @@ public class Circlegram extends BasicTreeRenderer
 		// super.drawRecalc();
 		float circum = PApplet.PI;
 		rowSize = rect.height / (circum * numRows);
+		colSize = rowSize;
 		//		rowSize = Math.min(5, rowSize);
 		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
 		textSize = rowSize * circum;
-		dotWidth = textSize * PhyloWidget.cfg.nodeSize;
+		dotWidth = getNormalLineWidth() * PhyloWidget.cfg.nodeSize;
 		rad = dotWidth / 2;
 		float gutter = biggestStringWidth * textSize;
 		float minSide = Math.min(rect.width - 2 * gutter, rect.height - 2
@@ -133,6 +134,7 @@ public class Circlegram extends BasicTreeRenderer
 		dx += rect.getX();
 		dy += rect.getY();
 		//		textSize *= PhyloWidget.ui.textSize;
+		textSize *= PhyloWidget.cfg.textSize;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 	}
 
@@ -296,12 +298,14 @@ public class Circlegram extends BasicTreeRenderer
 		n.setRealX(calcRealX(n));
 		n.setRealY(calcRealY(n));
 
-		float gapOffset = dotWidth / 2 + textSize / 3;
+		float gapOffset = dotWidth / 2 + getNormalLineWidth()*2;
 
 		canvas.pushMatrix();
 		canvas.translate(getX(n), getY(n));
 		canvas.rotate(PApplet.radians(textRotation));
 
+		float textSize = this.textSize * PhyloWidget.cfg.textSize;
+		
 		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 		Graphics2D g2 = pgj.g2;
 		g2.setFont(font.font.deriveFont(textSize));

@@ -56,7 +56,7 @@ import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 
-public class PhyloUI
+public class PhyloUI implements Runnable
 {
 	PhyloWidget p;
 
@@ -81,6 +81,7 @@ public class PhyloUI
 		UIUtils.loadUISinglets(p);
 	}
 
+	public Thread thread;
 	public void setup()
 	{
 		focus = FocusManager.instance;
@@ -90,7 +91,14 @@ public class PhyloUI
 		traverser = new NodeTraverser(p);
 		text = new PhyloTextField(p);
 		nodeUpdater = new NodeInfoUpdater();
-
+		
+		thread = new Thread(this);
+		thread.start();
+		
+	}
+	
+	public void run()
+	{
 		/*
 		 * Then, load properties from the applet.
 		 */
@@ -104,6 +112,7 @@ public class PhyloUI
 				PhyloWidget.cfg);
 		configureMenus(menus);
 		checkToolbarPermissions();
+		thread = null;
 	}
 
 	public void loadFromApplet(PApplet p)

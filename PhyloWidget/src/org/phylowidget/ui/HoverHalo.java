@@ -24,6 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
@@ -38,7 +39,7 @@ import org.phylowidget.render.RenderStyleSet;
 
 import processing.core.PApplet;
 
-public final class HoverHalo implements TweenListener, UIObject
+public final class HoverHalo extends AbstractUIObject implements TweenListener
 {
 	private PApplet p;
 	final int type = ELLIPSE;

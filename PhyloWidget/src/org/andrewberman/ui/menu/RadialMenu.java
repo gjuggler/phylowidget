@@ -133,7 +133,7 @@ public class RadialMenu extends Menu
 		layout();
 	}
 
-	public void layout()
+	public synchronized void layout()
 	{
 		if (items.size() == 0)
 			return;

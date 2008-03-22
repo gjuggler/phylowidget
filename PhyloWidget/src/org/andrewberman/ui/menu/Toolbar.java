@@ -168,7 +168,7 @@ public class Toolbar extends Menu
 		}
 	}
 
-	public void layout()
+	public synchronized void layout()
 	{
 		float px = style.getF("f.padX");
 		float py = style.getF("f.padY");

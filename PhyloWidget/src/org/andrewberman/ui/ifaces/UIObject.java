@@ -41,4 +41,5 @@ public interface UIObject
 	public void focusEvent(FocusEvent e);
 
 	public void draw();
+	
 }

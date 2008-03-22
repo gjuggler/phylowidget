@@ -25,6 +25,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIUtils;
@@ -35,7 +36,7 @@ import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 
-public class NearestNodeFinder implements UIObject
+public class NearestNodeFinder extends AbstractUIObject
 {
 	private PApplet p;
 

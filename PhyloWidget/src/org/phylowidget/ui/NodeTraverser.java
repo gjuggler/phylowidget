@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
@@ -45,7 +46,7 @@ import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 
-public class NodeTraverser implements UIObject, TweenListener
+public class NodeTraverser extends AbstractUIObject implements TweenListener
 {
 	public static final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
 	private NodeRange curNodeRange;
@@ -67,10 +68,9 @@ public class NodeTraverser implements UIObject, TweenListener
 	public NodeTraverser(PApplet p)
 	{
 		UIUtils.loadUISinglets(p);
-		EventManager.instance.add(this);
 		this.p = p;
-
 		glowTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f, .75f, 30);
+		EventManager.instance.add(this);
 	}
 
 	private boolean containsPoint(NodeRange r, Point pt)
@@ -89,7 +89,7 @@ public class NodeTraverser implements UIObject, TweenListener
 		return rc.contains(pt);
 	}
 
-	public void draw()
+	public synchronized void draw()
 	{
 		/*
 		 * Update the glowing circle's radius.
@@ -226,10 +226,12 @@ public class NodeTraverser implements UIObject, TweenListener
 	{
 		mousePt.setLocation(screen);
 		pt.setLocation(screen);
+		if (EventManager.instance.getToolManager() == null)
+			return;
 		Tool t = EventManager.instance.getToolManager().getCurrentTool();
 		if (t == null)
 			return;
-		if (PhyloWidget.ui.context.isOpen())
+		if (PhyloWidget.ui.context == null || PhyloWidget.ui.context.isOpen())
 			return;
 		if (getCurRange() == null)
 			return;

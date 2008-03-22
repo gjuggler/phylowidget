@@ -21,6 +21,7 @@ package org.andrewberman.ui.menu;
 import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Stroke;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -58,7 +59,8 @@ import processing.core.PFont;
  * 
  * @author Greg
  */
-public abstract class MenuItem implements Positionable, Sizable, Malleable
+public abstract class MenuItem implements Positionable, Sizable, Malleable,
+		UIObject
 {
 	static class VisibleDepthComparator implements Comparator
 	{
@@ -98,6 +100,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		}
 
 	}
+
 	class ZDepthComparator implements Comparator
 	{
 		public int compare(Object o1, Object o2)
@@ -115,6 +118,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 			return 0;
 		}
 	}
+
 	public static final int DISABLED = 3;
 	public static final int DOWN = 2;
 
@@ -145,6 +149,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	protected float width, height;
 	protected float x, y;
 
+	protected boolean drawnOnce; 
+	
 	protected int z;
 
 	/**
@@ -159,6 +165,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
 	}
+
+	ArrayList<MenuItem> itemsToAdd = new ArrayList();
 
 	public MenuItem add(MenuItem item)
 	{
@@ -252,7 +260,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	/**
 	 * Draws this MenuItem to the current root menu's PGraphics object.
 	 */
-	public void draw()
+	public synchronized void draw()
 	{
 		drawMyself();
 		if (!isOpen())
@@ -274,6 +282,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 			seg.draw();
 		}
 		drawAfter();
+		drawnOnce = true;
 	}
 
 	protected void drawAfter()
@@ -442,10 +451,10 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 
 	protected int getState()
 	{
-//		if (!isEnabled())
-//			return DISABLED;
-//		else
-			return state;
+		//		if (!isEnabled())
+		//			return DISABLED;
+		//		else
+		return state;
 	}
 
 	public Stroke getStroke()
@@ -645,13 +654,23 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	/**
 	 * Lays out this MenuItem and all of its sub-items.
 	 */
-	public void layout()
+	public synchronized void layout()
 	{
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem) items.get(i);
 			seg.layout();
 		}
+	}
+
+	public void focusEvent(FocusEvent e)
+	{
+		// Nothing.
+	}
+
+	public void mouseEvent(MouseEvent e, Point screen, Point model)
+	{
+		// Nothing.
 	}
 
 	protected void menuTriggerLogic()
@@ -715,7 +734,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 
 	public MenuItem setAction(Object object, String method)
 	{
-//		System.out.println(this.name);
+		//		System.out.println(this.name);
 		action = new Action(object, method);
 		if (shortcut != null)
 		{
@@ -729,7 +748,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 	{
 		this.enabled = enabled;
 	}
-	
+
 	public void setDisabled(boolean disabled)
 	{
 		setEnabled(!disabled);
@@ -751,7 +770,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		}
 		return false;
 	}
-	
+
 	public void setHeight(float height)
 	{
 		this.height = height;
@@ -794,7 +813,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 			shortcut.action = action;
 		} else
 		{
-			shortcut.action = new Action(this,"performAction");
+			shortcut.action = new Action(this, "performAction");
 		}
 		menu.layout();
 		return this;
@@ -849,10 +868,10 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 		boolean containsPoint = containsPoint(tempPt);
 		if (containsPoint)
 			mouseInside = true;
-		
+
 		if (!isEnabled())
 			return;
-		
+
 		switch (e.getID())
 		{
 			case MouseEvent.MOUSE_MOVED:
@@ -892,7 +911,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable
 				break;
 		}
 	}
-	
+
 	protected void zSort()
 	{
 		if (zComp == null)

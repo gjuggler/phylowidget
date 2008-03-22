@@ -22,6 +22,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
@@ -37,7 +38,7 @@ import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
 
-public class TreeManager
+public class TreeManager extends AbstractUIObject
 {
 	protected PApplet p;
 
@@ -60,6 +61,7 @@ public class TreeManager
 	{
 		this.p = p;
 		UIUtils.loadUISinglets(p);
+		EventManager.instance.add(this);
 	}
 
 	public void setup()
@@ -76,8 +78,20 @@ public class TreeManager
 		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
 		rectangleRender();
 		
+		try {
+			PhyloTree pt = (PhyloTree) getTree();
+			pt.updateNewick();
+		} catch (Exception e)
+		{
+			// Do nothing.
+		}
 	}
 
+	public void draw()
+	{
+		update();
+	}
+	
 	public void update()
 	{
 		camera.update();

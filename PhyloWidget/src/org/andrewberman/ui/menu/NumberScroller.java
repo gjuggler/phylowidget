@@ -75,7 +75,7 @@ public class NumberScroller extends MenuItem
 	protected void calcPreferredSize()
 	{
 		super.calcPreferredSize();
-		
+	
 		PFont font = menu.getStyle().getFont("font");
 		float fs = menu.getStyle().getF("f.fontSize");
 		float px = menu.getStyle().getF("f.padX");

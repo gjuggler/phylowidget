@@ -112,8 +112,6 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	protected ArrayList<PhyloNode> leaves = new ArrayList<PhyloNode>();
 	protected ArrayList<PhyloNode> sigLeaves = new ArrayList<PhyloNode>();
 
-	protected float lineThicknessMult = 0.2f;
-
 	/**
 	 * A data structure to store the rectangular regions of all nodes. Instead
 	 * of drawing all nodes, we retrieve the nodes whose regions intersect with
@@ -272,7 +270,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void draw()
 	{
-		baseStroke = getRowHeight() * PhyloWidget.cfg.lineSize;
+		float minSize = Math.min(rowSize, colSize);
+		baseStroke = getNormalLineWidth() * PhyloWidget.cfg.lineSize;
 		canvas.noStroke();
 		canvas.fill(0);
 
@@ -388,8 +387,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				NodeRange r = nodesToRanges.get(h);
 				if (r != null && tree.isLeaf(r.node))
 				{
-//					if (UniqueLabeler.isLabelSignificant(r.node.getLabel()))
-						overlap.insert(r.loY, r.hiY);
+					//					if (UniqueLabeler.isLabelSignificant(r.node.getLabel()))
+					overlap.insert(r.loY, r.hiY);
 				}
 			}
 		}
@@ -452,7 +451,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	protected void drawLabelImpl(PhyloNode n)
 	{
 		canvas.pushMatrix();
-		canvas.translate(getX(n) + dotWidth / 2 + textSize / 3, getY(n));
+		canvas.translate(getX(n) + dotWidth/2 + getNormalLineWidth()*2, getY(n));
 		canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
 
 		float curTextSize = textSize * n.zoomTextSize;
@@ -498,6 +497,9 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * Keep in mind that p may be null (in the case of root node).
 		 */
 		float weight = strokeForNode(c);
+		if (weight == 0)
+			return;
+		weight = Math.max(0.5f, weight);
 		canvas.strokeWeight(weight);
 		canvas.stroke(colorForNode(c));
 		drawLineImpl(p, c);
@@ -524,6 +526,12 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		// }
 	}
 
+	protected float getNormalLineWidth()
+	{
+		float min = Math.min(colSize,rowSize);
+		return min / 10f;
+	}
+	
 	protected void drawNodeMarker(PhyloNode n)
 	{
 		canvas.noStroke();
@@ -533,6 +541,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void drawNodeMarkerImpl(PhyloNode n)
 	{
+		if (dotWidth == 0)
+			return;
 		canvas.ellipse(getX(n), getY(n), dotWidth, dotWidth);
 	}
 
@@ -905,7 +915,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		tf.setWidth(textWidth);
 		if (tree.isLeaf(n))
 		{
-			tf.setPositionByBaseline(getX(n) + dotWidth / 2 + textSize / 3,
+			tf.setPositionByBaseline(getX(n) + dotWidth / 2 + getNormalLineWidth()*2,
 					getY(n) + dFont);
 		} else
 		{
@@ -922,30 +932,38 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void recalc()
 	{
+		/*
+		 * Some calculations that are valid for stretched and non-stretched views.
+		 */
 		overhang = biggestStringWidth
 				* PApplet.sin(PApplet.radians(PhyloWidget.cfg.textRotation));
 		float absOverhang = Math.abs(overhang);
-		rowSize = rect.height / (numRows + absOverhang);
-		textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
-		tsf = PhyloWidget.cfg.textSize;
-		tsf *= Math.max(1, PhyloWidget.cfg.minTextSize / textSize);
-		
-		colSize = rect.width / (numCols + 1 + biggestStringWidth);
-		// System.out.println("height:"+rect.width);
-		if (!PhyloWidget.cfg.stretchToFit)
+
+		float origWidth = rect.width;
+		if (PhyloWidget.cfg.stretchToFit)
 		{
+			rect.width = canvas.parent.getWidth();
+			rect.x = 0;
+			rowSize = rect.height / (numRows + absOverhang);
+			textSize = PhyloWidget.cfg.minTextSize;
+			colSize = rect.width / (numCols + 1 + biggestStringWidth);
+			scaleX = rect.width - biggestStringWidth * textSize;
+			scaleX *= 0.9f;
+			scaleY = rect.height - absOverhang * textSize;
+			tsf = 1;
+		} else
+		{
+			rowSize = rect.height / (numRows + absOverhang);
+			textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
+			tsf = PhyloWidget.cfg.textSize;
+			tsf *= Math.max(1, PhyloWidget.cfg.minTextSize / textSize);
+			colSize = rect.width / (numCols + 1 + biggestStringWidth);
 			rowSize = colSize = Math.min(rowSize, colSize) * .9f;
 			scaleX = colSize * numCols;
 			scaleY = rowSize * numRows;
+			textSize = Math.min(rowSize, textSize);
 		}
-		textSize = Math.min(rowSize, textSize);
-		if (PhyloWidget.cfg.stretchToFit)
-		{
-			scaleX = rect.width - biggestStringWidth * textSize - 10;
-			scaleY = rect.height - absOverhang * textSize;
-		}
-		// System.out.println(scaleX);
-		dotWidth = textSize * PhyloWidget.cfg.nodeSize;
+		dotWidth = getNormalLineWidth() * PhyloWidget.cfg.nodeSize;
 		rad = dotWidth / 2;
 		if (numRows == 1)
 			scaleX = 0;
@@ -956,7 +974,6 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Multiply the textSize by the user-specified scaling factor.
 		 */
-		// textSize *= PhyloWidget.ui.textSize;
 		textSize *= tsf;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 	}

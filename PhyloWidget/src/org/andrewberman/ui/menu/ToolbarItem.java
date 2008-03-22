@@ -310,7 +310,7 @@ public class ToolbarItem extends MenuItem
 	// super.setState(state);
 	// }
 
-	public void layout()
+	public synchronized void layout()
 	{
 		if (menu == null)
 			return;

@@ -1,5 +1,8 @@
 package org.andrewberman.ui.menu;
 
+import java.awt.event.KeyEvent;
+
+import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.LayoutUtils;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
@@ -14,11 +17,21 @@ public class TextBox extends Menu
 	public TextBox(PApplet p)
 	{
 		super(p);
-		tf = new TextField(p);
+		tf = new TextField(p) {
+			@Override
+			public void keyEvent(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					performAction();
+				}
+				super.keyEvent(e);
+			}
+		};
 	}
 	
 	@Override
-	public void layout()
+	public synchronized void layout()
 	{
 		float px = menu.style.getF("f.padX");
 		float py = menu.style.getF("f.padY");
@@ -31,10 +44,18 @@ public class TextBox extends Menu
 	}
 	
 	@Override
+	public void performAction()
+	{
+		super.performAction();
+		FocusManager.instance.removeFromFocus(tf);
+	}
+	
+	@Override
 	public void setWidth(float width)
 	{
 		super.setWidth(width);
 	}
+	
 	
 	@Override
 	protected void calcPreferredSize()

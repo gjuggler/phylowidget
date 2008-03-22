@@ -42,7 +42,13 @@ public class JSTreeUpdater extends DelayedAction
 	{
 		String s = TreeIO.createNewickString(tree,false);
 		String cmd = jsCall;
-		caller.reflectJS(cmd, s);
+		try {
+			Object o = caller.getMember("PhyloWidget");
+			caller.callWithObject(o, jsCall, s);
+		} catch (Exception e)
+		{
+//			e.printStackTrace();
+		}
 	}
 
 }

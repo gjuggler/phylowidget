@@ -48,10 +48,15 @@ public class NodeInfoUpdater extends DelayedAction
 
 	public void run()
 	{
-//		System.out.println("Update " + System.currentTimeMillis());
 		String s = createNodeHTML();
 		String cmd = jsCall;
-		caller.reflectJS(cmd, s);
+		try {
+			Object o = caller.getMember("PhyloWidget");
+			caller.callWithObject(o, jsCall, s);
+		} catch (Exception e)
+		{
+//			e.printStackTrace();
+		}
 	}
 
 	String b(String s)

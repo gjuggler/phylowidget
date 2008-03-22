@@ -44,7 +44,7 @@ public class PhyloConfig
 	/*
 	 * Set the starting tree.
 	 */
-	public String tree = "Homo Sapiens";
+	public String tree = "Homo sapiens";
 	/*
 	 * Set the starting search string.
 	 */
@@ -80,8 +80,8 @@ public class PhyloConfig
 	 */
 	public float textRotation = 0f;			// Text rotation, in degrees.
 	public float textSize = 1.0f;			// Text scaling, where a value of 1.0 is normal size.
-	public float lineSize = 0.1f;			// Line width. Ranges between 0 and 0.5 work best.
-	public float nodeSize = 0.15f;			// Node size. Again, ranges between 0 and 0.5 are sensible.
+	public float lineSize = 1f;				// Line width. 0 is minimum, 1 is a pretty normal size. 10 is as high as you'll want to go.
+	public float nodeSize = 2f;				// Node size. Same range as line width: 0 to 10 is reasonable.
 	public float renderThreshold = 150f;	// Maximum number of nodes to render per frame.
 	public float minTextSize = 10;			// Minimum text size for leaf node labels.
 

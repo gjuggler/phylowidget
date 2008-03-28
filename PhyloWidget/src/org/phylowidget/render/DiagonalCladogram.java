@@ -21,8 +21,8 @@ package org.phylowidget.render;
 import java.util.Collections;
 import java.util.List;
 
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
-import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
 
@@ -38,6 +38,12 @@ public class DiagonalCladogram extends BasicTreeRenderer
 	{
 	}
 
+	@Override
+	public float getBranchLengthScaling()
+	{
+		return 1;
+	}
+	
 	protected float branchPositions(PhyloNode n)
 	{
 		if (tree.isLeaf(n))

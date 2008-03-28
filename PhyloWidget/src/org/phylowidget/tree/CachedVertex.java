@@ -39,8 +39,8 @@ public class CachedVertex extends DefaultVertex
 	private double maxHeightToLeaf;
 	private int maxChildEnclosed;
 
-	private Object firstChild;
-	private Object lastChild;
+	private CachedVertex firstChild;
+	private CachedVertex lastChild;
 	
 	public int getMaxChildEnclosed()
 	{
@@ -52,12 +52,12 @@ public class CachedVertex extends DefaultVertex
 		this.maxChildEnclosed = maxChildEnclosed;
 	}
 	
-	public Object getFirstChild()
+	public CachedVertex getFirstChild()
 	{
 		return firstChild;
 	}
 
-	public void setFirstChild(Object firstChild)
+	public void setFirstChild(CachedVertex firstChild)
 	{
 		this.firstChild = firstChild;
 	}
@@ -67,14 +67,9 @@ public class CachedVertex extends DefaultVertex
 		return lastChild;
 	}
 
-	public void setLastChild(Object lastChild)
+	public void setLastChild(CachedVertex lastChild)
 	{
 		this.lastChild = lastChild;
-	}
-
-	public CachedVertex(Object o)
-	{
-		super(o);
 	}
 
 	public Object getParent()

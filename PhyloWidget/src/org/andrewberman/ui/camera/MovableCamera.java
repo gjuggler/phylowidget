@@ -46,6 +46,13 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 	 */
 	public boolean enableSideScrolling = false;
 
+	public boolean respondToKeyboard = false;
+	
+	public void setRespondToKeyboard(boolean respondToKeyboard)
+	{
+		this.respondToKeyboard = respondToKeyboard;
+	}
+	
 	public MovableCamera(PApplet p)
 	{
 		super(p);
@@ -74,7 +81,10 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 
 	public void update()
 	{
-		super.update();
+//		System.out.println(getX()+"  "+getY());
+		xTween.update();
+		yTween.update();
+		zTween.update();
 		scroll();
 		applyTransformations();
 	}
@@ -151,22 +161,32 @@ public class MovableCamera extends Camera implements MouseWheelListener,
 		// Only want keypresses here.
 		if (e.getID() != KeyEvent.KEY_PRESSED)
 			return;
-		// System.out.println(e);
+		
+		if (!respondToKeyboard)
+			return;
+		 System.out.println(e.getKeyCode());
 
 		int code = e.getKeyCode();
+		float nudgeAmt = 10 * 1f / getZ();
 		switch (code)
 		{
 			case (81): // Q
-				// this.zoomBy(2);
+				 this.zoomBy(2);
 				break;
 			case (87): // W
-				// this.zoomBy(.5f);
+				 this.zoomBy(.5f);
 				break;
 			case (37): // Left
-				// this.nudge(-10, 0);
+				 this.nudge(-nudgeAmt, 0);
 				break;
 			case (39): // Right
-				// this.nudge(10, 0);
+				 this.nudge(nudgeAmt, 0);
+				break;
+			case (38): // Up(?)
+				this.nudge(0,-nudgeAmt);
+				break;
+			case (40): // Down(?)
+				this.nudge(0,nudgeAmt);
 				break;
 		}
 

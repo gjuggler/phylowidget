@@ -123,7 +123,6 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public TextField(PApplet p)
 	{
-		UIUtils.loadUISinglets(p);
 		StringClipboard.lazyLoad();
 		Blinker.lazyLoad();
 
@@ -154,7 +153,7 @@ public class TextField extends AbstractUIObject implements Malleable
 			pg = createBuffer(OFFSET, OFFSET);
 			layout();
 		}
-		EventManager.instance.add(this);
+		UIGlobals.g.event().add(this);
 	}
 
 	PGraphicsJava2D createBuffer(int w, int h)
@@ -306,7 +305,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		/*
 		 * Draw the caret.
 		 */
-		if (blinker.isOn && FocusManager.instance.isFocused(this)
+		if (blinker.isOn && UIGlobals.g.focus().isFocused(this)
 				&& selHi - selLo == 0)
 		{
 			// System.out.println("Heyoo");
@@ -704,7 +703,7 @@ public class TextField extends AbstractUIObject implements Malleable
 	{
 		if (hidden)
 			return;
-		if (!FocusManager.instance.isFocused(this))
+		if (!UIGlobals.g.focus().isFocused(this))
 		{
 			return;
 		}
@@ -857,11 +856,11 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			mouseDragging = false;
 
-			if (FocusManager.instance.isFocused(this)
-					&& FocusManager.instance.isModal())
+			if (UIGlobals.g.focus().isFocused(this)
+					&& UIGlobals.g.focus().isModal())
 			{
-				FocusManager.instance.removeFromFocus(this);
-				FocusManager.instance.setFocus(this);
+				UIGlobals.g.focus().removeFromFocus(this);
+				UIGlobals.g.focus().setFocus(this);
 			}
 		}
 		if (e.getID() == MouseEvent.MOUSE_MOVED
@@ -889,7 +888,7 @@ public class TextField extends AbstractUIObject implements Malleable
 			if (withinInnerRect(pt) || mouseDragging) // contained within text
 			// area.
 			{
-				FocusManager.instance.setFocus(this);
+				UIGlobals.g.focus().setFocus(this);
 				// Find the correct insertion point.
 				int insertionIndex = viewLo;
 				float ult = x + getPosForIndex(viewLo);
@@ -913,7 +912,7 @@ public class TextField extends AbstractUIObject implements Malleable
 				if (e.getID() == MouseEvent.MOUSE_DRAGGED)
 				{
 					mouseDragging = true;
-					FocusManager.instance.setModalFocus(this);
+					UIGlobals.g.focus().setModalFocus(this);
 					mouseDragPos = pt.x;
 					// if (insertionIndex <= viewLo || insertionIndex >= viewHi)
 					if (insertionIndex > 1
@@ -944,7 +943,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		} else if (e.getID() == MouseEvent.MOUSE_PRESSED)
 		{
 			// Point is not contained within this box, so unset focus.
-			if (FocusManager.instance.removeFromFocus(this))
+			if (UIGlobals.g.focus().removeFromFocus(this))
 				clearSelection();
 		}
 	}

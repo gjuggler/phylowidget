@@ -18,22 +18,16 @@
  */
 package org.andrewberman.ui.menu;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.ifaces.Positionable;
-import org.andrewberman.ui.ifaces.Sizable;
 
 import processing.core.PApplet;
-import processing.core.PFont;
 
 /**
  * A <code>Toolbar</code> is a menu that acts more or less like a
@@ -121,7 +115,7 @@ public class Toolbar extends Menu
 	public void open(MenuItem i)
 	{
 		super.open(i);
-		FocusManager.instance.setFocus(this);
+		UIGlobals.g.focus().setFocus(this);
 	}
 
 	@Override
@@ -129,7 +123,7 @@ public class Toolbar extends Menu
 	{
 		super.close(item);
 		if (!isActive())
-			FocusManager.instance.removeFromFocus(this);
+			UIGlobals.g.focus().removeFromFocus(this);
 	}
 
 	@Override
@@ -164,7 +158,7 @@ public class Toolbar extends Menu
 		super.clickaway();
 		if (isModal)
 		{
-			FocusManager.instance.removeFromFocus(this);
+			UIGlobals.g.focus().removeFromFocus(this);
 		}
 	}
 
@@ -279,7 +273,7 @@ public class Toolbar extends Menu
 		// }
 		// if (isActive() && isModal)
 		// {
-		// FocusManager.instance.setModalFocus(this);
+		// UIGlobals.g.focus().setModalFocus(this);
 		// }
 	}
 
@@ -316,7 +310,7 @@ public class Toolbar extends Menu
 	public void keyEvent(KeyEvent e)
 	{
 		super.keyEvent(e);
-		if (FocusManager.instance.getFocusedObject() != this)
+		if (UIGlobals.g.focus().getFocusedObject() != this)
 			return;
 		// System.out.println("EVENT!");
 		if (kbFocus == null)

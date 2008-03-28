@@ -85,11 +85,11 @@ public class Scroll extends Tool
 		switch (e.getID())
 		{
 			case (MouseEvent.MOUSE_PRESSED):
-				UIUtils.setBaseCursor(draggingCursor);
+				UIUtils.setBaseCursor(p,draggingCursor);
 
 				break;
 			case (MouseEvent.MOUSE_RELEASED):
-				UIUtils.setBaseCursor(cursor);
+				UIUtils.setBaseCursor(p,cursor);
 				break;
 		}
 	}
@@ -127,8 +127,8 @@ public class Scroll extends Tool
 	{
 		if (cursor == null)
 		{
-			cursor = createCursor("cursors/grab.png", 6, 6);
-			draggingCursor = createCursor("cursors/grabbing.png", 6, 6);
+			cursor = UIUtils.createCursor(p,"cursors/grab.png", 6, 6);
+			draggingCursor = UIUtils.createCursor(p,"cursors/grabbing.png", 6, 6);
 		}
 		return cursor;
 	}

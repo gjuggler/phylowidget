@@ -21,10 +21,10 @@ package org.phylowidget.ui;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
+import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.TreeRenderer;
@@ -77,13 +77,13 @@ public class PhyloTextField extends TextField
 		text.replace(0, text.length(), oldValue);
 		show();
 		selectAll();
-		FocusManager.instance.setModalFocus(this);
+		UIGlobals.g.focus().setModalFocus(this);
 	}
 
 	public void hide()
 	{
 		super.hide();
-		FocusManager.instance.removeFromFocus(this);
+		UIGlobals.g.focus().removeFromFocus(this);
 		PhyloWidget.setMessage("");
 	}
 
@@ -121,7 +121,7 @@ public class PhyloTextField extends TextField
 						r.getTree().setBranchLength(curRange.node, value);
 					} catch (Exception e)
 					{
-						e.printStackTrace();
+//						e.printStackTrace();
 						PhyloWidget.ui.layout();
 						return;
 					}

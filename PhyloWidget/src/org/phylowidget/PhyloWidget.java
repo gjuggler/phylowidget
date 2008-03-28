@@ -27,7 +27,9 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 
 import org.andrewberman.ui.Color;
+import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FontLoader;
+import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.tree.RootedTree;
@@ -45,7 +47,6 @@ public class PhyloWidget extends PApplet
 {
 	private static final long serialVersionUID = -7096870051293017660L;
 
-	public static PhyloWidget p;
 	public static TreeManager trees;
 	public static PhyloConfig cfg;
 	public static PhyloUI ui;
@@ -60,7 +61,7 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
-	boolean DEBUG = false;
+	boolean DEBUG =  false;
 
 	public PhyloWidget()
 	{
@@ -90,16 +91,13 @@ public class PhyloWidget extends PApplet
 			 */
 			size(getWidth(), getHeight());
 		}
-		PGraphicsJava2D pg = (PGraphicsJava2D) g;
-		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//		pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-//				RenderingHints.VALUE_RENDER_SPEED);
-
 		frameRate(FRAMERATE);
-		p = this;
+		
+		PGraphicsJava2D pg = (PGraphicsJava2D) g;
 
+		new UIGlobals(this);
 		trees = new TreeManager(this);
-		cfg = new PhyloConfig(this);
+		cfg = new PhyloConfig();
 		ui = new PhyloUI(this);
 
 		treeUpdater = new PWTreeUpdater();
@@ -109,9 +107,23 @@ public class PhyloWidget extends PApplet
 		trees.setup();
 	}
 
+	@Override
+	public void resize(int width, int height)
+	{
+		super.resize(width, height);
+		PGraphicsJava2D pg = (PGraphicsJava2D) g;
+		if (pg == null)
+			return;
+		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//		pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING,
+//				RenderingHints.VALUE_RENDER_SPEED);
+		pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		
+	}
+	
 	public synchronized void draw()
 	{
-		background(PhyloWidget.cfg.getBackground().getRGB(), 1.0f);
+		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
 
 		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 			messageString = "";
@@ -130,10 +142,21 @@ public class PhyloWidget extends PApplet
 		super.stop();
 	}
 
+	public void destroy()
+	{
+		super.destroy();
+		UIGlobals.g.destroyGlobals();
+		trees = null;
+		cfg = null;
+		ui = null;
+		treeUpdater = null;
+		clipUpdater = null;
+	}
+	
 	void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(FontLoader.instance.vera);
+		textFont(UIGlobals.g.getFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40,
@@ -150,7 +173,7 @@ public class PhyloWidget extends PApplet
 				trees.getRenderer().getTree().getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
-		textFont(FontLoader.instance.vera);
+		textFont(UIGlobals.g.getFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(nleaves, width - 100, height - 10);
@@ -159,7 +182,7 @@ public class PhyloWidget extends PApplet
 	void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(FontLoader.instance.vera);
+		textFont(UIGlobals.g.getFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(messageString, 5, height - 10);
@@ -171,7 +194,7 @@ public class PhyloWidget extends PApplet
 	public static void setMessage(String s)
 	{
 		messageString = s;
-		messageFrame = p.frameCount;
+		messageFrame = UIGlobals.g.getP().frameCount;
 	}
 
 	//	public void size(int w, int h)
@@ -211,6 +234,7 @@ public class PhyloWidget extends PApplet
 		return true;
 	}
 
+	
 	public boolean updateClip(String s)
 	{
 		clipUpdater.triggerUpdate(s);
@@ -245,6 +269,7 @@ public class PhyloWidget extends PApplet
 		return "PhyloWidget!";
 	}
 
+	
 	static public void main(String args[])
 	{
 		PApplet.main(new String[] { "org.phylowidget.PhyloWidget" });

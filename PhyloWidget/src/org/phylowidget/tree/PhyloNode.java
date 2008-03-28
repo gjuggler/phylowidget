@@ -16,13 +16,12 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.ui;
+package org.phylowidget.tree;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
 import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.CachedVertex;
 
 public class PhyloNode extends CachedVertex implements Comparable
 {
@@ -44,29 +43,40 @@ public class PhyloNode extends CachedVertex implements Comparable
 	static TweenFriction fric = TweenFriction
 			.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
 	static TweenQuad quad = TweenQuad.tween;
-
 	static final float mult = 10000f;
 
 	private Tween xTween;
 	private Tween yTween;
 	public boolean labelWasDrawn;
 
-	public PhyloNode(Object o)
+	public PhyloNode()
 	{
-		super(o);
+		super();
 		xTween = new Tween(null, quad, Tween.OUT, (float) x, (float) x, 20f);
 		yTween = new Tween(null, quad, Tween.OUT, (float) y, (float) y, 20f);
 		
-		if (o instanceof PhyloNode)
-		{
-			PhyloNode n = (PhyloNode) o;
-			setPosition(n);
-		}
+//		if (o instanceof PhyloNode)
+//		{
+//			PhyloNode n = (PhyloNode) o;
+//			setPosition(n);
+//		}
 		
 		//		xTween = new Tween(null, fric, Tween.OUT, (float)x, (float)x, 0f);
 		//		yTween = new Tween(null, fric, Tween.OUT, (float)y, (float)y, 0f);
 	}
 
+	@Override
+	protected Object clone()
+	{
+		Object clone = super.clone();
+		PhyloNode n = (PhyloNode) clone;
+		n.xTween.continueTo(xTween.getPosition());
+		n.yTween.continueTo(yTween.getPosition());
+		n.xTween.fforward();
+		n.yTween.fforward();
+		return n;
+	}
+	
 	public void setPosition(PhyloNode n)
 	{
 		if (n == null)

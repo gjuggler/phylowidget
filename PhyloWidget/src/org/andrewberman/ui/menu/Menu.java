@@ -28,13 +28,10 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import org.andrewberman.ui.EventManager;
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Style;
 import org.andrewberman.ui.UIEvent;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.Positionable;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tween.PropertyTween;
@@ -42,7 +39,6 @@ import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
 
 import processing.core.PApplet;
-import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
@@ -257,7 +253,6 @@ public abstract class Menu extends MenuItem implements UIObject
 	public Menu(PApplet app)
 	{
 		super();
-		UIUtils.loadUISinglets(app);
 
 		canvas = app;
 		setMenu(this);
@@ -268,7 +263,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		 */
 		setOptions();
 		init();
-		EventManager.instance.add(this); // Add ourselves to EventManager.
+		UIGlobals.g.event().add(this); // Add ourselves to EventManager.
 	}
 
 	public void addListener(UIListener o)
@@ -304,9 +299,9 @@ public abstract class Menu extends MenuItem implements UIObject
 		 * Cause this menu to release its focus, if it had grabbed it.
 		 */
 		if (modalFocus)
-			FocusManager.instance.removeFromFocus(this);
+			UIGlobals.g.focus().removeFromFocus(this);
 		else if (focusOnShow)
-			FocusManager.instance.removeFromFocus(this);
+			UIGlobals.g.focus().removeFromFocus(this);
 		/*
 		 * Finally, fire the MENU_HIDDEN event to our listeners.
 		 */
@@ -563,9 +558,9 @@ public abstract class Menu extends MenuItem implements UIObject
 	{
 		open(this);
 		if (modalFocus)
-			FocusManager.instance.setModalFocus(this);
+			UIGlobals.g.focus().setModalFocus(this);
 		else if (focusOnShow)
-			FocusManager.instance.setFocus(this);
+			UIGlobals.g.focus().setFocus(this);
 		fireEvent(UIEvent.MENU_OPENED);
 	}
 
@@ -652,7 +647,7 @@ public abstract class Menu extends MenuItem implements UIObject
 			 * If we're no longer the root menu, then remove ourselves from the
 			 * EventManager's control.
 			 */
-			EventManager.instance.remove(this);
+			UIGlobals.g.event().remove(this);
 		}
 	}
 

@@ -23,7 +23,6 @@ import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSClipUpdater;
-import org.phylowidget.ui.PhyloNode;
 import org.phylowidget.ui.PhyloTree;
 
 public class TreeClipboard
@@ -183,7 +182,7 @@ public class TreeClipboard
 				destTree.addEdge(destNode, tree.getRoot());
 			} else
 			{
-				Object internalVertex = destTree.createAndAddVertex("");
+				DefaultVertex internalVertex = destTree.createAndAddVertex();
 				((PhyloNode) internalVertex).setPosition(origVertex);
 				destTree.insertNodeBetween(destTree.getParentOf(destNode),
 						destNode, internalVertex);

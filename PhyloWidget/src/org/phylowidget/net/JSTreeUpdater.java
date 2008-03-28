@@ -18,16 +18,16 @@
  */
 package org.phylowidget.net;
 
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 
 public class JSTreeUpdater extends DelayedAction
 {
 	
-	JSCaller caller = new JSCaller(PhyloWidget.p);
+	JSCaller caller = new JSCaller(UIGlobals.g.getP());
 	RootedTree tree;
 	String jsCall;
 

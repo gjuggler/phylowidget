@@ -25,14 +25,16 @@ import org.jgrapht.Graphs;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 
-public class PhyloTree extends CachedRootedTree
+public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -44,15 +46,16 @@ public class PhyloTree extends CachedRootedTree
 
 	public PhyloTree()
 	{
-		super();
+		super(DefaultWeightedEdge.class);
 		boolean unique = PhyloWidget.cfg.enforceUniqueLabels;
+//		boolean unique = false;
 		setEnforceUniqueLabels(unique);
 	}
 
 	public static PhyloTree createDefault()
 	{
 		PhyloTree t = new PhyloTree();
-		Object v = t.createAndAddVertex("PhyloWidget");
+		PhyloNode v = t.createAndAddVertex();
 		t.setRoot(v);
 		return t;
 	}
@@ -64,18 +67,18 @@ public class PhyloTree extends CachedRootedTree
 		hoveredNode = n;
 	}
 
-	public Object createVertex(Object o)
+	public PhyloNode createVertex()
 	{
-		return new PhyloNode(o);
+		return new PhyloNode();
 	}
-
-	public void flipChildren(Object parent)
+	
+	public void flipChildren(PhyloNode parent)
 	{
 		super.flipChildren(parent);
 		updateNewick();
 	}
 
-	public void reverseSubtree(Object vertex)
+	public void reverseSubtree(PhyloNode vertex)
 	{
 		super.reverseSubtree(vertex);
 		updateNewick();
@@ -113,7 +116,7 @@ public class PhyloTree extends CachedRootedTree
 	public void search(String s)
 	{
 		removeFound();
-
+		
 		String[] searches = s.split(";");
 
 		ArrayList<PhyloNode> matches = new ArrayList<PhyloNode>();
@@ -138,7 +141,7 @@ public class PhyloTree extends CachedRootedTree
 	}
 
 	@Override
-	public boolean removeVertex(Object o)
+	public boolean removeVertex(PhyloNode o)
 	{
 		boolean b = super.removeVertex(o);
 		if (b)
@@ -147,7 +150,7 @@ public class PhyloTree extends CachedRootedTree
 	}
 
 	@Override
-	public boolean addVertex(Object o)
+	public boolean addVertex(PhyloNode o)
 	{
 		boolean b = super.addVertex(o);
 		if (b)
@@ -206,25 +209,25 @@ public class PhyloTree extends CachedRootedTree
 		}
 	}
 
-	public static void main(String... args)
-	{
-		SimpleDirectedGraph<String, String> g = new SimpleDirectedGraph<String, String>(
-				String.class);
-		g.addVertex("Hello");
-		g.addVertex("World!");
-		g.addEdge("World!", "Hello");
-
-		SimpleDirectedGraph<String, String> g2 = new SimpleDirectedGraph<String, String>(
-				String.class)
-		{
-			public boolean addVertex(String s)
-			{
-				System.out.println(s);
-				return super.addVertex(s);
-			}
-		};
-		System.out.println(g2);
-		Graphs.addGraph(g2, g);
-		System.out.println(g2);
-	}
+//	public static void main(String... args)
+//	{
+//		SimpleDirectedGraph<String, String> g = new SimpleDirectedGraph<String, String>(
+//				String.class);
+//		g.addVertex("Hello");
+//		g.addVertex("World!");
+//		g.addEdge("World!", "Hello");
+//
+//		SimpleDirectedGraph<String, String> g2 = new SimpleDirectedGraph<String, String>(
+//				String.class)
+//		{
+//			public boolean addVertex(String s)
+//			{
+//				System.out.println(s);
+//				return super.addVertex(s);
+//			}
+//		};
+//		System.out.println(g2);
+//		Graphs.addGraph(g2, g);
+//		System.out.println(g2);
+//	}
 }

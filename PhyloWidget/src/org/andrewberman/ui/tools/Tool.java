@@ -19,25 +19,20 @@
 package org.andrewberman.ui.tools;
 
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
-import processing.core.PImage;
 
 public abstract class Tool extends AbstractUIObject
 {
-	PApplet p;
+	protected PApplet p;
 
 	Camera camera;
 
@@ -97,19 +92,8 @@ public abstract class Tool extends AbstractUIObject
 	{
 		camera = c;
 	}
-
-	public Cursor createCursor(String filename, int offsetX, int offsetY)
-	{
-		PImage img = p.loadImage(filename);
-		Dimension d = Toolkit.getDefaultToolkit().getBestCursorSize(img.width,
-				img.height);
-		PImage resized = p.createImage(d.width, d.height, PImage.ARGB);
-		resized.copy(img, 0, 0, img.width, img.height, 0, 0, img.width,
-				img.height);
-		Image image = UIUtils.PImageToImage(resized);
-		return Toolkit.getDefaultToolkit().createCustomCursor(image,
-				new java.awt.Point(offsetX, offsetY), "asdf");
-	}
+	
+	
 
 	public void enter()
 	{
@@ -142,12 +126,12 @@ public abstract class Tool extends AbstractUIObject
 				break;
 			case (MouseEvent.MOUSE_RELEASED):
 				if (modalFocusWhileDragging())
-					FocusManager.instance.removeFromFocus(this);
+					UIGlobals.g.focus().removeFromFocus(this);
 				mousePressed = false;
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
 				if (modalFocusWhileDragging())
-					FocusManager.instance.setModalFocus(this);
+					UIGlobals.g.focus().setModalFocus(this);
 			case (MouseEvent.MOUSE_MOVED):
 				curPoint = (Point) screen.clone();
 				break;

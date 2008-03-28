@@ -28,8 +28,9 @@ import org.phylowidget.PhyloWidget;
 
 public class RenderStyleSet
 {
-	public Color backgroundColor;
-	public Color foregroundColor;
+//	public Color textColor;
+//	public Color nodeColor;
+//	public Color lineColor;
 	
 	public float regStroke;
 
@@ -61,11 +62,13 @@ public class RenderStyleSet
 
 	private void loadDefaults()
 	{
-		foregroundColor = PhyloWidget.cfg.getForeground();
-		backgroundColor = PhyloWidget.cfg.getBackground();
+//		textColor = PhyloWidget.cfg.getTextColor();
+//		nodeColor = PhyloWidget.cfg.getNodeColor();
+//		lineColor = PhyloWidget.cfg.getBranchColor();
+		
 		regStroke = 1f;
 
-		dimColor = foregroundColor.brighter(200);
+		dimColor = PhyloWidget.cfg.getTextColor().brighter(200);
 		dimStroke = 1f;
 
 		hoverColor = new Color(100, 150, 255);

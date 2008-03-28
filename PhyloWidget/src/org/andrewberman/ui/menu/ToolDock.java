@@ -26,6 +26,7 @@ import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.Tool;
@@ -34,15 +35,12 @@ import org.andrewberman.ui.tools.ToolManager.ToolShortcuts;
 
 import processing.core.PApplet;
 
-public class ToolDock extends Dock implements ToolManager.ToolShortcuts
+public class ToolDock extends Dock implements UIObject
 {
-	protected ToolManager toolManager;
-
 	public ToolDock(PApplet app)
 	{
 		super(app);
-		toolManager = new ToolManager(this);
-		EventManager.instance.setToolManager(toolManager);
+		UIGlobals.g.tools().addToolListener(this);
 	}
 
 	public MenuItem create(String s)
@@ -68,7 +66,7 @@ public class ToolDock extends Dock implements ToolManager.ToolShortcuts
 
 	public void checkToolShortcuts(KeyEvent e)
 	{
-		Object o = FocusManager.instance.getFocusedObject();  
+		Object o = UIGlobals.g.focus().getFocusedObject();  
 		if (o != null && o != this)
 		{
 			return;

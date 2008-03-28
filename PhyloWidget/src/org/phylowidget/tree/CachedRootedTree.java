@@ -31,26 +31,28 @@ import java.util.Stack;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.phylowidget.tree.RootedTree.EnclosedLeavesComparator;
 
 import sun.misc.Queue;
 
-public class CachedRootedTree extends RootedTree
+public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEdge> extends RootedTree<V,E>
 {
 	private static final long serialVersionUID = 1L;
 	protected boolean inSync;
 
 	public Comparator enclSorter = new CachedEnclosedLeavesComparator(-1);
 
-	public CachedRootedTree()
+	public CachedRootedTree(Class<? extends E> edgeClass)
 	{
-		super();
+		super(edgeClass);
 	}
 
-	public Object createVertex(Object o)
+	public V createVertex()
 	{
-		return new CachedVertex(o);
+		CachedVertex cv = new CachedVertex();
+		return (V) cv;
 	}
 
 	private boolean inSync()
@@ -65,6 +67,11 @@ public class CachedRootedTree extends RootedTree
 	 */
 	private void sync()
 	{
+		if (holdCalculations)
+		{
+			inSync = false;
+			return;
+		}
 		if (inSync() || root == null)
 			return;
 		calculateStuff();
@@ -78,12 +85,12 @@ public class CachedRootedTree extends RootedTree
 		holdCalculations = holdMe;
 	}
 
-	private List getChildrenOfNoSort(Object vertex)
+	private List<V> getChildrenOfNoSort(V vertex)
 	{
-		List l;
+		List<V> l;
 		if (useNeighborIndex)
 		{
-			l = new ArrayList();
+			l = new ArrayList<V>();
 			l.addAll(neighbors.successorsOf(vertex));
 		} else
 			l = Graphs.successorListOf(this, vertex);
@@ -103,11 +110,11 @@ public class CachedRootedTree extends RootedTree
 		 * STEP 1: ROOT TO LEAVES.
 		 */
 		// Roll our own breadth-first iteration.
-		Stack s = new Stack();
+		Stack<V> s = new Stack<V>();
 		s.add(root);
 		while (!s.isEmpty())
 		{
-			CachedVertex v = (CachedVertex) s.pop();
+			V v = s.pop();
 			if (getParentOf(v) == null)
 			{
 				// Set the root-level cached values.
@@ -117,7 +124,7 @@ public class CachedRootedTree extends RootedTree
 			} else
 			{
 				// Normal iteration.
-				CachedVertex p = (CachedVertex) getParentOf(v);
+				V p = getParentOf(v);
 				v.setDepthToRoot(p.getDepthToRoot() + 1);
 				double ew = getEdgeWeight(getEdge(p, v));
 				v.setBranchLength(ew);
@@ -132,18 +139,18 @@ public class CachedRootedTree extends RootedTree
 		 * STEP 2: LEAVES TO ROOT.
 		 */
 		// Load the vertices breadth-first into a linked list.
-		LinkedList traversal = new LinkedList();
+		LinkedList<V> traversal = new LinkedList<V>();
 		/*
 		 * Destination linkedlist for the vertices. Root is first, leaves are
 		 * last.
 		 */
-		LinkedList dest = new LinkedList();
+		LinkedList<V> dest = new LinkedList<V>();
 		traversal.add(getRoot());
 		while (!traversal.isEmpty())
 		{
-			Object o = traversal.removeFirst();
+			V o = traversal.removeFirst();
 			dest.addLast(o);
-			List children = getChildrenOfNoSort(o);
+			List<V> children = getChildrenOfNoSort(o);
 			for (int i = 0; i < children.size(); i++)
 			{
 				traversal.addLast(children.get(i));
@@ -152,7 +159,7 @@ public class CachedRootedTree extends RootedTree
 
 		while (!dest.isEmpty())
 		{
-			CachedVertex cv = (CachedVertex) dest.removeLast();
+			V cv = dest.removeLast();
 			if (super.isLeaf(cv))
 			{
 				// If this vertex is a leaf, set the base cached values.
@@ -170,11 +177,11 @@ public class CachedRootedTree extends RootedTree
 				int minChildEnc = Integer.MAX_VALUE;
 				int maxChildEnc = 0;
 				double maxHeight = 0;
-				List children = getChildrenOfNoSort(cv);
+				List<V> children = getChildrenOfNoSort(cv);
 				sortChildrenList(cv, children, enclSorter);
 				for (int i = 0; i < children.size(); i++)
 				{
-					CachedVertex child = (CachedVertex) children.get(i);
+					V child = children.get(i);
 					if (child.getNumEnclosed() >= maxChildEnc)
 					{
 						maxChildEnc = child.getNumEnclosed();
@@ -208,30 +215,30 @@ public class CachedRootedTree extends RootedTree
 	}
 
 	@Override
-	public int getMaxChildEnclosed(Object vertex)
+	public int getMaxChildEnclosed(V vertex)
 	{
 		CachedVertex c = (CachedVertex) vertex;
 		return c.getMaxChildEnclosed();
 	}
 
 	@Override
-	public Object getFirstChild(Object vertex)
+	public V getFirstChild(V vertex)
 	{
 		sync();
-		CachedVertex c = (CachedVertex) vertex;
-		return c.getFirstChild();
+		V c = vertex;
+		return (V)c.getFirstChild();
 	}
 
 	@Override
-	public Object getLastChild(Object vertex)
+	public V getLastChild(V vertex)
 	{
 		sync();
 		CachedVertex c = (CachedVertex) vertex;
-		return c.getLastChild();
+		return (V)c.getLastChild();
 	}
 
 	@Override
-	public int getDepthToRoot(Object vertex)
+	public int getDepthToRoot(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -242,7 +249,7 @@ public class CachedRootedTree extends RootedTree
 			return super.getDepthToRoot(vertex);
 	}
 
-	public double getHeightToRoot(Object vertex)
+	public double getHeightToRoot(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -253,7 +260,7 @@ public class CachedRootedTree extends RootedTree
 			return super.getHeightToRoot(vertex);
 	}
 
-	public int getMaxDepthToLeaf(Object vertex)
+	public int getMaxDepthToLeaf(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -264,7 +271,7 @@ public class CachedRootedTree extends RootedTree
 			return super.getMaxDepthToLeaf(vertex);
 	}
 
-	public double getMaxHeightToLeaf(Object vertex)
+	public double getMaxHeightToLeaf(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -275,7 +282,7 @@ public class CachedRootedTree extends RootedTree
 			return super.getMaxHeightToLeaf(vertex);
 	}
 
-	public int getNumEnclosedLeaves(Object vertex)
+	public int getNumEnclosedLeaves(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -287,7 +294,7 @@ public class CachedRootedTree extends RootedTree
 	}
 
 	@Override
-	public boolean isLeaf(Object vertex)
+	public boolean isLeaf(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -298,42 +305,54 @@ public class CachedRootedTree extends RootedTree
 			return super.isLeaf(vertex);
 	}
 
-	protected void fireEdgeAdded(Object arg0)
+	protected void fireEdgeAdded(E arg0)
 	{
 		modPlus();
 		super.fireEdgeAdded(arg0);
 	}
 
-	protected void fireEdgeRemoved(Object arg0)
+	protected void fireEdgeRemoved(E arg0)
 	{
 		modPlus();
 		super.fireEdgeRemoved(arg0);
 	}
 
-	protected void fireVertexAdded(Object arg0)
+	protected void fireVertexAdded(V arg0)
 	{
 		modPlus();
 		super.fireVertexAdded(arg0);
 	}
 
-	protected void fireVertexRemoved(Object arg0)
+	protected void fireVertexRemoved(V arg0)
 	{
 		modPlus();
 		super.fireVertexRemoved(arg0);
 	}
 
-	public void setBranchLength(Object vertex, double weight)
+	public void setBranchLength(V vertex, double weight)
 	{
 		modPlus();
 		super.setBranchLength(vertex, weight);
 	}
 
+	@Override
+	public void reverseSubtree(V vertex)
+	{
+		super.reverseSubtree(vertex);
+	}
+	
 	public void modPlus()
 	{
 		super.modPlus();
 		inSync = false;
 	}
 
+	@Override
+	public void alignLeaves()
+	{
+		super.alignLeaves();
+	}
+	
 	class CachedEnclosedLeavesComparator implements Comparator
 	{
 		int dir;
@@ -345,8 +364,8 @@ public class CachedRootedTree extends RootedTree
 
 		public int compare(Object o1, Object o2)
 		{
-			CachedVertex ca = (CachedVertex) o1;
-			CachedVertex cb = (CachedVertex) o2;
+			V ca = (V) o1;
+			V cb = (V) o2;
 			int a = ca.getNumEnclosed();
 			int b = cb.getNumEnclosed();
 

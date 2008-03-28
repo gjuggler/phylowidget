@@ -34,9 +34,9 @@ import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.event.VertexSetListener;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.HoverHalo;
-import org.phylowidget.ui.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PConstants;

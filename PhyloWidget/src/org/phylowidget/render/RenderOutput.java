@@ -25,9 +25,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeManager;
-import org.phylowidget.ui.PhyloNode;
 import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;

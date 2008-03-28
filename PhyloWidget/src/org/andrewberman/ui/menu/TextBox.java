@@ -2,10 +2,10 @@ package org.andrewberman.ui.menu;
 
 import java.awt.event.KeyEvent;
 
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.LayoutUtils;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
+import org.andrewberman.ui.UIGlobals;
 
 import processing.core.PApplet;
 
@@ -47,7 +47,7 @@ public class TextBox extends Menu
 	public void performAction()
 	{
 		super.performAction();
-		FocusManager.instance.removeFromFocus(tf);
+		UIGlobals.g.focus().removeFromFocus(tf);
 	}
 	
 	@Override

@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
+import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenFriction;
@@ -125,7 +126,7 @@ public class Zoom extends Tool
 	{
 		if (zoomCursor == null)
 		{
-			zoomCursor = createCursor("cursors/zoom2.png", 6, 6);
+			zoomCursor = UIUtils.createCursor(p,"cursors/zoom2.png", 6, 6);
 		}
 		return zoomCursor;
 	}

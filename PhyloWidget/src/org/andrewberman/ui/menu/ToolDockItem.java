@@ -21,6 +21,7 @@ package org.andrewberman.ui.menu;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Constructor;
 
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.tools.Tool;
 
 import processing.core.PApplet;
@@ -97,7 +98,7 @@ public class ToolDockItem extends DockItem
 		if (nearestMenu instanceof ToolDock)
 		{
 			ToolDock td = (ToolDock) nearestMenu;
-			td.toolManager.switchTool(tool);
+			UIGlobals.g.tools().switchTool(tool);
 		}
 	}
 }

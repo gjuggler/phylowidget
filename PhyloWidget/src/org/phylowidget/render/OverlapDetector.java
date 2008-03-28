@@ -18,6 +18,8 @@
  */
 package org.phylowidget.render;
 
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -88,7 +90,6 @@ public class OverlapDetector
 
 	public class Range implements Comparable
 	{
-
 		double min;
 		double max;
 

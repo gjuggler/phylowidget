@@ -29,8 +29,8 @@ import java.util.Random;
 
 import javax.swing.tree.TreeNode;
 
+import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.ui.PhyloNode;
 
 public class RandomTreeMutator implements Runnable
 {
@@ -49,7 +49,7 @@ public class RandomTreeMutator implements Runnable
 		random = new Random(System.currentTimeMillis());
 
 		// InputStream is = new FileInputStream("taxonomy.txt");
-		InputStream is = PhyloWidget.p.openStream("taxonomy.txt");
+		InputStream is = UIGlobals.g.getP().openStream("taxonomy.txt");
 		InputStreamReader read = new InputStreamReader(is);
 		in = new BufferedReader(read);
 		try
@@ -104,8 +104,9 @@ public class RandomTreeMutator implements Runnable
 			allNodes.clear();
 			tree.getAll(tree.getRoot(), null, allNodes);
 			int i = random.nextInt(allNodes.size());
-			Object vertex = allNodes.get(i);
-			PhyloNode sis = (PhyloNode) tree.createAndAddVertex(taxonName);
+			DefaultVertex vertex = (DefaultVertex)allNodes.get(i);
+			PhyloNode sis = (PhyloNode) tree.createAndAddVertex();
+			tree.setLabel(sis, taxonName);
 			tree.addSisterNode(vertex, sis);
 
 			tree.setBranchLength(vertex, randomBranch());

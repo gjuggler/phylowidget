@@ -35,8 +35,7 @@ public class Label extends AbstractUIObject implements Malleable
 	public Label(PApplet p)
 	{
 		this.app = p;
-		UIUtils.loadUISinglets(p);
-		EventManager.instance.add(this);
+		UIGlobals.g.event().add(this);
 
 		color = new Color(Color.black);
 		label = "";
@@ -66,7 +65,7 @@ public class Label extends AbstractUIObject implements Malleable
 		if (UIUtils.isJava2D(app))
 			app.smooth();
 		app.fill(color.getRGB());
-		app.textFont(FontLoader.instance.vera);
+		app.textFont(UIGlobals.g.font());
 		app.textSize(fontSize);
 		app.textAlign(PApplet.LEFT);
 		app.text(label, x, y);
@@ -140,13 +139,13 @@ public class Label extends AbstractUIObject implements Malleable
 			return;
 		cacheS = label;
 		cacheFS = fontSize;
-		cacheH = UIUtils.getTextHeight(app.g, FontLoader.instance.vera,
+		cacheH = UIUtils.getTextHeight(app.g, UIGlobals.g.font(),
 				fontSize, label, true);
-		cacheW = UIUtils.getTextWidth(app.g, FontLoader.instance.vera,
+		cacheW = UIUtils.getTextWidth(app.g, UIGlobals.g.font(),
 				fontSize, label, true);
-		cacheA = UIUtils.getTextAscent(app.g, FontLoader.instance.vera,
+		cacheA = UIUtils.getTextAscent(app.g, UIGlobals.g.font(),
 				fontSize, true);
-		cacheD = UIUtils.getTextDescent(app.g, FontLoader.instance.vera,
+		cacheD = UIUtils.getTextDescent(app.g, UIGlobals.g.font(),
 				fontSize, true);
 	}
 

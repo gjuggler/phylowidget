@@ -23,8 +23,6 @@ import java.awt.FontFormatException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.phylowidget.PhyloWidget;
-
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -35,15 +33,6 @@ public class FontLoader
 	public PFont vera;
 	public PFont veraNonNative;
 	
-	static public FontLoader instance;
-	
-	
-	public static void lazyLoad(PApplet p2)
-	{
-		if (instance == null)
-			instance = new FontLoader(p2);
-	}
-
 	public FontLoader(PApplet p)
 	{
 		this.p = p;

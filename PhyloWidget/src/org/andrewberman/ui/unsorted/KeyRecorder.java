@@ -22,8 +22,6 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.andrewberman.sortedlist.ItemI;
-
 public class KeyRecorder
 {
 	HashMap events = new HashMap(50);

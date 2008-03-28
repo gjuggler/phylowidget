@@ -21,32 +21,42 @@ package org.andrewberman.ui.tools;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
-import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 
-public class ToolManager extends AbstractUIObject
-{
-	ToolShortcuts parent;
-	Tool curTool;
+import processing.core.PApplet;
 
-	public ToolManager(ToolShortcuts parent)
+public class ToolManager
+{
+	PApplet p;
+	Tool curTool;
+	ArrayList<UIObject> listeners;
+
+	public ToolManager(PApplet p)
 	{
-		this.parent = parent;
+		this.p = p;
+		listeners = new ArrayList<UIObject>();
+		UIGlobals.g.event().setToolManager(this);
 	}
 
+	public void addToolListener(UIObject o)
+	{
+		listeners.add(o);
+	}
+	
 	public void switchTool(Tool switchMe)
 	{
 		if (curTool != null)
 			curTool.exit();
 		curTool = switchMe;
-		curTool.setCamera(EventManager.instance.toolCamera);
+		curTool.setCamera(UIGlobals.g.event().toolCamera);
 		curTool.enter();
-		UIUtils.setBaseCursor(curTool.getCursor());
+		UIUtils.setBaseCursor(p,curTool.getCursor());
 	}
 
 	public Tool getCurrentTool()
@@ -70,11 +80,14 @@ public class ToolManager extends AbstractUIObject
 	{
 		if (curTool != null)
 			curTool.keyEvent(e);
-		if (FocusManager.instance.getFocusedObject() != null)
+		if (UIGlobals.g.focus().getFocusedObject() != null)
 		{
 			return;
 		}
-		parent.checkToolShortcuts(e);
+		for (UIObject o : listeners)
+		{
+			o.keyEvent(e);
+		}
 	}
 
 	public void mouseEvent(MouseEvent e, Point screen, Point model)

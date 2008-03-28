@@ -22,19 +22,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
 
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ShortcutManager;
-import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuIO;
 import org.andrewberman.ui.menu.MenuItem;
@@ -46,9 +41,10 @@ import org.phylowidget.net.NodeInfoUpdater;
 import org.phylowidget.net.SecurityChecker;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderOutput;
-import org.phylowidget.render.RenderStyleSet;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.CachedRootedTree;
+import org.phylowidget.tree.DefaultVertex;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeClipboard;
 import org.phylowidget.tree.TreeIO;
@@ -78,15 +74,14 @@ public class PhyloUI implements Runnable
 	public PhyloUI(PhyloWidget p)
 	{
 		this.p = p;
-		UIUtils.loadUISinglets(p);
 	}
 
 	public Thread thread;
 	public void setup()
 	{
-		focus = FocusManager.instance;
-		event = EventManager.instance;
-		keys = ShortcutManager.instance;
+		focus = UIGlobals.g.focus();
+		event = UIGlobals.g.event();
+		keys = UIGlobals.g.shortcuts();
 
 		traverser = new NodeTraverser(p);
 		text = new PhyloTextField(p);
@@ -166,7 +161,7 @@ public class PhyloUI implements Runnable
 	void checkToolbarPermissions()
 	{
 		// Create a SecurityChecker object.
-		SecurityChecker sc = new SecurityChecker(PhyloWidget.p);
+		SecurityChecker sc = new SecurityChecker(UIGlobals.g.getP());
 
 		if (toolbar != null)
 		{
@@ -212,7 +207,7 @@ public class PhyloUI implements Runnable
 		updateJS();
 	}
 
-	public Object curNode()
+	public DefaultVertex curNode()
 	{
 		return curRange().node;
 	}
@@ -270,7 +265,7 @@ public class PhyloUI implements Runnable
 	{
 		NodeRange r = curRange();
 		RootedTree tree = r.render.getTree();
-		PhyloNode sis = (PhyloNode) tree.createAndAddVertex("");
+		PhyloNode sis = (PhyloNode) tree.createAndAddVertex();
 		tree.addSisterNode(curNode(), sis);
 	}
 
@@ -403,7 +398,7 @@ public class PhyloUI implements Runnable
 		synchronized (PhyloWidget.trees.getTree())
 		{
 			PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
-					"Homo Sapiens"));
+					";"));
 			layout();
 		}
 	}
@@ -433,6 +428,24 @@ public class PhyloUI implements Runnable
 		layout();
 	}
 
+	/*
+	 * Aligns the leaves of the tree, changing branch lengths accordingly.
+	 */
+	public void treeAlignLeaves()
+	{
+		new Thread(){
+			@Override
+			public void run()
+			{
+				setMessage("Aligning leaves...");
+				RootedTree tree = getCurTree();
+				tree.alignLeaves();
+				layout();
+				setMessage("");
+			}
+		}.start();
+	}
+	
 	public void treeMutateOnce()
 	{
 		PhyloWidget.trees.mutateTree();

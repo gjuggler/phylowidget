@@ -35,7 +35,7 @@ import processing.core.PApplet;
  * then no other objects are allowed to grab focus until the modal focus is released.
  * <p>
  * It is left up to the UI objects to respond accordingly to the FocusManager's state. The most useful
- * method call is usually <code>FocusManager.instance.isFocused(this)</code>, to test if the current object
+ * method call is usually <code>UIGlobals.g.focus().isFocused(this)</code>, to test if the current object
  * has focus. For examples of how to successfully use the FocusManager, search through the <code>Menu</code> and 
  * <code>MenuItem</code> sources for "FocusManager."
  * 
@@ -52,20 +52,10 @@ public class FocusManager implements FocusListener
 	private Object lostFocusHolder = null;
 	private boolean isModal = false;
 	
-	public static FocusManager instance;
-	
-	private FocusManager(PApplet app)
+	public FocusManager(PApplet app)
 	{
 		p = app;
 		p.addFocusListener(this);
-	}
-	
-	public static void lazyLoad(PApplet p)
-	{
-//		if (instance == null)
-//		{
-			instance = new FocusManager(p);
-//		}
 	}
 	
 	public boolean setFocus(Object o)

@@ -18,22 +18,18 @@
  */
 package org.phylowidget.tree;
 
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.EventManager;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIRectangle;
-import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.camera.RectMover;
-import org.andrewberman.ui.camera.SettableRect;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.Circlegram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.ui.PhyloNode;
 import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
@@ -60,8 +56,7 @@ public class TreeManager extends AbstractUIObject
 	public TreeManager(PApplet p)
 	{
 		this.p = p;
-		UIUtils.loadUISinglets(p);
-		EventManager.instance.add(this);
+		UIGlobals.g.event().add(this);
 	}
 
 	public void setup()
@@ -73,7 +68,7 @@ public class TreeManager extends AbstractUIObject
 		/*
 		 * We need to let the ToolManager know our current Camera object.
 		 */
-		EventManager.instance.setCamera(camera);
+		UIGlobals.g.event().setCamera(camera);
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
 		rectangleRender();

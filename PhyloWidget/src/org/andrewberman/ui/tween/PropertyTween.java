@@ -59,6 +59,8 @@ public class PropertyTween extends Tween
 				field.setFloat(o, value);
 			else if (fieldClass == int.class)
 				field.setInt(o, (int)value);
+			else if (fieldClass == double.class)
+				field.setDouble(o,value);
 		} catch (IllegalArgumentException e)
 		{
 			e.printStackTrace();

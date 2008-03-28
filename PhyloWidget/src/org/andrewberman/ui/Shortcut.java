@@ -64,7 +64,7 @@ public class Shortcut
 
 	public Shortcut(String s)
 	{
-//		ShortcutManager.instance.add(this);
+//		UIGlobals.g.shortcuts().add(this);
 		origS = s;
 		parseString(s);
 	}

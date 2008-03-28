@@ -27,12 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.EventManager;
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.Tool;
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenListener;
@@ -41,6 +39,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderStyleSet;
 import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeManager;
 
@@ -67,10 +66,9 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	public NodeTraverser(PApplet p)
 	{
-		UIUtils.loadUISinglets(p);
 		this.p = p;
 		glowTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f, .75f, 30);
-		EventManager.instance.add(this);
+		UIGlobals.g.event().add(this);
 	}
 
 	private boolean containsPoint(NodeRange r, Point pt)
@@ -196,7 +194,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 			return;
 		if (PhyloWidget.ui.context.isOpen())
 			return;
-		if (FocusManager.instance.getFocusedObject() != null)
+		if (UIGlobals.g.focus().getFocusedObject() != null)
 			return;
 		int code = e.getKeyCode();
 		// System.out.println(e);
@@ -226,16 +224,16 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 	{
 		mousePt.setLocation(screen);
 		pt.setLocation(screen);
-		if (EventManager.instance.getToolManager() == null)
+		if (UIGlobals.g.event().getToolManager() == null)
 			return;
-		Tool t = EventManager.instance.getToolManager().getCurrentTool();
+		Tool t = UIGlobals.g.event().getToolManager().getCurrentTool();
 		if (t == null)
 			return;
 		if (PhyloWidget.ui.context == null || PhyloWidget.ui.context.isOpen())
 			return;
 		if (getCurRange() == null)
 			return;
-		if (FocusManager.instance.getFocusedObject() != null)
+		if (UIGlobals.g.focus().getFocusedObject() != null)
 			return;
 		PhyloWidget.trees.getRenderer().setMouseLocation(pt);
 		setCurRange(getNearestNode((float) pt.getX(), (float) pt.getY()));
@@ -387,7 +385,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 	{
 		if (r != null && r != curNodeRange)
 		{
-			Tool t = EventManager.instance.getToolManager().getCurrentTool();
+			Tool t = UIGlobals.g.event().getToolManager().getCurrentTool();
 			if (t.respondToOtherEvents())
 			{
 				RootedTree tree = r.render.getTree();

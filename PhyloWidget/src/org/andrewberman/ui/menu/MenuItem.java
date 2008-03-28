@@ -19,7 +19,6 @@
 package org.andrewberman.ui.menu;
 
 import java.awt.BasicStroke;
-import java.awt.Font;
 import java.awt.Stroke;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -33,8 +32,8 @@ import org.andrewberman.ui.Action;
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIEvent;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Malleable;
 import org.andrewberman.ui.ifaces.Positionable;
@@ -807,7 +806,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public MenuItem setShortcut(String s)
 	{
-		shortcut = ShortcutManager.instance.createShortcut(s);
+		shortcut = UIGlobals.g.shortcuts().createShortcut(s);
 		if (action != null)
 		{
 			shortcut.action = action;

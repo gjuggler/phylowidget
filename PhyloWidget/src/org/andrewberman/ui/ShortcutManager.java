@@ -40,23 +40,16 @@ import processing.core.PApplet;
 public class ShortcutManager implements KeyListener
 {
 	PApplet p;
-	public static ShortcutManager instance;
-
+	
 	public ArrayList keys;
 
 	int meta = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-	private ShortcutManager(PApplet app)
+	public ShortcutManager(PApplet app)
 	{
 		p = app;
 		keys = new ArrayList();
 		setup();
-	}
-
-	public static void lazyLoad(PApplet app)
-	{
-		// if (instance == null)
-		instance = new ShortcutManager(app);
 	}
 
 	public void setup()

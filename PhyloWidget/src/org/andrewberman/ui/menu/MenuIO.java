@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Stack;
 
 import org.andrewberman.ui.tools.Tool;
-import org.phylowidget.PhyloWidget;
 
 import processing.core.PApplet;
 import processing.xml.XMLElement;

@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.andrewberman.ui.Color;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.ui.PhyloNode;
+import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 import processing.core.PGraphicsJava2D;
@@ -200,13 +200,13 @@ public class Circlegram extends BasicTreeRenderer
 
 	void setRange(PhyloNode n, NodeRange r)
 	{
-		//		NodeRange r = nodesToRanges.get(n);
-		r.loX = getX(n) - dotWidth / 2;
-		float textHeight = (font.ascent() + font.descent()) * textSize;
-		r.loY = getY(n) - textHeight / 2;
-		r.hiY = getY(n) + textHeight / 2;
+		float dw = dotWidth/2;
+		r.loX = getX(n) - dw;
+		float textHeight = textSize/2;
+		r.loY = getY(n) - textHeight;
+		r.hiY = getY(n) + textHeight;
 		float textWidth = (float) n.unitTextWidth * textSize;
-		r.hiX = getX(n) + dotWidth / 2 + textWidth;
+		r.hiX = getX(n) + dw + textWidth;
 	}
 
 	@Override
@@ -214,7 +214,8 @@ public class Circlegram extends BasicTreeRenderer
 	{
 		float r = n.getX();
 		// float theta = n.getY();
-		float x = r * PApplet.cos(getTheta(n));
+		float x = r * cosines.get(n);
+//		float x = r * PApplet.cos(getTheta(n));
 		return (float) (x * scaleX + dx);
 	}
 
@@ -223,12 +224,15 @@ public class Circlegram extends BasicTreeRenderer
 	{
 		float r = n.getX();
 		// float theta = n.getY();
-		float y = r * PApplet.sin(getTheta(n));
+		float y = r * sines.get(n);
+//		float y = r * PApplet.sin(getTheta(n));
 		return (float) (y * scaleY + dy);
 	}
 
 	protected void drawLineImpl(PhyloNode p, PhyloNode n)
 	{
+//		if (true == true)
+//			return;
 		canvas.noFill();
 		canvas.ellipseMode(PApplet.RADIUS);
 		float pr = (float) getRadius(p);
@@ -263,8 +267,6 @@ public class Circlegram extends BasicTreeRenderer
 	@Override
 	protected void drawLabelImpl(PhyloNode n)
 	{
-		// if (true == true)
-		// return;
 		if (!tree.isLeaf(n))
 			return;
 		
@@ -309,7 +311,7 @@ public class Circlegram extends BasicTreeRenderer
 		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
 		Graphics2D g2 = pgj.g2;
 		g2.setFont(font.font.deriveFont(textSize));
-		g2.setPaint(style.foregroundColor);
+		g2.setPaint(PhyloWidget.cfg.getTextColor());
 		float drawX = 0;
 		float drawY = 0;
 		if (!alignRight)
@@ -339,7 +341,7 @@ public class Circlegram extends BasicTreeRenderer
 			g2.setPaint(style.foundForeground);
 		} else
 		{
-			g2.setPaint(style.foregroundColor);
+			g2.setPaint(PhyloWidget.cfg.getTextColor());
 		}
 		g2.drawString(n.getLabel(), drawX, drawY + dFont);
 

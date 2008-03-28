@@ -26,12 +26,12 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.UIObject;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
@@ -54,9 +54,8 @@ public class NearestNodeFinder extends AbstractUIObject
 	public NearestNodeFinder(PApplet p)
 	{
 		this.p = p;
-		UIUtils.loadUISinglets(p);
 		//		
-		EventManager.instance.add(this);
+		UIGlobals.g.event().add(this);
 	}
 
 	public void draw()

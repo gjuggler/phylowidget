@@ -24,6 +24,11 @@ public final class TweenFriction implements TweenFunction
 	
 	public static TweenFriction tween = new TweenFriction(.3f);
 	
+	public void setFriction(float easeSpeed)
+	{
+		this.easeSpeed = easeSpeed;
+	}
+	
 	public static TweenFriction tween(float speed)
 	{
 		return new TweenFriction(speed);

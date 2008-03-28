@@ -25,8 +25,8 @@ import java.awt.geom.RoundRectangle2D;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
@@ -288,7 +288,7 @@ public class NumberScroller extends MenuItem
 					startY = tempPt.y;
 					startVal = getValue();
 					scrolling = true;
-					FocusManager.instance.setModalFocus(this.menu);
+					UIGlobals.g.focus().setModalFocus(this.menu);
 				}
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
@@ -306,7 +306,7 @@ public class NumberScroller extends MenuItem
 				{
 					e.consume();
 					scrolling = false;
-					FocusManager.instance.removeFromFocus(this.menu);
+					UIGlobals.g.focus().removeFromFocus(this.menu);
 				}
 				break;
 		}

@@ -7,17 +7,28 @@
 <title>PhyloWidget</title>
 
 <link rel="stylesheet" href="style.css"/>
+<link rel="shortcut icon" href="img/pw.ico"/>
 <script src="scripts/phylowidget.js"></script>
-
 </head>
 <body>
-<div id="content-wrapper">
+
+<script type="text/javascript">
+	var totalWidth = PhyloWidget.getWidth()+300+50;
+	document.write('<div id="content-wrapper" style="width:'+totalWidth+'px;">');
+</script>
+<!-- <div id="content-wrapper"> -->
 
 <div id="content">
 
 <div id="floater" style="float:left;">
 	<h1>${project.name}</h1>
-	<div id="PhyloWidget" style="width:${applet.width}px;"></div>
+	
+	<script type="text/javascript">
+		document.write('<div id="PhyloWidget" style="width:'+PhyloWidget.getWidth()+'px;">');
+	</script>
+	
+	<!-- <div id="PhyloWidget" style="width:${applet.width}px;"> -->
+	</div>
 </div>
 	<div id="floater2" style="width:300px;float:right;">
 		<h1>${project.name} Toolbox</h1>

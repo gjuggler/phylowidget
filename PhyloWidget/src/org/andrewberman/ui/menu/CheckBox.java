@@ -123,8 +123,8 @@ public class CheckBox extends MenuItem
 	{
 		super.drawMyself();
 
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
 		
 		float curX = x + px;
 		MenuUtils.drawLeftText(this, getName() + ":", curX);
@@ -185,10 +185,10 @@ public class CheckBox extends MenuItem
 	{
 		super.calcPreferredSize();
 		
-		PFont font = menu.style.getFont("font");
-		float fontSize = menu.style.getF("f.fontSize");
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
+		PFont font = getStyle().getFont("font");
+		float fontSize = getStyle().getF("f.fontSize");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
 		
 		/*
 		 * For the height, let's use the height of some capital letters.
@@ -261,11 +261,11 @@ public class CheckBox extends MenuItem
 
 	protected boolean containsPoint(Point p)
 	{
-		float ro = menu.style.getF("f.roundOff");
+		float ro = getStyle().getF("f.roundOff");
 		buffRoundRect.setRoundRect(x, y, width, height, ro,
 				ro);
 //		buffRoundRect.setRoundRect(x + nOffsetX, y + nOffsetY, nWidth, nHeight,
-//				menu.style.roundOff, menu.style.roundOff);
+//				getStyle().roundOff, getStyle().roundOff);
 		return buffRoundRect.contains(p);
 	}
 

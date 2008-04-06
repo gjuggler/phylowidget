@@ -55,7 +55,7 @@ public class PhyloConfig
 	/*
 	 * Set the starting tree.
 	 */
-	public String tree = "Homo sapiens";
+	public String tree = "PhyloWidget";
 	/*
 	 * Set the starting search string.
 	 */
@@ -112,26 +112,35 @@ public class PhyloConfig
 	/*
 	 * The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	 */
-	public float textRotation = 0f; // Text rotation, in degrees.
-	public float textSize = 1.0f; // Text scaling, where a value of 1.0 is normal size.
-	public float lineSize = 1f; // Line width. 0 is minimum, 1 is a pretty normal size. 10 is as high as you'll want to go.
-	public float nodeSize = 2f; // Node size. Same range as line width: 0 to 10 is reasonable.
-	public float renderThreshold = 150f; // Maximum number of nodes to render per frame.
-	public float minTextSize = 10; // Minimum text size for leaf node labels.
-	public float branchLengthScaling = 1f; // How much to scale the branch lengths?
+	public float textRotation = 0f; 				// Text rotation, in degrees.
+	public float textSize = 1.0f; 					// Text scaling, where a value of 1.0 is normal size.
+	public float lineSize = 1f; 					// Line width. 0 is minimum, 1 is a pretty normal size.
+													// 10 is as high as you'll want to go.
+	public float nodeSize = 2f; 					// Node size. Same range as line width: 0 to 10 is reasonable.
+	public float renderThreshold = 150f; 			// Maximum number of nodes to render per frame.
+	public float minTextSize = 10; 					// Minimum text size for leaf node labels.
+	public float branchLengthScaling = 1f; 			// How much to scale the branch lengths?
 
-	public boolean showBootstrapValues = false; // Should we show bootstrap values if they exist?
-	public boolean showCladeLabels = false; // Should we show labels of non-leaf nodes?
+	public boolean showBootstrapValues = false; 	// Should we show bootstrap values if they exist?
+	public boolean showCladeLabels = false; 		// Should we show labels of non-leaf nodes?
 
-	public boolean outputAllInnerNodes = false; // Kind of a strange one: if set to true, PhyloWidget will *always* output the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
-	public boolean enforceUniqueLabels = false; // Enforce uniqueness of node labels.
+	public boolean outputAllInnerNodes = false; 	// Kind of a strange one: if set to true, PhyloWidget will *always* output 
+													// the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
+	public boolean enforceUniqueLabels = false; 	// Enforce uniqueness of node labels.
 	public boolean stretchToFit = false;
-	public boolean useBranchLengths = false; // Should the renderer display the tree using the branch length information?
-
+	public boolean useBranchLengths = false; 		// Should the renderer display the tree using the branch length information?
+	public boolean showAllLabels = false; 			// Should the renderer show all labels? This OVERRIDES the minTextSize setting,
+													// so that labels are shown no matter how small they must be displayed.
+	public boolean prioritizeDistantLabels = false; // This controls how PhyloWidget prioritizes the display of certain nodes above others.
+													// If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
+													// the root, instead of those that are closest (in terms of # of branches to the root).
+	public boolean useDoubleBuffering = true; 		// Don't really want to mess with this one too much -- the double buffering really helps!
+	
 	/*
+	 *
 	 * END: URL API Configuration
 	 * 
-	 * The rest is all just code...
+	 * The rest is all just code involved in making the configuration work...
 	 */
 
 	public PhyloConfig()
@@ -244,7 +253,7 @@ public class PhyloConfig
 		s = s.toLowerCase();
 		if (s.equals("diagonal"))
 		{
-			PhyloWidget.trees.rectangleRender();
+			PhyloWidget.trees.diagonalRender();
 		} else if (s.equals("circular"))
 		{
 			PhyloWidget.trees.circleRender();
@@ -279,4 +288,16 @@ public class PhyloConfig
 			e.printStackTrace();
 		}
 	}
+	
+	public void setMenuFile(String menuFile)
+	{
+		this.menuFile = menuFile;
+		PhyloWidget.ui.setMenus();
+	}
+	
+	public void setShowAllLabels(boolean showAllLabels)
+	{
+		this.showAllLabels = showAllLabels;
+	}
+	
 }

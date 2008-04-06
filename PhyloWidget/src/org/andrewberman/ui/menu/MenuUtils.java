@@ -43,12 +43,12 @@ public class MenuUtils
 
 		roundRect.setRoundRect(x, y, w, h, h / 3, h / 3);
 		if (!item.isEnabled())
-			g2.setPaint(item.menu.style.getC("c.disabled"));
+			g2.setPaint(item.getStyle().getC("c.disabled"));
 		else
 			g2.setPaint(Color.white);
 		g2.fill(roundRect);
 		g2.setPaint(Color.black);
-		g2.setStroke(new BasicStroke(item.menu.style.getF("f.strokeWeight")));
+		g2.setStroke(new BasicStroke(item.getStyle().getF("f.strokeWeight")));
 		g2.draw(roundRect);
 	}
 
@@ -56,7 +56,7 @@ public class MenuUtils
 			float x, float y, float width, float height)
 	{
 		PGraphicsJava2D buff = item.menu.buff;
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		Menu menu = item.menu;
 
 		float ro = style.getF("f.roundOff");
@@ -75,7 +75,7 @@ public class MenuUtils
 			float x, float y, float width, float height)
 	{
 		PGraphicsJava2D buff = item.menu.buff;
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		Menu menu = item.menu;
 
 		float ro = style.getF("f.roundOff");
@@ -117,7 +117,7 @@ public class MenuUtils
 
 	public static void drawRoundOutline(MenuItem item, RoundRectangle2D r2)
 	{
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		float sw = style.getF("f.strokeWeight");
 
 		//		float newX = (float) (Math.floor(r2.getX())-sw);
@@ -142,7 +142,7 @@ public class MenuUtils
 	static void preDraw(MenuItem item)
 	{
 		Menu menu = item.menu;
-		MenuStyle style = menu.style;
+		MenuStyle style = item.getStyle();
 		PGraphicsJava2D buff = item.menu.buff;
 		rh = menu.buff.g2.getRenderingHints();
 		buff.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -160,7 +160,7 @@ public class MenuUtils
 			float x, float y, float width, float height)
 	{
 		PGraphicsJava2D buff = item.menu.buff;
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		Menu menu = item.menu;
 
 		float ro = style.getF("f.roundOff");
@@ -196,7 +196,7 @@ public class MenuUtils
 			float y, float w, float h)
 	{
 		Menu menu = item.menu;
-		MenuStyle style = menu.style;
+		MenuStyle style = item.getStyle();
 
 		roundRect.setRoundRect(x, y, w, h, 0, 0);
 		drawRoundOutline(item, roundRect);
@@ -205,7 +205,7 @@ public class MenuUtils
 	public static synchronized void drawSingleGradientRect(MenuItem item,
 			float x, float y, float width, float height)
 	{
-		float ro = item.menu.style.getF("f.roundOff");
+		float ro = item.getStyle().getF("f.roundOff");
 		drawSingleGradientRect(item, x, y, width, height, ro);
 	}
 
@@ -213,7 +213,7 @@ public class MenuUtils
 			float x, float y, float width, float height, float roundOff)
 	{
 		Menu menu = item.menu;
-		MenuStyle style = menu.style;
+		MenuStyle style = item.getStyle();
 
 		roundRect.setRoundRect(x, y, width, height, roundOff, roundOff);
 		Graphics2D g2 = menu.buff.g2;
@@ -222,10 +222,10 @@ public class MenuUtils
 		 */
 		if (item.isOpen())
 		{
-			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
+			g2.setPaint(item.getStyle().getGradient(MenuItem.DOWN, y, y + height));
 		} else
 		{
-			g2.setPaint(menu.style.getGradient(MenuItem.OVER, y, y + height));
+			g2.setPaint(item.getStyle().getGradient(MenuItem.OVER, y, y + height));
 		}
 		/*
 		 * Only perform the fill if the mood is right.
@@ -275,7 +275,7 @@ public class MenuUtils
 		} else
 			yOffset = height - descent;
 
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		PFont font = style.getFont("font");
 		float fs = style.getF("f.fontSize");
 
@@ -290,28 +290,28 @@ public class MenuUtils
 
 	public static float getTextWidth(MenuItem item, String s)
 	{
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		return UIUtils.getTextWidth(item.menu.buff, style.getFont("font"),
 				style.getF("f.fontSize"), s, true);
 	}
 
 	public static float getTextHeight(MenuItem item, String s)
 	{
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		return UIUtils.getTextHeight(item.menu.buff, style.getFont("font"),
 				style.getF("f.fontSize"), s, true);
 	}
 
 	public static float getTextAscent(MenuItem item)
 	{
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		return UIUtils.getTextAscent(item.menu.buff, style.getFont("font"),
 				style.getF("f.fontSize"), true);
 	}
 
 	public static float getTextDescent(MenuItem item)
 	{
-		MenuStyle style = item.menu.style;
+		MenuStyle style = item.getStyle();
 		return UIUtils.getTextAscent(item.menu.buff, style.getFont("font"),
 				style.getF("f.fontSize"), true);
 	}

@@ -23,6 +23,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,8 @@ import processing.core.PGraphicsJava2D;
  * 
  * @author Greg Jordan
  */
-public class BasicTreeRenderer implements TreeRenderer, GraphListener
+public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer,
+		GraphListener
 {
 	float baseStroke;
 
@@ -100,8 +102,10 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	/**
 	 * Leaf nodes in the associated tree.
 	 */
-	protected ArrayList<PhyloNode> leaves = new ArrayList<PhyloNode>();
-	protected ArrayList<PhyloNode> sigLeaves = new ArrayList<PhyloNode>();
+	//	protected ArrayList<PhyloNode> leaves = new ArrayList<PhyloNode>();
+	//	protected ArrayList<PhyloNode> sigLeaves = new ArrayList<PhyloNode>();
+	protected PhyloNode[] leaves = new PhyloNode[1];
+	protected PhyloNode[] sigLeaves = new PhyloNode[1];
 
 	/**
 	 * A data structure to store the rectangular regions of all nodes. Instead
@@ -118,7 +122,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	/**
 	 * All nodes in the associated tree.
 	 */
-	protected ArrayList<PhyloNode> nodes = new ArrayList<PhyloNode>();
+	protected PhyloNode[] nodes = new PhyloNode[1];
 
 	protected HashMap<PhyloNode, NodeRange> nodesToRanges = new HashMap<PhyloNode, NodeRange>();
 
@@ -299,11 +303,12 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 */
 		foundItems.clear();
 		int nodesDrawn = 0;
-		ArrayList<PhyloNode> nodesToDraw = new ArrayList<PhyloNode>(nodes
-				.size());
-		for (int i = 0; i < nodes.size(); i++)
+		PhyloNode[] nodesToDraw = new PhyloNode[nodes.length];
+		Thread.yield();
+		for (int i = 0; i < nodes.length; i++)
 		{
-			PhyloNode n = nodes.get(i);
+			Thread.yield();
+			PhyloNode n = nodes[i];
 			if (fforwardMe)
 				n.fforward();
 			updateNode(n);
@@ -320,8 +325,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			if (!n.isWithinScreen)
 				continue;
 			n.drawMe = true;
+			nodesToDraw[nodesDrawn] = n;
 			nodesDrawn++;
-			nodesToDraw.add(n);
 		}
 		fforwardMe = false;
 		//		list.sort();
@@ -355,9 +360,11 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		 * THIRD LOOP: Drawing nodes
 		 *   - This loop actually does the drawing.
 		 */
-		for (int i = nodesToDraw.size() - 1; i >= 0; i--)
+		Thread.yield();
+		for (int i = nodesDrawn - 1; i >= 0; i--)
 		{
-			PhyloNode n = nodesToDraw.get(i);
+			Thread.yield();
+			PhyloNode n = nodesToDraw[i];
 			if (!n.drawMe)
 			{
 				if (n.isWithinScreen)
@@ -417,8 +424,10 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Also always try to draw nodes that are "found".
 		 */
+		Thread.yield();
 		for (PhyloNode n : foundItems)
 		{
+			Thread.yield();
 			NodeRange r = nodesToRanges.get(n);
 			if (!overlap.overlaps(r.loY, r.hiY) || !useOverlapDetector())
 			{
@@ -435,9 +444,11 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		}
 
 		int asdf = 0;
-		for (int i = 0; i < sigLeaves.size(); i++)
+		Thread.yield();
+		for (int i = 0; i < sigLeaves.length; i++)
 		{
-			PhyloNode n = sigLeaves.get(i);
+			Thread.yield();
+			PhyloNode n = sigLeaves[i];
 			if (!n.isWithinScreen || n.labelWasDrawn)
 				continue;
 			NodeRange r = nodesToRanges.get(n);
@@ -473,7 +484,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				float curTextSize = textSize * 0.5f;
 				canvas.textFont(font);
 				canvas.textSize(curTextSize);
-				canvas.fill(PhyloWidget.cfg.getTextColor().brighter(100).getRGB());
+				canvas.fill(PhyloWidget.cfg.getTextColor().brighter(100)
+						.getRGB());
 				canvas.textAlign(canvas.RIGHT, canvas.TOP);
 				float s = strokeForNode(n);
 				canvas.text(boot, -dotWidth * 2 - s, +s);
@@ -506,12 +518,21 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	protected void drawLabelImpl(PhyloNode n)
 	{
+		float curTextSize = textSize * n.zoomTextSize;
+
+		/*
+		 * Early exit strategy if text is too small.
+		 */
+		if (curTextSize < .5f)
+		{
+			return;
+		}
+
 		canvas.pushMatrix();
 		canvas.translate(getX(n) + dotWidth / 2 + getNormalLineWidth() * 2,
 				getY(n));
-		canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
-
-		float curTextSize = textSize * n.zoomTextSize;
+		if (PhyloWidget.cfg.textRotation != 0)
+			canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
 
 		if (tree.isLeaf(n) && n.found)
 		{
@@ -523,6 +544,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			canvas.rect(0, -curTextSize / 2,
 					(float) (n.unitTextWidth * curTextSize), curTextSize);
 		}
+
 		/*
 		 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
 		 */
@@ -574,7 +596,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			{
 				Double d = Double.parseDouble(boot);
 				d = (100 - d) * 200f / 100f;
-				canvas.stroke(PhyloWidget.cfg.getBranchColor().brighter(d).getRGB());
+				canvas.stroke(PhyloWidget.cfg.getBranchColor().brighter(d)
+						.getRGB());
 			}
 		}
 
@@ -862,19 +885,30 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Grab our list of nodes again.
 		 */
-		leaves.clear();
-		sigLeaves.clear();
-		nodes.clear();
-		tree.getAll(tree.getRoot(), leaves, nodes);
-		/*
-		 * Sort these nodes by significance (i.e. num of enclosed nodes).
-		 */
-		Collections.sort(nodes, tree.sorter);
-		/*
-		 * Sort the leaves by "leaf" significance (first leaf = least depth to root)
-		 */
-		sigLeaves.addAll(leaves);
-		Collections.sort(sigLeaves, tree.leafSorter);
+		ArrayList<PhyloNode> ls = new ArrayList<PhyloNode>();
+		ArrayList<PhyloNode> ns = new ArrayList<PhyloNode>();
+		synchronized (this)
+		{
+			tree.getAll(tree.getRoot(), ls, ns);
+			Thread.yield();
+
+			leaves = new PhyloNode[ls.size()];
+			nodes = new PhyloNode[ns.size()];
+			leaves = ls.toArray(leaves);
+			nodes = ns.toArray(nodes);
+			/*
+			 * Sort these nodes by significance (i.e. num of enclosed nodes).
+			 */
+			Arrays.sort(nodes, 0, nodes.length, tree.sorter);
+			Thread.yield();
+			/*
+			 * Sort the leaves by "leaf" significance (first leaf = least depth to root)
+			 */
+			sigLeaves = Arrays.copyOf(leaves, leaves.length);
+			Arrays.sort(sigLeaves, 0, sigLeaves.length, tree.leafSorter);
+			Thread.yield();
+			
+		}
 
 		/*
 		 * Crate new nodeRange objects for this layout.
@@ -883,9 +917,9 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		{
 			list.clear();
 			nodesToRanges.clear();
-			for (int i = 0; i < nodes.size(); i++)
+			for (int i = 0; i < nodes.length; i++)
 			{
-				PhyloNode n = (PhyloNode) nodes.get(i);
+				PhyloNode n = (PhyloNode) nodes[i];
 				NodeRange r = new NodeRange();
 				r.node = n;
 				r.render = this;
@@ -894,6 +928,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			}
 			list.sortFull();
 		}
+		Thread.yield();
 
 		/*
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
@@ -906,19 +941,21 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Set the leaf positions.
 		 */
-		for (int i = 0; i < leaves.size(); i++)
+		for (int i = 0; i < leaves.length; i++)
 		{
-			PhyloNode n = (PhyloNode) leaves.get(i);
+			PhyloNode n = (PhyloNode) leaves[i];
 			/*
 			 * Set the leaf position of this node.
 			 */
 			leafPosition(n, i);
 		}
 
-		taxonColorMap = new HashMap<String,Integer>();
-		for (int i = 0; i < nodes.size(); i++)
+		Thread.yield();
+
+		taxonColorMap = new HashMap<String, Integer>();
+		for (int i = 0; i < nodes.length; i++)
 		{
-			PhyloNode n = (PhyloNode) nodes.get(i);
+			PhyloNode n = (PhyloNode) nodes[i];
 			/**
 			 * Find the width of this node's label.
 			 */
@@ -945,7 +982,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				biggestStringWidth = width;
 				biggestString = n.getLabel();
 			}
-			
+
 			if (n.getClass() == NHXNode.class)
 			{
 				NHXNode nhx = (NHXNode) n;
@@ -957,16 +994,18 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 				{
 					String spec = nhx.getAnnotation(NHXNode.SPECIES_NAME);
 					if (spec != null)
-						taxonColorMap.put(spec,null);
+						taxonColorMap.put(spec, null);
 				}
 			}
 		}
-		
+
+		Thread.yield();
+
 		if (PhyloWidget.cfg.colorBySpecies)
 		{
 			getColorsForSpeciesMap();
 		}
-		
+
 		/*
 		 * Special case: if biggestString is 0 length, we'll fudge it.
 		 */
@@ -984,7 +1023,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/*
 		 * Set the numRows and numCols variables.
 		 */
-		numRows = leaves.size();
+		numRows = leaves.length;
 		numCols = tree.getMaxDepthToLeaf(tree.getRoot());
 	}
 
@@ -992,7 +1031,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	{
 		int n = taxonColorMap.size();
 		Set<String> keys = taxonColorMap.keySet();
-		float step = 1f / (n+1f);
+		float step = 1f / (n + 1f);
 		float pos = 0;
 		for (String key : keys)
 		{
@@ -1001,7 +1040,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			taxonColorMap.put(key, color);
 		}
 	}
-	
+
 	int textColor(PhyloNode n)
 	{
 		if (n.getClass() == NHXNode.class)
@@ -1024,7 +1063,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			return PhyloWidget.cfg.getTextColor().getRGB();
 		}
 	}
-	
+
 	public void layoutTrigger()
 	{
 		needsLayout = true;
@@ -1035,7 +1074,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		/**
 		 * Set the leaf position.
 		 */
-		float yPos = ((float) (index + .5f) / (float) (leaves.size()));
+		float yPos = ((float) (index + .5f) / (float) (leaves.length));
 		float xPos = 1;
 		if (PhyloWidget.cfg.useBranchLengths)
 			xPos = nodeXPosition(n);
@@ -1108,13 +1147,19 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 		float origWidth = rect.width;
 		if (PhyloWidget.cfg.stretchToFit)
 		{
-			rect.width = canvas.parent.getWidth();
+			rect.width = canvas.width;
 			rect.x = 0;
 			rowSize = rect.height / (numRows + absOverhang);
 			textSize = rowSize;
 			float maxSize = rect.width / (2 * biggestStringWidth);
-			textSize = PApplet.constrain(textSize, Math.min(14,
-					PhyloWidget.cfg.minTextSize), maxSize);
+			if (!PhyloWidget.cfg.showAllLabels)
+			{
+				textSize = PApplet.constrain(textSize, Math.min(14,
+						PhyloWidget.cfg.minTextSize), maxSize);
+			} else
+			{
+				textSize = PApplet.constrain(textSize, 0, maxSize);
+			}
 			colSize = rect.width / (numCols + 1 + biggestStringWidth);
 			scaleX = rect.width - biggestStringWidth * textSize;
 			scaleX *= 0.9f;
@@ -1125,7 +1170,8 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 			rowSize = rect.height / (numRows + absOverhang);
 			textSize = Math.min(rect.width / biggestStringWidth * .5f, rowSize);
 			tsf = PhyloWidget.cfg.textSize;
-			tsf *= Math.max(1, PhyloWidget.cfg.minTextSize / textSize);
+			if (!PhyloWidget.cfg.showAllLabels)
+				tsf *= Math.max(1, PhyloWidget.cfg.minTextSize / textSize);
 			colSize = rect.width / (numCols + 1 + biggestStringWidth);
 			rowSize = colSize = Math.min(rowSize, colSize) * .9f;
 
@@ -1158,12 +1204,43 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 	public void render(PGraphics canvas, float x, float y, float w, float h,
 			boolean mainRender)
 	{
-		this.canvas = canvas;
 		this.mainRender = mainRender;
 		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
-		synchronized (tree)
+		if (PhyloWidget.cfg.useDoubleBuffering)
+		{
+			drawToCanvas(canvas);
+		} else
+		{
+			synchronized (this)
+			{
+				this.canvas = canvas;
+				layout();
+				recalc();
+				draw();
+			}
+		}
+	}
+
+	//		this.rect.setFrame(x, y, w, h);
+	//		this.canvas = canvas;
+	////		canvas.background(0,0);
+	//		if (tree == null)
+	//			return;
+	////		synchronized (this)
+	////		{
+	//			layout();
+	//			recalc();
+	//			draw();
+	////		}
+	//	}
+
+	public void drawToBuffer(PGraphics g)
+	{
+		this.canvas = g;
+		g.background(0, 0);
+		synchronized (this)
 		{
 			layout();
 			recalc();
@@ -1184,7 +1261,7 @@ public class BasicTreeRenderer implements TreeRenderer, GraphListener
 
 	private float overhang;
 
-	protected HashMap<String,Integer> taxonColorMap;
+	protected HashMap<String, Integer> taxonColorMap;
 
 	public void setMouseLocation(Point pt)
 	{

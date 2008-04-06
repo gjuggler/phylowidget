@@ -121,10 +121,10 @@ public class RadialMenuItem extends MenuItem
 		// this.isAncestorOf(menu.currentlyHovered);
 		// if (this.isAncestorOf(menu.currentlyHovered))
 		if (isOpen())
-			g2.setPaint(menu.style.getGradient(Menu.OVER, x - rHi, y - rHi, x
+			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi, x
 					+ rHi, y + rHi));
 		else
-			g2.setPaint(menu.style.getGradient(getState(), x - rHi, y - rHi, x
+			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi, x
 					+ rHi, y + rHi));
 		g2.fill(wedge);
 		
@@ -146,7 +146,7 @@ public class RadialMenuItem extends MenuItem
 					+ dx, outerY + dy);
 			at.scale(scale, scale);
 			at.rotate(theta);
-			Area tri = (Area) menu.style.get("subTriangle");
+			Area tri = (Area) getStyle().get("subTriangle");
 			Area newTri = tri.createTransformedArea(at);
 			g2.setPaint(getStrokeColor());
 			g2.fill(newTri);
@@ -156,21 +156,21 @@ public class RadialMenuItem extends MenuItem
 	void drawText()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		PFont pf = menu.style.getFont("font");
+		PFont pf = getStyle().getFont("font");
 		Font f = pf.font.deriveFont(fontSize);
 		g2.setFont(f);
-		g2.setPaint(menu.style.getC("c.foreground"));
+		g2.setPaint(getStyle().getC("c.foreground"));
 		g2.drawString(displayLabel, textX, textY);
 	}
 
 	void drawHint()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		PFont pf = menu.style.getFont("font");
+		PFont pf = getStyle().getFont("font");
 		Font f = pf.font.deriveFont(fontSize);
 		f = f.deriveFont(hintSize);
 		g2.setFont(f);
-		g2.setPaint(menu.style.getC("c.foreground"));
+		g2.setPaint(getStyle().getC("c.foreground"));
 		g2.drawString(String.valueOf(hint), hintX, hintY);
 	}
 
@@ -252,7 +252,7 @@ public class RadialMenuItem extends MenuItem
 		outerY = y + sin * rHi;
 		innerX = x + cos * rLo;
 		innerY = y + sin * rLo;
-		PFont font = menu.style.getFont("font");
+		PFont font = getStyle().getFont("font");
 		FontMetrics fm = UIUtils.getMetrics(menu.buff, font.font, 1);
 		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2)
 				.getHeight();
@@ -277,7 +277,7 @@ public class RadialMenuItem extends MenuItem
 		// Calculate the necessary x and y offsets for the text.
 		float outX = x + cos * (rHi + textHeight);
 		float outY = y + sin * (rHi + textHeight);
-		float pad = menu.style.getF("f.padX");
+		float pad = getStyle().getF("f.padX");
 		rectW = textWidth + 2 * pad;
 		rectH = textHeight + 2 * pad;
 		rectX = outX + cos * rectW / 2 - rectW / 2;

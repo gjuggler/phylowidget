@@ -25,13 +25,13 @@ public class MenuStyle extends Style
 		defaults.set("c.gradientLo", new Color(245, 245, 255));
 		defaults.set("c.gradientHi", new Color(190, 210, 245));
 
-		defaults.set("f.fontSize", 12f);
+		defaults.set("f.fontSize", 11f);
 		defaults.set("font", UIGlobals.g.font());
 		defaults.set("c.font", new Color(0, 0, 0));
 
-		defaults.set("f.padY", 4f);
-		defaults.set("f.padX", 4f);
-		defaults.set("f.roundOff", 10f);
+		defaults.set("f.padY", 3.5f);
+		defaults.set("f.padX", 3.5f);
+		defaults.set("f.roundOff", 6f);
 		
 		defaults.set("f.strokeWeight",.5f);
 

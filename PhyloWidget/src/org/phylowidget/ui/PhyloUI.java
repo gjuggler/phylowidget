@@ -18,6 +18,10 @@
  */
 package org.phylowidget.ui;
 
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.TextArea;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -77,6 +81,7 @@ public class PhyloUI implements Runnable
 	}
 
 	public Thread thread;
+
 	public void setup()
 	{
 		focus = UIGlobals.g.focus();
@@ -86,12 +91,13 @@ public class PhyloUI implements Runnable
 		traverser = new NodeTraverser(p);
 		text = new PhyloTextField(p);
 		nodeUpdater = new NodeInfoUpdater();
-		
+
 		thread = new Thread(this);
 		thread.start();
-		
 	}
-	
+
+	ArrayList<MenuItem> menus;
+
 	public void run()
 	{
 		/*
@@ -99,15 +105,29 @@ public class PhyloUI implements Runnable
 		 */
 		loadFromApplet(p);
 
+		setMenus();
+
+		checkToolbarPermissions();
+		thread = null;
+	}
+
+	public void setMenus()
+	{
 		/*
 		 * Menu file should be loaded first.
 		 */
+		if (menus != null)
+		{
+			for (MenuItem i : menus)
+			{
+				i.dispose();
+			}
+		}
 		String menuFile = "menus/" + PhyloWidget.cfg.menuFile;
-		ArrayList menus = MenuIO.loadFromXML(p, menuFile, PhyloWidget.ui,
-				PhyloWidget.cfg);
+		menus = MenuIO
+				.loadFromXML(p, menuFile, PhyloWidget.ui, PhyloWidget.cfg);
+
 		configureMenus(menus);
-		checkToolbarPermissions();
-		thread = null;
 	}
 
 	public void loadFromApplet(PApplet p)
@@ -171,7 +191,7 @@ public class PhyloUI implements Runnable
 				search = (SearchBox) s;
 				search.setText(PhyloWidget.cfg.search);
 			}
-			s = toolbar.get("Load Tree...");
+			s = toolbar.get("From File...");
 			if (s != null)
 				s.setEnabled(sc.canReadFiles());
 			s = toolbar.get("Save Tree...");
@@ -397,10 +417,11 @@ public class PhyloUI implements Runnable
 	{
 		synchronized (PhyloWidget.trees.getTree())
 		{
+			System.out.println("Hey!");
 			PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
-					";"));
-			layout();
+					"PhyloWidget"));
 		}
+		layout();
 	}
 
 	public void treeFlip()
@@ -433,7 +454,8 @@ public class PhyloUI implements Runnable
 	 */
 	public void treeAlignLeaves()
 	{
-		new Thread(){
+		new Thread()
+		{
 			@Override
 			public void run()
 			{
@@ -445,7 +467,7 @@ public class PhyloUI implements Runnable
 			}
 		}.start();
 	}
-	
+
 	public void treeMutateOnce()
 	{
 		PhyloWidget.trees.mutateTree();
@@ -509,7 +531,7 @@ public class PhyloUI implements Runnable
 
 	public void treeLoad()
 	{
-		final File f = p.inputFile("Select Newick-format text file...");
+		final File f = p.inputFile("Select a Newick or Nexus text file...");
 		if (f == null)
 			return;
 		setMessage("Loading tree...");
@@ -527,25 +549,58 @@ public class PhyloUI implements Runnable
 		}.start();
 	}
 
+	public Frame getFrame()
+	{
+		Frame parentFrame = null;
+		Component comp = p.getParent();
+		while (comp != null)
+		{
+			if (comp instanceof Frame)
+			{
+				parentFrame = (Frame) comp;
+				break;
+			}
+			comp = comp.getParent();
+		}
+		if (parentFrame == null)
+			parentFrame = new Frame();
+		return parentFrame;
+	}
+
+	public void treeInput()
+	{
+		Frame parentFrame = getFrame();
+
+		InputDialog d = new InputDialog(parentFrame,
+				"Enter your Newick-formatted tree here.");
+		d.setVisible(true);
+
+		final String treeString = d.text.getText();
+		if (treeString == null || treeString.length() == 0)
+			return;
+
+		new Thread()
+		{
+			public void run()
+			{
+				setMessage("Loading tree...");
+				PhyloTree t = (PhyloTree) TreeIO.parseNewickString(
+						new PhyloTree(), treeString);
+				p.noLoop();
+				PhyloWidget.trees.setTree(t);
+				p.loop();
+				setMessage("");
+				layout();
+			}
+		}.start();
+	}
+
 	/*
 	 * File actions.
 	 */
 
-	public void fileOutputSmall()
+	public void fileOutput()
 	{
-		TreeRenderer tr = PhyloWidget.trees.getRenderer();
-		RenderOutput.save(p, getCurTree(), tr, 640, 480);
-	}
-
-	public void fileOutputBig()
-	{
-		TreeRenderer tr = PhyloWidget.trees.getRenderer();
-		RenderOutput.save(p, getCurTree(), tr, 1600, 1200);
-	}
-
-	public void fileOutputPDF()
-	{
-		final TreeRenderer tr = PhyloWidget.trees.getRenderer();
-		RenderOutput.savePDF(p, getCurTree(), tr);
+		ImageExportDialog ied = new ImageExportDialog(getFrame());
 	}
 }

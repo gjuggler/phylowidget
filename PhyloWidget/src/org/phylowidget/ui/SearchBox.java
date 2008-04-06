@@ -28,6 +28,7 @@ public class SearchBox extends TextBox implements UIListener
 	public void setLabel(String l)
 	{
 		label.setLabel(l);
+		layout();
 	}
 	
 	@Override
@@ -40,8 +41,8 @@ public class SearchBox extends TextBox implements UIListener
 	@Override
 	public void layout()
 	{
-//		tf.setWidth(width-menu.style.padX);
-//		tf.setHeight(height-menu.style.padY);
+//		tf.setWidth(width-getStyle().padX);
+//		tf.setHeight(height-getStyle().padY);
 		LayoutUtils.centerVertical(tf, y, y+height);
 		LayoutUtils.centerHorizontal(tf, x,x+width);
 

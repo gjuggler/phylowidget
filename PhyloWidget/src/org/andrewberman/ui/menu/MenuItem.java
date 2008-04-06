@@ -134,6 +134,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	private boolean enabled = true;
 	protected boolean isOpen;
 	protected ArrayList<MenuItem> items;
+	private MenuStyle style;
 	protected Menu menu;
 	protected boolean mouseInside;
 	protected String name;
@@ -163,6 +164,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		this.name = new String();
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
+		style = new MenuStyle();
 	}
 
 	ArrayList<MenuItem> itemsToAdd = new ArrayList();
@@ -193,6 +195,15 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return add(create(newLabel));
 	}
 
+	public void dispose()
+	{
+		for (MenuItem i : items)
+		{
+			i.dispose();
+		}
+	}
+	
+	
 	protected void calcPreferredSize()
 	{
 	}
@@ -440,7 +451,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public MenuStyle getRootStyle()
 	{
-		return menu.style;
+		return menu.getStyle();
 	}
 
 	public Shortcut getShortcut()
@@ -480,14 +491,14 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public MenuStyle getStyle()
 	{
-		return menu.style;
+		return style;
 	}
 
 	protected float getTextHeight()
 	{
-		int padY = menu.style.getI("f.padY");
-		PFont font = (PFont) menu.style.getO("font");
-		float fontSize = menu.style.getF("f.fontSize");
+		int padY = getStyle().getI("f.padY");
+		PFont font = (PFont) getStyle().getO("font");
+		float fontSize = getStyle().getF("f.fontSize");
 		return UIUtils.getTextHeight(menu.buff, font, fontSize, name, true)
 				+ padY * 2;
 	}
@@ -794,6 +805,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	protected void setParent(MenuItem item)
 	{
 		parent = item;
+		getStyle().setParent(item.getStyle());
 		setMenu(item.menu);
 	}
 
@@ -911,6 +923,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		}
 	}
 
+	public void setFontSize(float size)
+	{
+		getStyle().set("f.fontSize", size);
+	}
+	
 	protected void zSort()
 	{
 		if (zComp == null)

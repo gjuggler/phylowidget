@@ -104,8 +104,11 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void add(UIObject o)
 	{
-		//		delegates.add(o);
-		delegatesToAdd.add(o);
+		synchronized (delegates)
+		{
+			delegates.add(o);
+		}
+		//		delegatesToAdd.add(o);
 	}
 
 	public void setToolManager(ToolManager t)
@@ -132,10 +135,13 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	{
 		//		UIUtils.setMatrix(p);
 
-		for (int i = 0; i < delegates.size(); i++)
+		synchronized (delegates)
 		{
-			UIObject o = (UIObject) delegates.get(i);
+			for (int i = 0; i < delegates.size(); i++)
+			{
+				UIObject o = (UIObject) delegates.get(i);
 				o.draw();
+			}
 		}
 
 		/*
@@ -143,13 +149,13 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		 */
 		if (toolManager != null)
 			toolManager.draw();
-		
-		for (int i = 0; i < delegatesToAdd.size(); i++)
-		{
-			UIObject o = delegatesToAdd.get(i);
-			delegatesToAdd.remove(i);
-			delegates.add(o);
-		}
+
+		//		for (int i = 0; i < delegatesToAdd.size(); i++)
+		//		{
+		//			UIObject o = delegatesToAdd.get(i);
+		//			delegatesToAdd.remove(i);
+		//			delegates.add(o);
+		//		}
 	}
 
 	public void mouseEvent(MouseEvent e)
@@ -157,7 +163,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		screen.setLocation(e.getX(), e.getY());
 		model.setLocation(screen.x, screen.y);
 		UIUtils.screenToModel(model);
-		
+
 		/*
 		 * First, send the event directly to the focused object.
 		 */
@@ -165,7 +171,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		{
 			UIObject o = (UIObject) UIGlobals.g.focus().getFocusedObject();
 			// System.out.println(UIGlobals.g.focus().getFocusedObject());
-				o.mouseEvent(e, screen, model);
+			o.mouseEvent(e, screen, model);
 		}
 		/*
 		 * If the FocusManager is in a modal state, return without further
@@ -181,19 +187,22 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 			if (toolManager != null)
 				toolManager.mouseEvent(e, screen, model);
 		}
-		
+
 		/*
 		 * Then, if the focus isn't modal and the object wasn't consumed,
 		 * continue sending the mouse event to the other uiobjects.
 		 */
-		for (int i = delegates.size() - 1; i >= 0; i--)
+		synchronized (delegates)
 		{
-			if (e.isConsumed())
-				break;
-			UIObject ui = (UIObject) delegates.get(i);
-			if (ui == UIGlobals.g.focus().getFocusedObject())
-				continue;
+			for (int i = delegates.size() - 1; i >= 0; i--)
+			{
+				if (e.isConsumed())
+					break;
+				UIObject ui = (UIObject) delegates.get(i);
+				if (ui == UIGlobals.g.focus().getFocusedObject())
+					continue;
 				ui.mouseEvent(e, screen, model);
+			}
 		}
 	}
 

@@ -420,7 +420,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		return height;
 	}
 
-	public int getNumEnclosedLeaves(V vertex)
+	public synchronized int getNumEnclosedLeaves(V vertex)
 	{
 		return getEnclosedLeaves(vertex).size();
 	}
@@ -441,7 +441,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 		return max;
 	}
-
+	
 	/**
 	 * A method for retrieving all nodes below a given vertex in a tree. The
 	 * "leaves" and "nodes" List objects (which must have already been created
@@ -451,7 +451,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 * @param leaves
 	 * @param nodes
 	 */
-	public void getAll(V vertex, List<V> leaves, List<V> nodes)
+	public synchronized void getAll(V vertex, List<V> leaves, List<V> nodes)
 	{
 		if (vertex == null)
 			return;

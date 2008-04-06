@@ -51,7 +51,7 @@ public class Circlegram extends BasicTreeRenderer
 	@Override
 	protected void leafPosition(PhyloNode n, int index)
 	{
-		float theta = (float) index / (float) (leaves.size()) * PApplet.TWO_PI;
+		float theta = (float) index / (float) (leaves.length) * PApplet.TWO_PI;
 		float sin = PApplet.sin(theta);
 		float cos = PApplet.cos(theta);
 		setRadius(n, nodeXPosition(n));
@@ -154,9 +154,9 @@ public class Circlegram extends BasicTreeRenderer
 			{
 				//				list.clear();
 				//				nodesToRanges.clear();
-				for (int i = 0; i < nodes.size(); i++)
+				for (int i = 0; i < nodes.length; i++)
 				{
-					PhyloNode n = (PhyloNode) nodes.get(i);
+					PhyloNode n = (PhyloNode) nodes[i];
 					NodeRange r = new NodeRange();
 					r.node = n;
 					r.render = this;
@@ -182,8 +182,7 @@ public class Circlegram extends BasicTreeRenderer
 	@Override
 	protected void updateNode(PhyloNode n)
 	{
-		if (mainRender)
-			n.update();
+		n.update();
 		/*
 		 * Store the real, scaled x and y values.
 		 */

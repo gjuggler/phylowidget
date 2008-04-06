@@ -106,7 +106,7 @@ public class Dock extends Menu
 	public Dock(PApplet app)
 	{
 		super(app);
-		inset = style.getF("f.padX");
+		inset = getStyle().getF("f.padX");
 
 		rotation = new DockRotationHandler();
 		rotation.setRotation(BOTTOM);
@@ -135,6 +135,9 @@ public class Dock extends Menu
 
 	public synchronized void layout()
 	{
+		if (!isOpen())
+			return;
+		
 		mousePt.setLocation(canvas.mouseX, canvas.mouseY);
 		if (useCameraCoordinates)
 			UIUtils.screenToModel(mousePt);
@@ -239,12 +242,12 @@ public class Dock extends Menu
 		layout();
 		rotation.setRect(drawRect, origWidth);
 
-		Color strokeC = menu.style.getC("c.foreground");
-		float sw = menu.style.getF("f.strokeWeight");
+		Color strokeC = getStyle().getC("c.foreground");
+		float sw = getStyle().getF("f.strokeWeight");
 		Stroke stroke = new BasicStroke(sw);
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
-		PFont font = menu.style.getFont("font");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
+		PFont font = getStyle().getFont("font");
 
 		/*
 		 * Draw a nice-looking background gradient.
@@ -252,7 +255,7 @@ public class Dock extends Menu
 		if (usesJava2D)
 		{
 			Graphics2D g2 = ((PGraphicsJava2D) menu.canvas.g).g2;
-			g2.setPaint(menu.style.getGradient(MenuItem.UP, 0, (float) drawRect
+			g2.setPaint(getStyle().getGradient(MenuItem.UP, 0, (float) drawRect
 					.getMinY(), 0, (float) drawRect.getMaxY()));
 			g2.fill(drawRect);
 			g2.setStroke(stroke);
@@ -269,14 +272,14 @@ public class Dock extends Menu
 			Color c;
 			canvas.beginShape(PApplet.QUADS);
 			canvas.stroke(canvas.color(strokeC.getRGB(), alpha));
-			c = style.getC("c.gradientLo");
+			c = getStyle().getC("c.gradientLo");
 			color = canvas.color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 			canvas.fill(color);
 			canvas.vertex((float) drawRect.getMinX(), (float) drawRect
 					.getMinY());
 			canvas.vertex((float) drawRect.getMaxX(), (float) drawRect
 					.getMinY());
-			c = style.getC("c.gradientHi");
+			c = getStyle().getC("c.gradientHi");
 			color = canvas.color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 			canvas.fill(color);
 			canvas.vertex((float) drawRect.getMaxX(), (float) drawRect

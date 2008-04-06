@@ -52,8 +52,8 @@ public class PhyloNode extends CachedVertex implements Comparable
 	public PhyloNode()
 	{
 		super();
-		xTween = new Tween(null, quad, Tween.OUT, (float) x, (float) x, 20f);
-		yTween = new Tween(null, quad, Tween.OUT, (float) y, (float) y, 20f);
+		xTween = new Tween(null, quad, Tween.OUT, (float) x, (float) x, 30f);
+		yTween = new Tween(null, quad, Tween.OUT, (float) y, (float) y, 30f);
 		
 //		if (o instanceof PhyloNode)
 //		{

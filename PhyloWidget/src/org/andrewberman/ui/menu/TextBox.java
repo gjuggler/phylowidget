@@ -33,8 +33,8 @@ public class TextBox extends Menu
 	@Override
 	public synchronized void layout()
 	{
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
 		
 		super.layout();
 		tf.setWidth(width-px);

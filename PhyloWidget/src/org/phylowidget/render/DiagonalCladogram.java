@@ -69,7 +69,7 @@ public class DiagonalCladogram extends BasicTreeRenderer
 		 * Find the max depth of each child, and project where the "lower" child
 		 * would be in the y axis if it were at that higher depth.
 		 */
-		float stepSize = 1f / (leaves.size());
+		float stepSize = 1f / (leaves.length);
 		float loLeaves = tree.getNumEnclosedLeaves(loChild);
 		float hiLeaves = tree.getNumEnclosedLeaves(hiChild);
 		float mLeaves = Math.max(loLeaves, hiLeaves);
@@ -93,7 +93,7 @@ public class DiagonalCladogram extends BasicTreeRenderer
 
 	float xPosForNumEnclosedLeaves(int numLeaves)
 	{
-		return 1 - (float) (numLeaves - 1) / (float) (leaves.size());
+		return 1 - (float) (numLeaves - 1) / (float) (leaves.length);
 	}
 
 	protected void layout()

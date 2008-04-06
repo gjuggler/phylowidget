@@ -72,8 +72,9 @@ public class TreeManager extends AbstractUIObject
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
 		rectangleRender();
-		
-		try {
+
+		try
+		{
 			PhyloTree pt = (PhyloTree) getTree();
 			pt.updateNewick();
 		} catch (Exception e)
@@ -86,7 +87,7 @@ public class TreeManager extends AbstractUIObject
 	{
 		update();
 	}
-	
+
 	public void update()
 	{
 		camera.update();
@@ -101,17 +102,17 @@ public class TreeManager extends AbstractUIObject
 			mutateMe = false;
 		}
 
-//		if (runMe != null)
-//		{
-//			Runnable r = runMe;
-//			runMe = null;
-//			r.run();
-//		}
+		//		if (runMe != null)
+		//		{
+		//			Runnable r = runMe;
+		//			runMe = null;
+		//			r.run();
+		//		}
 	}
 
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect)
 	{
-			r.nodesInRange(list, rect);
+		r.nodesInRange(list, rect);
 	}
 
 	// public void nodesTouchingPoint(ArrayList list, Point2D.Float pt)
@@ -154,12 +155,19 @@ public class TreeManager extends AbstractUIObject
 	{
 		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
 	}
-	
+
 	public void setTree(final RootedTree tree)
 	{
 		this.t = tree;
 		if (getRenderer() != null)
-			getRenderer().setTree(tree);
+		{
+			synchronized (getRenderer())
+			{
+				System.out.println("Setting tree...");
+				getRenderer().setTree(tree);
+				System.out.println("Set!");
+			}
+		}
 		if (tree instanceof PhyloTree)
 		{
 			PhyloTree pt = (PhyloTree) tree;

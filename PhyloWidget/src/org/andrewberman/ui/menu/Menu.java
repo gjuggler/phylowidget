@@ -215,7 +215,6 @@ public abstract class Menu extends MenuItem implements UIObject
 	 * at once. Generally best left set to true.
 	 */
 	protected boolean singletNavigation;
-	public MenuStyle style;
 	/*
 	 * =============================== GENERAL OPTIONS FOR SUBCLASSES
 	 */
@@ -256,7 +255,6 @@ public abstract class Menu extends MenuItem implements UIObject
 
 		canvas = app;
 		setMenu(this);
-		style = new MenuStyle();
 		/*
 		 * Give our subclasses a chance to set their options before we start
 		 * initing stuff.
@@ -266,6 +264,13 @@ public abstract class Menu extends MenuItem implements UIObject
 		UIGlobals.g.event().add(this); // Add ourselves to EventManager.
 	}
 
+	@Override
+	public void dispose()
+	{
+		UIGlobals.g.event().remove(this);
+		super.dispose();
+	}
+	
 	public void addListener(UIListener o)
 	{
 		listeners.add(o);
@@ -632,7 +637,7 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	public void setFontSize(float newSize)
 	{
-		style.set("f.fontSize", newSize);
+		getStyle().set("f.fontSize", newSize);
 		//		PFont curFont = (PFont) style.get("font");
 		//		curFont.font = curFont.font.deriveFont(newSize);
 		layout();

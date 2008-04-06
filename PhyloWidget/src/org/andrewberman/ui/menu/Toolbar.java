@@ -91,7 +91,7 @@ public class Toolbar extends Menu
 		 * Do some automatic positioning.
 		 */
 
-		float sw = style.getF("f.strokeWeight");
+		float sw = getStyle().getF("f.strokeWeight");
 
 		if (fullWidth)
 		{
@@ -164,8 +164,8 @@ public class Toolbar extends Menu
 
 	public synchronized void layout()
 	{
-		float px = style.getF("f.padX");
-		float py = style.getF("f.padY");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
 		float xOffset = px;
 		float yOffset = py;
 
@@ -226,7 +226,7 @@ public class Toolbar extends Menu
 
 	void setFullWidth()
 	{
-		float sw = style.getF("f.strokeWeight");
+		float sw = getStyle().getF("f.strokeWeight");
 
 		if (orientation == HORIZONTAL)
 		{

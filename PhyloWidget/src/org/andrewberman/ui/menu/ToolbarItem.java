@@ -103,7 +103,7 @@ public class ToolbarItem extends MenuItem
 			 * Calculate the width of the "submenu" triangle shape.
 			 */
 			at = AffineTransform.getScaleInstance(tHeight / 2f, tHeight / 2f);
-			Area tri = (Area) menu.style.get("subTriangle");
+			Area tri = (Area) getStyle().get("subTriangle");
 			Area a = tri.createTransformedArea(at);
 			ToolbarItem.tri = a;
 			ToolbarItem.triWidth = (float) a.getBounds2D().getWidth();
@@ -123,7 +123,7 @@ public class ToolbarItem extends MenuItem
 
 	protected boolean containsPoint(Point p)
 	{
-		float ro = menu.style.getF("f.roundOff");
+		float ro = getStyle().getF("f.roundOff");
 		buffRoundRect.setRoundRect(x, y, width, height, ro, ro);
 		return buffRoundRect.contains(p);
 	}
@@ -151,11 +151,11 @@ public class ToolbarItem extends MenuItem
 
 	protected void drawMyself()
 	{
-		float ro = menu.style.getF("f.roundOff");
+		float ro = getStyle().getF("f.roundOff");
 		Color strokeC = getStrokeColor();
 		Stroke stroke = getStroke();
-		float px = menu.style.getF("f.padX");
-		float py = menu.style.getF("f.padY");
+		float px = getStyle().getF("f.padX");
+		float py = getStyle().getF("f.padY");
 
 		roundRect.setRoundRect(x, y, width, height, ro, ro);
 		Graphics2D g2 = menu.buff.g2;
@@ -165,16 +165,16 @@ public class ToolbarItem extends MenuItem
 		 */
 		//		if (!isEnabled())
 		//		{
-		//			g2.setPaint(menu.style.getC("c.disabled"));
+		//			g2.setPaint(getStyle().getC("c.disabled"));
 		//		} else 
 		if (isOpen() && parent == menu)
 		{
-			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
+			g2.setPaint(getStyle().getGradient(MenuItem.DOWN, y, y + height));
 		} else if (!hasChildren() && getState() == MenuItem.DOWN)
 		{
-			g2.setPaint(menu.style.getGradient(MenuItem.DOWN, y, y + height));
+			g2.setPaint(getStyle().getGradient(MenuItem.DOWN, y, y + height));
 		} else
-			g2.setPaint(menu.style.getGradient(getState(), y, y + height));
+			g2.setPaint(getStyle().getGradient(getState(), y, y + height));
 
 		/*
 		 * Only perform the fill if the mood is right.
@@ -212,12 +212,12 @@ public class ToolbarItem extends MenuItem
 		curX += tWidth;
 		if (shortcut != null)
 		{
-			PFont font = menu.style.getFont("font");
-			float fs = menu.style.getF("f.fontSize");
+			PFont font = getStyle().getFont("font");
+			float fs = getStyle().getF("f.fontSize");
 
 			float rightX = getX() + getWidth();
 			curX = rightX - shortcutWidth;
-			// curX += menu.style.padX;
+			// curX += getStyle().padX;
 			float shortSize = fs * shortcutTextSize;
 			float descent = UIUtils.getTextDescent(menu.buff, font, shortSize,
 					true);

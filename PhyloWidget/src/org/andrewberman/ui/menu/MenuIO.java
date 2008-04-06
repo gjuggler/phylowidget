@@ -44,10 +44,10 @@ public class MenuIO
 	 *            for this menu set.
 	 * @return
 	 */
-	public static ArrayList loadFromXML(PApplet p, String filename,
+	public static ArrayList<MenuItem> loadFromXML(PApplet p, String filename,
 			Object... actionHolders)
 	{
-		ArrayList menus = new ArrayList();
+		ArrayList<MenuItem> menus = new ArrayList<MenuItem>();
 		app = p;
 		actionObjects = actionHolders;
 		InputStream in = p.openStream(filename);

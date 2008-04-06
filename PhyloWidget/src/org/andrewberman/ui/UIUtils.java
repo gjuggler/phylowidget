@@ -303,6 +303,18 @@ public final class UIUtils
 		return width;
 	}
 
+	public static float getTextWidth(Graphics2D g2, Font font, float size, String text)
+	{
+		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
+		return (float) fm.getStringBounds(text, g2).getWidth();
+	}
+	
+	public static float getTextHeight(Graphics2D g2, Font font, float size, String text)
+	{
+		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
+		return (float) fm.getStringBounds(text, g2).getHeight();
+	}
+	
 	/**
 	 * Convenience function for <code>isJava2D(PGraphics pg)</code>
 	 * 
@@ -588,16 +600,22 @@ public final class UIUtils
 		}
 	}
 
-	static void setRenderingHints(PApplet p)
+	public static void setRenderingHints(Graphics2D g2)
 	{
-		if (p.g instanceof PGraphicsJava2D)
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+	}
+	
+	public static void setRenderingHints(PGraphics g)
+	{
+		if (g instanceof PGraphicsJava2D)
 		{
-			PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
+			PGraphicsJava2D pg = (PGraphicsJava2D) g;
+			g.smooth();
 			Graphics2D g2 = pg.g2;
-			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-					RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+			setRenderingHints(g2);
 		}
 	}
 

@@ -22,6 +22,7 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.swing.SwingUtilities;
@@ -30,8 +31,11 @@ import org.andrewberman.ui.Color;
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.UIGlobals;
+import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
+import org.phylowidget.render.DoubleBuffer;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
@@ -41,6 +45,7 @@ import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
 public class PhyloWidget extends PApplet
@@ -61,7 +66,7 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
-	boolean DEBUG =  false;
+	boolean DEBUG =  true;
 
 	public PhyloWidget()
 	{
@@ -105,7 +110,9 @@ public class PhyloWidget extends PApplet
 
 		ui.setup();
 		trees.setup();
+		
 	}
+DoubleBuffer dbr;
 
 	@Override
 	public void resize(int width, int height)
@@ -114,10 +121,7 @@ public class PhyloWidget extends PApplet
 		PGraphicsJava2D pg = (PGraphicsJava2D) g;
 		if (pg == null)
 			return;
-		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//		pg.g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-//				RenderingHints.VALUE_RENDER_SPEED);
-		pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		UIUtils.setRenderingHints(pg);
 		
 	}
 	
@@ -229,30 +233,21 @@ public class PhyloWidget extends PApplet
 
 	public boolean updateTree(String s)
 	{
-		System.out.println("Hey!");
 		treeUpdater.triggerUpdate(s);
 		return true;
 	}
 
-	
 	public boolean updateClip(String s)
 	{
 		clipUpdater.triggerUpdate(s);
 		return true;
 	}
-
-	public void callFunction(String s, String p)
+	
+	public void changeSetting(String setting, String newValue)
 	{
-		try
-		{
-			Method m = cfg.getClass()
-					.getMethod(s, new Class[] { String.class });
-			m.invoke(cfg, new Object[] { p });
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			return;
-		}
+		HashMap m = new HashMap();
+		m.put(setting, newValue);
+		MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, m);
 	}
 
 	@Override

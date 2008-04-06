@@ -70,7 +70,7 @@ public class DockItem extends MenuItem implements TweenListener
 	{
 		tween.update();
 
-		float px = menu.style.getF("f.padX");
+		float px = getStyle().getF("f.padX");
 		
 		if (icon != null)
 		{
@@ -115,7 +115,7 @@ public class DockItem extends MenuItem implements TweenListener
 				 */
 				int alf = (int) (menu.alpha * 255);
 				menu.canvas.tint(255, alf);
-//				float pad = menu.style.padX;
+//				float pad = getStyle().padX;
 				menu.canvas.image(icon, x+xOffset,y+yOffset,w,h);
 				menu.canvas.noTint();
 			}

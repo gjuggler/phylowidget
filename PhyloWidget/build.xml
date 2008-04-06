@@ -404,7 +404,7 @@ This Ant task assumes a certain structure within your project directory:
 					</pathconvert>
 			<property name="internal.quotedJars" value="'${temp.quotedJarList}'"/>
 			<property name="internal.quotedPrefixedJars" value="'${temp.quotedPrefixedJarList}'"/>
-			
+			<property name="internal.spacedJars" value="'${temp.spaceJarList}'"/>
 			<!-- PRELOADER SNEAKINESS!!!
 				We need to modify the Manifest of the freeloader.jar file.
 				-->
@@ -413,7 +413,6 @@ This Ant task assumes a certain structure within your project directory:
 					<attribute name="Class-Path" value="${temp.spaceJarList}" />
 				</manifest>
 			</jar>
-		
 		</target>
 
 	<!-- TARGET: UPLOAD -->

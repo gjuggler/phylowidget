@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Vignette #1: PhyloWidget Gallery</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="index.html">
+			<img src='../img/pw-icon.png'/>Previous: Vignettes Index
+		</a>
+	</li>
+	<li>
+		<a href="..">Home</a>
+	</li>
+	<li style="">
+		<a href="2.html">
+			<img src='../img/pw-icon.png'/>Next: Navigation
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #1: PhyloWidget Gallery</h1>
+
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var params = {
+	codebase:'../lite/lib',
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR THE VIGNETTES.
+	 */
+	tree:'(__Welcome:1,(_______to:2,PhyloWidget!:3));',
+	renderer:'diagonal',
+	nodeSize:0,
+	menuFile:'none.xml'
+};
+var treeOfLife = "(((Leishmania_major_strain_Friedlin:0.45664,((Cryptosporidium_hominis_TU502:0.25048,Plasmodium_falciparum_3D7:0.28267)Apicomplexa:0.17854,(((Oryza_sativa__japonica_cultivar-group_:0.07623,Arabidopsis_thaliana:0.09366)Streptophyta:0.15770,Cyanidioschyzon_merolae:0.38319)Eukaryota_subclade:0.08133,(Dictyostelium_discoideum:0.34685,(((((Gallus_gallus:0.04596,((Mus_musculus:0.01651,Rattus_norvegicus:0.03107)Murinae:0.00398,(Homo_sapiens:0.00957,Pan_troglodytes:0.03864)Hominidae:0.01549)Euarchontoglires:0.01629)Gnathostomata_subclade:0.01859,(Takifugu_rubripes:0.03142,Danio_rerio:0.05230)Actinopterygii:0.04335)Gnathostomata:0.09688,(Drosophila_melanogaster:0.10233,Anopheles_gambiae_str_PEST:0.10724)Diptera:0.09870)Metazoa_subclade:0.03693,(Caenorhabditis_elegans:0.01843,Caenorhabditis_briggsae:0.01896)Caenorhabditis:0.24324)Metazoa:0.09911,(Schizosaccharomyces_pombe_972h-:0.24665,(Ashbya_gossypii_ATCC_10895:0.07298,Saccharomyces_cerevisiae:0.07619)Saccharomycetaceae:0.21170)Ascomycota:0.15370)Eukaryota_subclade:0.04004)Eukaryota_subclade:0.02708)Eukaryota_subclade:0.02636)Eukaryota_subclade:0.06455)blabla_0.3/4.3_bla_4.4.4:0.67672,(((Pyrobaculum_aerophilum:0.55514,(Aeropyrum_pernix_K1:0.43380,(Sulfolobus_tokodaii_str_7:0.17389,Sulfolobus_solfataricus_P2:0.18962)Sulfolobus:0.33720)Thermoprotei_subclade:0.09462)Thermoprotei:0.12018,Nanoarchaeum_equitans_Kin4-M:0.81078)Archaea_subclade:0.15444,((Thermoplasma_acidophilum_DSM_1728:0.09785,Thermoplasma_volcanium_GSS1:0.10412)Thermoplasma:0.66151,(((Pyrococcus_furiosus_DSM_3638:0.02366,(Pyrococcus_abyssi_GE5:0.02179,Pyrococcus_horikoshii_OT3:0.02786)Pyrococcus_subclade:0.02239)Pyrococcus:0.36220,((Methanopyrus_kandleri_AV19:0.35331,Methanothermobacter_thermautotrophicus_str_Delta_H:0.36583)Euryarchaeota_subclade:0.07446,(Methanocaldococcus_jannaschii_DSM_2661:0.13226,Methanococcus_maripaludis:0.28592)Methanococcales:0.23828)Euryarchaeota_subclade:0.06284)Euryarchaeota_subclade:0.04469,(Archaeoglobus_fulgidus_DSM_4304:0.34660,((Methanosarcina_acetivorans_C2A:0.02602,Methanosarcina_mazei_Go1:0.03087)Methanosarcina:0.30588,Halobacterium_sp_NRC-1:0.61597)Euryarchaeota_subclade:0.12801)Euryarchaeota_subclade:0.10395)Euryarchaeota_subclade:0.06815)Euryarchaeota:0.11833)Archaea:0.43325):0.88776,(((Thermoanaerobacter_tengcongensis_MB4:0.17512,(Clostridium_acetobutylicum_ATCC_824:0.11396,(Clostridium_tetani_E88:0.10918,Clostridium_perfringens_str_13:0.11535)Clostridium_subclade:0.03238)Clostridium:0.15056)Clostridia:0.11788,(((((Staphylococcus_aureus_subsp_aureus_MW2:0.00000,(Staphylococcus_aureus_subsp_aureus_Mu50:0.00022,Staphylococcus_aureus_subsp_aureus_N315:0.00022)Staphylococcus_subclade:0.00022)Staphylococcus_subclade:0.02479,Staphylococcus_epidermidis_ATCC_12228:0.03246)Staphylococcus:0.17366,((Listeria_innocua_Clip11262:0.00248,(Listeria_monocytogenes_str_4b_F2365:0.00063,Listeria_monocytogenes_EGD-e:0.00144)Listeria_subclade:0.00235)Listeria:0.13517,((Bacillus_subtilis_subsp_subtilis_str_168:0.07876,(Bacillus_anthracis_str_Ames:0.00331,(Bacillus_cereus_ATCC_10987:0.00123,Bacillus_cereus_ATCC_14579:0.00342)Bacillus_subclade:0.00573)Bacillus_subclade:0.08924)Bacillus:0.01984,(Bacillus_halodurans_C-125:0.09280,Oceanobacillus_iheyensis_HTE831:0.13838)Bacillaceae_subclade:0.02676)Bacillaceae:0.03907)Bacillales_subclade:0.02816)Bacillales:0.02828,((Enterococcus_faecalis_V583:0.07946,(Lactococcus_lactis_subsp_lactis_Il1403:0.11214,((Streptococcus_pneumoniae_R6:0.00119,Streptococcus_pneumoniae_TIGR4:0.00124)Streptococcus_subclade:0.03607,(((Streptococcus_agalactiae_NEM316:0.00110,Streptococcus_agalactiae_2603VR:0.00155)Streptococcus_subclade:0.01637,(Streptococcus_pyogenes_M1_GAS:0.00134,(Streptococcus_pyogenes_MGAS8232:0.00045,(Streptococcus_pyogenes_MGAS315:0.00000,Streptococcus_pyogenes_SSI-1:0.00022)Streptococcus_subclade:0.00110)Streptococcus_subclade:0.00066)Streptococcus_subclade:0.02250)Streptococcus_subclade:0.01360,Streptococcus_mutans_UA159:0.04319)Streptococcus_subclade:0.01920)Streptococcus:0.04983)Streptococcaceae:0.08901)Lactobacillales_subclade:0.03958,(Lactobacillus_plantarum_WCFS1:0.14371,Lactobacillus_johnsonii_NCC_533:0.20999)Lactobacillus:0.06763)Lactobacillales:0.08989)Bacilli:0.08905,(Onion_yellows_phytoplasma_OY-M:0.47843,(Mycoplasma_mycoides_subsp_mycoides_SC_str_PG1:0.37680,((Mycoplasma_mobile_163K:0.27702,Mycoplasma_pulmonis_UAB_CTIP:0.28761)Mycoplasma_subclade:0.28466,(Ureaplasma_parvum_serovar_3_str_ATCC_700970:0.33874,(Mycoplasma_penetrans_HF-2:0.34890,(Mycoplasma_gallisepticum_R:0.24373,(Mycoplasma_pneumoniae_M129:0.10966,Mycoplasma_genitalium_G37:0.11268)Mycoplasma_subclade:0.31768)Mycoplasma_subclade:0.14180)Mycoplasma_subclade:0.06674)Mycoplasmataceae_subclade:0.19177)Mycoplasmataceae_subclade:0.07341)Mycoplasmataceae:0.12541)Mollicutes:0.09099)Firmicutes_subclade:0.09540)Firmicutes:0.04315,((((Fusobacterium_nucleatum_subsp_nucleatum_ATCC_25586:0.45615,(Thermotoga_maritima_MSB8:0.34182,Aquifex_aeolicus_VF5:0.40986)Bacteria_subclade:0.07696)Bacteria_subclade:0.03606,((Dehalococcoides_ethenogenes_195:0.53988,(Thermus_thermophilus_HB27:0.26583,Deinococcus_radiodurans_R1:0.29763)Deinococci:0.24776)Bacteria_subclade:0.04370,(Gloeobacter_violaceus_PCC_7421:0.23764,((Synechococcus_elongatus_PCC_6301:0.13147,(Nostoc_sp_PCC_7120:0.12014,Synechocystis_sp_PCC_6803:0.15652)Cyanobacteria_subclade:0.04331)Cyanobacteria_subclade:0.05040,((Prochlorococcus_marinus_subsp_marinus_str_CCMP1375:0.10211,(Prochlorococcus_marinus_str_MIT_9313:0.05434,Synechococcus_sp_WH_8102:0.06780)Cyanobacteria_subclade:0.04879)Cyanobacteria_subclade:0.04238,Prochlorococcus_marinus_subsp_pastoris_str_CCMP1986:0.16170)Cyanobacteria_subclade:0.20442)Cyanobacteria_subclade:0.07646)Cyanobacteria:0.24501)Bacteria_subclade:0.04332)Bacteria_subclade:0.02720,((Acidobacteria_bacterium_Ellin345:0.49600,(Desulfovibrio_vulgaris_subsp_vulgaris_str_Hildenborough:0.38320,(Geobacter_sulfurreducens_PCA:0.22491,Bdellovibrio_bacteriovorus_HD100:0.45934)Deltaproteobacteria_subclade:0.04870)Deltaproteobacteria:0.04100)Bacteria_subclade:0.04214,((Campylobacter_jejuni_subsp_jejuni_NCTC_11168:0.20399,(Wolinella_succinogenes_DSM_1740:0.11644,(Helicobacter_hepaticus_ATCC_51449:0.12643,(Helicobacter_pylori_26695:0.00637,Helicobacter_pylori_J99:0.00897)Helicobacter_subclade:0.19055)Helicobacter:0.05330)Helicobacteraceae:0.09105)Campylobacterales:0.41390,(((Caulobacter_crescentus_CB15:0.23943,(((Sinorhizobium_meliloti_1021:0.05114,(Agrobacterium_tumefaciens_str_C58:0.00000,Agrobacterium_tumefaciens_str_C58:0.00000)Agrobacterium:0.05735)Rhizobiaceae:0.05575,((Brucella_suis_1330:0.00102,Brucella_melitensis_16M:0.00184)Brucella:0.08660,Mesorhizobium_loti_MAFF303099:0.09308)Rhizobiales_subclade:0.02384)Rhizobiales_subclade:0.08637,(Rhodopseudomonas_palustris_CGA009:0.04182,Bradyrhizobium_japonicum_USDA_110:0.06346)Bradyrhizobiaceae:0.14122)Rhizobiales:0.05767)Alphaproteobacteria_subclade:0.11257,((Rickettsia_conorii_str_Malish_7:0.02487,Rickettsia_prowazekii_str_Madrid_E:0.04245)Rickettsia:0.38019,Wolbachia_endosymbiont_of_Drosophila_melanogaster:0.51596)Rickettsiaceae:0.12058)Alphaproteobacteria:0.12365,((Nitrosomonas_europaea_ATCC_19718:0.22059,((Chromobacterium_violaceum_ATCC_12472:0.09623,(Neisseria_meningitidis_MC58:0.00134,Neisseria_meningitidis_Z2491:0.00400)Neisseria:0.12615)Neisseriaceae:0.07131,(Ralstonia_solanacearum_GMI1000:0.11464,(Bordetella_pertussis_Tohama_I:0.00127,(Bordetella_bronchiseptica_RB50:0.00022,Bordetella_parapertussis_12822:0.00199)Bordetella_subclade:0.00006)Bordetella:0.14218)Burkholderiales:0.08478)Betaproteobacteria_subclade:0.03840)Betaproteobacteria:0.08761,(Coxiella_burnetii_RSA_493:0.33185,(((Xanthomonas_campestris_pv_campestris_str_ATCC_33913:0.00934,Xanthomonas_axonopodis_pv_citri_str_306:0.01069)Xanthomonas:0.05037,(Xylella_fastidiosa_9a5c:0.00802,Xylella_fastidiosa_Temecula1:0.01324)Xylella:0.10192)Xanthomonadaceae:0.24151,((Pseudomonas_aeruginosa_PAO1:0.03202,(Pseudomonas_putida_KT2440:0.02741,Pseudomonas_syringae_pv_tomato_str_DC3000:0.03162)Pseudomonas_subclade:0.02904)Pseudomonas:0.14456,(Shewanella_oneidensis_MR-1:0.10577,((Photobacterium_profundum:0.06131,(Vibrio_cholerae_O1_biovar_eltor_str_N16961:0.02995,((Vibrio_vulnificus_YJ016:0.00021,Vibrio_vulnificus_CMCP6:0.00291)Vibrio_subclade:0.01212,Vibrio_parahaemolyticus_RIMD_2210633:0.01985)Vibrio_subclade:0.01536)Vibrio:0.02661)Vibrionaceae:0.05597,(((Pasteurella_multocida_subsp_multocida_str_Pm70:0.03441,Haemophilus_influenzae_Rd_KW20:0.03754)Pasteurellaceae_subclade:0.01571,Haemophilus_ducreyi_35000HP:0.05333)Pasteurellaceae:0.07365,((((Salmonella_typhimurium_LT2:0.00075,(Salmonella_enterica_subsp_enterica_serovar_Typhi_str_CT18:0.00000,Salmonella_enterica_subsp_enterica_serovar_Typhi_Ty2:0.00000)Salmonella_subclade:0.00146)Salmonella:0.00702,((Escherichia_coli_O157_H7_str_Sakai:0.00000,Escherichia_coli_O157_H7_EDL933:0.00000)Escherichia:0.00044,(Escherichia_coli_K12:0.00044,(Shigella_flexneri_2a_str_301:0.00000,Shigella_flexneri_2a_str_2457T:0.00000)Shigella:0.00266)Enterobacteriaceae_subclade:0.00000)Enterobacteriaceae_subclade:0.00813)Enterobacteriaceae_subclade:0.03131,((Yersinia_pestis_biovar_Microtus_str_91001:0.00000,(Yersinia_pestis_CO92:0.00000,Yersinia_pestis_KIM:0.00000)Yersinia_subclade:0.00000)Yersinia:0.03398,Photorhabdus_luminescens_subsp_laumondii_TTO1:0.05076)Enterobacteriaceae_subclade:0.01182)Enterobacteriaceae_subclade:0.02183,(((Buchnera_aphidicola_str_APS__Acyrthosiphon_pisum_:0.09535,Buchnera_aphidicola_str_Sg__Schizaphis_graminum_:0.10235)Buchnera_subclade:0.10140,Buchnera_aphidicola_str_Bp__Baizongia_pistaciae_:0.27492)Buchnera:0.06497,(Candidatus_Blochmannia_floridanus:0.32481,Wigglesworthia_glossinidia_endosymbiont_of_Glossina_brevipalpis:0.35452)Enterobacteriaceae_subclade:0.08332)Enterobacteriaceae_subclade:0.15030)Enterobacteriaceae:0.02808)Gammaproteobacteria_subclade:0.03759)Gammaproteobacteria_subclade:0.03492)Gammaproteobacteria_subclade:0.12234)Gammaproteobacteria_subclade:0.04492)Gammaproteobacteria_subclade:0.02475)Gammaproteobacteria:0.03328)Proteobacteria_subclade:0.16913)Proteobacteria_subclade:0.06301)Proteobacteria_subclade:0.04428)Bacteria_subclade:0.05551)Bacteria_subclade:0.03471,(((Rhodopirellula_baltica_SH_1:0.62079,((Leptospira_interrogans_serovar_Copenhageni_str_Fiocruz_L1-130:0.00000,Leptospira_interrogans_serovar_Lai_str_56601:0.00027)Leptospira:0.47573,(Borrelia_burgdorferi_B31:0.42323,(Treponema_denticola_ATCC_35405:0.16072,Treponema_pallidum_subsp_pallidum_str_Nichols:0.25544)Treponema:0.19057)Spirochaetaceae:0.20278)Spirochaetales:0.07248)Bacteria_subclade:0.04615,(((Streptomyces_coelicolor_A3_2_:0.02678,Streptomyces_avermitilis_MA-4680:0.02680)Streptomyces:0.16707,((Mycobacterium_avium_subsp_paratuberculosis_K-10:0.02091,(((Mycobacterium_tuberculosis_CDC1551:0.00000,Mycobacterium_tuberculosis_H37Rv:0.00000)Mycobacterium_subclade:0.00022,Mycobacterium_bovis_AF212297:0.00067)Mycobacterium_subclade:0.03027,Mycobacterium_leprae_TN:0.05135)Mycobacterium_subclade:0.01514)Mycobacterium:0.11523,(Corynebacterium_diphtheriae_NCTC_13129:0.06479,(Corynebacterium_efficiens_YS-314:0.02559,(Corynebacterium_glutamicum_ATCC_13032:0.00000,Corynebacterium_glutamicum_ATCC_13032:0.00022)Corynebacterium_subclade:0.03415)Corynebacterium_subclade:0.03682)Corynebacterium:0.13907)Corynebacterineae:0.09883)Actinomycetales_subclade:0.06110,(Bifidobacterium_longum_NCC2705:0.29283,(Tropheryma_whipplei_TW0827:0.00009,Tropheryma_whipplei_str_Twist:0.00081)Tropheryma:0.44723)Actinobacteridae_subclade:0.14429)Actinobacteridae:0.26800)Bacteria_subclade:0.03480,(((Chlamydia_muridarum_Nigg:0.01938,Chlamydia_trachomatis_DUW-3CX:0.02643)Chlamydia:0.06809,(Chlamydophila_caviae_GPIC:0.05903,((Chlamydophila_pneumoniae_J138:0.00000,(Chlamydophila_pneumoniae_CWL029:0.00000,Chlamydophila_pneumoniae_AR39:0.00000)Chlamydophila_subclade:0.00000)Chlamydophila_subclade:0.00000,Chlamydophila_pneumoniae_TW-183:0.00000)Chlamydophila_subclade:0.10482)Chlamydophila:0.04170)Chlamydiaceae:0.60169,(Chlorobium_tepidum_TLS:0.37204,(Porphyromonas_gingivalis_W83:0.11304,Bacteroides_thetaiotaomicron_VPI-5482:0.13145)Bacteroidales:0.34694)BacteroidetesChlorobi_group:0.97211)Bacteria_subclade:0.04443)Bacteria_subclade:0.04284)Bacteria_subclade:0.02646)Bacteria:1.34959);";
+var geneTree = "(((BGIOSIBCA042311_ORYSA:0.11893[&&NHX:S=ORYSA:O=BGIOSIBCA042311.1:G=BGIOSIBCA042311],At3g11830_ARATH:0.103292[&&NHX:S=ARATH:O=At3g11830.1:G=At3g11830]):0.0816687[&&NHX:S=Magnoliophyta:B=99:D=N],(cct7_SCHPO:0.166585[&&NHX:S=SCHPO:O=SPBC25H2.12c:G=SPBC25H2.12c],CCT7_YEAST:0.186209[&&NHX:S=YEAST:O=YJL111W.1:G=YJL111W]):0.029676[&&NHX:S=Ascomycota:B=99:D=N]):0.00495409[&&NHX:S=Eukaryota:B=55:D=N],((((((((CCT7_HUMAN:0.0510845[&&NHX:S=HUMAN:O=ENST00000258091.4:G=ENSG00000135624],Cct7_MOUSE:0.0548045[&&NHX:S=MOUSE:O=ENSMUST00000032078.4:G=ENSMUSG00000030007]):0.0267848[&&NHX:S=Euarchontoglires:B=54:D=N],ENSMODT00000021123_MONDO:0.0837789[&&NHX:S=MONDO:O=ENSMODT00000021123.2:G=ENSMODG00000016626]):0.0255967[&&NHX:S=Theria:B=54:D=N],ENSGALT00000025922_CHICK:0.131991[&&NHX:S=CHICK:O=ENSGALT00000025922.2:G=ENSGALG00000016088]):0.0021982[&&NHX:S=Amniota:B=53:D=N],Q5D024_XENTR:0.105271[&&NHX:S=XENTR:O=ENSXETT00000025763.2:G=ENSXETG00000011778])[&&NHX:S=Tetrapoda:B=96:D=N],(cct7_BRARE:0.0999995[&&NHX:S=BRARE:O=ENSDART00000006802.3:G=ENSDARG00000007385],NEWSINFRUT00000128352_FUGRU:0.108658[&&NHX:S=FUGRU:O=NEWSINFRUT00000128352.3:G=NEWSINFRUG00000121580]):0.00780083[&&NHX:S=Clupeocephala:B=100:D=N]):0.0510091[&&NHX:S=Euteleostomi:B=97:D=N],(ENSCINT00000001715_CIOIN:0.00425529[&&NHX:S=CIOIN:O=ENSCINT00000001715.2:G=ENSCING00000000947],ENSCINT00000003265_CIOIN:0.0104703[&&NHX:S=CIOIN:O=ENSCINT00000003265.2:G=ENSCING00000001620]):0.139761[&&NHX:S=CIOIN:B=100:D=Y]):0.0066056[&&NHX:S=Chordata:B=91:D=N],(Sm00.scaff00161.0170_SCHMA:0.187113[&&NHX:S=SCHMA:O=Sm00.scaff00161.0170:G=Sm00.scaff00161.0170],(NP_503522_CAEEL:0.0698092[&&NHX:S=CAEEL:O=T10B5.5a.1:G=T10B5.5],CBG21817_CAEBR:0.0734101[&&NHX:S=CAEBR:O=CBG21817:G=CBG21817]):0.142116[&&NHX:S=Caenorhabditis:B=94:D=N])[&&NHX:S=Bilateria:B=35:D=N])[&&NHX:S=Bilateria:D=N],(NP_649835_DROME:0.0835465[&&NHX:S=DROME:O=CG8351-RA.3:G=CG8351],GA21011-PA_DROPS:0.0840653[&&NHX:S=DROPS:O=GA21011-PA:G=GA21011]):0.108617[&&NHX:S=Sophophora:B=100:D=N]):0.00495409[&&NHX:S=Bilateria:D=N])[&&NHX:S=Eukaryota:D=N];";
+PhyloWidget.loadWidget('phylowidget',params);
+</script>
+
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:5px;overflow:scroll;">
+<h1>Welcome to PhyloWidget!</h1>
+<p>
+This is the first in a short series of demonstrations or 'vignettes' designed to introduce the user to PhyloWidget, its capabilities,
+and how to use it effectively for phylogenetic visualization.
+<p>
+Shown on the left is PhyloWidget in its most basic configuration: no menus, no user interface, just displaying a tree.
+Try using some of the links below to sample the diversity of phylogenetic visualizations which PhyloWidget is capable of producing.
+
+<h1>Tree Gallery</h1>
+
+<ul>
+	<li>
+	Simple trees:
+	<a href="javascript:PhyloWidget.changeSetting('tree','(a,(b,c));');">letters</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('tree','(1,(2,3));');">numbers</a>,
+	<a href="javascript:PhyloWidget.changeSetting('tree','(*&^%$,(!@#$%,@!$@@$&*));');">special characters</a> 
+	</li>
+	<li>
+	Test cases:
+	<a href="javascript:PhyloWidget.changeSetting('tree','Feeling lonely...;');">single node</a>,
+	<a href="javascript:PhyloWidget.changeSetting('tree','(Bashful,Doc,Dopey,Grumpy,Happy,Sleepy,Sneezy);');">multifurcation</a>,
+	<a href="javascript:PhyloWidget.changeSetting('tree','(a,(b,(c,(d,(e,(f,(g,(h,(i,(j,(k,(l,(m,(n,(o,(p,(q,(r,(s,(t,(u,(v,(w,(x,(y,(z))))))))))))))))))))))))));');">alphabet</a>
+	</li>
+	<li>
+	Species trees:
+	<a href="javascript:PhyloWidget.changeSetting('tree',window.treeOfLife);">"tree of life"</a>,	
+	<a href="javascript:PhyloWidget.changeSetting('tree','((bear:6.87500,raccoon:19.12500):1.75000,((seal:12.35000,sea_lion:11.65000):7.81250,(weasel:19.56250,(cat:47.08333,monkey:100.91667):20.43750):1.56250):3.43750,dog:25.25000);');">animals</a>,
+	<a href="javascript:PhyloWidget.changeSetting('tree','((((Picrophilus_torridus:4.7126427,Feroplasma_acidarmanus:4.7126427):1.605092,(Thermoplasma_volcanium:1.576355,Thermoplasma_acidophilum:1.576355):4.7413797):6.5871563,((((Methanocorpusculum_labreanum:6.937603,(Methanoculleus_marisnigri:5.763546,Methanospirillum_hungatei:5.763546):1.174057):2.0563765,(Methanosaeta_thermophila:7.8448277,((Methanosarcina_barkeri:1.5681438,(Methanosarcina_mazei:1.3957291,Methanosarcina_acetivorans:1.3957291):0.17241478):2.8708262,Methanococcoides_burtonii:4.43897):3.4058576):1.1491518):2.4838524,((Haloquadratum_walsbyi:5.5665016,Haloferax_volcanii:5.5665016):1.0125904,(Haloarcula_marismortui:5.853859,(Natronomonas_pharaonis:4.860428,Halobacterium_halobacterium:4.860428):0.9934311):0.7252331):4.89874):1.0009365,((Methanococcus_maripaludis:10.812807,(Methanosphaera_stadtmanae:9.54023,Methanobacterium_thermoautotrophicum:9.54023):1.2725773):1.4293184,(Nanoarchaeum_equitans:10.499648,((Metallosphaera_sedula:6.152162,(Sulfolobus_solfataricus:5.188835,(Sulfolobus_tokodaii:4.2528725,Sulfolobus_acidocaldarius:4.2528725):0.9359627):0.96332693):3.7331367,(((((Thermococcus_kodakaraensis:2.5396817,((Pyrococcus_furiosus:0.14778137,Pyrococcus_horikoshii:0.14778137):0.09031296,Pyrococcus_abyssi:0.23809433):2.3015873):4.303505,Methanopyrus_kandleri:6.8431864):0.24712515,Methanocaldococcus_jannaschii:7.0903115):1.0842919,Archaeoglobus_fulgidus:8.174603):0.7848158,((Thermofilum_pendens:6.4422555,(Staphylothermus_marinus:3.8095245,(Hyperthermus_butylicus:3.1198692,Aeropyrum_pernix:3.1198692):0.6896553):2.632731):0.8470168,(Pyrobaculum_calidifontis:6.1970444,(Caldivirga_maquilingensis:4.95895,(Thermoproteus_tenax:2.665572,(Pyrobaculum_arsenaticum:0.8702793,(Pyrobaculum_islandicum:0.7389145,Pyrobaculum_aerophilum:0.7389145):0.13136482):1.7952926):2.293378):1.2380943):1.0922279):1.670147):0.9258795):0.61434937):1.7424774):0.23664284):0.42612267):0.42609692,Cenarchaeum_symbiosum:13.330988);');">archaea</a>	
+	</li>
+	<li>
+	Gene trees:
+	<a href="javascript:PhyloWidget.changeSetting('tree','(((ADH2:0.1[&&NHX:S=human:E=1.1.1.1], ADH1:0.11[&&NHX:S=human:E=1.1.1.1]):0.05[&&NHX:S=Primates:E=1.1.1.1:D=Y:B=100], ADHY:0.1[&&NHX:S=nematode:E=1.1.1.1],ADHX:0.12[&&NHX:S=insect:E=1.1.1.1]):0.1[&&NHX:S=Metazoa:E=1.1.1.1:D=N], (ADH4:0.09[&&NHX:S=yeast:E=1.1.1.1],ADH3:0.13[&&NHX:S=yeast:E=1.1.1.1], ADH2:0.12[&&NHX:S=yeast:E=1.1.1.1],ADH1:0.11[&&NHX:S=yeast:E=1.1.1.1]):0.1 [&&NHX:S=Fungi])[&&NHX:E=1.1.1.1:D=N];');">ADH</a>,
+	<a href="javascript:PhyloWidget.changeSetting('tree',window.geneTree);">Ensembl gene tree</a>	
+	</li>
+</ul>
+
+<h1>Display Options</h1>
+PhyloWidget provides many options for how you display your trees. Below are some of the more commonly used options:
+<ul>
+	<li>
+	Renderers:
+	<a href="javascript:PhyloWidget.changeSetting('renderer','rectangular');">Rectangular</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('renderer','diagonal');">Diagonal</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('renderer','circular');">Circular</a>
+	</li>
+	<li>
+	Branch lengths:
+	<a href="javascript:PhyloWidget.changeSetting('useBranchLengths','true');">show</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('useBranchLengths','false');">ignore</a>  
+	</li>
+	<li>
+	Node size:
+	<a href="javascript:PhyloWidget.changeSetting('nodeSize','1');">tiny</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('nodeSize','2');">medium</a>,
+	<a href="javascript:PhyloWidget.changeSetting('nodeSize','5');">large</a>
+	</li>
+	<li>
+	Line width:
+	<a href="javascript:PhyloWidget.changeSetting('lineWidth','.5');">tiny</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('lineWidth','1');">medium</a>,
+	<a href="javascript:PhyloWidget.changeSetting('lineWidth','3');">large</a>
+	</li>
+	<li>
+	Minimum text size:
+	<a href="javascript:PhyloWidget.changeSetting('minTextSize','0');">none</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('minTextSize','8');">small</a>,
+	<a href="javascript:PhyloWidget.changeSetting('minTextSize','14');">large</a>
+	</li>
+	<li>
+	Text rotation:
+	<a href="javascript:PhyloWidget.changeSetting('textRotation','-30');">up</a>, 
+	<a href="javascript:PhyloWidget.changeSetting('textRotation','0');">none</a>,
+	<a href="javascript:PhyloWidget.changeSetting('textRotation','30');">down</a>
+	</li>
+</ul>
+
+Note that any combination of options can be applied to any tree in the above list.
+Try playing around with different combinations of settings!
+
+<ul class="boxlist" style="margin-top:30px;">
+<li>
+<a href="2.html">Continue to the next vignette...</a>
+</li>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

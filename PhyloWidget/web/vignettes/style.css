@@ -1,0 +1,28 @@
+body {
+  padding:0px;
+}
+
+.boxlist {
+	margin-top:20px;
+	text-align:center;
+}
+.boxlist li {
+	}
+.boxlist a{
+	text-align:center;
+	margin-bottom:15px;
+}
+
+ul li {
+	font-weight: bold;
+}
+
+#content p{
+	padding: 0px;
+}
+
+h1 {
+	clear:both;
+	padding: 5px;
+	margin-top:0px;
+}

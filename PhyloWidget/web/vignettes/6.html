@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Vignette #6: Menus</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="5.html">
+			<img src='../img/pw-icon.png'/>Previous: Editing
+		</a>
+	</li>
+	<li>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Vignettes Index</a>
+	</li>
+	<li style="">
+		<a href="7.html">
+			<img src='../img/pw-icon.png'/>Next: Input / Output
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #6: Menus</h1>
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var fullMenus = 'dock.xml;toolbar.xml;context.xml';
+var params = {
+	/*
+	 *  THESE SHOULD STAY THE SAME FOR ALL VIGNETTES
+	 */
+	codebase:'../lite/lib',
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
+	 */
+	menuFile:'dock.xml;toolbar-onlysearch.xml;context.xml',
+	tree:'PhyloWidget;',
+	useBranchLengths:true
+};
+PhyloWidget.loadWidget('phylowidget',params);
+</script>
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
+<!-- VIGNETTE CONTENT -->
+<h1>Menus: bringing it all together</h1>
+You may have noticed by now that PhyloWidget has quite a few configuration parameters (many of which were shown off in the gallery 
+in the <a href="1.html">first vignette</a>). In order to fit all of the options into a small, widget-like space,
+PhyloWidget provides a densely-packed set of toolbar menus allowing access to most (but not all!) of its available settings.
+You've already seen the search component, but click below to activate the full toolbar:
+<ul>
+<li><a href="javascript:PhyloWidget.changeSetting('menuFile',window.fullMenus);">Show me the menus!</a></li>
+</ul>
+The toolbar menu should look and feel fairly similar to most modern toolbars, with a couple of exceptions. Under the "view" menu,
+you'll find a couple of different types of menu elements, including checkboxes and what we call "number scrollers":
+<ul>
+<li><b>Checkboxes:</b> these items usually control an on/off configuration setting, such as whether or not to show branch lengths. Simply
+click to check or uncheck the item.
+</li>
+<li><b>Number scrollers:</b> these unique menu items are used to control a numerical parameter. The cursor should become an "up-down"
+pointer when the mouse is hovering above these menu items, and you can change the value by clicking and dragging. To reset the value
+to its default, double-click the menu item.
+</ul>
+<p>
+<b>Power user tip:</b> many of the toolbar items have keyboard shortcuts; these are displayed to the right of the menu item. You can run
+this command at any time from within PhyloWidget by typing the keyboard shortcut. The shortcut for 'Zoom to Full' can be especially handy.
+</p>
+<h1>Nearing the end</h1>
+<p>
+With the addition of the toolbar menu, we've finally reached the point where you have access to all of PhyloWidget's functionality.
+There is still information left to mention regarding the menu system and PhyloWidget's more advanced features (for example, why some of the 
+options under the File menu are disabled), but if you were just looking to
+get a basic introduction to PhyloWidget's user interface elements, then congratulations&mdash;you're done!
+</p>
+<h1>Full disclosure</h1>
+<p>
+What good would any documentation be without a boring, comprehensive listing of toolbar menu items and descriptions? We wouldn't want to disappoint,
+so below you will find a complete listing, accompanied by a description for each item:
+<ul>
+<li><b>File</b>, for loading and saving tree files and graphics
+	<ul>
+		<li><b>New Tree:</b> deletes the current tree and replaces it with the default.</li>
+		<li><b>Load Tree</b>, for tree input
+			<ul>
+				<li><b>From File:</b> opens a file dialog to select a tree file to load.</li>
+				<li><b>Manual Input:</b> opens a text box to manually type or paste in a tree.</li>
+			</ul>
+		</li>
+		<li><b>Save Tree:</b> opens a file dialog to output a Newick-formatted version of the current tree.</li>
+		<li><b>Export Image:</b> opens a dialog for exporting the current tree to a variety of image formats (PDF, PNG, JPG, and TIFF are supported).</li>
+	</ul>
+</li>
+<li><b>View</b>, for changing rendering and display options
+	<ul>
+		<li><b>Zoom to Full:</b> zooms in or out as necessary to cause the tree to fill the screen.</li>
+		<li><b>Renderer Type</b>, for changing the renderer
+			<ul>
+				<li><b>Rectangular:</b> the standard cladogram view.</li>
+				<li><b>Diagonal:</b> the slanted cladogram view.</li>
+				<li><b>Circular:</b> a circular representation of the tree.</li>
+			</ul>
+		</li>
+		<li><b>Render Options</b>, for changing parameters related to rendering
+			<ul>
+				<li><b>Render Threshold:</b> the maximum number of branches to draw on screen at one time. Higher values cause rendering to become sluggish.</li>
+				<li><b>Minimum Text Size:</b> the minimum text size at which to display node labels. Very low values cause the rendering to become sluggish.</li>
+				<li><b>Branch Length Scaling:</b> how much to horizontally "stretch" the tree. Sometimes useful for trees with very small branch length values.</li>
+				<li><b>Stretch to Fit:</b> causes the renderer to stretch the tree to fit the width of the window.</li>
+				<li><b>Show Clade Labels:</b> if set, the renderer will display labels of non-leaf nodes, if they exist.</li>
+			</ul>
+		</li>
+		<li><b>Style</b>, for changing the style of the drawn tree
+			<ul>
+				<li><b>Text Multiplier:</b> how much to scale the node label text size. A value of 1 uses the default text size.</li>
+				<li><b>Text Angle:</b> how much to rotate the node label text.</li>
+				<li><b>Node Size:</b> how much to scale the node size. A value of 10 is equal to the height of the whole row.</li>
+				<li><b>Line Weight:</b> how much to scale the line weight. A value of 10 is equal to the height of the whole row.</li>
+			</ul>
+		</li>
+		<li><b>Show all Labels:</b> causes ALL leaf labels to be shown, regardless of the minimum text size. If the tree is large, this setting will cause rendering to be very sluggish. Consider yourself warned!</li>
+		<li><b>Branch Lengths:</b> whether or not to use branch length information. Not applicable for the diagonal renderer.</li>
+	</ul>
+<li><b>Tree</b>, for performing operations on the tree structure
+	<ul>
+		<li><b>Mutator:</b> a sub-menu for randomly mutating the current tree. The sub-menu items should be self-explanatory. This is not too useful for scientific purposes,
+		but handy for testing the software.</li>
+		<li><b>Structure</b>, for global operations on the tree structure.
+			<ul>
+				<li><b>Align all Leaves:</b> changes the branch lengths of the tree so that all leaf nodes are aligned.</li>
+				<li><b>Flip Tree:</b> reverses the order of the entire tree.</li>
+				<li><b>Auto-Sort Tree:</b> causes the tree to become 'ladderized,' or sorted to a point where each node's children are sorted according to the number of vertices in their enclosed subtrees.</li> 
+				<li><b>Remove 'Elbows':</b> removes 'elbow vertices' from the tree, or vertices which have one parent and one child.</li>
+			</ul>
+		</li>
+		<li><b>Annotation</b>, for operations affecting the tree annotation (labels, etc.)
+			<ul> 
+				<li><b>Enforce Unique Labels:</b> enforces the uniqueness of node labels, automatically appending an ending (such as "#1") to duplicate nodes.</li>
+				<li><b>Ignore Annotations:</b> whether or not to ignore the NHX annotations when displaying and saving the tree.</li>
+			</ul>
+		</li>		
+	</ul>
+
+</ul>
+
+</p>
+
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="7.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+</li>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

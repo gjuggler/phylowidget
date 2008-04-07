@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Vignette #7: Input / Output</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="6.html">
+			<img src='../img/pw-icon.png'/>Previous: Menus
+		</a>
+	</li>
+	<li>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Vignettes Index</a>
+	</li>
+	<li style="">
+		<a href="8.html">
+			<img src='../img/pw-icon.png'/>Next: Annotation
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #7: Input / Output</h1>
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var fullMenus = 'dock.xml;toolbar.xml;context.xml';
+var params = {
+	/*
+	 *  THESE SHOULD STAY THE SAME FOR ALL VIGNETTES
+	 */
+	codebase:'../full/lib',				// NOTE we're using PhyloWidget full for this vignette!
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
+	 */
+	menuFile:'dock.xml;toolbar.xml;context.xml',
+	tree:'PhyloWidget;',
+	useBranchLengths:true
+};
+//PhyloWidget.loadWidget('phylowidget',params);  // Not yet... gotta warn the user first!
+</script>
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
+<!-- VIGNETTE CONTENT -->
+<h1>What happened to the applet??!?</h1>
+<p>
+Where did our trusty applet in the left panel go? We intentionally didn't load the applet yet, because PhyloWidget's
+file I/O requires a <em>signed applet</em>, which will load up a security warning asking you if you trust the program.
+<p>
+We thought it would be kind to warn you before this happens!
+If you wish to test out the I/O features, just click ok at the security warning, and you'll be all set! Click below to start loading the signed
+applet version of PhyloWidget:
+<ul>
+<li><a href="javascript:PhyloWidget.loadWidget('phylowidget',window.params);">Load me up!</a></li>
+</ul>
+<p>
+If all goes well, you'll notice that now the Save Tree, Export Image, and Load Tree from File menu items are enabled.
+</p>
+<h1>Tree Input</h1>
+<p>
+PhyloWidget can parse the standard array of tree file formats with varying degrees of support:
+<ul>
+<li><b>Newick</b>, or New Hampshire <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">(link)</a>
+	<ul>
+		<li>The Newick format is the simplest possible format for communicating a phylogenetic tree, and PhyloWidget is based
+		primarily on Joe Felsenstein's description of the format, available <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">here</a>.
+		</li>
+	</ul>
+</li>
+<li><b>NHX</b>, or New Hampshire eXtended <a href="http://www.phylosoft.org/forester/NHX.html">(link)</a>
+	<ul>
+		<li>The NHX format is an extension to the Newick format that provides for <b>(a)</b> a way to incorporate further annotations into Newick-formatted trees,
+		and <b>(b)</b> some standardized annotation types that may be useful for biologists.</li>
+		<li>PhyloWidget can read all NHX annotations and stores them in its data structure, but only the following annotations are currently
+		used in a visually meaningful way:
+			<ul>
+				<li><b>D</b> for duplication vs. speciation</li>
+				<li><b>S or T</b> for species or taxon coloring</li>
+				<li><b>B</b> for bootstrap value</li>
+			</ul>
+		</li>
+		<li><b>Note:</b> If you actively use an NHX annotation type not listed here and would like PhyloWidget to visualize it in a meaningful way, please feel free to contact us!</li>
+	</ul>
+</li>
+<li><b>Nexus</b> <a href="http://www.ncbi.nlm.nih.gov/pubmed/11975335">(link)</a>
+	<ul>
+		<li>The Nexus file format is a very complex data format capable of storing diverse types of data in evolutionary biology. PhyloWidget does not contain a full Nexus
+		parser, but rather a simple method for obtaining a phylogenetic tree described within a Nexus file. 
+		<li><em>PhyloWidget will currently only read the FIRST tree from the trees block of a Nexus file.</em> Please let us know if you find this limitation
+		to be a severe problem; we have some ideas on how to include support for multiple trees, but it's only worth the effort if people will use the feature!</li>
+		<li><em>Note:</em> This support has not been fully tested by any means. In practice, however, it tends to work well on a variety of Nexus files.</li>
+	</ul>
+</li>
+
+</ul>
+</p>
+<h1>Remote URL Input</h1>
+<p>
+Now is also a good time to mention PhyloWidget's URL loading capability. Whenever you're using the signed applet (aka PhyloWidget Full), you can
+substitute a URL for the Newick tree string, and PhyloWidget will instead load the tree to which the URL is referring.
+<p>
+As an example, try pasting the following URL into PhyloWidget's Manual Input dialog:
+<p>
+<span style="font-size:9px;">http://www.molevol.org/camel/projects/nexus/NEXUS/barns-combined.nex</span>
+</p>
+<h1>Tree Output</h1>
+<p>
+PhyloWidget can output trees in Newick or NHX format. This choice is usually made automatically, outputting the NHX annotations only for nodes that contain annotation data. However,
+there is a configuration setting named <code>ignoreAnnotations</code> (see the Menu vignette) that allows all NHX-style annotations to be ignored when viewing and outputting the tree.  
+</p>
+<h1>Image Export</h1>
+Image export is another way of outputting your tree of interest. Clicking the Image Export menu item will open up a dialog with various options governing
+the export process. PhyloWidget can export to the following image formats:
+<ul>
+	<li>PDF (vector-based), PNG, JPEG, and TIFF</li>
+</ul>
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="7.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+</li>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

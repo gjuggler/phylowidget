@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Vignette #3: Labels</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="2.html">
+			<img src='../img/pw-icon.png'/>Previous: Navigation
+		</a>
+	</li>
+	<li>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Vignettes Index</a>
+	</li>
+	<li style="">
+		<a href="4.html">
+			<img src='../img/pw-icon.png'/>Next: Search
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #3: Labels</h1>
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var shuffled = "((2,((4,((6,((8,(10,9)),7)),5)),3)),1);";
+var sorted = "(((((((((10,9),8),7),6),5),4),3),2),1);";
+
+var params = {
+	codebase:'../lite/lib',
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR THE VIGNETTES.
+	 */
+	tree:sorted,
+	nodeSize:1,
+	menuFile:'dock-onlynav.xml'
+};
+PhyloWidget.loadWidget('phylowidget',params);
+</script>
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
+<!-- VIGNETTE CONTENT -->
+<h1>What to do with all these labels?</h1>
+
+A common problem with phylogenetic visualization is what to do when a tree is viewed at a low magnification.
+<p>
+Most programs tend to "solve" the problem by doing one of the following:
+<ol style="list-style-type:lower-alpha;">
+<li>Shrinking the node labels to the point that 
+they are unreadable, or
+</li>
+<li>keep the text at a reasonable size, but overlapping the labels&mdash;again resulting
+in unreadable text. 
+</li>
+</ol>
+While option (a) at least has the advantage of preserving a sense of scale, it is still far
+from optimal: drawing node labels with an unreadable font size is <b><em>useless to the user</em></b>, who should be able to get at least
+at least <em>some</em> information from the labels at all times! Otherwise, why should we bother drawing them in the first place?
+<p>
+In an attempt to yield a workable solution to this issue, PhyloWidget includes the concept of a <em>minimum text size</em>. This setting lets the user specify how small the node labels should be allowed to get; 
+when the minimum text size is set to zero, we are following strategy (a) from above, and when set to a normal size, we are approximating strategy (b).
+However, there is always one importance between PhyloWidget an strategy (b): we use a process we call <em>competetive occlusion</em> to ensure that only
+one label is ever drawn in a given amount of space.
+</p>
+<h1>Label occlusion: tidying up your tree</h1>
+
+<b>Try zooming in and out of the tree</b> shown on your left with one of the following settings for the minimum text size:
+
+<ul>
+<li>Minimum text size: <a href="javascript:PhyloWidget.changeSetting('minTextSize',16);">16</a>,
+<a href="javascript:PhyloWidget.changeSetting('minTextSize',32);">32</a>,
+<a href="javascript:PhyloWidget.changeSetting('minTextSize',64);">64</a>,
+<a href="javascript:PhyloWidget.changeSetting('minTextSize',128);">128</a>
+</li>
+</ul>
+
+It may not be entirely clear what determines whether a given node is occluded or shown. But, keeping in mind that each node in this tree is labeled according
+to its <em>branch distance to the root node</em>, try doing the same zooming with a shuffled version of the same tree:
+
+<ul>
+<li><a href="javascript:PhyloWidget.changeSetting('tree',window.shuffled);">Shuffled tree</a></li>
+<li><a href="javascript:PhyloWidget.changeSetting('tree',window.sorted);">Original tree</a></li>
+</ul>
+
+Got it yet? PhyloWidget's competetive occlusion algorithm does the following:
+
+<ol style="list-style-type:decimal;">
+<li>Sorts the nodes based on their distance to the root</li>
+<li>Greedily assigns spaces to this sorted list of nodes</li>
+</ol>
+
+As a result, nodes which are "closer" to the root in terms of branch length are generally more likely to be shown. The biological
+justification for this occlusion process is that, at a low zoom level, we are probably more interested in seeing those species
+which diverged from the common ancestor at the earliest point in time, rather than those which diverged later on.
+<p>
+Of course, PhyloWidget's configuration lets you reverse the sorting rule which governs the occlusion behavior:
+<ul>
+<li>Favor nodes: 
+<a href="javascript:PhyloWidget.changeSetting('prioritizeDistantLabels','false');">close to root</a> (default),
+<a href="javascript:PhyloWidget.changeSetting('prioritizeDistantLabels','true');">distant from root</a>
+</li>
+</ul>
+Do you agree with our decision on how to occlude node labels? Let us know if not!
+
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="4.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+</li>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

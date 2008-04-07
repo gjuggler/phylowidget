@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Vignette #5: Editing</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="4.html">
+			<img src='../img/pw-icon.png'/>Previous: Search
+		</a>
+	</li>
+	<li>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Vignettes Index</a>
+	</li>
+	<li style="">
+		<a href="6.html">
+			<img src='../img/pw-icon.png'/>Next: Menus
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #5: Editing</h1>
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var animalTree = "((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700, seal:12.00300):7.52973,((monkey:20.85930,cat:30.14069):20.59201,weasel:18.87953):2.09460):3.87382,dog:15.46154);";
+
+var params = {
+	/*
+	 *  THESE SHOULD STAY THE SAME FOR ALL VIGNETTES
+	 */
+	codebase:'../lite/lib',
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
+	 */
+	useBranchLengths:true,
+	menuFile:'dock-onlynav.xml;toolbar-onlysearch.xml;',
+	tree:animalTree
+};
+PhyloWidget.loadWidget('phylowidget',params);
+</script>
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
+<!-- VIGNETTE CONTENT -->
+<h1>Growing trees (the old-fashioned way!)</h1>
+
+So far we've introduced some useful methods for zooming, navigating, an searching through existing trees, but we
+still need a way to build a tree from scratch&mdash;trees don't just grow on trees, you know!
+<p>
+In all seriousness, though: while it is true that phylogenies don't grow on trees, nowadays they're usually produced by computers instead of humans. So why should we
+care about being able to build one by hand? This capability is still important for
+<ul>
+<li>creating summary trees,</li>
+<li>curating computational predictions, and</li>
+<li>quickly producing tree diagrams,</li>
+</ul> 
+among other tasks. So, without further ado, let's activate PhyloWidget's <em>radial context menu</em>:
+
+<ul><li><a href="javascript:PhyloWidget.changeSetting('menuFile','dock.xml;toolbar-onlysearch.xml;context.xml');">Abracadabra!</a></li></ul>
+
+Wow, what just happened?? Well, not much, yet. You should now see the Arrow tool in the dock. Sometimes big things some in small packages, and this
+little icon will now let you create your own tree!
+<p>
+To begin, first click on the arrow icon, then try hovering the mouse over the node circle (just to the left of the 'PhyloWidget' label).
+You should see a pulsing blue circle around the node, and the mouse cursor should become a hand&mdash;as you probably guessed, this
+is letting you know that you can click there to do something!
+<p>
+Clicking on the node brings up what's known as a radial context menu. The <em>context</em> of this menu is the node from which it was opened.
+Even if you zoom or scroll away from the node (by using your mouse wheel for example), the menu remains attached to the node.
+<p>
+Upon opening, PhyloWidget's context menu displays four sub-menus which contain menu items or further sub-menus of their own. Try playing around with the menu system for
+a while, and don't be afraid to experiment&mdash;if you get in trouble, just <a href="javascript:PhyloWidget.changeSetting('tree',window.animalTree);PhyloWidget.callMethod('zoomToFull');">click here to reset the tree</a>.
+<p>
+<b>Power user tip:</b> notice that every item in the context menu has a single-character label&mdash;that's it's keyboard shortcut! It can be
+quite efficient to use the context menu via the keyboard shortcuts, so give it a try!
+</p>
+<h1>A more detailed look</h1>
+For reference, here is detailed overview of PhyloWidget's context menu hierarchy:
+<ul>
+	<li><em>Clipboard:</em> for performing cut-and-paste operations
+	<ul>
+		<li><b>Cut:</b> cuts the selected node and its subtree, to be pasted back elsewhere in the tree.</li>
+		<li><b>Copy:</b> copies the selected node and subtree, to be pasted elsewhere.</li>
+		<li><b>Paste:</b> pastes the clipboard contents (if it exists) below the selected node.</li>
+		<li><b>Swap:</b> swaps this node with the clipboard contents.</li>
+	</ul>
+	</li>
+	<li><em>Node Edit:</em> for editing the current node's attributes
+	<ul>
+		<li><b>Name:</b> edits the name of the current node.
+		<li><b>Branch length:</b> edits the length of the branch between this node and its parent.</li>
+		<li><b>Annotations:</b> edits the annotations associated with the current node. Most often, these annotations will represent the NHX format information contained in the tree (see the Annotations vignette).</li>
+	</ul>
+	</li>
+	<li><em>Layout:</em> for changing the layout of the tree
+	<ul>
+		<li><b>Swap Children:</b> simply swaps the order of this node's children.</li>
+		<li><b>Flip Subtree:</b> causes the entire subtree below this node to be flipped.</li>
+		<li><b>Reroot:</b> reroots the tree on this node using the <i>midpoint method</i>. Causes this node to become a direct
+		descendant of the root node.</li>
+	</ul>
+	</li>
+	<li><em>Tree Edit:</em> for changing the structure of the tree
+	<ul>
+		<li><b>Add child:</b> adds a direct descendant to this node.</li>
+		<li><b>Add sister:</b> approximates creating a new speciation event, by adding a parental node just above this node and inserting a new 'sister' node.</li>
+		<li><b>Delete subtree:</b> deletes this node and the entire subtree below it.</li>
+		<li><b>Delete this node:</b> deletes this node (we'll call it X) by splicing it out of the tree, so X's children become the children of X's parent.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="5.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+</li>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #2: Navigating Trees with PhyloWidget</title>
+<title>PhyloWidget Vignette #2: Navigation </title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -18,17 +18,20 @@
 		</a>
 	</li>
 	<li>
-		<a href="..">Home</a>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Vignettes Index</a>
 	</li>
 	<li style="">
 		<a href="3.html">
-			<img src='../img/pw-icon.png'/>Next: _________
+			<img src='../img/pw-icon.png'/>Next: Labels
 		</a>
 	</li>
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #2: Navigating through Trees</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Vignette #2: Navigation</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
 var params = {
@@ -48,7 +51,7 @@ var treeOfLife = "(((Leishmania_major_strain_Friedlin:0.45664,((Cryptosporidium_
 </script>
 <div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
 <!-- VIGNETTE CONTENT -->
-<h1>A 'Scalable' Approach to Navigation</h1>
+<h1>A 'scalable' approach to navigation</h1>
 By far, the most important user interface component for tree visualization is navigation. Phylogenetic trees
 often have such a complex structure that simply looking at static picture is completely uninformative; instead, we
 need a method which allows us to <b>access the information present at multiple scales</b> within the tree structure.
@@ -71,19 +74,23 @@ One version of the "tree of life"</a>
 <p>
 With this larger tree, you can begin to see the usefulness of PhyloWidget's emphasis on zooming: with a single click of the mouse, you can move from viewing this tree in its entirety down to analyzing a
 single node. You may also have noticed that the node labels always remain readable and are never overlapping each other; this is a unique feature of PhyloWidget's rendering
-engine, and is covered in more detail in the <a href="3.html">very next vignette</a>. 
+engine, and is covered in more detail in the <a href="3.html">next vignette</a>. 
 <p>
-<h1>Getting Lost in the Forest</h1>
+<h1>Getting lost in the forest</h1>
 It's okay to get lost every once in a while -- when traveling, for example, getting purposefully lost is often the best way to see a city! But when doing science, a loss of context is unacceptable. PhyloWidget
 has two features to avoid this problem. First, there is a minimum zoom level, so that you cannot zoom out to infinity. Second, there is a "Zoom to Full" function which will always bring the entire tree back into
 view:
 <ul>
 <li><a href="javascript:PhyloWidget.callMethod('zoomToFull');">Zoom to Full</a></li>
-</ul> 
+</ul>
+
+<em>Power user tip:</em> The first tip is that you can use the keyboard to change the active tool. Just use the key indicated by the dock item; in this case, "s" for Scroll, and "z" for Zoom.
+<p>
+<em>Also useful:</em> Try holding down the <code>Ctrl</code> key while using the pan and/or zoom tools. This causes the tool to enter into "flyby" mode, which can be more efficient for some uses.
 
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="2.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="3.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
 </li>
 </ul>
 

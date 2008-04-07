@@ -13,8 +13,11 @@ body {
 	margin-bottom:15px;
 }
 
+em {
+	font-weight:bold;
+}
+
 ul li {
-	font-weight: bold;
 }
 
 #content p{

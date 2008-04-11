@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #7: Input / Output</title>
+<title>PhyloWidget Step #8: Annotation</title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -13,25 +13,25 @@
 <div id="content-wrapper" style="width:900px;">
 <ul class="boxlist">
 	<li style="">
-		<a href="6.html">
-			<img src='../img/pw-icon.png'/>Previous: Menus
+		<a href="7.html">
+			<img src='../img/pw-icon.png'/>Previous: Input/Output
 		</a>
 	</li>
 	<li>
 		<a href="../">PW Home</a>
 	</li>
 	<li>
-		<a href="./">Vignettes Index</a>
+		<a href="./">Step-by-Step Index</a>
 	</li>
 	<li style="">
-		<a href="8.html">
-			<img src='../img/pw-icon.png'/>Next: Annotation
+		<a href="9.html">
+			<img src='../img/pw-icon.png'/>Next: Web Links
 		</a>
 	</li>
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #7: Input / Output</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Step 8 of 10: Annotation</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
 var fullMenus = 'dock.xml;toolbar.xml;context.xml';
@@ -45,89 +45,70 @@ var params = {
 	/*
 	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
 	 */
-	menuFile:'dock.xml;toolbar.xml;context.xml',
+	menus:'dock.xml;toolbar.xml;context.xml',
 	tree:'PhyloWidget;',
 	useBranchLengths:true
 };
-//PhyloWidget.loadWidget('phylowidget',params);  // Not yet... gotta warn the user first!
+var ensembl = {
+	nodeSize:4,
+	lineWidth:1
+};
+var geneTree = "(((BGIOSIBCA042311_ORYSA:0.11893[&&NHX:S=ORYSA:O=BGIOSIBCA042311.1:G=BGIOSIBCA042311],At3g11830_ARATH:0.103292[&&NHX:S=ARATH:O=At3g11830.1:G=At3g11830]):0.0816687[&&NHX:S=Magnoliophyta:B=99:D=N],(cct7_SCHPO:0.166585[&&NHX:S=SCHPO:O=SPBC25H2.12c:G=SPBC25H2.12c],CCT7_YEAST:0.186209[&&NHX:S=YEAST:O=YJL111W.1:G=YJL111W]):0.029676[&&NHX:S=Ascomycota:B=99:D=N]):0.00495409[&&NHX:S=Eukaryota:B=55:D=N],((((((((CCT7_HUMAN:0.0510845[&&NHX:S=HUMAN:O=ENST00000258091.4:G=ENSG00000135624],Cct7_MOUSE:0.0548045[&&NHX:S=MOUSE:O=ENSMUST00000032078.4:G=ENSMUSG00000030007]):0.0267848[&&NHX:S=Euarchontoglires:B=54:D=N],ENSMODT00000021123_MONDO:0.0837789[&&NHX:S=MONDO:O=ENSMODT00000021123.2:G=ENSMODG00000016626]):0.0255967[&&NHX:S=Theria:B=54:D=N],ENSGALT00000025922_CHICK:0.131991[&&NHX:S=CHICK:O=ENSGALT00000025922.2:G=ENSGALG00000016088]):0.0021982[&&NHX:S=Amniota:B=53:D=N],Q5D024_XENTR:0.105271[&&NHX:S=XENTR:O=ENSXETT00000025763.2:G=ENSXETG00000011778])[&&NHX:S=Tetrapoda:B=96:D=N],(cct7_BRARE:0.0999995[&&NHX:S=BRARE:O=ENSDART00000006802.3:G=ENSDARG00000007385],NEWSINFRUT00000128352_FUGRU:0.108658[&&NHX:S=FUGRU:O=NEWSINFRUT00000128352.3:G=NEWSINFRUG00000121580]):0.00780083[&&NHX:S=Clupeocephala:B=100:D=N]):0.0510091[&&NHX:S=Euteleostomi:B=97:D=N],(ENSCINT00000001715_CIOIN:0.00425529[&&NHX:S=CIOIN:O=ENSCINT00000001715.2:G=ENSCING00000000947],ENSCINT00000003265_CIOIN:0.0104703[&&NHX:S=CIOIN:O=ENSCINT00000003265.2:G=ENSCING00000001620]):0.139761[&&NHX:S=CIOIN:B=100:D=Y]):0.0066056[&&NHX:S=Chordata:B=91:D=N],(Sm00.scaff00161.0170_SCHMA:0.187113[&&NHX:S=SCHMA:O=Sm00.scaff00161.0170:G=Sm00.scaff00161.0170],(NP_503522_CAEEL:0.0698092[&&NHX:S=CAEEL:O=T10B5.5a.1:G=T10B5.5],CBG21817_CAEBR:0.0734101[&&NHX:S=CAEBR:O=CBG21817:G=CBG21817]):0.142116[&&NHX:S=Caenorhabditis:B=94:D=N])[&&NHX:S=Bilateria:B=35:D=N])[&&NHX:S=Bilateria:D=N],(NP_649835_DROME:0.0835465[&&NHX:S=DROME:O=CG8351-RA.3:G=CG8351],GA21011-PA_DROPS:0.0840653[&&NHX:S=DROPS:O=GA21011-PA:G=GA21011]):0.108617[&&NHX:S=Sophophora:B=100:D=N]):0.00495409[&&NHX:S=Bilateria:D=N])[&&NHX:S=Eukaryota:D=N];";
+var thirdEx = "(((05_YEAST:0.493471[&&NHX:S=YEAST],04_SCHPO:0.318204[&&NHX:S=SCHPO]):0.157022[&&NHX:D=N:S=Ascomycota],03_ARATH:0.308649[&&NHX:S=ARATH]):0.04141[&&NHX:D=N:S=Eukaryota],((((((((08_RAT:0.102249[&&NHX:S=RAT],(13_RAT:0.095242[&&NHX:S=RAT],10_RAT:0.031982[&&NHX:S=RAT]):0.018615[&&NHX:D=Y:S=RAT]):0.014489[&&NHX:D=Y:S=RAT],11_MOUSE:0.042825[&&NHX:S=MOUSE]):0.037198[&&NHX:D=N:S=Murinae],12_HUMAN:0.060992[&&NHX:E=$-PANTR:S=HUMAN]):0.109605[&&NHX:D=N:E=$-CANFA:S=Eutheria],09_CHICK:0.105274[&&NHX:S=CHICK]):0.086729[&&NHX:D=N:E=$-XENTR:S=Amniota],06_BRARE:0.356832[&&NHX:E=$-Tetraodontidae:S=BRARE]):0.073642[&&NHX:D=N:S=Euteleostomi],(((18_HUMAN:0.077476[&&NHX:E=$-PANTR:S=HUMAN],17_MOUSE:0.066898[&&NHX:E=$-RAT:S=MOUSE]):0.142228[&&NHX:D=N:E=$-CANFA:S=Eutheria],16_CHICK:0.196657[&&NHX:S=CHICK]):0.083315[&&NHX:D=N:E=$-XENTR:S=Amniota],(15_FUGRU:0.125305[&&NHX:E=$-TETNG:S=FUGRU],14_BRARE:0.192069[&&NHX:S=BRARE]):0.133036[&&NHX:D=N:S=Clupeocephala]):0.096936[&&NHX:D=N:S=Euteleostomi]):0.06101[&&NHX:D=Y:E=$-CIOIN:S=Euteleostomi],07_DROME:0.262868[&&NHX:E=$-ANOGA-APIME:S=DROME]):0.1118[&&NHX:D=N:S=Bilateria],(02_CAEBR:0.168649[&&NHX:S=CAEBR],01_CAEEL:0.166054[&&NHX:S=CAEEL]):0.371596[&&NHX:D=N:Loglk=-18289.490411:S=Caenorhabditis]):0.083573[&&NHX:D=N:S=Bilateria])[&&NHX:D=N:S=Eukaryota];";
+
+PhyloWidget.loadWidget('phylowidget',params);
 </script>
 <div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
 <!-- VIGNETTE CONTENT -->
-<h1>What happened to the applet??!?</h1>
+<h1>Annotations: a little something extra</h1>
 <p>
-Where did our trusty applet in the left panel go? We intentionally didn't load the applet yet, because PhyloWidget's
-file I/O requires a <em>signed applet</em>, which will load up a security warning asking you if you trust the program.
-<p>
-We thought it would be kind to warn you before this happens!
-If you wish to test out the I/O features, just click ok at the security warning, and you'll be all set! Click below to start loading the signed
-applet version of PhyloWidget:
+In the very first vignette, you may have noticed that a couple of the trees in the gallery showed up with colorful annotations
+in PhyloWidget. They looked something like this:
 <ul>
-<li><a href="javascript:PhyloWidget.loadWidget('phylowidget',window.params);">Load me up!</a></li>
+	<li>Colorful trees:
+	<a href="javascript:PhyloWidget.changeSettings(window.ensembl);PhyloWidget.changeSetting('tree','(((ADH2:0.1[&&NHX:S=human:E=1.1.1.1], ADH1:0.11[&&NHX:S=human:E=1.1.1.1]):0.05[&&NHX:S=Primates:E=1.1.1.1:D=Y:B=100], ADHY:0.1[&&NHX:S=nematode:E=1.1.1.1],ADHX:0.12[&&NHX:S=insect:E=1.1.1.1]):0.1[&&NHX:S=Metazoa:E=1.1.1.1:D=N], (ADH4:0.09[&&NHX:S=yeast:E=1.1.1.1],ADH3:0.13[&&NHX:S=yeast:E=1.1.1.1], ADH2:0.12[&&NHX:S=yeast:E=1.1.1.1],ADH1:0.11[&&NHX:S=yeast:E=1.1.1.1]):0.1 [&&NHX:S=Fungi])[&&NHX:E=1.1.1.1:D=N];');">ADH</a>,
+	<a href="javascript:PhyloWidget.changeSettings(window.ensembl);PhyloWidget.changeSetting('tree',window.geneTree);">Ensembl gene tree</a>,
+	<a href="javascript:PhyloWidget.changeSettings(window.ensembl);PhyloWidget.changeSetting('tree',window.thirdEx);">a third example</a>
+	</li>
 </ul>
+This is done using the standard NHX annotation format, which (as mentioned in the <a href="7.html">previous vignette</a>) is a simple way to add
+certain annotations to a Newick-formatted tree.
 <p>
-If all goes well, you'll notice that now the Save Tree, Export Image, and Load Tree from File menu items are enabled.
+When PhyloWidget detects NHX annotations in a tree, it does the following:
+<ol>
+<li>All nodes marked as representing a duplication event (using the <em>D=T</em> annotation) are colored red, and those marked as a speciation event (using the <em>D=F</em> annotation) are colored blue</li>
+<li>Leaf nodes are grouped according to the species (<em>S</em>) or taxon (<em>T</em>) and assigned different colors according to their groups</li>
+<li>Bootstrap values (<em>B</em>) are drawn on top of the branch which they represent</li>
+<li>Bootstrap values are used to shade their corresponding branch</li>
+</ol>
+All of the above behaviors are configurable. Using PhyloWidget's configuration settings (see the <a href="10.html">last vignette</a>) you can individually
+enable or disable , theAt any point, you can turn off both the display and output of annotations by going to the toolbar and choosing Tree->Annotation->Ignore Annotations.
 </p>
-<h1>Tree Input</h1>
+<h1>Editing annotations</h1>
 <p>
-PhyloWidget can parse the standard array of tree file formats with varying degrees of support:
-<ul>
-<li><b>Newick</b>, or New Hampshire <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">(link)</a>
-	<ul>
-		<li>The Newick format is the simplest possible format for communicating a phylogenetic tree, and PhyloWidget is based
-		primarily on Joe Felsenstein's description of the format, available <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">here</a>.
-		</li>
-	</ul>
-</li>
-<li><b>NHX</b>, or New Hampshire eXtended <a href="http://www.phylosoft.org/forester/NHX.html">(link)</a>
-	<ul>
-		<li>The NHX format is an extension to the Newick format that provides for <b>(a)</b> a way to incorporate further annotations into Newick-formatted trees,
-		and <b>(b)</b> some standardized annotation types that may be useful for biologists.</li>
-		<li>PhyloWidget can read all NHX annotations and stores them in its data structure, but only the following annotations are currently
-		used in a visually meaningful way:
-			<ul>
-				<li><b>D</b> for duplication vs. speciation</li>
-				<li><b>S or T</b> for species or taxon coloring</li>
-				<li><b>B</b> for bootstrap value</li>
-			</ul>
-		</li>
-		<li><b>Note:</b> If you actively use an NHX annotation type not listed here and would like PhyloWidget to visualize it in a meaningful way, please feel free to contact us!</li>
-	</ul>
-</li>
-<li><b>Nexus</b> <a href="http://www.ncbi.nlm.nih.gov/pubmed/11975335">(link)</a>
-	<ul>
-		<li>The Nexus file format is a very complex data format capable of storing diverse types of data in evolutionary biology. PhyloWidget does not contain a full Nexus
-		parser, but rather a simple method for obtaining a phylogenetic tree described within a Nexus file. 
-		<li><em>PhyloWidget will currently only read the FIRST tree from the trees block of a Nexus file.</em> Please let us know if you find this limitation
-		to be a severe problem; we have some ideas on how to include support for multiple trees, but it's only worth the effort if people will use the feature!</li>
-		<li><em>Note:</em> This support has not been fully tested by any means. In practice, however, it tends to work well on a variety of Nexus files.</li>
-	</ul>
-</li>
+PhyloWidget provides a convenient user interface for viewing and editing tree annotations. Just click on a node with the arrow, tool,
+type 'e' for edit, and 'a' for annotation, and the annotation
+dialog should come up showing the annotation for the current node. Then just edit the text, making sure
+to keep to the described formatting guidelines. Click "ok", and the annotation will be updated.
+<p>
+In this way, you can easily annotate one of your trees with the standard NHX values, causing it to become rendered just
+like the NHX trees you saw above. If you then save your tree, PhyloWidget will output all annotations in the NHX format.
 
-</ul>
+<h1>Going a step further</h1>
+The great thing about the NHX format is that, although it formally defines only a list of 15 or so possible
+annotation types (<a href="http://www.phylosoft.org/forester/NHX.html" target="_new">click here</a> for the format definition), the format is extensible to any number of non-standard annotations.
+<p>
+This means that you can use PhyloWidget's annotation functionality to attach <em>arbitrary information</em> to your tree. For example, you
+may want to include URL links within your tree file or a PubMed ID for reference. We will be exploring a very web-aware
+application of this annotation in the <a href="9.html">next vignette</a>.
+<p>
+When working with URLs in particular, PhyloWidget breaks away slightly from the NHX format by specially treating annotations that contain the <em>://</em>
+string, as you might find in a <em>http://</em> or <em>ftp://</em> URL. Strictly, the colon character should be considered an annotation delimiter (thus making
+it inappropriate to use annotations that contain valid URLs), but PhyloWidget recognizes URLs as an important special case and makes sure to keep URL annotations intact.
 </p>
-<h1>Remote URL Input</h1>
-<p>
-Now is also a good time to mention PhyloWidget's URL loading capability. Whenever you're using the signed applet (aka PhyloWidget Full), you can
-substitute a URL for the Newick tree string, and PhyloWidget will instead load the tree to which the URL is referring.
-<p>
-As an example, try pasting the following URL into PhyloWidget's Manual Input dialog:
-<p>
-<span style="font-size:9px;">http://www.molevol.org/camel/projects/nexus/NEXUS/barns-combined.nex</span>
-</p>
-<h1>Tree Output</h1>
-<p>
-PhyloWidget can output trees in Newick or NHX format. This choice is usually made automatically, outputting the NHX annotations only for nodes that contain annotation data. However,
-there is a configuration setting named <code>ignoreAnnotations</code> (see the Menu vignette) that allows all NHX-style annotations to be ignored when viewing and outputting the tree.  
-</p>
-<h1>Image Export</h1>
-Image export is another way of outputting your tree of interest. Clicking the Image Export menu item will open up a dialog with various options governing
-the export process. PhyloWidget can export to the following image formats:
-<ul>
-	<li>PDF (vector-based), PNG, JPEG, and TIFF</li>
-</ul>
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="7.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="9.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
 </li>
 </ul>
 

@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #2: Navigation </title>
+<title>PhyloWidget Step #2: Navigation </title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -21,7 +21,7 @@
 		<a href="../">PW Home</a>
 	</li>
 	<li>
-		<a href="./">Vignettes Index</a>
+		<a href="./">Step-by-Step Index</a>
 	</li>
 	<li style="">
 		<a href="3.html">
@@ -31,7 +31,7 @@
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #2: Navigation</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Step 2 of 10: Navigation</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
 var params = {
@@ -43,7 +43,7 @@ var params = {
 	 */
 	tree:'PhyloWidget',
 	nodeSize:1,
-	menuFile:'none.xml'
+	menus:'none.xml'
 };
 PhyloWidget.loadWidget('phylowidget',params);
 
@@ -60,7 +60,7 @@ In short, we need a way to <b><em>pan</em> and <em>zoom</em></b>.
 <p>
 PhyloWidget approaches this problem with two simple but powerful navigational tools. Click below to rev 'em up.
 <ul>
-<li><a href="javascript:PhyloWidget.changeSetting('menuFile','dock-nav.xml');">Activate the navigation dock!</a></li>
+<li><a href="javascript:PhyloWidget.changeSetting('menus','dock-onlynav.xml;');">Activate the navigation dock!</a></li>
 </ul>
 <p>
 With a simple flick of the wrist (or rather a click of the button), you now have the capability to quite easily zoom and pan around our tree! It can get boring with just a single node in our tree,
@@ -90,7 +90,7 @@ view:
 
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="3.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="3.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
 </li>
 </ul>
 

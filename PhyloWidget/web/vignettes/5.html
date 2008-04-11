@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #5: Editing</title>
+<title>PhyloWidget Step #5: Editing</title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -21,7 +21,7 @@
 		<a href="../">PW Home</a>
 	</li>
 	<li>
-		<a href="./">Vignettes Index</a>
+		<a href="./">Step-by-Step Index</a>
 	</li>
 	<li style="">
 		<a href="6.html">
@@ -31,7 +31,7 @@
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #5: Editing</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Step 5 of 10: Editing</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
 var animalTree = "((raccoon:19.19959,bear:6.80041):0.84600,((sea_lion:11.99700, seal:12.00300):7.52973,((monkey:20.85930,cat:30.14069):20.59201,weasel:18.87953):2.09460):3.87382,dog:15.46154);";
@@ -47,7 +47,7 @@ var params = {
 	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
 	 */
 	useBranchLengths:true,
-	menuFile:'dock-onlynav.xml;toolbar-onlysearch.xml;',
+	menus:'dock-onlynav.xml;toolbar-onlysearch.xml;',
 	tree:animalTree
 };
 PhyloWidget.loadWidget('phylowidget',params);
@@ -59,7 +59,7 @@ PhyloWidget.loadWidget('phylowidget',params);
 So far we've introduced some useful methods for zooming, navigating, an searching through existing trees, but we
 still need a way to build a tree from scratch&mdash;trees don't just grow on trees, you know!
 <p>
-In all seriousness, though: while it is true that phylogenies don't grow on trees, nowadays they're usually produced by computers instead of humans. So why should we
+In all seriousness, however: while it is true that phylogenies don't "grow on trees", nowadays they are usually produced by computers instead of humans. So why should we
 care about being able to build one by hand? This capability is still important for
 <ul>
 <li>creating summary trees,</li>
@@ -68,7 +68,7 @@ care about being able to build one by hand? This capability is still important f
 </ul> 
 among other tasks. So, without further ado, let's activate PhyloWidget's <em>radial context menu</em>:
 
-<ul><li><a href="javascript:PhyloWidget.changeSetting('menuFile','dock.xml;toolbar-onlysearch.xml;context.xml');">Abracadabra!</a></li></ul>
+<ul><li><a href="javascript:PhyloWidget.changeSetting('menus','dock.xml;toolbar-onlysearch.xml;context.xml');">Abracadabra!</a></li></ul>
 
 Wow, what just happened?? Well, not much, yet. You should now see the Arrow tool in the dock. Sometimes big things some in small packages, and this
 little icon will now let you create your own tree!
@@ -83,7 +83,7 @@ Even if you zoom or scroll away from the node (by using your mouse wheel for exa
 Upon opening, PhyloWidget's context menu displays four sub-menus which contain menu items or further sub-menus of their own. Try playing around with the menu system for
 a while, and don't be afraid to experiment&mdash;if you get in trouble, just <a href="javascript:PhyloWidget.changeSetting('tree',window.animalTree);PhyloWidget.callMethod('zoomToFull');">click here to reset the tree</a>.
 <p>
-<b>Power user tip:</b> notice that every item in the context menu has a single-character label&mdash;that's it's keyboard shortcut! It can be
+<b>Power user tip:</b> notice that every item in the context menu has a single-character label&mdash;that's its keyboard shortcut! It can be
 quite efficient to use the context menu via the keyboard shortcuts, so give it a try!
 </p>
 <h1>A more detailed look</h1>
@@ -95,13 +95,14 @@ For reference, here is detailed overview of PhyloWidget's context menu hierarchy
 		<li><b>Copy:</b> copies the selected node and subtree, to be pasted elsewhere.</li>
 		<li><b>Paste:</b> pastes the clipboard contents (if it exists) below the selected node.</li>
 		<li><b>Swap:</b> swaps this node with the clipboard contents.</li>
+		<li><b>Clear:</b> clears the current clipboard contents.</li>
 	</ul>
 	</li>
 	<li><em>Node Edit:</em> for editing the current node's attributes
 	<ul>
 		<li><b>Name:</b> edits the name of the current node.
 		<li><b>Branch length:</b> edits the length of the branch between this node and its parent.</li>
-		<li><b>Annotations:</b> edits the annotations associated with the current node. Most often, these annotations will represent the NHX format information contained in the tree (see the Annotations vignette).</li>
+		<li><b>Annotations:</b> edits the annotations associated with the current node. Most often, these annotations will represent the NHX format information contained in the tree (see the later <a href="8.html">Annotations vignette</a>).</li>
 	</ul>
 	</li>
 	<li><em>Layout:</em> for changing the layout of the tree
@@ -120,12 +121,19 @@ For reference, here is detailed overview of PhyloWidget's context menu hierarchy
 		<li><b>Delete this node:</b> deletes this node (we'll call it X) by splicing it out of the tree, so X's children become the children of X's parent.</li>
 	</ul>
 	</li>
+	<li><em>Web Links:</em> for linking out to external sites
+	<ul>
+		<li>Here you'll find an assortment of useful external sites. This behavior is completely customizable using
+		PhyloWidget's modular user interface; see the later vignette on <a href="9.html">Web Links</a> for an interactive example of this.
+		</li> 
+	</ul>
+	</li>
 </ul>
 
 
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="5.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="6.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
 </li>
 </ul>
 

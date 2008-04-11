@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #7: Input / Output</title>
+<title>PhyloWidget Step #7: Input / Output</title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -21,7 +21,7 @@
 		<a href="../">PW Home</a>
 	</li>
 	<li>
-		<a href="./">Vignettes Index</a>
+		<a href="./">Step-by-Step Index</a>
 	</li>
 	<li style="">
 		<a href="8.html">
@@ -31,10 +31,9 @@
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #7: Input / Output</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Step 7 of 10: Input / Output</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
-var fullMenus = 'dock.xml;toolbar.xml;context.xml';
 var params = {
 	/*
 	 *  THESE SHOULD STAY THE SAME FOR ALL VIGNETTES
@@ -45,7 +44,7 @@ var params = {
 	/*
 	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
 	 */
-	menuFile:'dock.xml;toolbar.xml;context.xml',
+	menus:'dock.xml;toolbar.xml;context.xml',
 	tree:'PhyloWidget;',
 	useBranchLengths:true
 };
@@ -67,18 +66,39 @@ applet version of PhyloWidget:
 <p>
 If all goes well, you'll notice that now the Save Tree, Export Image, and Load Tree from File menu items are enabled.
 </p>
-<h1>Tree Input</h1>
+<h1>Local tree input</h1>
+<p>
+For inputting a tree from your own computer, you have two primary options:
+<ul>
+<li><em>File input:</em> select the menu item File->Load Tree->From File, and choose your input file. Quick and easy.</li>
+<li><em>Manual cut and paste:</em> select the menu item File->Load Tree->Manual Input, and paste your tree string into the text box. Also quick, also easy!</li>
+</ul>
+</p>
+
+<h1>Remote URL input</h1>
+<p>
+Now is also a good time to mention PhyloWidget's URL loading capability. When you're using PhyloWidget as a signed applet or a standalone program, you can
+substitute a URL for the Newick tree string, and PhyloWidget will instead load the tree to which the URL is referring.
+<p>
+As an example, try pasting the following URL into PhyloWidget's Manual Input dialog:
+<p>
+<span style="font-size:9px;">http://www.molevol.org/camel/projects/nexus/NEXUS/barns-combined.nex</span>
+<p>
+If you notice that the taxon labels appear to be cut off in this example, know that that is not a PhyloWidget artifact; the original Nexus file has all labels cut off to 9 characters!
+
+</p>
+<h1>Supported tree formats</h1>
 <p>
 PhyloWidget can parse the standard array of tree file formats with varying degrees of support:
 <ul>
-<li><b>Newick</b>, or New Hampshire <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">(link)</a>
+<li><b>Newick</b>, or New Hampshire <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html" target="_new">(link)</a>
 	<ul>
 		<li>The Newick format is the simplest possible format for communicating a phylogenetic tree, and PhyloWidget is based
 		primarily on Joe Felsenstein's description of the format, available <a href="http://evolution.genetics.washington.edu/phylip/newicktree.html">here</a>.
 		</li>
 	</ul>
 </li>
-<li><b>NHX</b>, or New Hampshire eXtended <a href="http://www.phylosoft.org/forester/NHX.html">(link)</a>
+<li><b>NHX</b>, or New Hampshire eXtended <a href="http://www.phylosoft.org/forester/NHX.html" target="_new">(link)</a>
 	<ul>
 		<li>The NHX format is an extension to the Newick format that provides for <b>(a)</b> a way to incorporate further annotations into Newick-formatted trees,
 		and <b>(b)</b> some standardized annotation types that may be useful for biologists.</li>
@@ -93,31 +113,28 @@ PhyloWidget can parse the standard array of tree file formats with varying degre
 		<li><b>Note:</b> If you actively use an NHX annotation type not listed here and would like PhyloWidget to visualize it in a meaningful way, please feel free to contact us!</li>
 	</ul>
 </li>
-<li><b>Nexus</b> <a href="http://www.ncbi.nlm.nih.gov/pubmed/11975335">(link)</a>
+<li><b>Nexus</b> <a href="http://www.ncbi.nlm.nih.gov/pubmed/11975335" target="_new">(link)</a>
 	<ul>
 		<li>The Nexus file format is a very complex data format capable of storing diverse types of data in evolutionary biology. PhyloWidget does not contain a full Nexus
 		parser, but rather a simple method for obtaining a phylogenetic tree described within a Nexus file. 
 		<li><em>PhyloWidget will currently only read the FIRST tree from the trees block of a Nexus file.</em> Please let us know if you find this limitation
 		to be a severe problem; we have some ideas on how to include support for multiple trees, but it's only worth the effort if people will use the feature!</li>
-		<li><em>Note:</em> This support has not been fully tested by any means. In practice, however, it tends to work well on a variety of Nexus files.</li>
+		<li><em>Note:</em> This support has not been fully tested. In practice, however, it tends to work well on a variety of Nexus files. If you find specific cases
+		where the Nexus parsing does <em>not</em> work, please file a bug report.</li>
 	</ul>
 </li>
 
 </ul>
 </p>
-<h1>Remote URL Input</h1>
-<p>
-Now is also a good time to mention PhyloWidget's URL loading capability. Whenever you're using the signed applet (aka PhyloWidget Full), you can
-substitute a URL for the Newick tree string, and PhyloWidget will instead load the tree to which the URL is referring.
-<p>
-As an example, try pasting the following URL into PhyloWidget's Manual Input dialog:
-<p>
-<span style="font-size:9px;">http://www.molevol.org/camel/projects/nexus/NEXUS/barns-combined.nex</span>
-</p>
+
 <h1>Tree Output</h1>
 <p>
-PhyloWidget can output trees in Newick or NHX format. This choice is usually made automatically, outputting the NHX annotations only for nodes that contain annotation data. However,
+<em>PhyloWidget can output trees in Newick or NHX format</em>. This choice is usually made automatically, outputting the NHX annotations only for nodes that contain annotation data. However,
 there is a configuration setting named <code>ignoreAnnotations</code> (see the Menu vignette) that allows all NHX-style annotations to be ignored when viewing and outputting the tree.  
+</p>
+<p>
+<em>There are currently no plans to implement Nexus output in PhyloWidget</em>. If you are looking for this functionality, <a href="http://mesquiteproject.org/mesquite/mesquite.html">Mesquite</a> is
+a widely-used, open source program that can handle the Nexus format. Additionally, you may consult Joe Felsenstein's <a href="http://evolution.genetics.washington.edu/phylip/software.html">extensive listing of phylogenetic software</a> for other available alternatives.  
 </p>
 <h1>Image Export</h1>
 Image export is another way of outputting your tree of interest. Clicking the Image Export menu item will open up a dialog with various options governing
@@ -127,7 +144,7 @@ the export process. PhyloWidget can export to the following image formats:
 </ul>
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="7.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="8.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
 </li>
 </ul>
 

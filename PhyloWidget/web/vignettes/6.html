@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<title>PhyloWidget Vignette #6: Menus</title>
+<title>PhyloWidget Step #6: Menus</title>
 <link rel="stylesheet" href="../style.css"/>
 <link rel="shortcut icon" href="../img/pw.ico"/>
 <script src="../scripts/phylowidget.js"></script>
@@ -21,7 +21,7 @@
 		<a href="../">PW Home</a>
 	</li>
 	<li>
-		<a href="./">Vignettes Index</a>
+		<a href="./">Step-by-Step Index</a>
 	</li>
 	<li style="">
 		<a href="7.html">
@@ -31,7 +31,7 @@
 </ul>
 <div id="content" style="width:100%;">
 <!-- Content! -->
-<h1 style="text-align:center;clear:both;padding:5px;">Vignette #6: Menus</h1>
+<h1 style="text-align:center;clear:both;padding:5px;">Step 6 of 10: Menus</h1>
 <div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
 <script type="text/javascript">
 var fullMenus = 'dock.xml;toolbar.xml;context.xml';
@@ -45,7 +45,7 @@ var params = {
 	/*
 	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
 	 */
-	menuFile:'dock.xml;toolbar-onlysearch.xml;context.xml',
+	menus:'dock.xml;toolbar-onlysearch.xml;context.xml',
 	tree:'PhyloWidget;',
 	useBranchLengths:true
 };
@@ -59,7 +59,7 @@ in the <a href="1.html">first vignette</a>). In order to fit all of the options 
 PhyloWidget provides a densely-packed set of toolbar menus allowing access to most (but not all!) of its available settings.
 You've already seen the search component, but click below to activate the full toolbar:
 <ul>
-<li><a href="javascript:PhyloWidget.changeSetting('menuFile',window.fullMenus);">Show me the menus!</a></li>
+<li><a href="javascript:PhyloWidget.changeSetting('menus',window.fullMenus);">Show me the menus!</a></li>
 </ul>
 The toolbar menu should look and feel fairly similar to most modern toolbars, with a couple of exceptions. Under the "view" menu,
 you'll find a couple of different types of menu elements, including checkboxes and what we call "number scrollers":
@@ -112,11 +112,11 @@ so below you will find a complete listing, accompanied by a description for each
 		</li>
 		<li><b>Render Options</b>, for changing parameters related to rendering
 			<ul>
-				<li><b>Render Threshold:</b> the maximum number of branches to draw on screen at one time. Higher values cause rendering to become sluggish.</li>
 				<li><b>Minimum Text Size:</b> the minimum text size at which to display node labels. Very low values cause the rendering to become sluggish.</li>
 				<li><b>Branch Length Scaling:</b> how much to horizontally "stretch" the tree. Sometimes useful for trees with very small branch length values.</li>
 				<li><b>Stretch to Fit:</b> causes the renderer to stretch the tree to fit the width of the window.</li>
 				<li><b>Show Clade Labels:</b> if set, the renderer will display labels of non-leaf nodes, if they exist.</li>
+				<li><b>Antialias:</b> if set, PhyloWidget will use a smoother, but much slower, rendering method, resulting in a cleaner-looking display.
 			</ul>
 		</li>
 		<li><b>Style</b>, for changing the style of the drawn tree
@@ -156,7 +156,7 @@ so below you will find a complete listing, accompanied by a description for each
 
 <ul class="boxlist" style="text-align:center;">
 <li>
-<a href="7.html"><img src='../img/pw-icon.png'/>Continue to the next vignette...</a>
+<a href="7.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
 </li>
 </ul>
 

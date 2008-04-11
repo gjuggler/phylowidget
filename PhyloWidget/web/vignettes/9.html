@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Step #9: Web Links</title>
+<link rel="stylesheet" href="../style.css"/>
+<link rel="shortcut icon" href="../img/pw.ico"/>
+<script src="../scripts/phylowidget.js"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="content-wrapper" style="width:900px;">
+<ul class="boxlist">
+	<li style="">
+		<a href="8.html">
+			<img src='../img/pw-icon.png'/>Previous: Annotation
+		</a>
+	</li>
+	<li>
+		<a href="../">PW Home</a>
+	</li>
+	<li>
+		<a href="./">Step-by-Step Index</a>
+	</li>
+	<li style="">
+		<a href="10.html">
+			<img src='../img/pw-icon.png'/>Next: Deployment
+		</a>
+	</li>
+</ul>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<h1 style="text-align:center;clear:both;padding:5px;">Step 9 of 10: Web Links</h1>
+<div style="float:left;width:425px;height:500px;border: 2px solid black;padding:3px;" id="phylowidget"></div>
+<script type="text/javascript">
+var fullMenus = 'dock.xml;toolbar.xml;context.xml';
+var params = {
+	/*
+	 *  THESE SHOULD STAY THE SAME FOR ALL VIGNETTES
+	 */
+	codebase:'../full/lib',				// NOTE we're using PhyloWidget full for this vignette!
+	width:425,
+	height:500,
+	/*
+	 *  OK, CHANGE THESE ONES FOR INDIVIDUAL VIGNETTES
+	 */
+	menus:'dock.xml;toolbar.xml;context.xml',
+	tree:'PhyloWidget;',
+	useBranchLengths:'true'
+};
+var ensembl = {
+	nodeSize:4,
+	lineWidth:1
+};
+var geneTree = "(((BGIOSIBCA042311_ORYSA:0.11893[&&NHX:S=ORYSA:O=BGIOSIBCA042311.1:G=BGIOSIBCA042311],At3g11830_ARATH:0.103292[&&NHX:S=ARATH:O=At3g11830.1:G=At3g11830]):0.0816687[&&NHX:S=Magnoliophyta:B=99:D=N],(cct7_SCHPO:0.166585[&&NHX:S=SCHPO:O=SPBC25H2.12c:G=SPBC25H2.12c],CCT7_YEAST:0.186209[&&NHX:S=YEAST:O=YJL111W.1:G=YJL111W]):0.029676[&&NHX:S=Ascomycota:B=99:D=N]):0.00495409[&&NHX:S=Eukaryota:B=55:D=N],((((((((CCT7_HUMAN:0.0510845[&&NHX:S=HUMAN:O=ENST00000258091.4:G=ENSG00000135624],Cct7_MOUSE:0.0548045[&&NHX:S=MOUSE:O=ENSMUST00000032078.4:G=ENSMUSG00000030007]):0.0267848[&&NHX:S=Euarchontoglires:B=54:D=N],ENSMODT00000021123_MONDO:0.0837789[&&NHX:S=MONDO:O=ENSMODT00000021123.2:G=ENSMODG00000016626]):0.0255967[&&NHX:S=Theria:B=54:D=N],ENSGALT00000025922_CHICK:0.131991[&&NHX:S=CHICK:O=ENSGALT00000025922.2:G=ENSGALG00000016088]):0.0021982[&&NHX:S=Amniota:B=53:D=N],Q5D024_XENTR:0.105271[&&NHX:S=XENTR:O=ENSXETT00000025763.2:G=ENSXETG00000011778])[&&NHX:S=Tetrapoda:B=96:D=N],(cct7_BRARE:0.0999995[&&NHX:S=BRARE:O=ENSDART00000006802.3:G=ENSDARG00000007385],NEWSINFRUT00000128352_FUGRU:0.108658[&&NHX:S=FUGRU:O=NEWSINFRUT00000128352.3:G=NEWSINFRUG00000121580]):0.00780083[&&NHX:S=Clupeocephala:B=100:D=N]):0.0510091[&&NHX:S=Euteleostomi:B=97:D=N],(ENSCINT00000001715_CIOIN:0.00425529[&&NHX:S=CIOIN:O=ENSCINT00000001715.2:G=ENSCING00000000947],ENSCINT00000003265_CIOIN:0.0104703[&&NHX:S=CIOIN:O=ENSCINT00000003265.2:G=ENSCING00000001620]):0.139761[&&NHX:S=CIOIN:B=100:D=Y]):0.0066056[&&NHX:S=Chordata:B=91:D=N],(Sm00.scaff00161.0170_SCHMA:0.187113[&&NHX:S=SCHMA:O=Sm00.scaff00161.0170:G=Sm00.scaff00161.0170],(NP_503522_CAEEL:0.0698092[&&NHX:S=CAEEL:O=T10B5.5a.1:G=T10B5.5],CBG21817_CAEBR:0.0734101[&&NHX:S=CAEBR:O=CBG21817:G=CBG21817]):0.142116[&&NHX:S=Caenorhabditis:B=94:D=N])[&&NHX:S=Bilateria:B=35:D=N])[&&NHX:S=Bilateria:D=N],(NP_649835_DROME:0.0835465[&&NHX:S=DROME:O=CG8351-RA.3:G=CG8351],GA21011-PA_DROPS:0.0840653[&&NHX:S=DROPS:O=GA21011-PA:G=GA21011]):0.108617[&&NHX:S=Sophophora:B=100:D=N]):0.00495409[&&NHX:S=Bilateria:D=N])[&&NHX:S=Eukaryota:D=N];";
+var thirdEx = "(((05_YEAST:0.493471[&&NHX:S=YEAST],04_SCHPO:0.318204[&&NHX:S=SCHPO]):0.157022[&&NHX:D=N:S=Ascomycota],03_ARATH:0.308649[&&NHX:S=ARATH]):0.04141[&&NHX:D=N:S=Eukaryota],((((((((08_RAT:0.102249[&&NHX:S=RAT],(13_RAT:0.095242[&&NHX:S=RAT],10_RAT:0.031982[&&NHX:S=RAT]):0.018615[&&NHX:D=Y:S=RAT]):0.014489[&&NHX:D=Y:S=RAT],11_MOUSE:0.042825[&&NHX:S=MOUSE]):0.037198[&&NHX:D=N:S=Murinae],12_HUMAN:0.060992[&&NHX:E=$-PANTR:S=HUMAN]):0.109605[&&NHX:D=N:E=$-CANFA:S=Eutheria],09_CHICK:0.105274[&&NHX:S=CHICK]):0.086729[&&NHX:D=N:E=$-XENTR:S=Amniota],06_BRARE:0.356832[&&NHX:E=$-Tetraodontidae:S=BRARE]):0.073642[&&NHX:D=N:S=Euteleostomi],(((18_HUMAN:0.077476[&&NHX:E=$-PANTR:S=HUMAN],17_MOUSE:0.066898[&&NHX:E=$-RAT:S=MOUSE]):0.142228[&&NHX:D=N:E=$-CANFA:S=Eutheria],16_CHICK:0.196657[&&NHX:S=CHICK]):0.083315[&&NHX:D=N:E=$-XENTR:S=Amniota],(15_FUGRU:0.125305[&&NHX:E=$-TETNG:S=FUGRU],14_BRARE:0.192069[&&NHX:S=BRARE]):0.133036[&&NHX:D=N:S=Clupeocephala]):0.096936[&&NHX:D=N:S=Euteleostomi]):0.06101[&&NHX:D=Y:E=$-CIOIN:S=Euteleostomi],07_DROME:0.262868[&&NHX:E=$-ANOGA-APIME:S=DROME]):0.1118[&&NHX:D=N:S=Bilateria],(02_CAEBR:0.168649[&&NHX:S=CAEBR],01_CAEEL:0.166054[&&NHX:S=CAEEL]):0.371596[&&NHX:D=N:Loglk=-18289.490411:S=Caenorhabditis]):0.083573[&&NHX:D=N:S=Bilateria])[&&NHX:D=N:S=Eukaryota];";
+
+PhyloWidget.loadWidget('phylowidget',params);
+</script>
+<div style="float:right;width:425px;height:500px;border: 2px solid black;padding:3px;overflow:scroll;">
+<!-- VIGNETTE CONTENT -->
+<h1>Web-awareness</h1>
+One of the main goals of PhyloWidget is to be as <em>web-aware</em> as possible. This is primarily done through
+being deployed as an applet that lives within a web browser. The other component to PhyloWidget's web presence is
+its ability to create links between phylogenetic trees and external sites.
+<p>
+In the default user interface (which should be loaded into the left panel right now), there is an item in the context
+menu called "Web links". This item provides the user with a powerful convenience: with the click of a button, the name
+of the current node is used to link to one of a variety of phylogenetic or web search engines. It's a simple way to find
+out more information about an unfamiliar taxon!
+<h1>An extensible user interface</h1>
+<p>
+Throughout this series of vignettes, we have presented PhyloWidget in a variety of different styles, dressed
+in a different set of UI components, depending on the task at hand. For example, here are a few of the GUI "masks"
+that we have used so far:
+</p>
+<ul>
+<li>
+<a href="javascript:PhyloWidget.changeSetting('menus','none.xml');">Blank slate</a>,
+<a href="javascript:PhyloWidget.changeSetting('menus','dock-onlynav.xml');">navigation tools</a>,
+<a href="javascript:PhyloWidget.changeSetting('menus','dock-onlynav.xml;toolbar-onlysearch.xml');">nav & search</a>,
+<a href="javascript:PhyloWidget.changeSetting('menus','dock.xml;toolbar.xml;context.xml');">the works</a>
+</li>
+</ul>
+<p>
+So far, we have done all the work of configuring the UI components behind the scenes, to let the user (i.e. <em>you</em>) focus
+on the points being made in each vignette. As we get into PhyloWidget's more advanced features, however, we will need 
+to introduce a little bit of the underlying "guts" of the program.
+<p>
+The <a href="10.html">next vignette</a> focuses almost entirely on the details of how to get PhyloWidget running on your own 
+server. Here, however, we will focus just on one small piece of the picture: <em>customizing PhyloWidget's user interface</em>.
+</p>
+<h1>A couple of working examples</h1>
+<p>
+In order to provide you an idea of where this vignette is going, here are a few "pre-cooked" examples of using tree annotations
+to create custom web links:
+<ul>
+<script type="text/javascript">
+// Let's define the menu files that we'll be using in the examples.
+var movieMenu = "<menu type='PhyloContextMenu'>" +
+			'<item name="Node Edit" hint="e">' +
+			'<item name="Name" action="nodeEditName" hint="n"/>' +
+			'<item name="Annotations" action="nodeEditAnnotation" hint="a"/>' +
+			'</item>' +
+			"<item type='PhyloLinkItem' name='Google Search'	url='http://www.google.com/search?q=%s' hint='g'	icon='links/google.png'/>" +
+			"<item type='PhyloLinkItem' name='IMDB Link' 		url='http://www.imdb.com/title/%s/' 	hint='i'	icon='links/imdb.png'	annotation='imdb'/>" +
+			"</menu>";
+var movieTree = "((('Shaun of the Dead (2004)'[&&NHX:s=comedy:imdb=tt0365748],'Fight Club (1999)'[&&NHX:s=comedy:imdb=tt0137523])Dark,('There''s Something About Mary (1998)'[&&NHX:s=comedy],'Love Actually (2003)'[&&NHX:s=comedy:imdb=tt0314331],'Notting Hill (1999)'[&&NHX:s=comedy:imdb=tt0125439])Romantic)Comedy,('Con Air (1997)':2.0[&&NHX:s=action:imdb=tt0118880],'Live Free or Die Hard (2007)':2.0[&&NHX:s=action:imdb=tt0337978])Action);"
+var movieParams = {
+	menus:'dock.xml;toolbar.xml;'+movieMenu,
+	tree:movieTree,
+	showCladeLabels:'true'
+};
+
+var urlMenu = 	'<menu type="PhyloContextMenu" radius="35">' +
+				'<item name="Node Edit" hint="e">' +
+					'<item name="Name" action="nodeEditName" hint="n"/>' +
+					'<item name="Annotations" action="nodeEditAnnotation" hint="a"/>' +
+				'</item>' +
+				'<item type="PhyloLinkItem" name="Custom URL" url="%s" hint="u" annotation="url"/>' +
+				'<item type="PhyloLinkItem" name="Google Search" url="http://www.google.com/search?q=%s" icon="links/google.png" hint="g"/>' +
+				'</menu>';
+var urlTree="(dog:25.25[&&NHX:url=http://promo.warnerbros.com/web/sd_brand/index.jsp],(bear:6.875[&&NHX:url=http://members.aol.com/PaulEC2/yogi.html],raccoon:19.125[&&NHX:url=http://en.wikipedia.org/wiki/Rocky_Raccoon]):1.75,((seal:12.35[&&NHX:url=http://music.yahoo.com/ar-263877---Seal],sea_lion:11.65[&&NHX:url=http://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Sea_Lion_Pup.jpg/693px-Sea_Lion_Pup.jpg]):7.8125,(weasel:19.5625[&&NHX:url=http://www.bbc.co.uk/nature/wildfacts/factfiles/202.shtml],(cat:47.08333[&&NHX:url=http://www.felixthecat.com/],monkey:100.91667[&&NHX:url=http://www.bushorchimp.com/]):20.4375):1.5625):3.4375);"
+var treefamMenu = 	'<menu type="PhyloContextMenu" >\n' +
+					'  <item name="Node Edit" hint="e">\n' +
+						'    <item name="Name" action="nodeEditName" hint="n"/>\n' +
+						'    <item name="Annotations" action="nodeEditAnnotation" hint="a"/>\n' +
+					'  </item>\n' +
+					'  <item type="PhyloLinkItem" name="Google Search" url="http://www.google.com/search?q=%s" icon="links/google.png" hint="g"/>\n' +
+					'  <item type="PhyloLinkItem" name="TreeFam Link" url="http://www.treefam.org/cgi-bin/TFseq.pl?id=%s" hint="t" annotation="g"/>\n' +					
+					'</menu>\n';
+var treefamTree="(NEWSINFRUT00000161964_FUGRU:0.0118395[&&NHX:g=NEWSINFRUG00000152271:o=NEWSINFRUT00000161964.3],(((((((((ENSBTAT00000009766_BOVIN:0.028794[&&NHX:g=ENSBTAG00000007428:o=ENSBTAT00000009766.2],ENSCAFT00000020342_CANFA:0.031039[&&NHX:g=ENSCAFG00000012819:o=ENSCAFT00000020342.1]):0.002771,(((CDKL5_HUMAN:0.001129[&&NHX:g=ENSG00000008086:o=ENST00000379989.1],ENSPTRT00000040263_PANTR:0.001237[&&NHX:g=ENSPTRG00000021711:o=ENSPTRT00000040263.2]):0.0,ENSMMUT00000007138_MACMU:0.003388[&&NHX:g=ENSMMUG00000005063:o=ENSMMUT00000007138.2]):0.014524,(ENSRNOT00000005061_RAT:0.003389[&&NHX:g=ENSRNOG00000003742:o=ENSRNOT00000005061.4],Cdkl5_MOUSE:0.003509[&&NHX:g=ENSMUSG00000031292:o=ENSMUST00000087104.3]):0.025043):0.005683):0.059743,ENSMODT00000021762_MONDO:0.048876[&&NHX:g=ENSMODG00000017140:o=ENSMODT00000021762.2]):0.06052,ENSGALT00000026674_CHICK:0.058714[&&NHX:g=ENSGALG00000016529:o=ENSGALT00000026674.2]):0.062272,ENSXETT00000047159_XENTR:0.168601[&&NHX:g=ENSXETG00000021807:o=ENSXETT00000047159.2]):0.176352,((GSTENT00012107001_TETNG:0.011812[&&NHX:g=GSTENG00012107001:o=GSTENT00012107001.1],NEWSINFRUT00000149464_FUGRU:0.019675[&&NHX:g=NEWSINFRUG00000140837:o=NEWSINFRUT00000149464.3]):0.071841,(ENSGACT00000018511_GASAC:0.079403[&&NHX:g=ENSGACG00000013990:o=ENSGACT00000018511.1],ENSORLT00000020491_ORYLA:0.071795[&&NHX:g=ENSORLG00000016364:o=ENSORLT00000020491.1]):0.001541):0.123847):0.066719,ENSDART00000010026_BRARE:0.140371[&&NHX:g=ENSDARG00000015240:o=ENSDART00000010026.5]):0.161546,(ENSORLT00000004484_ORYLA:0.054332[&&NHX:g=ENSORLG00000003597:o=ENSORLT00000004484.1],ENSGACT00000019944_GASAC:0.053641[&&NHX:g=ENSGACG00000015093:o=ENSGACT00000019944.1]):0.011456):0.058169,GSTENT00018035001_TETNG:0.025587[&&NHX:g=GSTENG00018035001:o=GSTENT00018035001.1]):0.0118395)CDKL5[&&NHX:loglkspec=0.000000:loglk=-10313.245880:ratiocons=-11.512915];";
+
+</script>
+<li><a href="javascript:PhyloWidget.changeSettings(window.movieParams);">Movie Tree</a>
+<p>
+In this example, we created a simple tree of popular movies. Most of the movies are also annotated with a unique identifier from the <a href="www.imdb.com">IMDB</a>,
+and the context menu is set up to use that annotation to create a custom link to the IMDB. However, one of the menus does not have the IMDB annotation, and the context
+menu consequently disables the link. Can you find it? 
+</p>
+</li>
+<li><a href="javascript:PhyloWidget.changeSetting('menus','dock.xml;toolbar.xml;'+window.urlMenu);PhyloWidget.changeSetting('tree',window.urlTree);">Animal Tree</a>
+<p>
+This example is a bit closer to home: we have annotated a simple animal tree with a custom URL for each animal.
+</p>
+</li>
+</ul>
+<h1>An in-depth example: TreeFam links</h1>
+<p>
+Let's look in a little more detail at a "real-world" scenario of using annotation to create custom links. In this example,
+we will connect an annotated gene tree with links to the <a href="http://www.treefam.org/">Treefam database</a>.
+<p>
+The two steps in the process are:
+<ol style="list-style-type:roman;">
+<li>Annotate a tree with gene IDs</li>
+<li>Create a custom context menu to generate links from those annotations</li>
+</ol>
+<p>
+For the first step, we have collected an example tree from TreeFam which includes 
+annotations of the Ensembl gene ID for each node.
+<ul>
+<li>Click to load the 
+<a href="javascript:PhyloWidget.changeSetting('tree',window.treefamTree);PhyloWidget.changeSetting('useBranchLengths','true');">TreeFam tree</a></li>
+</ul>
+<p>
+If you edit the annotation on any of the leaf nodes, you'll notice that there are two annotations in the tree: 'g' for the gene ID, and 'o' for the ID of an orthologous
+gene. We will be using the 'g' annotation for creating our links.
+<p>
+The next step is to create the definition file for the context menu that we want to create. Here is what we will be using:
+</p>
+<textarea id="menuText" wrap="off" style="width:390px;height:130px;font-size:11px;"></textarea>
+<script type="text/javascript">
+document.getElementById('menuText').value = window.treefamMenu;
+</script>
+<p>
+The second to last line is the important one; that line of text defines the TreeFam link behavior. As you can see, the URL attribute contains
+the base URL for TreeFam's gene pages, and the <em>%s</em> string indicates where the annotation should be pasted into the URL. Now,
+let's load up this GUI and try it out:
+<ul><li>Click to  
+<a href="javascript:PhyloWidget.changeSetting('menus','dock.xml;toolbar.xml;'+window.treefamMenu);">Load it up!</a></li></ul>
+<p>
+Now, if you click on one of the leaf nodes, a menu should come up with the "TreeFam Link" option. Click it, and you will be redirected
+to a TreeFam page about your selected gene. That's it!
+</p>
+<h1>Tinkering around...</h1>
+At this point, you may want to work on creating your own GUI by changing the parameters in the textbox above. To apply the changes to the GUI, 
+just click the "Load it up!" link again.
+<p>
+For some more examples, you can also find all of PhyloWidget's default GUI components in the <a href="http://code.google.com/p/phylowidget/source/browse/trunk/PhyloWidget/data/menus/" target="_new">source code repository</a>.  
+Have fun!
+
+</p>
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="10.html"><img src='../img/pw-icon.png'/>Take the next step!</a>
+</li>
+</ul>
+</div>
+<div style="clear:both;"></div>
+<p>
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

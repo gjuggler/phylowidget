@@ -55,7 +55,7 @@ public class PhyloConfig
 	/*
 	 * Set the starting tree.
 	 */
-	public String tree = "PhyloWidget";
+	public String tree = DEFAULT_TREE;
 	/*
 	 * Set the starting search string.
 	 */
@@ -68,15 +68,32 @@ public class PhyloConfig
 	public String renderer = "Rectangular";
 
 	/*
-	 * Choose the preset XML menu file which PhyloWidget will load.
+	 * Choose the preset XML menu files which PhyloWidget will load.
 	 * 
-	 * Useful presets:
-	 *   - "full.xml" (default) a full set of editing, viewing, and output menus.
-	 *   - "dock-only.xml", a UI that only shows the pan and zoom tools.
-	 *   - "view.xml", a dock and toolbar with only viewing (no editing) controls.
-	 *   - "none.xml", Shows no menus at all.
+	 * You can load up multiple XML menu files by giving a semicolon-delimited list. See the default
+	 * value for an example of this.
+	 * 
+	 * You may also simply let this string be the XML data which you want to load. This is useful for
+	 * demonstration purposes, letting the user edit and change the menu structure in real-time.
+	 * 
+	 * The following menu files exist:
+	 *   - "context.xml" 			The context menu which appears when you click a node.
+	 *   - "dock.xml" 				The dock, which holds the arrow, pan, and zoom tools.
+	 *   - "toolbar.xml" 			The toolbar, which sits at the top of the screen and contains 
+	 *   							the menu items and search bar.
+	 *   - "none.xml" 				No menus at all.
+	 *   
+	 * Some useful variants:
+	 *   - "toolbar-onlysearch.xml" 	A toolbar with only the search command, nothing else.
+	 *   - "dock-onlynav.xml" 			A dock with only the pan and zoom settings, no arrow.
+	 *   - "context-linkout.xml" 		A context menu which lets you link out to other sites.
+	 *   								See the XML file for more information.
+	 *   - "dock-hidden.xml"			A hidden dock. Useful for providing the dock's functionality without
+	 *   								cluttering up the screen. Users use the keyboard shortcuts to switch
+	 *   								between tools.
+	 *   - "toolbar-hidden.xml"			Same idea as above, but with the toolbar.
 	 */
-	public String menuFile = "full.xml";
+	public String menus = "dock.xml;toolbar.xml;context.xml";
 
 	/*
 	 * Colors: You can modify the foreground and background colors which PhyloWidget uses.
@@ -89,52 +106,44 @@ public class PhyloConfig
 	public String branchColor = "(0,0,0)";
 
 	/*
-	 * Shapes -- usable values are:
+	 * Node shapes -- usable values are:
 	 *   - "square"
 	 *   - "circle"
-	 *   - "triangle"
 	 */
 	public String nodeShape = "circle";
-
-	/*
-	 * Should we color the branches based on the NHX bootstrap values (if they exist?)
-	 * If true, then branches with low bootstrap will be faded.
-	 */
-	public boolean colorBranchesWithBootstrap = true;
-	/*
-	 * Should we color duplicated nodes based on the NHX annotations (if they exist)? If true, then duplicated nodes will
-	 * show up red.
-	 */
-	public boolean colorNodesWithDuplications = true;
-
-	public boolean colorBySpecies = true;
 
 	/*
 	 * The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	 */
 	public float textRotation = 0f; 				// Text rotation, in degrees.
-	public float textSize = 1.0f; 					// Text scaling, where a value of 1.0 is normal size.
-	public float lineSize = 1f; 					// Line width. 0 is minimum, 1 is a pretty normal size.
+	public float textScaling = 0.5f; 					// Text scaling, where a value of 1.0 is normal size.
+	public float imageSize = 0.95f;					// Image scaling, where a value of 1.0 is normal size.
+	public float lineWidth = 1f; 					// Line width. 0 is minimum, 1 is a pretty normal size.
 													// 10 is as high as you'll want to go.
 	public float nodeSize = 2f; 					// Node size. Same range as line width: 0 to 10 is reasonable.
 	public float renderThreshold = 150f; 			// Maximum number of nodes to render per frame.
 	public float minTextSize = 10; 					// Minimum text size for leaf node labels.
 	public float branchLengthScaling = 1f; 			// How much to scale the branch lengths?
-
-	public boolean showBootstrapValues = false; 	// Should we show bootstrap values if they exist?
+	
+	
 	public boolean showCladeLabels = false; 		// Should we show labels of non-leaf nodes?
-
-	public boolean outputAllInnerNodes = false; 	// Kind of a strange one: if set to true, PhyloWidget will *always* output 
-													// the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
-	public boolean enforceUniqueLabels = false; 	// Enforce uniqueness of node labels.
-	public boolean stretchToFit = false;
+	public boolean stretchToFit = false;			// Stretches the tree to fit the width of the display.
 	public boolean useBranchLengths = false; 		// Should the renderer display the tree using the branch length information?
 	public boolean showAllLabels = false; 			// Should the renderer show all labels? This OVERRIDES the minTextSize setting,
 													// so that labels are shown no matter how small they must be displayed.
 	public boolean prioritizeDistantLabels = false; // This controls how PhyloWidget prioritizes the display of certain nodes above others.
 													// If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
 													// the root, instead of those that are closest (in terms of # of branches to the root).
-	public boolean useDoubleBuffering = true; 		// Don't really want to mess with this one too much -- the double buffering really helps!
+	public boolean useDoubleBuffering = true; 		// Probably don't want to mess with this one too much -- the double buffering really helps!
+	public boolean antialias = false;				// When set to true this slows down the rendering significantly, but looks much prettier!
+	public boolean outputAllInnerNodes = false; 	// Kind of a strange one: if set to true, PhyloWidget will *always* output 
+													// the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
+	public boolean enforceUniqueLabels = false; 	// Enforce uniqueness of node labels.
+	public boolean ignoreAnnotations = false;		// ANNOTATIONS: Set to true if you want to globally disable PhyloWidget's display and output of NHX annotations.
+	public boolean showBootstrapValues = true;	 	// ANNOTATIONS: Should we show NHX-annotated bootstrap values if they exist?
+	public boolean colorSpecies = true;				// ANNOTATIONS: Should we assign colors to different leaf nodes NHX-annotated with a given species or taxon?
+	public boolean colorDuplications = true;		// ANNOTATIONS: Same idea as the others, but for the node duplication coloring. 
+	public boolean colorBootstrap = true;			// ANNOTATIONS: ditto for bootstrap values.
 	
 	/*
 	 *
@@ -236,7 +245,7 @@ public class PhyloConfig
 
 	public void setSearch(String s)
 	{
-		search = s;
+		this.search = s;
 		PhyloWidget.ui.search();
 	}
 
@@ -289,15 +298,41 @@ public class PhyloConfig
 		}
 	}
 	
-	public void setMenuFile(String menuFile)
+	public void setMenus(String menus)
 	{
-		this.menuFile = menuFile;
-		PhyloWidget.ui.setMenus();
+		this.menus = menus;
+		new Thread("Menu Loader"){
+			@Override
+			public void run()
+			{
+				PhyloWidget.ui.setMenus();		
+			}
+		}.start();
 	}
 	
 	public void setShowAllLabels(boolean showAllLabels)
 	{
 		this.showAllLabels = showAllLabels;
 	}
+	
+	public void setPrioritizeDistantLabels(boolean prioritizeDistanceLabels)
+	{
+		this.prioritizeDistantLabels = prioritizeDistanceLabels;
+		PhyloWidget.ui.layout();
+	}
+	
+	public void destroy()
+	{
+		tree = null;
+	}
+	
+	public void setTextSize(float textSize)
+	{
+		this.textScaling = textSize;
+		PhyloWidget.ui.layout();
+	}
+	
+	
+	public final static String DEFAULT_TREE = "PhyloWidget;";
 	
 }

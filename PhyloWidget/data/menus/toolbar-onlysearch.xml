@@ -1,0 +1,3 @@
+<menu type="Toolbar" x="5" y="5">
+	<item type="org.phylowidget.ui.SearchBox" name="Search:" width="150" />
+</menu>

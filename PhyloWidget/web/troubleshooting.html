@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<title>PhyloWidget Step-by-Step</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="shortcut icon" href="img/pw.ico"/>
+<!-- <script src="../scripts/phylowidget.js"></script> -->
+<link rel="stylesheet" href="vignettes/style.css"/>
+</head>
+<style type="text/css">
+
+div.step {
+	padding:10px;
+	cursor:hand;
+	border:2px solid black;
+	width:75%;
+	margin:auto;
+	margin-bottom:10px;
+}
+
+div.step img{
+	border:none;
+	margin:10px;
+	float:right;
+}
+
+.heading {
+	font-size:16px;
+	font-weight:bold;
+}
+
+li p {
+	margin-left:30px;
+}
+</style>
+
+
+<body>
+
+<div id="content-wrapper" style="width:900px;">
+<a href="index.html">
+<img src="img/pw-logo.png" style="margin-bottom:10px;margin-top:10px;border:2px solid black;"/>
+</a>
+<div id="content" style="width:100%;">
+<!-- Content! -->
+<div style="width:886px;border: 2px solid black;padding:5px;">
+
+<h1 style="">Troubleshooting PhyloWidget</h1>
+<p>
+All software has its flaws, and PhyloWidget is no exception. If you're having trouble running PhyloWidget, this could be
+caused by a number of problems. Below is a checklist of potential issues
+and our recommended solutions; please let us know if what you're experiencing is not covered here!
+</p>
+<ul id="Troubleshooting Checklist">
+	<li>
+		<h1> General Problems</h1>
+		<ul>
+			<li><span class="heading">Browser crash / freeze-up</span></li>
+				<p>
+					With certain versions of Firefox, Java, and Windows XP or Vista, we have observed the browser crashing
+					entirely when PhyloWidget <em>or any other Java applet</em> is run. If this is happening to you, please visit <a href="http://www.java.com/">Java.com</a> and update your
+					version of Java.
+				</p>
+			<li>
+				<span class="heading">Sluggish / strange behavior</span>
+				<p>
+					The main point is this: <em>Most strange or sluggish behavior in PhyloWidget can be fixed by restarting your browser!!</em>
+				<p>
+					Usually refreshing the browser will not fix problems with sluggishness. The Java runtime environment stays loaded for the entire
+					time the browser is running, so the only way to give PhyloWidget a "fresh start" is to completely quit the browser, and then start it back up.
+				<p>
+					<em>To reiterate:</em> <span style="font-style:italic;">If you're having a problem with PhyloWidget suddenly acting strange, 90% of the time restarting the browser will solve it!</span>
+				</p>
+			</li>
+			
+			<li>
+				<span class="heading">OutOfMemory Error / Java heap space</span>
+				<p>
+					If you see either of these error message while using PhyloWidget, or the program appears to putter out when working with large trees or images,
+					then the operation you attempted may be using more memory than is allocated to Java applets by default.
+					</p><p>The simplest solution is to download the standalone version of PhyloWidget from the homepage and run the program as an application,
+					where more memory is allocated to the JVM. 
+					</p><p>Another option is to edit your computer-specific applet settings to allocate
+					more memory: see the relevant <a href="http://forum.java.sun.com/thread.jspa?threadID=523105&messageID=3033288">Java forum thread</a>, or
+					search Google for <a href="http://www.google.com/search?hl=en&q=java+applet+heap+space">java applet heap space</a>. One set of visual instructions
+					for Windows XP can be found <a href="http://www.duckware.com/pmvr/howtoincreaseappletmemory.html">here</a>.
+				</p>
+			</li>
+			
+			<li>
+				<span class="heading">Web links don't work</span>
+				<p>
+					On some browsers, especially Firefox, we have noticed PhyloWidget's "web link" popups getting blocked. If this is the case, configure
+					your browser's popup blocker to allow phylowidget.org to create popups.
+				</p>
+			</li>
+			<li>
+				<span class="heading">Error pop-ups</span>
+				<p>
+					Some users, especially on Linux systems, have reported seeing pop-up messages mentioning <code>Null Pointer Exceptions</code> when trying
+					to load PhyloWidget. If you see this, please <em>submit a bug report!</em>
+				</p>
+			</li>
+		</ul>
+	</li>
+	
+	<li>
+		<h1>Browser Compatibility Issues</h1>
+		<p>
+			The fact that PhyloWidget is happy to live within a browser is convenient for quick, easy access online. However, browser
+			support for Java is notoriously ill-formed, and despite our best efforts to maximize compatibility, some issues still remain.
+			We can offer some very general advice:
+		<p>
+		<em>If you are on a Mac,</em> we recommend using Safari to access PhyloWidget.
+		<p>
+		<em>If you are on a PC,</em> we recommend using Firefox to access PhyloWidget.
+		<p>
+		Here are some specific browser / OS issues that we have encountered:
+		<ul style="margin-left:40px;">
+			<li> <em>OS X / Firefox 2.0:</em> PhyloWidget's Toolbox components may be non-functional.
+			<p> <em>Solution:</em> use the Safari browser.</p>
+			</li>
+			<li> <em>OS X / Safari:</em> The screen flickers when the Node Info box is updated.
+			<p> <em>Solution:</em> Click "hide" to hide the toolbox and stop the updating.</p>
+			</li>
+			<li> <em>Linux / Firefox:</em> We have heard reports from users using the OpenJDK and/or IcedTea that PhyloWidget does not work
+			with their system. If this is the case for you, please <a href="index.html#contact">contact us</a> so we can track down and fix the problem.
+			<p> <em>Solution:</em> use the Sun JVM on Linux.</p>
+			</li>
+		</ul>
+		<p/>
+	</li>
+	<li>
+		<h1>Java Requirements</h1>
+		<p>
+			<em>PhyloWidget requires Java 1.5 or higher</em> (this is also known as Java 5.0). Most modern systems, including OS X and Windows XP, should have this installed;
+			if for some reason it appears that Java is not set up correctly on your system, simply visit <a href="http://www.java.com/">Java.com</a> to download the
+			latest version.
+		</p>
+	</li>
+</ul>
+</p>
+<h1>Found a bug?</h1>
+<p>
+If you've found a specific, well-defined problem that doesn't fall under the categories above, then you probably found
+a bug in PhyloWidget. Sorry&mdash;it happens! If you have a few minutes to spare and are feeling particularly helpful, 
+please do head over to our project site and <a href="http://code.google.com/p/phylowidget/issues/list">submit a bug report</a>. 
+
+</p>
+<ul class="boxlist" style="margin-top:30px;">
+<li>
+<a href="index.html"><img src='img/pw-icon.png'/>Click to return home</a>
+</ul>
+
+</div>
+<div style="clear:both;"></div>
+<p>
+
+</div>
+<!-- End Content! -->
+
+<div id="footer">
+Copyright © 2008 Gregory Jordan. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL v2</a> license.
+</div>
+
+<div id="footer2">
+Created with <a href="http://processing.org/">Processing</a>.
+</div>
+
+</div>
+</div>
+</body>
+</html>

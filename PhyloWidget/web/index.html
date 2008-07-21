@@ -10,12 +10,14 @@
 function showFull(myTree)
 {
   var s = "./full/index.html?tree='" + myTree + "'";
-  open(s);
+  //open(s);
+  window.location = s;
 }
 function showLite(myTree)
 {
   var s = "./lite/index.html?tree='" + myTree + "'";
-  open(s);
+  //open(s);
+  window.location = s;
 }
 /*
  *  This function causes the newick input box to be selected fully once.
@@ -36,7 +38,7 @@ function getObject(id){
 </script>
 
 </head>
-<body class="yui-skin-sam">
+<body>
 
 <div id="content-wrapper">
 
@@ -89,10 +91,20 @@ PhyloWidget is specifically designed for:
 </ul>
 <h2>Who wrote it?</h2>
 <p>
-The software was written by Gregory Jordan as a <a href="http://code.google.com/soc/">Google Summer of Code</a> project under the mentorship of Bill Piel.
-Many thanks are also due to Hilmar Lapp, secondary mentor on the project and lead organizer of the <a href="https://www.nescent.org/wg_phyloinformatics/Phyloinformatics_Summer_of_Code_2007">Phyloinformatics Summer of Code 2007</a>.
+The software was written by <a href="http://www.embl-ebi.ac.uk/Information/Staff/person_maintx.php?s_person_id=928">Gregory Jordan</a> as a <a href="http://code.google.com/soc/">Google Summer of Code</a> project under the mentorship of <a href="http://www.treebase.org/~piel/">Bill Piel</a>.
+Many thanks are also due to Hilmar Lapp, a secondary mentor on the project and the lead organizer of the <a href="https://www.nescent.org/wg_phyloinformatics/Phyloinformatics_Summer_of_Code_2007">Phyloinformatics Summer of Code 2007</a>.
 </p>
+<a name="citation"></a>
+<h2>Citations</h2>
+<p>
+If PhyloWidget has played an important role in your publication, please cite us!
+</p><p>
+PhyloWidget: web-based visualizations for the tree of life<br/>
+Gregory E. Jordan; William H. Piel<br/>
+Bioinformatics 2008 24: 1641-1642<br/>
+<a href="http://www.ncbi.nlm.nih.gov/pubmed/18487241">PubMed</a> | <a href="http://www.citeulike.org/user/gjuggler/article/2970082">CiteULike</a>
 <a name="contact"></a>
+</p>
 <h2>Contact Information</h2>
 <p>
 All queries regarding the general use, integration, or availability of PhyloWidget should be directed towards <a href="mailto:phylowidget@gmail.com">phylowidget@gmail.com</a>.
@@ -117,105 +129,33 @@ for (var i in images)
 
 <h1>Documentation</h1>
 <p style="padding:0px;">
-PhyloWidget was specifically designed to easily integrate with phylogenetic databases.
-Currently, PhyloWidget provides two main methods for integration:
-
-<h2>URL / Hyperlink API</h2>
-<p>
-The URL API provides a simple, easy way to link to PhyloWidget in an automated manner. In order to link to PhyloWidget, you should first choose whether to use
-the "Full" or "Lite" version of the applet. The full version has a stable base URL of <a href="http://www.phylowidget.org/full/index.html">http://www.phylowidget.org/full/index.html</a>,
-and the lite version can be found at <a href="http://www.phylowidget.org/lite/index.html">http://www.phylowidget.org/lite/index.html</a>.
-<p>
-Constructing the query is then a very simple process of adding configuration parameters to the URL string.
-A few examples will clearly illustrate the basic syntax:
-<p>
-<code>
-<a href="http://www.phylowidget.org/lite/index.html?tree='(a,(b,c));'" target="_blank">http://www.phylowidget.org/lite/index.html?tree='(a,(b,c));'</a>
-<br/>
-<a href="http://www.phylowidget.org/lite/index.html?tree='(a,(b,c));'&search='a'" target="_blank">http://www.phylowidget.org/lite/index.html?tree='(a,(b,c));'&search='a'</a>
-<br/>
-<a href="http://www.phylowidget.org/full/index.html?tree='(a,(b,c));'&search='a'&menuFile='none.xml'" target="_blank">http://www.phylowidget.org/full/index.html?tree='(a,(b,c));'&search='a'&menuFile='none.xml'</a>
-</code>
-<ul class='innerlist'>
+Extensive documentation for PhyloWidget has been produced in the form a series of short vignettes, collectively
+titled <em>PhyloWidget Step-by-Step</em>:
+<ul class="boxlist" style="text-align:center;">
 <li>
-Some words of caution: <b><em>be careful with your parentheses!</em></b> Javascript and HTML are notoriously sensitive to misuse of nested parentheses. This is often the source of the problem when
-PhyloWidget is apparently ignoring your URL queries.
-</li><p><li>
-Another useful tip: try using the <code style="font-weight:bold;">target="_blank"</code> attribute in your &lt;A&gt; elements to cause links to be opened in a new tab or wndow.
-</li></ul>
-<p>
-For information on the various configuration parameters that can be used, we recommend you go directly to the (reasonably well-documented) source code:
-<ul class='innerlist'>
-<li>
-<a href="http://code.google.com/p/phylowidget/source/browse/trunk/PhyloWidget/src/org/phylowidget/ui/PhyloConfig.java#18">Up-to-date documentation of the URL API</a>.
+<a href="vignettes/index.html"><img src='img/pw-icon.png'/>PhyloWidget Step-by-Step</a>
 </li>
-</ul> 
-
-<h2>Direct Integration</h2>
-<p>
-For more control and tighter integration, you may want to employ PhyloWidget <b><em>within</em> your own webpage or database</b> as opposed to merely linking to our hosted version.
-Again, PhyloWidget makes this process easier than you might expect!
-<p>
-For direct integration of PhyloWidget with your site, you have two options:
-<h3>Remote Hosting</h3>
-<p>
-Remote hosting means that the PhyloWidget applet and scripts are hosted <em>here</em>, on PhyloWidget.org, and your website uses the remotely hosted files to load PhyloWidget
-into your webpage. The advantage of remote hosting are many:
-<ul class='innerlist'>
-<li>Nothing to download or set up—just one line of Javascript and you're done</li>
-<li>Constant access to the latest version of PhyloWidget, without having to re-download or update your files</li>
-<li>Two words: <b>quick and easy!</b></li>
 </ul>
-<p>
-To get up and running with a remotely-hosted PhyloWidget applet, include the following within your HTML &lt;header&gt; element:
-<code>
-<xmp><script src="http://www.phylowidget.org/scripts/phylowidget.js"></script></xmp>
-</code>
-<p>
-This will cause the necessary Javascript functions to be loaded. The next step is to then choose between PhyloWidget Full or PhyloWidget Lite. This can be done
-by calling either of the two following Javascript functions from somewhere within your page:
-<code>
-<xmp>PhyloWidget.useFull();  // Use PhyloWidget Full
-PhyloWidget.useLite();  // Use PhyloWidget Lite</xmp>
-</code>
-<p>
-Next, you can choose the configuration parameters to use when loading PhyloWidget.
-The available options are the same as for the URL API, except that here you can additionally 
-specify the 'width' and 'height' of the applet:
-<code>
-<xmp>var params = {
-	width:500,
-	height:300,
-	tree:'(a,(b,c));',
-	search:'a'
-};</xmp>
-</code>
-Finally, you choose how you want PhyloWidget to be loaded on your page:
-<code>
-<xmp>PhyloWidget.loadWidget('my_div',params); // Loads PhyloWidget into the element with ID of 'my_div'
-PhyloWidget.loadWidgetPanel(params); // Loads PhyloWidget into a floating, draggable panel
-PhyloWidget.writeWidget(params); // Immediately inserts the applet code directly into the current document. 
-</xmp>
-</code>
-<p>
-To see an example of PhyloWidget's remote hosting in action (and to tinker with it yourself), visit the following testing page:
-<a href="index_remote.html">PhyloWidget Testbed</a>
-<h3>Local Hosting</h3>
-<p>
-Local hosting is very much the same as remote hosting. The main difference is that in this case, you keep the required PhyloWidget code hosted on your own site.
-Also, when hosting the applet locally, you don't need to call the <code>useFull()</code> or <code>useLite()</code> functions to choose between the two options;
-this choice is made when you decide which version of the .jars to include.
-<p>
-Access to the latest version of the PhyloWidget applets can be found in the Downloads section under "Entire project," or just click <a href="zip/phylowidget_project.zip">here (zip)</a>.
-Inside the .zip file, look under the <code>web</code> directory, and you should find two sub-directories, named <code>full</code> and <code>lite</code>. These directories exactly corresponded
-to the online versions of PhyloWidget Full and PhyloWidget Lite; in theory, you could drop either directory into your webserver and it will work without a problem.
-<p>
-If you're hosting PhyloWidget on your own site, we will assume that you know how to navigate the required Javascript and HTML issues, so we will leave the rest to you.
-<p>
-Of course, if you have <b>any problems at all,</b> please don't hesitate to <a href="#contact">contact us!</a>
+</p><p>
+In the spirit of <a href="http://en.wikipedia.org/wiki/Literate_programming">Literate Programming</a>, we've documented some of
+PhyloWidget's more interested configuration parameters within the code itself. All of the source code can be reached via the
+<a href="http://code.google.com/p/phylowidget/source/browse">Google code browser</a>, and here are some of the more interesting
+links:
+<ul>
+<li><a href="http://code.google.com/p/phylowidget/source/browse/trunk/PhyloWidget/src/org/phylowidget/ui/PhyloConfig.java#18">UI configuration parameters</a></li>
+<li><a href="
+<h1>Troubleshooting</h1>
+<p style="padding:0px;">
+A list of known problems and potential solutions can be found on the Troubleshooting Page:
+<ul class="boxlist" style="text-align:center;">
+<li>
+<a href="troubleshooting.html"><img src='img/pw-icon.png'/>Troubleshooting PhyloWidget</a>
+</li>
+</ul>
+ 
 <h1>Downloads</h1>
 <p style="padding:0px;">
-These downloads are automatically generated by the PhyloWidget build script. They should reflect the current version of PhyloWidget
+The following downloads are automatically generated by the PhyloWidget build script. They should reflect the current version of PhyloWidget
 that is available on the website. To access the absolute latest source code, please use the <a href="http://code.google.com/p/phylowidget/source/checkout">Google Code SVN repository</a>. 
 <p style="padding:0px;">
 You may choose between:

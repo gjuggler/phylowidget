@@ -121,15 +121,6 @@ This Ant task assumes a certain structure within your project directory:
 				<fileset dir="${lib}" />
 			</classpath>
 		</javac>
-		
-		<!-- If "Open Source", copy the .java files into ${build} as well. -->
-		<if><istrue value="${project.sourcezip}"/><then>
-			<copy todir="${build}" overwrite="true">
-				<fileset dir="${src}">
-					<include name="**/*.*" />
-				</fileset>
-			</copy>
-		</then></if>
 				
 		<!-- COPY THE "DATA" DIRECTORY TO THE BUILD FOLDER -->
 		<antcall target="copydata" inheritRefs="true"/>
@@ -158,13 +149,13 @@ This Ant task assumes a certain structure within your project directory:
 		<pathconvert pathsep=";" property="temp.pathlist" refid="appletlibsnonatives">
 			<chainedmapper><flattenmapper/><globmapper from="*" to="${lib}/*" /></chainedmapper>
 		</pathconvert>
-		<concat destfile="${applet}/${project.name}.bat">start javaw -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
+		<concat destfile="${applet}/${project.name}.bat">start javaw -Xms32m -Xmx512m -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
 		
 		<!-- Create the Unix .sh file. Requires COLON-separated jar names. -->
 		<pathconvert pathsep=":" property="temp.pathlist" refid="appletlibsnonatives">
 			<chainedmapper><flattenmapper/><globmapper from="*" to="${lib}/*" /></chainedmapper>
 		</pathconvert>
-		<concat destfile="${applet}/${project.name}.sh">java -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
+		<concat destfile="${applet}/${project.name}.sh">java -Xms32m -Xmx512m -cp ${temp.pathlist} processing.core.PApplet ${project.class}</concat>
 	
 		<!-- Zip up the necessary files in the applet directory into the standalone .zip -->
 		<zip destfile="${applet}/${internal.standalonezip}" includes="${lib}/*.jar,*.sh,*.bat" basedir="${applet}"/>
@@ -326,7 +317,7 @@ This Ant task assumes a certain structure within your project directory:
 			<condition property="internal.includeopengl" value="opengl/*.jar" else="NOTHING">
 				<istrue value="${project.opengl}" />
 			</condition>
-			<fileset id="libFiles" dir="" casesensitive="no">
+			<fileset id="libFiles" dir="" casesensitive="no" excludes="${ignoreJars}">
 				<include name="${lib}/*.jar" />
 				<include name="${lib}/${internal.includeopengl}" />
 			</fileset>
@@ -353,26 +344,7 @@ This Ant task assumes a certain structure within your project directory:
 				</manifest>
 			</jar>
 		
-			<!-- PRELOADER SNEAKINESS!!!
-					What we'll do here is create a list of all .java files larger than 10kb, and store
-					it in a property to be used by the HTML later on. -->
-			<fileset id="rootAbsolutePath" dir="${basedir}" includes="build.xml" />
-				<pathconvert pathsep="" property="internal.absPath" refid="rootAbsolutePath">
-				<globmapper from="*build.xml" to="*"/>
-			</pathconvert>
-			<fileset id="sourceFiles" dir="${src}" casesensitive="no">
-				<include name="**/*.java"/>
-				<size value="25" units="k" when="more"/>
-			</fileset>
-			<pathconvert pathsep="," property="internal.preloadList" refid="sourceFiles">
-				<chainedmapper>
-				<mapper type="package" from="${internal.absPath}src${file.separator}*.java" to="*"/>
-				</chainedmapper>
-			</pathconvert>
-			<!-- Done with the really sneaky stuff. -->
-			
-		
-			<fileset id="appletlibs" dir="${applet}" casesensitive="no">
+			<fileset id="appletlibs" dir="${applet}" casesensitive="no" excludes="${ignoreJars}">
 				<include name="${lib}/**/*.jar" />
 			</fileset>
 			<fileset id="appletlibsnonatives" dir="${applet}" casesensitive="no">
@@ -382,11 +354,6 @@ This Ant task assumes a certain structure within your project directory:
 			
 			<!-- Create a property that is a comma-separated list of the libFilesNoNatives fileset. -->
 			<pathconvert pathsep="," property="internal.allJars" refid="appletlibsnonatives">
-				<chainedmapper>
-					<flattenmapper/>
-				</chainedmapper>
-			</pathconvert>
-			<pathconvert pathsep=" " property="temp.spaceJarList" refid="appletlibs">
 				<chainedmapper>
 					<flattenmapper/>
 				</chainedmapper>
@@ -404,15 +371,6 @@ This Ant task assumes a certain structure within your project directory:
 					</pathconvert>
 			<property name="internal.quotedJars" value="'${temp.quotedJarList}'"/>
 			<property name="internal.quotedPrefixedJars" value="'${temp.quotedPrefixedJarList}'"/>
-			<property name="internal.spacedJars" value="'${temp.spaceJarList}'"/>
-			<!-- PRELOADER SNEAKINESS!!!
-				We need to modify the Manifest of the freeloader.jar file.
-				-->
-			<jar jarfile="${applet}/${lib}/freeloader.jar" update="true">
-				<manifest>
-					<attribute name="Class-Path" value="${temp.spaceJarList}" />
-				</manifest>
-			</jar>
 		</target>
 
 	<!-- TARGET: UPLOAD -->
@@ -456,7 +414,7 @@ This Ant task assumes a certain structure within your project directory:
 		<copy todir="web/zip" overwrite="true">
 			<fileset dir="${applet_full}/${zip}"/>
 		</copy>
-		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/**/*.*,build/**/*.*,applet/**/*.*" basedir="."/>
+		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/zip/phylowidget_project.zip,build/**/*.*,applet/**/*.*" basedir="."/>
 
 		<!-- UPLOAD THE WEB DIRECTORY TO THE SERVER -->
 		<!--

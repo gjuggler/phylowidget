@@ -1,0 +1,11 @@
+<menu name="context" type="PhyloContextMenu">
+	<item type="PhyloLinkItem" icon="links/google.png"  name="Google" url="http://www.google.com/search?q=%s" hint="g"/>
+	<item type="PhyloLinkItem" icon="links/ubio.png" name="uBio" url="http://www.ubio.org/browser/search.php?search_all=%s" hint="u"/>
+	<item type="PhyloLinkItem" icon="links/wikipedia.png" name="Wikipedia" url="http://wikipedia.org/wiki/Special:Search?search=%s" hint="k"/>
+	<item type="PhyloLinkItem" icon="links/tol.png" name="ToL Web" url="http://tolweb.org/tree?group=%s" hint="t"/>
+	<item type="PhyloLinkItem" icon="links/ebi.png" name="EBI" url="http://www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&amp;query=%s" hint="e"/>
+	<item name="Custom links...">
+		<item type="PhyloLinkItem" name="External URL" url="%s" annotation="URL" hint="u"/>
+		<item type="PhyloLinkItem" name="Ensembl Acc." url="http://www.ensembl.org/" annotation="G"
+	</item>
+</menu>

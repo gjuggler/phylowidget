@@ -117,6 +117,7 @@ public class Scroll extends Tool
 	public void enter()
 	{
 		super.enter();
+		controlPressed = false;
 		xTween.continueTo(0);
 		yTween.continueTo(0);
 		xTween.fforward();

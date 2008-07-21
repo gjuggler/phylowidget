@@ -13,6 +13,8 @@ public class SecurityChecker
 	public SecurityChecker(Applet a)
 	{
 		this.a = a;
+//		if (a.getCodeBase().toString().contains("full"))
+//			everythingTrue = true;
 		sm = System.getSecurityManager();
 		if (sm == null)
 			everythingTrue = true;

@@ -107,11 +107,13 @@ public class RandomTreeMutator implements Runnable
 			DefaultVertex vertex = (DefaultVertex)allNodes.get(i);
 			PhyloNode sis = (PhyloNode) tree.createAndAddVertex();
 			tree.setLabel(sis, taxonName);
+			
 			tree.addSisterNode(vertex, sis);
 
 			tree.setBranchLength(vertex, randomBranch());
 			tree.setBranchLength(sis, randomBranch());
 			tree.setBranchLength(tree.getParentOf(sis), randomBranch());
+//			sis.searchForImages();
 			mutations++;
 		}
 		//		PhyloWidget.trees.fforward(true, true);

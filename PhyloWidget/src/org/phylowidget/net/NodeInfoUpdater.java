@@ -33,11 +33,11 @@ public class NodeInfoUpdater extends DelayedAction
 	JSCaller caller = new JSCaller(UIGlobals.g.getP());
 	RootedTree tree;
 	PhyloNode node;
-	String jsCall;
+//	String jsCall;
 
 	public NodeInfoUpdater()
 	{
-		jsCall = "updateNode";
+//		jsCall = "updateNode";
 	}
 
 	public void triggerUpdate(RootedTree t, PhyloNode n)
@@ -50,10 +50,11 @@ public class NodeInfoUpdater extends DelayedAction
 	public void run()
 	{
 		String s = createNodeHTML();
-		String cmd = jsCall;
+//		String cmd = jsCall;
 		try {
 			Object o = caller.getMember("PhyloWidget");
-			caller.callWithObject(o, jsCall, s);
+			caller.callWithObject(o, "updateNode", s);
+//			caller.eval("PhyloWidget.updateNode(\""+s+"\");");
 		} catch (Exception e)
 		{
 //			e.printStackTrace();
@@ -92,7 +93,7 @@ public class NodeInfoUpdater extends DelayedAction
 		put("Branch Length",""+node.getBranchLength());
 		put("Enclosed Leaves", ""+node.getNumLeaves());
 		put("Depth to Root",node.getDepthToRoot()+"");
-		put("UBio Link",getUBioLink(node));
+//		put("UBio Link",getUBioLink(node));
 		
 		sb.append("<table>");
 		

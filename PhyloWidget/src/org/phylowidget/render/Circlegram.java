@@ -19,11 +19,9 @@
 package org.phylowidget.render;
 
 import java.awt.Graphics2D;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.andrewberman.ui.Color;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 
@@ -118,11 +116,15 @@ public class Circlegram extends BasicTreeRenderer
 		rowSize = rect.height / (circum * numRows);
 		colSize = rowSize;
 		//		rowSize = Math.min(5, rowSize);
+		
 		// textSize = Math.min(rect.width / gutterWidth * .5f, rowSize);
-		textSize = rowSize * circum;
+		rowSize = Math.min((float)rect.width / (float)biggestAspectRatio*.1f, rowSize);
+		textSize = rowSize * 2*circum * .75f;
+//		textSize = Math.min(textSize, rect.width / biggestStringWidth / 2);
+		
 		dotWidth = getNormalLineWidth() * PhyloWidget.cfg.nodeSize;
 		rad = dotWidth / 2;
-		float gutter = biggestStringWidth * textSize;
+		float gutter = biggestAspectRatio * textSize;
 		float minSide = Math.min(rect.width - 2 * gutter, rect.height - 2
 				* gutter);
 		scaleX = rowSize * numRows;
@@ -134,7 +136,7 @@ public class Circlegram extends BasicTreeRenderer
 		dx += rect.getX();
 		dy += rect.getY();
 		//		textSize *= PhyloWidget.ui.textSize;
-		textSize *= PhyloWidget.cfg.textSize;
+		textSize *= PhyloWidget.cfg.textScaling;
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 	}
 
@@ -168,7 +170,7 @@ public class Circlegram extends BasicTreeRenderer
 							* textSize;
 					r.loY = getY(n) - textHeight / 2;
 					r.hiY = getY(n) + textHeight / 2;
-					float textWidth = (float) n.unitTextWidth * textSize;
+					float textWidth = (float) n.aspectRatio * textSize;
 					r.hiX = getX(n) + dotWidth / 2 + textWidth;
 					setTheta(n, oldTheta);
 					updateNode(n);
@@ -204,7 +206,7 @@ public class Circlegram extends BasicTreeRenderer
 		float textHeight = textSize/2;
 		r.loY = getY(n) - textHeight;
 		r.hiY = getY(n) + textHeight;
-		float textWidth = (float) n.unitTextWidth * textSize;
+		float textWidth = (float) n.aspectRatio * textSize;
 		r.hiX = getX(n) + dw + textWidth;
 	}
 
@@ -304,13 +306,14 @@ public class Circlegram extends BasicTreeRenderer
 		canvas.pushMatrix();
 		canvas.translate(getX(n), getY(n));
 		canvas.rotate(PApplet.radians(textRotation));
-
-		float textSize = this.textSize * PhyloWidget.cfg.textSize;
 		
-		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
-		Graphics2D g2 = pgj.g2;
-		g2.setFont(font.font.deriveFont(textSize));
-		g2.setPaint(PhyloWidget.cfg.getTextColor());
+		
+//		float textSize = this.textSize * PhyloWidget.cfg.textScaling;
+//		
+//		PGraphicsJava2D pgj = (PGraphicsJava2D) canvas;
+//		Graphics2D g2 = pgj.g2;
+//		g2.setFont(font.font.deriveFont(textSize));
+//		g2.setPaint(PhyloWidget.cfg.getTextColor());
 		float drawX = 0;
 		float drawY = 0;
 		if (!alignRight)
@@ -319,17 +322,23 @@ public class Circlegram extends BasicTreeRenderer
 			drawY = 0;
 		} else
 		{
-			float width = (float) (n.unitTextWidth * textSize);
+			float width = (float) (n.aspectRatio * textSize);
 			drawX = -width - gapOffset;
 			drawY = 0;
 		}
+		
+		labelRenderer.renderNode(this, n, drawX, drawY, textSize);
+
+		canvas.popMatrix();
+		if (true==true)
+			return;
 
 		if (n.found)
 		{
 			canvas.stroke(0);
 			canvas.strokeWeight(textSize/10);
 			canvas.fill(style.foundBackground.getRGB());
-			canvas.rect(drawX, drawY-textSize/2, (float) (n.unitTextWidth*textSize), textSize);
+			canvas.rect(drawX, drawY-textSize/2, (float) (n.aspectRatio*textSize), textSize);
 //			g2.setPaint(style.foundBackground);
 //			g2.setStroke(style.stroke(.5f));
 //			g2.fillRect((int) drawX - 1, (int) (drawY -textSize / 2 - 1),
@@ -337,12 +346,17 @@ public class Circlegram extends BasicTreeRenderer
 //			g2.setPaint(Color.BLACK);
 //			g2.drawRect((int) drawX - 1, (int) (drawY -textSize / 2 - 1),
 //					(int) (n.unitTextWidth * textSize) + 1, (int) textSize + 1);
-			g2.setPaint(style.foundForeground);
+//			g2.setPaint(style.foundForeground);
 		} else
 		{
-			g2.setPaint(PhyloWidget.cfg.getTextColor());
+//			g2.setPaint(PhyloWidget.cfg.getTextColor());
 		}
-		g2.drawString(n.getLabel(), drawX, drawY + dFont);
+//		g2.drawString(n.getLabel(), drawX, drawY + dFont);
+		if (alignRight)
+			canvas.textAlign(canvas.RIGHT,canvas.BASELINE);
+		else
+			canvas.textAlign(canvas.LEFT, canvas.BASELINE);
+		canvas.text(n.getLabel(), gapOffset, 0 + dFont);
 
 		canvas.popMatrix();
 

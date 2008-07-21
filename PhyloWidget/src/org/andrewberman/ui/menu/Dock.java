@@ -341,7 +341,7 @@ public class Dock extends Menu
 			menu.canvas.fill(menu.canvas.color(c.getRed(), c.getGreen(), c
 					.getBlue(), alpha));
 			// menu.canvas.fill(0,alpha);
-			menu.canvas.textFont(UIGlobals.g.font());
+			menu.canvas.textFont(UIGlobals.g.getPFont());
 			menu.canvas.textSize(fontSize);
 			menu.canvas.text(i.getLabel(), tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);

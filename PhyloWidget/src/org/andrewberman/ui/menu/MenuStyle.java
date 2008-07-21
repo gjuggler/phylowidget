@@ -21,12 +21,14 @@ public class MenuStyle extends Style
 		defaults.set("c.background", new Color(245, 245, 255));
 		defaults.set("c.foreground", new Color(0,0,0));
 		
-		defaults.set("c.disabled", new Color(245, 245, 255).darker(10));
+		defaults.set("c.foregroundDisabled", new Color(0,0,0).brighter(100));
+		
+		defaults.set("c.disabled", new Color(245, 245, 255).darker(30));
 		defaults.set("c.gradientLo", new Color(245, 245, 255));
 		defaults.set("c.gradientHi", new Color(190, 210, 245));
 
 		defaults.set("f.fontSize", 11f);
-		defaults.set("font", UIGlobals.g.font());
+		defaults.set("font", UIGlobals.g.getPFont());
 		defaults.set("c.font", new Color(0, 0, 0));
 
 		defaults.set("f.padY", 3.5f);

@@ -267,7 +267,8 @@ public abstract class Menu extends MenuItem implements UIObject
 	@Override
 	public void dispose()
 	{
-		UIGlobals.g.event().remove(this);
+		if (UIGlobals.g != null && UIGlobals.g.event() != null)
+			UIGlobals.g.event().remove(this);
 		super.dispose();
 	}
 	

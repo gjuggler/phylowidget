@@ -119,7 +119,7 @@ public class MethodAndFieldSetter
 		}
 	}
 	
-	private static void setField(Object o, String field, String param)
+	public static void setField(Object o, String field, String param)
 			throws Exception
 	{
 		Field f = o.getClass().getField(field);

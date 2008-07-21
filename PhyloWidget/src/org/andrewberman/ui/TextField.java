@@ -256,6 +256,13 @@ public class TextField extends AbstractUIObject implements Malleable
 		}
 	}
 
+	public void dispose()
+	{
+		UIGlobals.g.event().remove(this);
+		blinker.stop();
+		blinker = null;
+	}
+	
 	protected void doTheDrawing()
 	{
 		Color bgFill = style.getC("c.backgroundFill");
@@ -672,8 +679,9 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public void replaceText(String replacement)
 	{
-	selectAll();
-	insert(replacement, 0);
+		selectAll();
+		deleteSelection();
+		insert(replacement, 0);
 	}
 	
 	public String getText(int lo,int hi)

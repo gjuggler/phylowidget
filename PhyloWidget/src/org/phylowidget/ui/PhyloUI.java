@@ -18,17 +18,26 @@
  */
 package org.phylowidget.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.awt.Label;
 import java.awt.TextArea;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import javax.swing.SwingUtilities;
 
 import org.andrewberman.ui.EventManager;
 import org.andrewberman.ui.FocusManager;
@@ -49,6 +58,7 @@ import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.DefaultVertex;
 import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeClipboard;
 import org.phylowidget.tree.TreeIO;
@@ -63,7 +73,7 @@ public class PhyloUI implements Runnable
 	public FocusManager focus;
 	public EventManager event;
 	public ShortcutManager keys;
-	public TreeClipboard clipboard = TreeClipboard.instance();
+	public TreeClipboard clipboard;
 
 	public NearestNodeFinder nearest;
 	public NodeTraverser traverser;
@@ -92,6 +102,8 @@ public class PhyloUI implements Runnable
 		text = new PhyloTextField(p);
 		nodeUpdater = new NodeInfoUpdater();
 
+		clipboard = new TreeClipboard(p);
+
 		thread = new Thread(this);
 		thread.start();
 	}
@@ -100,18 +112,26 @@ public class PhyloUI implements Runnable
 
 	public void run()
 	{
+		checkPermissions();
+		
 		/*
 		 * Then, load properties from the applet.
 		 */
+		try {
 		loadFromApplet(p);
+		} catch (Exception e)
+		{
+			// Do nothing. Continue on...
+		}
 
-		setMenus();
-
-		checkToolbarPermissions();
-		thread = null;
+		/*
+		 * If the menus were specified in the applet params, we shouldn't load them again.
+		 */
+		if (menus == null)
+			setMenus();
 	}
 
-	public void setMenus()
+	void disposeMenus()
 	{
 		/*
 		 * Menu file should be loaded first.
@@ -123,15 +143,81 @@ public class PhyloUI implements Runnable
 				i.dispose();
 			}
 		}
-		String menuFile = "menus/" + PhyloWidget.cfg.menuFile;
-		menus = MenuIO
-				.loadFromXML(p, menuFile, PhyloWidget.ui, PhyloWidget.cfg);
-
-		configureMenus(menus);
 	}
 
-	public void loadFromApplet(PApplet p)
+	public synchronized void setMenus()
 	{
+		disposeMenus();
+		String[] menuFiles = PhyloWidget.cfg.menus.split(";");
+		ArrayList<MenuItem> allMenus = new ArrayList<MenuItem>();
+		for (String menuFile : menuFiles)
+		{
+			if (menuFile.trim().length() == 0)
+				continue;
+			PhyloMenuIO io = new PhyloMenuIO();
+			Reader r = null;
+			InputStream in = p.openStream("menus/" + menuFile);
+			//			InputStream in = getClass().getResourceAsStream("data/menus/"+menuFile);
+			//			ClassLoader cl = getClass().getClassLoader();
+			//			InputStream in = cl.getResourceAsStream("data/menus/" + menuFile);
+			/*
+			 * If "in" is still null, then let's try looking for the file NOT in the menus directory.
+			 */
+			if (in == null)
+			{
+				//				in = p.openStream(menuFile);
+				in = p.openStream(menuFile);
+			}
+			//			String fileS = streamToString(in);
+			//			System.out.println("Done!");
+			//			System.out.println(fileS);
+			/*
+			 * If "in" is STILL null, then let's try just loading the string itself.
+			 */
+			if (in == null)
+			{
+				r = new StringReader(menuFile);
+			} else
+			{
+				r = new InputStreamReader(new BufferedInputStream(in));
+				//				r = new StringReader(fileS);
+			}
+			ArrayList<MenuItem> theseMenus = io.loadFromXML(r, p,
+					PhyloWidget.ui, PhyloWidget.cfg);
+			configureMenus(theseMenus);
+			allMenus.addAll(theseMenus);
+		}
+		this.menus = allMenus;
+	}
+
+	String streamToString(InputStream in)
+	{
+		int c = 0;
+		InputStreamReader r = new InputStreamReader(in);
+		StringBuffer sb = new StringBuffer();
+		try
+		{
+			while ((c = r.read()) != -1)
+			{
+				sb.append((char) c);
+			}
+			return sb.toString();
+		} catch (Exception e)
+		{
+			return "";
+		}
+	}
+
+	public void loadFromApplet(PApplet p) throws Exception
+	{
+		/*
+		 * Let's first load the URL query parameters.
+		 */
+		System.out.println(p.getDocumentBase());
+		
+		/*
+		 * The Javascript-defined parameters should take precedence, so now we'll load those up:
+		 */
 		HashMap<String, String> map = new HashMap<String, String>();
 		Field[] fields = PhyloConfig.class.getDeclaredFields();
 		for (Field f : fields)
@@ -169,6 +255,12 @@ public class PhyloUI implements Runnable
 			if (menu.getClass() == Toolbar.class)
 			{
 				toolbar = (Toolbar) menu;
+				MenuItem item = toolbar.get("Search:");
+				if (item != null)
+				{
+					search = (SearchBox) item;
+					search.setText(PhyloWidget.cfg.search);
+				}	
 			}
 
 			if (menu.getClass() == ToolDock.class)
@@ -178,31 +270,33 @@ public class PhyloUI implements Runnable
 		}
 	}
 
-	void checkToolbarPermissions()
+	void checkPermissions()
 	{
-		// Create a SecurityChecker object.
 		SecurityChecker sc = new SecurityChecker(UIGlobals.g.getP());
-
-		if (toolbar != null)
-		{
-			MenuItem s = toolbar.get("Search:");
-			if (s != null)
-			{
-				search = (SearchBox) s;
-				search.setText(PhyloWidget.cfg.search);
-			}
-			s = toolbar.get("From File...");
-			if (s != null)
-				s.setEnabled(sc.canReadFiles());
-			s = toolbar.get("Save Tree...");
-			if (s != null)
-				s.setEnabled(sc.canWriteFiles());
-			s = toolbar.get("Export Image");
-			if (s != null)
-				s.setEnabled(sc.canWriteFiles());
-		}
+		canWriteFiles = sc.canWriteFiles();
+		canReadFiles = sc.canReadFiles();
+		canAccessInternet = sc.canAccessInternet();
 	}
 
+	/**
+	 * Some utility methods and fields for UI items dependent on security permissions.
+	 */
+	boolean canWriteFiles;
+	boolean canReadFiles;
+	boolean canAccessInternet;
+	public boolean canWriteFiles()
+	{
+		return canWriteFiles;
+	}
+	public boolean canReadFiles()
+	{
+		return canReadFiles;
+	}
+	public boolean canAccessInternet()
+	{
+		return canAccessInternet;
+	}
+	
 	public void updateNodeInfo(RootedTree t, PhyloNode n)
 	{
 		nodeUpdater.triggerUpdate(t, n);
@@ -227,23 +321,31 @@ public class PhyloUI implements Runnable
 		updateJS();
 	}
 
-	public DefaultVertex curNode()
+	public PhyloNode getCurNode()
 	{
-		return curRange().node;
+		if (curRange() == null)
+			return null;
+		else
+			return curRange().node;
 	}
 
 	public void search()
 	{
-		String s = PhyloWidget.cfg.search;
-		PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
-		//		if (search != null)
-		//			search.setText(s);
-		if (tree != null)
-			tree.search(s);
+		if (search != null)
+		{
+			search.setText(PhyloWidget.cfg.search);
+		} else
+		{
+			PhyloTree t = (PhyloTree) getCurTree();
+			if (t != null)
+				t.search(PhyloWidget.cfg.search);
+		}
 	}
 
 	public NodeRange curRange()
 	{
+		if (context == null)
+			return null;
 		return context.curNodeRange;
 	}
 
@@ -257,26 +359,43 @@ public class PhyloUI implements Runnable
 		text.startEditing(curRange(), PhyloTextField.LABEL);
 	}
 
+	AnnotationEditorDialog annotation;
+
+	public void nodeEditAnnotation()
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+
+			public void run()
+			{
+				if (annotation == null)
+					annotation = new AnnotationEditorDialog(getFrame(), p);
+				annotation.setNode(getCurNode());
+				annotation.setVisible(true);
+			}
+		});
+	}
+
 	public void nodeReroot()
 	{
 		NodeRange r = curRange();
 		synchronized (r.render.getTree())
 		{
-			r.render.getTree().reroot(curNode());
+			r.render.getTree().reroot(getCurNode());
 		}
 	}
 
 	public void nodeSwitchChildren()
 	{
 		NodeRange r = curRange();
-		r.render.getTree().flipChildren(curNode());
+		r.render.getTree().flipChildren(getCurNode());
 		r.render.layoutTrigger();
 	}
 
 	public void nodeFlipSubtree()
 	{
 		NodeRange r = curRange();
-		r.render.getTree().reverseSubtree(curNode());
+		r.render.getTree().reverseSubtree(getCurNode());
 		getCurTree().modPlus();
 		r.render.layoutTrigger();
 	}
@@ -286,14 +405,14 @@ public class PhyloUI implements Runnable
 		NodeRange r = curRange();
 		RootedTree tree = r.render.getTree();
 		PhyloNode sis = (PhyloNode) tree.createAndAddVertex();
-		tree.addSisterNode(curNode(), sis);
+		tree.addSisterNode(getCurNode(), sis);
 	}
 
 	public void nodeAddChild()
 	{
 		NodeRange r = curRange();
 		RootedTree tree = r.render.getTree();
-		tree.addChildNode(curNode());
+		tree.addChildNode(getCurNode());
 	}
 
 	public void nodeCut()
@@ -370,7 +489,7 @@ public class PhyloUI implements Runnable
 		RootedTree g = r.render.getTree();
 		synchronized (g)
 		{
-			g.deleteNode(curNode());
+			g.deleteNode(getCurNode());
 		}
 	}
 
@@ -380,7 +499,7 @@ public class PhyloUI implements Runnable
 		RootedTree g = r.render.getTree();
 		synchronized (g)
 		{
-			g.deleteSubtree(curNode());
+			g.deleteSubtree(getCurNode());
 		}
 	}
 
@@ -403,7 +522,7 @@ public class PhyloUI implements Runnable
 		PhyloWidget.trees.circleRender();
 	}
 
-	public void viewZoomToFull()
+	public void zoomToFull()
 	{
 		//		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
 		TreeManager.camera.fillScreen(.8f);
@@ -417,9 +536,8 @@ public class PhyloUI implements Runnable
 	{
 		synchronized (PhyloWidget.trees.getTree())
 		{
-			System.out.println("Hey!");
 			PhyloWidget.trees.setTree(TreeIO.parseNewickString(new PhyloTree(),
-					"PhyloWidget"));
+					PhyloConfig.DEFAULT_TREE));
 		}
 		layout();
 	}
@@ -488,9 +606,38 @@ public class PhyloUI implements Runnable
 		PhyloWidget.trees.stopMutatingTree();
 	}
 
+	public void nodeLoadImage()
+	{
+		new Thread()
+		{
+			public void run()
+			{
+				getCurNode().loadImage();
+			}
+		}.start();
+	}
+	
+	public void treeLoadImages()
+	{
+		new Thread()
+		{
+			public void run()
+			{
+				RootedTree tree = getCurTree();
+				ArrayList<PhyloNode> leaves = new ArrayList<PhyloNode>();
+				tree.getAll(tree.getRoot(), leaves, null);
+				for (PhyloNode n : leaves)
+				{
+					n.loadImage();
+				}
+			}
+		}.start();
+	}
+
 	public void treeSave()
 	{
-		final File f = p.outputFile("Save tree as...");
+		final File f = p
+				.outputFile("Choose your destination file. Tree will be in Newick / NHX format.");
 		if (f == null)
 			return;
 		setMessage("Saving tree...");
@@ -499,6 +646,8 @@ public class PhyloUI implements Runnable
 			public void run()
 			{
 				p.noLoop();
+				File dir = f.getParentFile();
+				TreeIO.outputTreeImages(PhyloWidget.trees.getTree(), dir);
 				String s = TreeIO.createNewickString(PhyloWidget.trees
 						.getTree(), false);
 				try
@@ -573,6 +722,14 @@ public class PhyloUI implements Runnable
 
 		InputDialog d = new InputDialog(parentFrame,
 				"Enter your Newick-formatted tree here.");
+		SecurityChecker sc = new SecurityChecker(p);
+		if (sc.canAccessInternet())
+		{
+			Label l = new Label(
+					"A URL pointing to a Newick/NHX/Nexus file is also valid input.");
+			d.add(l, BorderLayout.NORTH);
+		}
+
 		d.setVisible(true);
 
 		final String treeString = d.text.getText();
@@ -602,5 +759,42 @@ public class PhyloUI implements Runnable
 	public void fileOutput()
 	{
 		ImageExportDialog ied = new ImageExportDialog(getFrame());
+	}
+
+	/*
+	 * Conditional calls.
+	 */
+	public boolean hasClipboard()
+	{
+		return !clipboard.isEmpty();
+	}
+
+	public boolean isNotRoot()
+	{
+		if (getCurTree() == null || getCurNode() == null)
+			return true;
+		return (getCurTree().getRoot() != getCurNode());
+	}
+
+	public void destroy()
+	{
+		if (annotation != null)
+			annotation.dispose();
+		annotation = null;
+		disposeMenus();
+		p = null;
+		focus = null;
+		event = null;
+		keys = null;
+		clipboard = null;
+		nearest = null;
+		traverser = null;
+		text = null;
+		context = null;
+		toolbar = null;
+		search = null;
+		nodeUpdater = null;
+		thread = null;
+		menus = null;
 	}
 }

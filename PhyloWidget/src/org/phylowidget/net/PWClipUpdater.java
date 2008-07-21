@@ -33,7 +33,8 @@ public class PWClipUpdater extends DelayedAction
 	
 	public void run()
 	{
-		TreeClipboard.instance().setClipFromJS(parseMe);
+		PhyloWidget.ui.clipboard.setClipFromJS(parseMe);
+		System.out.println(parseMe.length());
 		PhyloWidget.setMessage("Clipboard text set to: "+parseMe);
 	}
 }

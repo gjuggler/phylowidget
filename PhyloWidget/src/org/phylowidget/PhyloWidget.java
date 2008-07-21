@@ -21,6 +21,7 @@ package org.phylowidget;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Properties;
@@ -36,11 +37,11 @@ import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloConfig;
-import org.phylowidget.ui.PhyloTree;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
@@ -66,7 +67,7 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
-	boolean DEBUG =  true;
+	boolean DEBUG = false;
 
 	public PhyloWidget()
 	{
@@ -78,7 +79,7 @@ public class PhyloWidget extends PApplet
 		if (frame != null)
 		{
 			/*
-			 * We're in standalone / application mode. Freedom!!
+			 * We're in standalone / application mode. FREEDOM!!!
 			 */
 			frame.setResizable(true);
 			frame.setTitle("PhyloWidget Standalone");
@@ -97,22 +98,22 @@ public class PhyloWidget extends PApplet
 			size(getWidth(), getHeight());
 		}
 		frameRate(FRAMERATE);
-		
+
 		PGraphicsJava2D pg = (PGraphicsJava2D) g;
 
 		new UIGlobals(this);
-		trees = new TreeManager(this);
 		cfg = new PhyloConfig();
 		ui = new PhyloUI(this);
+		trees = new TreeManager(this);
 
 		treeUpdater = new PWTreeUpdater();
 		clipUpdater = new PWClipUpdater();
 
 		ui.setup();
 		trees.setup();
-		
 	}
-DoubleBuffer dbr;
+
+	DoubleBuffer dbr;
 
 	@Override
 	public void resize(int width, int height)
@@ -122,9 +123,9 @@ DoubleBuffer dbr;
 		if (pg == null)
 			return;
 		UIUtils.setRenderingHints(pg);
-		
+
 	}
-	
+
 	public synchronized void draw()
 	{
 		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
@@ -146,21 +147,31 @@ DoubleBuffer dbr;
 		super.stop();
 	}
 
-	public void destroy()
+	public synchronized void destroy()
 	{
+//		System.out.println("Destroying.");
+		noLoop();
 		super.destroy();
-		UIGlobals.g.destroyGlobals();
+		if (trees != null)
+			trees.destroy();
 		trees = null;
+		cfg.destroy();
 		cfg = null;
+		ui.destroy();
 		ui = null;
 		treeUpdater = null;
 		clipUpdater = null;
+		/*
+		 * Call these guys last, because other classes (such as the UI classes) may depend on the globals still being here
+		 * in order to destroy themselves.
+		 */
+		UIGlobals.g.destroyGlobals();
 	}
-	
+
 	void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getFont());
+		textFont(UIGlobals.g.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40,
@@ -173,11 +184,11 @@ DoubleBuffer dbr;
 
 	void drawNumLeaves()
 	{
-		int leaves = trees.getRenderer().getTree().getNumEnclosedLeaves(
+		int leaves = trees.getTree().getNumEnclosedLeaves(
 				trees.getRenderer().getTree().getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getFont());
+		textFont(UIGlobals.g.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(nleaves, width - 100, height - 10);
@@ -186,7 +197,7 @@ DoubleBuffer dbr;
 	void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getFont());
+		textFont(UIGlobals.g.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(messageString, 5, height - 10);
@@ -242,12 +253,24 @@ DoubleBuffer dbr;
 		clipUpdater.triggerUpdate(s);
 		return true;
 	}
-	
+
 	public void changeSetting(String setting, String newValue)
 	{
 		HashMap m = new HashMap();
 		m.put(setting, newValue);
 		MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, m);
+	}
+
+	public void callMethod(String method)
+	{
+		try
+		{
+			Method m = PhyloUI.class.getMethod(method);
+			m.invoke(ui);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -261,10 +284,9 @@ DoubleBuffer dbr;
 	@Override
 	public String getAppletInfo()
 	{
-		return "PhyloWidget!";
+		return "PhyloWidget";
 	}
 
-	
 	static public void main(String args[])
 	{
 		PApplet.main(new String[] { "org.phylowidget.PhyloWidget" });

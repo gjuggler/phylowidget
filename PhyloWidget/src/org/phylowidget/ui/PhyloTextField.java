@@ -26,8 +26,9 @@ import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.TreeRenderer;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
@@ -108,7 +109,7 @@ public class PhyloTextField extends TextField
 	{
 		synchronized (this)
 		{
-			TreeRenderer r = curRange.render;
+			BasicTreeRenderer r = curRange.render;
 			switch (editMode)
 			{
 				case (LABEL):

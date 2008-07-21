@@ -47,6 +47,8 @@ public class RenderStyleSet
 	public float foundStroke;
 	public Color foundBackground;
 	public Color foundForeground;
+	
+	public float labelSpacing;
 
 	private static RenderStyleSet defaultSet;
 
@@ -82,6 +84,8 @@ public class RenderStyleSet
 		foundStroke = 3f;
 		foundForeground = new Color(255,255,255);
 		foundBackground = foundColor;
+		
+		labelSpacing = 0.1f;
 	}
 
 	public Stroke stroke(float weight)

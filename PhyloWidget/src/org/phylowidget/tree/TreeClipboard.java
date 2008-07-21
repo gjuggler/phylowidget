@@ -23,12 +23,11 @@ import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSClipUpdater;
-import org.phylowidget.ui.PhyloTree;
+
+import processing.core.PApplet;
 
 public class TreeClipboard
 {
-	public static TreeClipboard instance;
-
 	String newickString;
 	//	String fullNewickString;
 	RootedTree origTree;
@@ -36,21 +35,17 @@ public class TreeClipboard
 
 	JSClipUpdater updater;
 
-	private TreeClipboard()
+	public TreeClipboard(PApplet p)
 	{
-		updater = new JSClipUpdater();
+		updater = new JSClipUpdater(p);
 	}
 
-	public static TreeClipboard instance()
+	public boolean isEmpty()
 	{
-		if (instance == null)
-			instance = new TreeClipboard();
-		return instance;
-	}
-
-	boolean isEmpty()
-	{
-		return (newickString.length() == 0);
+		if (newickString == null)
+			return true;
+		else
+			return (newickString.length() == 0);
 	}
 
 	public void clearClipboard()

@@ -1,6 +1,5 @@
 package org.phylowidget.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
@@ -8,23 +7,18 @@ import java.awt.Choice;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Label;
 import java.awt.Panel;
-import java.awt.TextArea;
-import java.awt.TextComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
@@ -46,7 +40,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 
 	private Choice fileFormat;
 
-	private Choice imageSize;
+	private JComboBox imageSize;
 
 	private CheckboxGroup viewportOptions;
 
@@ -97,13 +91,15 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		String small = w+"x"+h;
 		String med = w*2+"x"+h*2;
 		String large = 4*w+"x"+4*h;
-		imageSize = new Choice();
-		imageSize.add(small);
-		imageSize.add(med);
-		imageSize.add(large);
+		String[] sizes = new String[]{small,med,large};
+		long mem = Runtime.getRuntime().freeMemory();
+		System.out.println(mem);
+//		String huge = 8*w+"x"+8*h;
+		imageSize = new JComboBox(sizes);
+		imageSize.setEditable(true);
 		
 		Component boundariesL2 = sectionLabel("<html><b>1) Output Format");
-		Component boundariesInfo2 = infoLabel("<html>Note: the size parameter is ignored for PDF output, which is resolution-independent.");
+		Component boundariesInfo2 = infoLabel("<html><b>Note:</b> the size parameter is ignored for PDF output, which is resolution independent.<br><b>Hint:</b>You can specify arbitrary output dimensions by entering a width and height in the same format as the defaults. But be warned: large sizes may cause memory errors and program crashes!");
 		
 		c.fill = c.BOTH;
 		c.anchor = c.NORTH;
@@ -113,6 +109,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		p.add(boundariesL2,c);
 		
 		c.gridy++;
+		c.anchor = c.NORTH;
 		p.add(boundariesInfo2,c);
 		
 		c.gridy++;
@@ -127,8 +124,8 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		vo_entireTree = new Checkbox("Render the entire tree",true,viewportOptions);
 		vo_currentView = new Checkbox("Use the current viewport",false,viewportOptions);
 		Component boundariesL = sectionLabel("<html><b>2) Rendering Boundaries");
-		Component boundariesInfo = infoLabel("<html><b>Note:</b> if you choose the entire tree, sometimes PhyloWidget will cut off parts" +
-				" of the node labels. If that is the case, just zoom out further and render the current view.");
+		Component boundariesInfo = infoLabel("<html><b>Note:</b> if you choose the \"entire tree\" option, PhyloWidget may cut off parts" +
+				" of the tree, especially with a large minimum text size or branch scaling. If that is the case, just manually zoom to the entire tree and choose the \"current viewport\" option.");
 		
 		c.fill = c.BOTH;
 		c.gridx = 1;				// CHANGE THIS TO RE-ORDER THE COLUMNS
@@ -137,6 +134,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		p.add(boundariesL,c);
 		
 		c.gridy++;
+		c.anchor = c.NORTH;
 		p.add(boundariesInfo,c);
 		
 		c.gridy++;
@@ -161,6 +159,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		p.add(boundariesL1,c);
 		
 		c.gridy++;
+		c.anchor = c.NORTH;
 		p.add(boundariesInfo1,c);
 		
 		c.gridy++;
@@ -189,7 +188,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		 * Add the panel, and we're done!
 		 */
 		add(p);
-		setSize(700,320);
+		setSize(780,425);
 		pack();
 		validate();
 		setVisible(true);
@@ -198,8 +197,9 @@ public class ImageExportDialog extends Dialog implements ActionListener
 	Component infoLabel(String s)
 	{
 		JLabel j = new JLabel(s);
-		j.setFont(f.deriveFont(10));
-		j.setPreferredSize(new Dimension(200,100));
+		j.setAlignmentY(JLabel.TOP_ALIGNMENT);
+		j.setFont(f.deriveFont(Font.PLAIN,11));
+		j.setPreferredSize(new Dimension(200,150));
 		return j;
 	}
 	
@@ -220,7 +220,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		boolean showAll = (nodeLabelOptions.getSelectedCheckbox() == node_showAll);
 		
 		String format = fileFormat.getSelectedItem();
-		String size = imageSize.getSelectedItem();
+		String size = imageSize.getSelectedItem().toString();
 		String[] s = size.split("x");
 		int w = Integer.parseInt(s[0]);
 		int h = Integer.parseInt(s[1]);

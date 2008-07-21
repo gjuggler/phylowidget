@@ -74,8 +74,12 @@ public final class Color extends java.awt.Color
 	
 	public static Color parseColor(String s)
 	{
-		s = s.replaceAll("[\"\'()]", "");
+		s = s.replaceAll("[\"\'()]", ""); // Get rid of pesky parantheses and quotation marks
 		String[] rgb = s.split(",");
+		if (rgb.length == 1) // If we don't see comma separation, interpret it as a single grayscale color. 
+		{
+			return new Color(Integer.parseInt(rgb[0]),Integer.parseInt(rgb[0]),Integer.parseInt(rgb[0]));
+		}
 		Color color = new Color(Integer.parseInt(rgb[0]),
 				Integer.parseInt(rgb[1]), Integer
 						.parseInt(rgb[2]));

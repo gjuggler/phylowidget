@@ -19,6 +19,8 @@
 package org.andrewberman.ui.menu;
 
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -32,8 +34,16 @@ import processing.xml.XMLElement;
 
 public class MenuIO
 {
-	static PApplet app;
-	static Object[] actionObjects;
+	PApplet app;
+	Object[] actionObjects;
+
+	ClassLoader cl;
+
+	public MenuIO()
+	{
+		String menuPackage = Menu.class.getPackage().getName();
+		menuPackages.add(menuPackage);
+	}
 
 	/**
 	 * 
@@ -44,13 +54,14 @@ public class MenuIO
 	 *            for this menu set.
 	 * @return
 	 */
-	public static ArrayList<MenuItem> loadFromXML(PApplet p, String filename,
+	public ArrayList<MenuItem> loadFromXML(Reader in, PApplet p,
 			Object... actionHolders)
 	{
 		ArrayList<MenuItem> menus = new ArrayList<MenuItem>();
 		app = p;
+		cl = p.getClass().getClassLoader();
 		actionObjects = actionHolders;
-		InputStream in = p.openStream(filename);
+		//		InputStream in = p.openStream(filename);
 		/*
 		 * Search depth-first through the XML tree, adding the highest-level
 		 * menu elements we can find.
@@ -85,8 +96,9 @@ public class MenuIO
 		return menus;
 	}
 
-	public static MenuItem processElement(MenuItem parent, XMLElement el)
+	public MenuItem processElement(MenuItem parent, XMLElement el)
 	{
+//		long t = System.currentTimeMillis();
 		MenuItem newItem = null;
 		String elName = el.getName();
 		String itemName = el.getStringAttribute("name");
@@ -154,6 +166,10 @@ public class MenuIO
 			setAttribute(newItem, attr, el.getStringAttribute(attr));
 		}
 		
+//		long curT = System.currentTimeMillis();
+//		long dt = curT - t;
+//		System.out.println((dt / 1000f) + "   " + itemName);
+
 		/*
 		 * Now, keep the recursion going: go through the current XMLElement's
 		 * children and call menuElement() on each one.
@@ -167,8 +183,10 @@ public class MenuIO
 		return newItem;
 	}
 
-	static final String menuPackage = Menu.class.getPackage().getName();
-	static final String toolPackage = Tool.class.getPackage().getName();
+	protected ArrayList<String> menuPackages = new ArrayList<String>();
+
+	//	protected static final String menuPackage = Menu.class.getPackage().getName();
+	//	protected static final String toolPackage = Tool.class.getPackage().getName();
 
 	/**
 	 * Uses Reflection to create a Menu of the given class type.
@@ -180,29 +198,61 @@ public class MenuIO
 	 *            org.something.SomethingElse).
 	 * @return
 	 */
-	private static MenuItem createMenu(String classType)
+	protected MenuItem createMenu(String classType)
 	{
 		/*
 		 * We need to give the complete package name of the desired Class, so we
 		 * need to assume that the desired class resides within the base Menu
 		 * package.
 		 */
-		String fullClass = menuPackage + "." + classType;
 		Class c = null;
-		try
+		if (classType.indexOf('.') != -1)
 		{
-			c = Class.forName(fullClass);
-		} catch (java.lang.ClassNotFoundException e1)
-		{
-
 			try
 			{
-				c = Class.forName(classType);
-			} catch (java.lang.ClassNotFoundException e2)
+				c = cl.loadClass(classType);
+			} catch (ClassNotFoundException e)
 			{
-				e2.printStackTrace();
+				//				e.printStackTrace();
 			}
 		}
+
+		if (c == null)
+		{
+			for (String menuPackage : menuPackages)
+			{
+//				System.out.println("H");
+				String fullClass = menuPackage + "." + classType;
+				try
+				{
+					c = cl.loadClass(fullClass);
+					//				c = Class.forName(fullClass);
+					//				System.out.println(fullClass);
+					//				c = getClass().getClassLoader().loadClass(fullClass);
+					//				c = Class.forName(fullClass, false,app.getClass().getClas);
+					//				app.getClass().getClassLoader().loadClass(fullClass);
+					break;
+				} catch (Exception e)
+				{
+					//				e.printStackTrace();
+					continue;
+				}
+			}
+		}
+//
+//		/*
+//		 * If using the predefined package names didn't work, try loading as if we were given the full class name.
+//		 */
+//		if (c == null)
+//		{
+//			try
+//			{
+//				c = Class.forName(classType);
+//			} catch (java.lang.ClassNotFoundException e2)
+//			{
+//				e2.printStackTrace();
+//			}
+//		}
 
 		Constructor construct;
 		try
@@ -212,7 +262,7 @@ public class MenuIO
 			return (Menu) newMenu;
 		} catch (Exception e)
 		{
-			//			 e.printStackTrace();
+			//			e.printStackTrace();
 			try
 			{
 				construct = c.getConstructor(new Class[] {});
@@ -237,15 +287,18 @@ public class MenuIO
 	 * @param attr
 	 * @param value
 	 */
-	private static void setAttribute(MenuItem item, String attr, String value)
+	protected void setAttribute(MenuItem item, String attr, String value)
 	{
 		String attrL = attr.toLowerCase();
 		String upperFirst = "set" + upperFirst(attr);
 
 		/*
-		 * Special case: setAction(String s, Object o)
+		 * Special case: setAction(Object o, String s)
+		 * setProperty(Object o, String s)
+		 * setMethodCall(Object o, String s)
+		 * setCondition(Object o, String s)
 		 */
-		if (attrL.matches("(action|property|methodcall)"))
+		if (attrL.matches("(action|property|methodcall|condition)"))
 		{
 			setWithObjectRef(item, attr, value);
 			return;
@@ -283,17 +336,17 @@ public class MenuIO
 					/*
 					 * Dammit, nothing worked. Let's let loose on the console.
 					 */
-					e.printStackTrace();
-					e2.printStackTrace();
-					e3.printStackTrace();
+					//					e.printStackTrace();
+					//					e2.printStackTrace();
+					//					e3.printStackTrace();
 				}
 			}
 		}
 	}
 
-	private static void setWithObjectRef(MenuItem item, String attr, String value)
+	protected void setWithObjectRef(MenuItem item, String attr, String value)
 	{
-		String methodS = "set"+upperFirst(attr);
+		String methodS = "set" + upperFirst(attr);
 		Class c = item.getClass();
 		try
 		{
@@ -306,17 +359,17 @@ public class MenuIO
 					break;
 				} catch (Exception e)
 				{
-//					e.printStackTrace();
+					//					e.printStackTrace();
 					continue;
 				}
 			}
 		} catch (Exception e)
 		{
-//			e.printStackTrace();
+			//			e.printStackTrace();
 		}
 	}
 
-	private static String upperFirst(String s)
+	protected static String upperFirst(String s)
 	{
 		String upper = s.substring(0, 1).toUpperCase();
 		String orig = s.substring(1, s.length());

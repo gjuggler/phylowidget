@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.ui;
+package org.phylowidget.tree;
 
 import java.util.ArrayList;
 
@@ -30,9 +30,6 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSTreeUpdater;
-import org.phylowidget.tree.CachedRootedTree;
-import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.RootedTree;
 
 public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 {
@@ -42,6 +39,8 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 
 	private SearchIndex<PhyloNode> index = new SearchIndex<PhyloNode>();
 
+	private PhyloFilter filter = new PhyloFilter();
+	
 	private boolean synchronizedWithJS;
 
 	public PhyloTree()
@@ -75,13 +74,11 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 	public void flipChildren(PhyloNode parent)
 	{
 		super.flipChildren(parent);
-		updateNewick();
 	}
 
 	public void reverseSubtree(PhyloNode vertex)
 	{
 		super.reverseSubtree(vertex);
-		updateNewick();
 	}
 
 	@Override
@@ -92,11 +89,20 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		index.add((PhyloNode) vertex);
 	}
 
+	@Override
+	public boolean shouldKeep(PhyloNode v)
+	{
+		if (filter != null)
+		{
+			return filter.shouldKeep(v);
+		} else
+			return true;
+	}
+	
 	public void updateNewick()
 	{
 		if (isValid())
 		{
-			PhyloWidget.ui.search();
 			if (synchronizedWithJS)
 				updater.triggerUpdate(this);
 		}
@@ -158,41 +164,48 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		return b;
 	}
 
-	class NewickUpdater implements GraphListener
+	@Override
+	public void modPlus()
 	{
-		public void edgeAdded(GraphEdgeChangeEvent e)
-		{
-			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
-			{
-				updateNewick();
-			}
-		}
-
-		public void edgeRemoved(GraphEdgeChangeEvent e)
-		{
-			if (e.getType() == GraphEdgeChangeEvent.EDGE_REMOVED)
-			{
-				updateNewick();
-			}
-		}
-
-		public void vertexAdded(GraphVertexChangeEvent e)
-		{
-			if (e.getType() == GraphVertexChangeEvent.VERTEX_ADDED)
-			{
-				updateNewick();
-			}
-		}
-
-		public void vertexRemoved(GraphVertexChangeEvent e)
-		{
-			if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
-			{
-				//				index.remove((PhyloNode) e.getVertex());
-				updateNewick();
-			}
-		}
+		super.modPlus();
+		updateNewick();
 	}
+	
+//	class NewickUpdater implements GraphListener
+//	{
+//		public void edgeAdded(GraphEdgeChangeEvent e)
+//		{
+//			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
+//			{
+//				updateNewick();
+//			}
+//		}
+//
+//		public void edgeRemoved(GraphEdgeChangeEvent e)
+//		{
+//			if (e.getType() == GraphEdgeChangeEvent.EDGE_REMOVED)
+//			{
+//				updateNewick();
+//			}
+//		}
+//
+//		public void vertexAdded(GraphVertexChangeEvent e)
+//		{
+//			if (e.getType() == GraphVertexChangeEvent.VERTEX_ADDED)
+//			{
+//				updateNewick();
+//			}
+//		}
+//
+//		public void vertexRemoved(GraphVertexChangeEvent e)
+//		{
+//			if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
+//			{
+//				//				index.remove((PhyloNode) e.getVertex());
+//				updateNewick();
+//			}
+//		}
+//	}
 
 	public boolean isSynchronizedWithJS()
 	{
@@ -205,7 +218,7 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		if (synchronizedWithJS && updater == null)
 		{
 			updater = new JSTreeUpdater();
-			addGraphListener(new NewickUpdater());
+//			addGraphListener(new NewickUpdater());
 		}
 	}
 

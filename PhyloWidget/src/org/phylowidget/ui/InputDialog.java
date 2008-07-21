@@ -7,15 +7,22 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextArea;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-public class InputDialog extends Dialog implements WindowListener
+import org.phylowidget.PhyloWidget;
+import org.phylowidget.net.SecurityChecker;
+import org.phylowidget.tree.TreeIO;
+
+public class InputDialog extends Dialog implements WindowListener, KeyListener
 {
 	TextArea text;
 	Button ok;
@@ -23,16 +30,24 @@ public class InputDialog extends Dialog implements WindowListener
 
 	public InputDialog(Frame owner, String title)
 	{
-		super(owner, title,true);
+		super(owner, title, true);
+
+		addKeyListener(this);
+		
 		setLayout(new BorderLayout());
 
 		text = new TextArea("", 5, 40, TextArea.SCROLLBARS_BOTH);
-		add(text,BorderLayout.CENTER);
+		String s = TreeIO.createNewickString(
+			PhyloWidget.trees.getTree(), false);
+		text.setText(s);
+		add(
+			text, BorderLayout.CENTER);
+		text.addKeyListener(this);
 
 		Panel p = new Panel(new FlowLayout(FlowLayout.RIGHT));
-		
-		Dimension buttonSize = new Dimension(50,30);
-		
+
+		Dimension buttonSize = new Dimension(50, 30);
+
 		ok = new Button("Ok");
 		ok.setPreferredSize(buttonSize);
 		ok.addActionListener(new ActionListener()
@@ -56,15 +71,18 @@ public class InputDialog extends Dialog implements WindowListener
 			}
 
 		});
+
+		p.add(new Label("Esc to cancel, Ctrl-Enter to commit.     "));
 		p.add(ok);
 		p.add(cancel);
-		
-		add(p,BorderLayout.SOUTH);
-		
-		setSize(500, 200);
-		
+		add(
+			p, BorderLayout.SOUTH);
+
+		setSize(
+			500, 200);
+
 		validate();
-		
+
 		addWindowListener(this);
 	}
 
@@ -94,6 +112,29 @@ public class InputDialog extends Dialog implements WindowListener
 	}
 
 	public void windowOpened(WindowEvent e)
+	{
+	}
+
+	public void keyPressed(KeyEvent e)
+	{
+		//		System.out.println(e);
+		int code = e.getKeyChar();
+		if (code == KeyEvent.VK_ENTER)
+		{
+			if (e.isControlDown())
+				dispose();
+		} else if (code == KeyEvent.VK_ESCAPE)
+		{
+			text.setText("");
+			dispose();
+		}
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+	}
+
+	public void keyTyped(KeyEvent e)
 	{
 	}
 

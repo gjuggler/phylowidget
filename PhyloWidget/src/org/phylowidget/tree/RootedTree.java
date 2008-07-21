@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.WeakHashMap;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DirectedNeighborIndex;
@@ -64,9 +65,13 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 * This Hashtable keeps track of the sort orders for each node, if they have
 	 * been set to be different from the defalut sort order.
 	 */
-	public HashMap<V, Object> sorting;
+	public WeakHashMap<V, Integer> sorting;
+
 	public static final Integer REVERSE = new Integer(1);
 	public static final Integer FORWARD = new Integer(-1);
+	public static final int REVERSE_I = 1;
+	public static final int FORWARD_I = -1;
+
 	public Comparator<V> sorter = new EnclosedLeavesComparator(-1);
 	public Comparator<V> leafSorter = new DepthToRootComparator(1);
 
@@ -106,7 +111,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		setOptions();
 		if (useNeighborIndex)
 			createNeighborIndex();
-		sorting = new HashMap<V, Object>();
+		sorting = new WeakHashMap<V, Integer>();
 		isValid = true;
 	}
 
@@ -293,10 +298,14 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	{
 		// Sort the resulting list.
 		Collections.sort(l, sorter);
-		if (sorting.containsKey(vertex))
+//		if (sorting.containsKey(vertex))
+//		{
+//			if (sorting.get(vertex) == REVERSE)
+//				Collections.reverse(l);
+//		}
+		if (getSorting(vertex) == REVERSE_I)
 		{
-			if (sorting.get(vertex) == REVERSE)
-				Collections.reverse(l);
+			Collections.reverse(l);
 		}
 		return l;
 	}
@@ -441,7 +450,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 		return max;
 	}
-	
+
 	/**
 	 * A method for retrieving all nodes below a given vertex in a tree. The
 	 * "leaves" and "nodes" List objects (which must have already been created
@@ -460,6 +469,8 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		while (!s.isEmpty())
 		{
 			V v = s.pop();
+			if (!shouldKeep(v))
+				continue;
 			if (isLeaf(v))
 			{
 				if (leaves != null)
@@ -477,6 +488,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
+	public boolean shouldKeep(V vertex)
+	{
+		return true;
+	}
+	
 	private List<V> getEnclosedVertices(V vertex)
 	{
 		ArrayList<V> l = new ArrayList<V>();
@@ -604,17 +620,19 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	{
 		V curParent = getParentOf(v);
 		V newParent = createAndAddVertex();
-		// Object newSister = createAndAddVertex("");
 		if (v == getRoot())
 		{
 			setRoot(newParent);
+			addEdge(newParent,newSister);
+			addEdge(newParent,v);
 		} else
 		{
 			insertNodeBetween(curParent, v, newParent);
 		}
 		addEdge(newParent, newSister);
-		addEdge(newParent, v);
-		// return newSister;
+		double ew = getEdgeWeight(getEdge(newParent,v));
+		setEdgeWeight(getEdge(newParent,newSister), ew);
+		modPlus();
 	}
 
 	/**
@@ -643,11 +661,12 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	{
 		E e = getEdge(a, b);
 		double weight = getEdgeWeight(e);
-		E newToB = addEdge(insertMe, b);
-		setEdgeWeight(newToB, weight / 2);
 		E aToNew = addEdge(a, insertMe); //
 		setEdgeWeight(aToNew, weight / 2);
+		E newToB = addEdge(insertMe, b);
+		setEdgeWeight(newToB, weight / 2);
 		removeEdge(a, b);
+		modPlus();
 	}
 
 	/**
@@ -789,19 +808,13 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	public void flipChildren(V parent)
 	{
 		// If we've already stored a sorting value, then toggle it.
-		if (sorting.containsKey(parent))
-		{
-			Object o = sorting.get(parent);
-			if (o == REVERSE)
-				sorting.put(parent, FORWARD);
-			else
-				sorting.put(parent, REVERSE);
-		} else
-		{
-			// Otherwise, this vertex is already implicitly forward sorted.
-			// Switch it to reverse.
-			sorting.put(parent, REVERSE);
-		}
+		Integer o = sorting.get(parent);
+		if (o == null)
+			setSorting(parent,REVERSE);
+		else if (o == REVERSE)
+			setSorting(parent,FORWARD);
+		else
+			setSorting(parent,REVERSE);
 	}
 
 	/**
@@ -817,12 +830,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		{
 			flipChildren(node);
 		}
-		//		BreadthFirstIterator<V,E> bfi = new BreadthFirstIterator<V,E>(this, vertex);
-		//		while (bfi.hasNext())
-		//		{
-		//			V o = bfi.next();
-		//			flipChildren(o);
-		//		}
+		modPlus();
 	}
 
 	/**
@@ -839,10 +847,28 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		while (bfi.hasNext())
 		{
 			V o = bfi.next();
-			sorting.put(o, FORWARD);
+			setSorting(o, FORWARD);
 		}
 	}
 
+	int fInt = FORWARD.intValue();
+	public void setSorting(V vertex, int direction)
+	{
+		if (fInt == direction)
+			sorting.put(vertex, FORWARD);
+		else
+			sorting.put(vertex,REVERSE);
+	}
+
+	public int getSorting(V v)
+	{
+		Integer i = sorting.get(v);
+		if (i == null || i == FORWARD)
+			return FORWARD_I;
+		else
+			return REVERSE_I;
+	}
+	
 	/**
 	 * Removes "elbowed" nodes from the subtree below the given vertex. An
 	 * elbowed node is defined as a node that has a single parent and a single
@@ -906,13 +932,14 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 */
 	public void alignLeaves()
 	{
-		DepthFirstIterator<V,E>it = new DepthFirstIterator<V, E>(this,getRoot());
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this,
+				getRoot());
 		LinkedList<V> list = new LinkedList<V>();
 		while (it.hasNext())
 		{
 			list.add(it.next());
 		}
-		
+
 		while (!list.isEmpty())
 		{
 			V v = list.removeLast();
@@ -925,45 +952,53 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 			{
 				double below = getMaxHeightToLeaf(child);
 				double above = getBranchLength(child);
-				totalHeight += below+above;
+				totalHeight += below + above;
 			}
 			totalHeight /= children.size();
-			
+
 			for (V child : children)
 			{
 				double below = getMaxHeightToLeaf(child);
 				double above = getBranchLength(child);
-				if (below+above == 0)
+				if (below + above == 0)
 					below = 0.00001;
-				double childScale = totalHeight / (below+above);
-				scaleSubtree(child,childScale);
+				double childScale = totalHeight / (below + above);
+				scaleSubtree(child, childScale);
 			}
 		}
 	}
 
-	void scaleSubtree(V v,double scale)
+	void scaleSubtree(V v, double scale)
 	{
-		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this,v);
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);
 		while (it.hasNext())
 		{
 			V curV = it.next();
-			setBranchLength(curV,getBranchLength(curV)*scale);
+			setBranchLength(curV, getBranchLength(curV) * scale);
 		}
+	}
+
+	public void dispose()
+	{
+		sorting = null;
+		neighbors = null;
+		root = null;
+		uniqueLabeler = null;
 	}
 	
 	class VertexAndDouble
 	{
 		public V v;
 		public double d;
-		
-		public VertexAndDouble(V v,double d)
+
+		public VertexAndDouble(V v, double d)
 		{
 			this.v = v;
 			this.d = d;
 		}
 	}
-	
-	class DepthToRootComparator implements Comparator
+
+	public class DepthToRootComparator implements Comparator
 	{
 		int dir;
 
@@ -997,7 +1032,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
-	class EnclosedLeavesComparator implements Comparator
+	public class EnclosedLeavesComparator implements Comparator
 	{
 		int dir;
 

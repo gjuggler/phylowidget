@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.phylowidget.render;
 
@@ -43,7 +43,7 @@ public class DiagonalCladogram extends BasicTreeRenderer
 	{
 		return 1;
 	}
-	
+
 	protected float branchPositions(PhyloNode n)
 	{
 		if (tree.isLeaf(n))
@@ -52,7 +52,16 @@ public class DiagonalCladogram extends BasicTreeRenderer
 		/*
 		 * Do the children first.
 		 */
-		List children = tree.getChildrenOf(n);
+		List<PhyloNode> children = tree.getChildrenOf(n);
+		for (int i=0; i < children.size(); i++)
+		{
+			PhyloNode child = children.get(i);
+			if (!tree.shouldKeep(child))
+			{
+				children.remove(i);
+				i--;
+			}
+		}
 		for (int i = 0; i < children.size(); i++)
 		{
 			PhyloNode child = (PhyloNode) children.get(i);
@@ -70,8 +79,10 @@ public class DiagonalCladogram extends BasicTreeRenderer
 		 * would be in the y axis if it were at that higher depth.
 		 */
 		float stepSize = 1f / (leaves.length);
-		float loLeaves = tree.getNumEnclosedLeaves(loChild);
-		float hiLeaves = tree.getNumEnclosedLeaves(hiChild);
+//		float loLeaves = tree.getNumEnclosedLeaves(loChild);
+//		float hiLeaves = tree.getNumEnclosedLeaves(hiChild);
+		float loLeaves = getRealEnclosedLeaves(loChild);
+		float hiLeaves = getRealEnclosedLeaves(hiChild);
 		float mLeaves = Math.max(loLeaves, hiLeaves);
 		// System.out.println("md:" + mLeaves);
 		float loChildNewY = loChild.getTargetY() + (mLeaves - loLeaves)
@@ -84,10 +95,26 @@ public class DiagonalCladogram extends BasicTreeRenderer
 		return 0;
 	}
 
+	protected int getRealEnclosedLeaves(PhyloNode n)
+	{
+		int numEnclosed = tree.getNumEnclosedLeaves(n);
+		int orig = numEnclosed;
+		List<PhyloNode> children = tree.getChildrenOf(n);
+		for (PhyloNode child : children)
+		{
+			if (!tree.shouldKeep(child))
+				numEnclosed -= tree.getNumEnclosedLeaves(child);
+		}
+		System.out.println(n.getLabel()+"  "+numEnclosed);
+		return numEnclosed;
+	}
+	
 	protected float nodeXPosition(PhyloNode n)
 	{
-		float a = xPosForNumEnclosedLeaves(tree.getNumEnclosedLeaves(n));
-		float b = (float) (tree.getBranchLength(n) / tree.getMaxHeightToLeaf(tree.getRoot()));
+		System.out.println(n.getLabel()+"  "+getRealEnclosedLeaves(n));
+		float a = xPosForNumEnclosedLeaves(getRealEnclosedLeaves(n));
+//		float b = (float) (tree.getBranchLength(n) / tree
+//				.getMaxHeightToLeaf(tree.getRoot()));
 		return a;
 	}
 
@@ -122,6 +149,6 @@ public class DiagonalCladogram extends BasicTreeRenderer
 		float retreatY = getNodeRadius() / 2f;
 		if (getY(p) > getY(n))
 			retreatY = -retreatY;
-		canvas.line(getX(n), getY(n),  getX(p) + retreatX, getY(p) + retreatY);
+		canvas.line(getX(n), getY(n), getX(p) + retreatX, getY(p) + retreatY);
 	}
 }

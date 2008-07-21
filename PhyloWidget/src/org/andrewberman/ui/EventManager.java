@@ -164,21 +164,25 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		model.setLocation(screen.x, screen.y);
 		UIUtils.screenToModel(model);
 
-		/*
-		 * First, send the event directly to the focused object.
-		 */
-		if (UIGlobals.g.focus().getFocusedObject() instanceof UIObject)
+		if (UIGlobals.g.focus() != null)
 		{
-			UIObject o = (UIObject) UIGlobals.g.focus().getFocusedObject();
-			// System.out.println(UIGlobals.g.focus().getFocusedObject());
-			o.mouseEvent(e, screen, model);
+
+			/*
+			 * First, send the event directly to the focused object.
+			 */
+			if (UIGlobals.g.focus().getFocusedObject() instanceof UIObject)
+			{
+				UIObject o = (UIObject) UIGlobals.g.focus().getFocusedObject();
+				// System.out.println(UIGlobals.g.focus().getFocusedObject());
+				o.mouseEvent(e, screen, model);
+			}
+			/*
+			 * If the FocusManager is in a modal state, return without further
+			 * dispatching.
+			 */
+			if (UIGlobals.g.focus().isModal())
+				return;
 		}
-		/*
-		 * If the FocusManager is in a modal state, return without further
-		 * dispatching.
-		 */
-		if (UIGlobals.g.focus().isModal())
-			return;
 		/*
 		 * Now, send it to the ToolManager.
 		 */

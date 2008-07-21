@@ -20,8 +20,8 @@ package org.phylowidget.net;
 
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.TreeIO;
-import org.phylowidget.ui.PhyloTree;
 
 /**
  * A utility class to update PhyloWidget's internal tree when triggered via
@@ -47,6 +47,7 @@ public class PWTreeUpdater extends DelayedAction
 		{
 			PhyloTree t = new PhyloTree();
 			TreeIO.setOldTree(PhyloWidget.trees.getTree());
+			System.out.println(parseMe.length());
 			PhyloWidget.trees.setTree(TreeIO.parseNewickString(t, parseMe));
 			PhyloWidget.setMessage("Tree text updated.");
 		} catch (Exception e)

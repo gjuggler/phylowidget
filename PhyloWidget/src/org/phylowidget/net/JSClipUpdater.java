@@ -22,30 +22,39 @@ import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
 
+import processing.core.PApplet;
+
 public class JSClipUpdater extends DelayedAction
 {
 	
-	JSCaller caller = new JSCaller(UIGlobals.g.getP());
+	JSCaller caller;
 	
-	String jsCall;
+//	String jsCall;
 	String newClip;
 
+	public JSClipUpdater(PApplet p)
+	{
+		caller = new JSCaller(p);
+	}
+	
 	public void triggerUpdate(String s)
 	{
 		trigger(200);
-		jsCall = "PhyloWidget.updateClip";
+//		jsCall = "updateClip";
 		newClip = s;
 	}
 
 	public void run()
 	{
-		String cmd = jsCall;
+//		String cmd = jsCall;
 		try {
 			Object o = caller.getMember("PhyloWidget");
-			caller.callWithObject(o, jsCall, newClip);
+			caller.callWithObject(o, "updateClip", newClip);
+//			caller.eval("PhyloWidget.updateClip(\""+newClip+"\");");
+			
 		} catch (Exception e)
 		{
-//			e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 }

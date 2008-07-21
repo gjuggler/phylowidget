@@ -18,29 +18,25 @@
  */
 package org.andrewberman.ui.menu;
 
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import org.andrewberman.ui.EventManager;
-import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.UIGlobals;
-import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.tools.Tool;
-import org.andrewberman.ui.tools.ToolManager;
-import org.andrewberman.ui.tools.ToolManager.ToolShortcuts;
 
 import processing.core.PApplet;
 
 public class ToolDock extends Dock implements UIObject
 {
+//	public Tool curTool;
+	
 	public ToolDock(PApplet app)
 	{
 		super(app);
-		UIGlobals.g.tools().addToolListener(this);
+		UIGlobals.g.tools().setToolDock(this);
 	}
 
 	public MenuItem create(String s)
@@ -51,70 +47,47 @@ public class ToolDock extends Dock implements UIObject
 		return tdi;
 	}
 
-	public ToolDockItem create(String name, String toolClassName, String icon)
-	{
-		ToolDockItem tdi = (ToolDockItem) create(name);
-		tdi.setTool(toolClassName);
-		tdi.setIcon(icon);
-		return tdi;
-	}
-
 	public void keyEvent(KeyEvent e)
 	{
-		checkToolShortcuts(e);
+		UIGlobals.g.getToolManager().checkToolShortcuts(e);
 	}
 
-	public void checkToolShortcuts(KeyEvent e)
-	{
-		Object o = UIGlobals.g.focus().getFocusedObject();  
-		if (o != null && o != this)
-		{
-			return;
-		}
-		if (e.getID() != KeyEvent.KEY_PRESSED)
-			return;
-		ToolDockItem activeItem = null;
-		for (int i = 0; i < items.size(); i++)
-		{
-			ToolDockItem tdi = (ToolDockItem) items.get(i);
-			Tool t = (Tool) tdi.getTool();
-			if (t.getShortcut() != null)
-			{
-				Shortcut s = t.getShortcut();
-				if (s.matchesKeyEvent(e))
-				{
-					activeItem = tdi;
-				}
-			}
-		}
-		if (activeItem != null)
-		{
-			selectItem(activeItem);
-		}
-	}
-
-	public void selectItem(MenuItem item)
+	public void selectItem(MenuItem item, boolean performAction)
 	{
 		setState(item,MenuItem.DOWN);
-		item.performAction();
 		hovered = null;
 		for (MenuItem i : items)
 		{
+//			if (i == item)
+//			{
+//				ToolDockItem tdi = (ToolDockItem) item;
+//				curTool = tdi.tool;
+//			}
 			if (i != item)
 				setState(i,MenuItem.UP);
 		}
+		if (performAction)
+			item.performAction();
 	}
 	
+	/*
+	 * Convenience method for xml menu definitions. Don't remove!!
+	 */
 	public void selectTool(String toolName)
 	{
 		MenuItem tool = get(toolName);
-		selectItem(tool);
+		selectItem(tool,true);
+	}
+	
+	public void updateActiveTool(String toolName)
+	{
+		MenuItem tool = get(toolName);
+		selectItem(tool,false);
 	}
 	
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		super.mouseEvent(e, screen, model);
-
 	}
 
 

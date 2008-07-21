@@ -117,8 +117,9 @@ public class JSCaller
 	public synchronized Object eval(String expression) throws Exception
 	{
 		initialize();
+//		app.getAppletContext().showDocument(new URL("javascript:"+expression));
 		Object result = eval.invoke(jsObject, expression);
-		return result;
+		return null;
 	}
 
 	public synchronized Object call(String methodName, Object... args)

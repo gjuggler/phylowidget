@@ -1,6 +1,9 @@
 package org.andrewberman.ui;
 
+import java.awt.Font;
+
 import org.andrewberman.applets.Globals;
+import org.andrewberman.ui.menu.MenuTimer;
 import org.andrewberman.ui.tools.ToolManager;
 
 import processing.core.PApplet;
@@ -15,6 +18,7 @@ public class UIGlobals extends Globals
 	private FontLoader fontLoader;
 	private PApplet p;
 	private ShortcutManager shortcutManager;
+	private MenuTimer menuTimer;
 	
 	private ToolManager toolManager;
 	
@@ -27,8 +31,15 @@ public class UIGlobals extends Globals
 		setToolManager(new ToolManager(p));
 		setShortcutManager(new ShortcutManager(p));
 		setFontLoader(new FontLoader(p));
+		menuTimer = new MenuTimer();
+		menuTimer.start();
 	}
 
+	public MenuTimer getMenuTimer()
+	{
+		return menuTimer;
+	}
+	
 	public  EventManager event()
 	{
 		return getEventManager();
@@ -49,12 +60,7 @@ public class UIGlobals extends Globals
 		return focusManager;
 	}
 	
-	public PFont font()
-	{
-		return getFont();
-	}
-	
-	public  PFont getFont()
+	public  PFont getPFont()
 	{
 		return fontLoader.vera;
 	}
@@ -115,15 +121,21 @@ public class UIGlobals extends Globals
 	}
 	
 	@Override
-	public void destroyGlobals()
+	public synchronized void destroyGlobals()
 	{
 		super.destroyGlobals();
+		menuTimer.item = null;
+		menuTimer.parent = null;
+		menuTimer.lastSet = null;
+		menuTimer.stop();
+		menuTimer = null;
 		eventManager = null;
 		focusManager = null;
 		fontLoader = null;
-		p = null;
 		shortcutManager = null;
 		toolManager = null;
+		p = null;
+		UIGlobals.g = null;
 	}
 	
 }

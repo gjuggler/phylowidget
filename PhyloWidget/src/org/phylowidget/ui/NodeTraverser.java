@@ -40,6 +40,7 @@ import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderStyleSet;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeManager;
 
@@ -74,7 +75,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 	private boolean containsPoint(NodeRange r, Point pt)
 	{
 		tempPt.setLocation(getX(r), getY(r));
-		float radius = r.render.getTextSize() / 2f;
+		float radius = r.render.getRowHeight() / 2f;
 		float distance = (float) pt.distance(tempPt);
 		// System.out.println("rad:" + radius + " dist:" + distance);
 		if (distance < radius)
@@ -95,7 +96,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		if (isGlowing)
 		{
 			glowTween.update();
-			float glowRadius = PhyloWidget.trees.getRenderer().getTextSize();
+			float glowRadius = PhyloWidget.trees.getRenderer().getRowHeight();
 			glowRadius *= glowTween.getPosition();
 
 			p.noFill();
@@ -138,9 +139,10 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	private NodeRange getNearestNode(float x, float y)
 	{
-		getWithinRange(x, y, 40);
+		getWithinRange(x, y, 30);
 		pt.setLocation(x, y);
-		float nearestDist = Float.MAX_VALUE;
+//		float nearestDist = Float.MAX_VALUE;
+		float nearestDist = 100;
 		NodeRange temp = null;
 		for (int i = 0; i < nearNodes.size(); i++)
 		{
@@ -164,7 +166,8 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	private void getWithinRange(float x, float y, float radius)
 	{
-		float ratio = TreeManager.camera.getZ();
+//		float ratio = TreeManager.camera.getZ();
+		float ratio = 1;
 		float rad = radius * ratio;
 
 		pt.setLocation(x, y);
@@ -220,6 +223,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		}
 	}
 
+	boolean pressedWithinNode;
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
 		mousePt.setLocation(screen);
@@ -240,8 +244,14 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		boolean containsPoint = containsPoint(getCurRange(), pt);
 		switch (e.getID())
 		{
-			case (MouseEvent.MOUSE_MOVED):
 			case (MouseEvent.MOUSE_DRAGGED):
+			case (MouseEvent.MOUSE_PRESSED):
+				if (containsPoint && t.respondToOtherEvents())
+				{
+					pressedWithinNode = true;
+					glowTween.stop();
+				}
+			case (MouseEvent.MOUSE_MOVED):
 				PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
 				if (containsPoint && t.respondToOtherEvents())
 				{
@@ -253,14 +263,17 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 					tree.setHoveredNode(null);
 				}
 				break;
-			case (MouseEvent.MOUSE_PRESSED):
-				if (containsPoint && t.respondToOtherEvents())
+			case (MouseEvent.MOUSE_CLICKED):
+//			case (MouseEvent.MOUSE_RELEASED):
+				if (containsPoint && t.respondToOtherEvents() && pressedWithinNode)
 				{
 					openContextMenu();
 					isGlowing = false;
 				}
 				break;
 		}
+		if (!containsPoint)
+			pressedWithinNode = false;
 		if (!t.respondToOtherEvents())
 		{
 			PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();

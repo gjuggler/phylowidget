@@ -59,6 +59,8 @@ public interface TreeRenderer
 
 	public RootedTree getTree();
 
+	public void dispose();
+	
 	public void setMouseLocation(Point pt);
 	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);

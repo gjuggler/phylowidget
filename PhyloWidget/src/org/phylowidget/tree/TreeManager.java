@@ -30,7 +30,7 @@ import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.Circlegram;
 import org.phylowidget.render.DiagonalCladogram;
 import org.phylowidget.render.TreeRenderer;
-import org.phylowidget.ui.PhyloTree;
+import org.phylowidget.render.images.ImageLoader;
 
 import processing.core.PApplet;
 
@@ -43,6 +43,7 @@ public class TreeManager extends AbstractUIObject
 	//	protected ArrayList trees;
 	//	protected ArrayList renderers;
 
+	public static ImageLoader imageLoader;
 	TreeRenderer r;
 	RootedTree t;
 
@@ -61,6 +62,8 @@ public class TreeManager extends AbstractUIObject
 
 	public void setup()
 	{
+		imageLoader = new ImageLoader();
+		
 		cameraRect = new UIRectangle(0, 0, 0, 0);
 		camera = new RectMover(p);
 		camera.fillScreen(.8f);
@@ -71,7 +74,8 @@ public class TreeManager extends AbstractUIObject
 		UIGlobals.g.event().setCamera(camera);
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
-		rectangleRender();
+		
+		PhyloWidget.cfg.setRenderer(PhyloWidget.cfg.renderer);
 
 		try
 		{
@@ -141,7 +145,7 @@ public class TreeManager extends AbstractUIObject
 		mutator.stop();
 	}
 
-	public RootedTree getTree()
+	public synchronized RootedTree getTree()
 	{
 		return t;
 	}
@@ -151,22 +155,29 @@ public class TreeManager extends AbstractUIObject
 		return r;
 	}
 
-	public void setTree(String s)
+	public synchronized void setTree(String s)
 	{
 		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
 	}
 
-	public void setTree(final RootedTree tree)
+	public synchronized void setTree(final RootedTree tree)
 	{
+		if (t != null)
+		{
+			/*
+			 * Whenever doing something to the tree (such as DISPOSING it!) we need to lock
+			 * on it, because the renderer (which is on a different thread) could be using it at the moment.
+			 */
+			synchronized (t)
+			{
+				t.dispose();
+				t = null;
+			}
+		}
 		this.t = tree;
 		if (getRenderer() != null)
 		{
-			synchronized (getRenderer())
-			{
-				System.out.println("Setting tree...");
-				getRenderer().setTree(tree);
-				System.out.println("Set!");
-			}
+			getRenderer().setTree(tree);
 		}
 		if (tree instanceof PhyloTree)
 		{
@@ -177,23 +188,30 @@ public class TreeManager extends AbstractUIObject
 		mutator = new RandomTreeMutator(tree);
 	}
 
-	public void diagonalRender()
+	public synchronized void diagonalRender()
 	{
 		setRenderer(new DiagonalCladogram());
 	}
 
-	public void rectangleRender()
+	public synchronized void rectangleRender()
 	{
 		setRenderer(new BasicTreeRenderer());
 	}
 
-	public void circleRender()
+	public synchronized void circleRender()
 	{
 		setRenderer(new Circlegram());
 	}
 
-	void setRenderer(TreeRenderer r)
+	synchronized void setRenderer(BasicTreeRenderer r)
 	{
+		if (getRenderer() != null)
+		{
+			synchronized (this.r)
+			{
+				getRenderer().dispose();
+			}
+		}
 		this.r = r;
 		if (getTree() != null)
 			r.setTree(getTree());
@@ -210,5 +228,21 @@ public class TreeManager extends AbstractUIObject
 		UIRectangle fl = getRenderer().getVisibleRect();
 		fl.translate(-p.width / 2, -p.height / 2);
 		return fl;
+	}
+
+	public void destroy()
+	{
+		if (r != null)
+			r.dispose();
+		r = null;
+		if (t != null)
+			t.dispose();
+		t = null;
+		p = null;
+		camera = null;
+		cameraRect = null;
+		if (imageLoader != null)
+			imageLoader.dispose();
+		imageLoader = null;
 	}
 }

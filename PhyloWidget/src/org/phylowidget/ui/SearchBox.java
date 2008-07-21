@@ -8,6 +8,7 @@ import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.menu.TextBox;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.PhyloTree;
 
 import processing.core.PApplet;
 
@@ -36,6 +37,13 @@ public class SearchBox extends TextBox implements UIListener
 	{
 		super.setName(name);
 		setLabel(name);
+	}
+	
+	@Override
+	public synchronized void dispose()
+	{
+		super.dispose();
+		label.dispose();
 	}
 	
 	@Override
@@ -91,7 +99,8 @@ public class SearchBox extends TextBox implements UIListener
 		if (e.getID() == UIEvent.TEXT_VALUE)
 		{
 			PhyloWidget.cfg.search = getText();
-			PhyloWidget.ui.search();
+			PhyloTree t = (PhyloTree) PhyloWidget.trees.getTree();
+			t.search(getText());
 		}
 	}
 	

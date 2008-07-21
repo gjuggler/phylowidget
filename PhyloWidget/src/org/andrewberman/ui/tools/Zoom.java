@@ -111,6 +111,7 @@ public class Zoom extends Tool
 
 	void reset()
 	{
+		controlPressed = false;
 		downPoint = (Point) curPoint.clone();
 		targetX = downPoint.x - p.width / 2;
 		targetY = downPoint.y - p.height / 2;

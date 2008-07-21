@@ -31,6 +31,13 @@ public class TextBox extends Menu
 	}
 	
 	@Override
+	public synchronized void dispose()
+	{
+		super.dispose();
+		tf.dispose();
+	}
+	
+	@Override
 	public synchronized void layout()
 	{
 		float px = getStyle().getF("f.padX");

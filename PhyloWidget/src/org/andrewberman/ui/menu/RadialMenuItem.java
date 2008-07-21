@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -38,46 +38,96 @@ import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
 import processing.core.PFont;
+import processing.core.PImage;
 
 public class RadialMenuItem extends MenuItem
 {
+	protected static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(
+			0, 0, 0, 0, 0, 0);
+
+	public static final int HINT_DELAY = 60;
+
 	public static final float SIZE_DECAY = .9f;
+	protected Arc2D.Float tempArc = new Arc2D.Float(Arc2D.PIE);
 
-	String displayLabel;
+	protected Ellipse2D.Float tempCircle = new Ellipse2D.Float(0, 0, 0, 0);
 
-	float rLo, rHi, tLo, tHi;
-	float radius;
+	protected float fontSize, hintSize;
+	protected char hint;
+	protected float hintX, hintY;
+	protected PImage icon;
+	float iconAlpha;
+	String iconFile = null;
+	protected float minRadius = 5f;
 
-	float outerX, outerY, innerX, innerY;
-	float rectX, rectY, rectW, rectH;
-	float textX, textY;
-	float textWidth, textHeight, pad;
-	float hintX, hintY;
-	float fontSize, hintSize;
-	Area wedge;
+	protected float outerX, outerY, innerX, innerY;
 
-	char hint;
+	protected float radius;
 
-	static Ellipse2D.Float tempCircle = new Ellipse2D.Float(0, 0, 0, 0);
-	static Arc2D.Float tempArc = new Arc2D.Float(Arc2D.PIE);
-	static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(0,
-			0, 0, 0, 0, 0);
+	protected float rectX, rectY, rectW, rectH;
+
+	protected float rLo, rHi, tLo, tHi;
+	protected float textWidth, textHeight, pad;
+	protected float textX, textY;
+
+	protected Area wedge;
+
+	protected int hintTrigger;
 
 	public RadialMenuItem()
 	{
 		super();
 	}
 
-	public void setHint(String hint)
+	protected boolean alreadyContainsChar(char c)
 	{
-		this.hint = hint.charAt(0);
+		if (hint == c)
+			return true;
+		for (int i = 0; i < items.size(); i++)
+		{
+			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+			if (rmi.alreadyContainsChar(c))
+				return true;
+		}
+		return false;
 	}
 
-	public void drawUnder()
+	public boolean containsPoint(Point pt)
 	{
-		Graphics2D g2 = menu.buff.g2;
-		MenuUtils.drawWhiteTextRect(this, rectX, rectY, rectW, rectH);
-		super.draw();
+		//		if (!isOpen())
+		//			return false;
+		boolean contained = false;
+		if (wedge.contains(pt.x, pt.y))
+			contained = true;
+		if (isShowingLabel())
+		{
+			Rectangle2D.Float temp = new Rectangle2D.Float(rectX, rectY, rectW,
+					rectH);
+			if (temp.contains(pt.x, pt.y))
+				contained = true;
+		}
+		return contained;
+	}
+
+	void createShapes()
+	{
+		tempCircle.setFrameFromCenter(x, y, x + rLo, y + rLo);
+		tempArc.setFrameFromCenter(x, y, x + rHi, y + rHi);
+
+		float degLo = radToDeg(-tLo);
+		float degHi = radToDeg(-tHi);
+		tempArc.setAngleStart(degLo);
+		tempArc.setAngleExtent(degHi - degLo);
+		wedge = new Area(tempArc);
+		Area delete = new Area(tempCircle);
+		wedge.subtract(delete);
+	}
+
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		icon = null;
 	}
 
 	public void draw()
@@ -88,28 +138,61 @@ public class RadialMenuItem extends MenuItem
 			drawUnder();
 			drawText();
 		}
+
 		drawShape();
-		drawHint();
+
+		int dt = menu.canvas.frameCount - hintTrigger;
+		//		if (hintTrigger == -1)
+		//			dt = -1;
+		loadImage();
+		boolean drawHintInstead = (icon == null) ;
+//				|| (mouseInside && dt > HINT_DELAY);
+		if (drawHintInstead)
+			drawHint();
+		if (!drawHintInstead)
+			drawIcon();
 	}
 
-	boolean isShowingLabel()
+	void drawHint()
 	{
-		if (!isOpen())
-		{
-			MenuItem par = parent;
-			int distToMenu = 1;
-			while (par != menu)
-			{
-				distToMenu++;
-				par = par.parent;
-			}
-			RadialMenu rm = (RadialMenu) menu;
-			if (distToMenu == rm.maxLevelOpen)
-			{
-				return true;
-			}
-		}
-		return false;
+		Graphics2D g2 = menu.buff.g2;
+		PFont pf = getStyle().getFont("font");
+		Font f = pf.font.deriveFont(hintSize);
+		g2.setFont(f);
+		g2.setPaint(getStrokeColor());
+		g2.drawString(String.valueOf(hint), hintX, hintY);
+	}
+
+	public void drawIcon()
+	{
+		if (icon == null)
+			return;
+		
+		Graphics2D g2 = menu.buff.g2;
+
+		float rMid = (rLo + rHi) / 2;
+		float imgDiag = (float) Math.sqrt(icon.width * icon.width + icon.height
+				* icon.height);
+		hintSize = (rHi - rLo) / imgDiag;
+		hintSize = Math.min(hintSize, (float) Math.sin(tHi - tLo) * rMid);
+		hintSize *= 0.8f;
+
+		float imgW = icon.width * hintSize;
+		float imgH = icon.height * hintSize;
+
+		float midX = (innerX + outerX) / 2f;
+		float midY = (innerY + outerY) / 2f;
+
+		if (!isEnabled())
+			menu.canvas.tint(200);
+		menu.canvas.image(icon, midX - imgW / 2, midY - imgH / 2, imgW, imgH);
+		if (!isEnabled())
+			menu.canvas.noTint();
+	}
+
+	protected boolean drawingHint()
+	{
+		return true;
 	}
 
 	void drawShape()
@@ -121,14 +204,13 @@ public class RadialMenuItem extends MenuItem
 		// this.isAncestorOf(menu.currentlyHovered);
 		// if (this.isAncestorOf(menu.currentlyHovered))
 		if (isOpen())
-			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi, x
-					+ rHi, y + rHi));
+			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi,
+					x + rHi, y + rHi));
 		else
-			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi, x
-					+ rHi, y + rHi));
+			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi,
+					x + rHi, y + rHi));
 		g2.fill(wedge);
-		
-		
+
 		g2.setStroke(getStroke());
 		g2.setPaint(getStrokeColor());
 
@@ -159,28 +241,130 @@ public class RadialMenuItem extends MenuItem
 		PFont pf = getStyle().getFont("font");
 		Font f = pf.font.deriveFont(fontSize);
 		g2.setFont(f);
-		g2.setPaint(getStyle().getC("c.foreground"));
-		g2.drawString(displayLabel, textX, textY);
+		g2.setPaint(getStrokeColor());
+		g2.drawString(getDisplayLabel(), textX, textY);
 	}
 
-	void drawHint()
+	public void drawUnder()
 	{
 		Graphics2D g2 = menu.buff.g2;
-		PFont pf = getStyle().getFont("font");
-		Font f = pf.font.deriveFont(fontSize);
-		f = f.deriveFont(hintSize);
-		g2.setFont(f);
-		g2.setPaint(getStyle().getC("c.foreground"));
-		g2.drawString(String.valueOf(hint), hintX, hintY);
+		MenuUtils.drawWhiteTextRect(this, rectX, rectY, rectW, rectH);
+		super.draw();
 	}
 
-	public void layout()
+	public String getDisplayLabel()
 	{
-
+		String displayLabel = getName();
+		if (items.size() > 0)
+			displayLabel = displayLabel.concat("...");
+		if (!drawingHint() && hint != 0)
+			displayLabel = displayLabel.concat(" (" + String.valueOf(hint)
+					+ ")");
+		return displayLabel;
 	}
 
-	void layout(float radLo, float radHi, float thLo, float thHi)
+	float getMaxRadius()
 	{
+		if (!isOpen())
+			return 0;
+		float max = this.rHi;
+		for (int i = 0; i < items.size(); i++)
+		{
+			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+			float cur = rmi.getMaxRadius();
+			if (cur > max)
+				max = cur;
+		}
+		return max;
+	}
+
+	public float getMinRadius()
+	{
+		return minRadius;
+	}
+
+	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
+	{
+		// if (isOpen())
+		// {
+		super.getRect(rect, buff);
+		buff.setRect(wedge.getBounds2D());
+		Rectangle2D.union(rect, buff, rect);
+		buff.setRect(rectX, rectY, rectW, rectH);
+		Rectangle2D.union(rect, buff, rect);
+		// }
+	}
+
+	boolean isShowingLabel()
+	{
+		if (!isOpen())
+		{
+			MenuItem par = parent;
+			int distToMenu = 1;
+			while (par != menu)
+			{
+				distToMenu++;
+				par = par.parent;
+			}
+			RadialMenu rm = (RadialMenu) menu;
+			if (distToMenu == rm.maxLevelOpen)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	protected void itemMouseEvent(MouseEvent e, Point tempPt)
+	{
+		boolean wasInside = mouseInside;
+
+		super.itemMouseEvent(e, tempPt);
+		boolean isInside = mouseInside;
+		if (isInside && !wasInside)
+		{
+			if (menu != null && menu.canvas != null)
+				hintTrigger = menu.canvas.frameCount;
+		}
+	}
+
+	protected void keyHintEvent(KeyEvent e)
+	{
+		if (isOpen())
+		{
+			for (int i = 0; i < items.size(); i++)
+			{
+				RadialMenuItem rmi = (RadialMenuItem) items.get(i);
+				rmi.keyHintEvent(e);
+			}
+		}
+		if (e.isConsumed())
+			return;
+		char c = (char) e.getKeyChar();
+		if (Character.toLowerCase(c) == Character.toLowerCase(hint))
+		{
+			this.performAction();
+			e.consume();
+			return;
+		}
+	}
+
+	@Override
+	public synchronized void layout()
+	{
+		super.layout();
+	}
+
+	protected void layout(float radLo, float radHi, float thLo, float thHi)
+	{
+		//		super.layout();
+
+		if (radHi - radLo < minRadius)
+		{
+			radHi = radLo + minRadius;
+		}
+
 		this.rLo = radLo;
 		this.rHi = radHi;
 		this.tLo = thLo;
@@ -189,10 +373,9 @@ public class RadialMenuItem extends MenuItem
 
 		this.layoutText();
 		this.createShapes();
+
 		/*
-		 * Give each item in the next level up half as much theta room as I have
-		 * This works out alright, because the radius is growing bigger as theta
-		 * grows smaller.
+		 * Start laying out our sub-items.
 		 */
 		float tMid = (tHi + tLo) / 2;
 		float dTheta = tHi - tLo;
@@ -200,7 +383,7 @@ public class RadialMenuItem extends MenuItem
 		 * Sub-item sizing: Ensure that sub-items' thetas are constrained within
 		 * a certain range.
 		 */
-		float minTheta = PApplet.QUARTER_PI / 2f * items.size();
+		float minTheta = PApplet.QUARTER_PI * .6f * items.size();
 		float maxTheta = Math.min(PApplet.HALF_PI * 1.5f, dTheta);
 
 		dTheta = PApplet.constrain(dTheta, minTheta, maxTheta);
@@ -221,25 +404,6 @@ public class RadialMenuItem extends MenuItem
 		}
 	}
 
-	float radToDeg(float rad)
-	{
-		return PApplet.degrees(rad);
-	}
-
-	void createShapes()
-	{
-		tempCircle.setFrameFromCenter(x, y, x + rLo, y + rLo);
-		tempArc.setFrameFromCenter(x, y, x + rHi, y + rHi);
-
-		float degLo = radToDeg(-tLo);
-		float degHi = radToDeg(-tHi);
-		tempArc.setAngleStart(degLo);
-		tempArc.setAngleExtent(degHi - degLo);
-		wedge = new Area(tempArc);
-		Area delete = new Area(tempCircle);
-		wedge.subtract(delete);
-	}
-
 	void layoutText()
 	{
 		/*
@@ -253,27 +417,24 @@ public class RadialMenuItem extends MenuItem
 		innerX = x + cos * rLo;
 		innerY = y + sin * rLo;
 		PFont font = getStyle().getFont("font");
-		FontMetrics fm = UIUtils.getMetrics(menu.buff, font.font, 1);
+		FontMetrics fm = UIUtils.getMetrics(menu.canvas.g, font.font, 1);
 		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2)
 				.getHeight();
-		fontSize = (rHi - rLo) / unitTextHeight * .9f;
+		fontSize = (rHi - rLo) / unitTextHeight * .75f;
+		// Keep the font size readable.
+		fontSize = Math.max(8, fontSize);
 		fm = UIUtils.getMetrics(menu.buff, font.font, fontSize);
 		// float descent = fm.getDescent();
 		float ascent = fm.getAscent();
 
 		// Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
 
-		if (items.size() > 0)
-			displayLabel = getName().concat("...");
-		else
-			displayLabel = getName();
-
 		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize,
-				displayLabel, true);
+				getDisplayLabel(), true);
 		// textHeight = (float) bounds.getHeight();
 		// textWidth = (float) bounds.getWidth();
 		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize,
-				displayLabel, true);
+				getDisplayLabel(), true);
 		// Calculate the necessary x and y offsets for the text.
 		float outX = x + cos * (rHi + textHeight);
 		float outY = y + sin * (rHi + textHeight);
@@ -326,70 +487,33 @@ public class RadialMenuItem extends MenuItem
 		hintY = centerY - charDesc + charHeight / 2.0f;
 	}
 
-	protected boolean alreadyContainsChar(char c)
+	protected synchronized void loadImage()
 	{
-		if (hint == c)
-			return true;
-		for (int i = 0; i < items.size(); i++)
-		{
-			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-			if (rmi.alreadyContainsChar(c))
-				return true;
-		}
-		return false;
-	}
-
-	float getMaxRadius()
-	{
-		if (!isOpen())
-			return 0;
-		float max = this.rHi;
-		for (int i = 0; i < items.size(); i++)
-		{
-			RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-			float cur = rmi.getMaxRadius();
-			if (cur > max)
-				max = cur;
-		}
-		return max;
-	}
-
-	public boolean containsPoint(Point pt)
-	{
-//		if (!isOpen())
-//			return false;
-		boolean contained = false;
-		if (wedge.contains(pt.x, pt.y))
-			contained = true;
-		if (isShowingLabel())
-		{
-			Rectangle2D.Float temp = new Rectangle2D.Float(rectX, rectY, rectW,
-					rectH);
-			if (temp.contains(pt.x, pt.y))
-				contained = true;
-		}
-		return contained;
-	}
-
-	protected void keyHintEvent(KeyEvent e)
-	{
-		if (isOpen())
-		{
-			for (int i = 0; i < items.size(); i++)
+		if (icon == null && iconFile != null && menu != null && menu.canvas != null)
 			{
-				RadialMenuItem rmi = (RadialMenuItem) items.get(i);
-				rmi.keyHintEvent(e);
+				icon = menu.canvas.loadImage(iconFile);
 			}
-		}
-		if (e.isConsumed())
-			return;
-		char c = (char) e.getKeyChar();
-		if (Character.toLowerCase(c) == Character.toLowerCase(hint))
-		{
-			this.performAction();
-			e.consume();
-			return;
-		}
+	}
+
+	float radToDeg(float rad)
+	{
+		return PApplet.degrees(rad);
+	}
+
+	public void setHint(String hint)
+	{
+		this.hint = hint.charAt(0);
+	}
+
+	public void setIcon(String s)
+	{
+		iconFile = s;
+		loadImage();
+	}
+
+	public void setMinRadius(float minRadius)
+	{
+		this.minRadius = minRadius;
 	}
 
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
@@ -397,17 +521,5 @@ public class RadialMenuItem extends MenuItem
 		super.visibleMouseEvent(e, tempPt);
 		if (getState() == MenuItem.OVER)
 			e.consume();
-	}
-
-	public void getRect(Rectangle2D.Float rect, Rectangle2D.Float buff)
-	{
-		// if (isOpen())
-		// {
-		super.getRect(rect, buff);
-		buff.setRect(wedge.getBounds2D());
-		Rectangle2D.union(rect, buff, rect);
-		buff.setRect(rectX, rectY, rectW, rectH);
-		Rectangle2D.union(rect, buff, rect);
-		// }
 	}
 }

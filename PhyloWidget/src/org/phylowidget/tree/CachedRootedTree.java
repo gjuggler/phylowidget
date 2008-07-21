@@ -85,7 +85,7 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 		holdCalculations = holdMe;
 	}
 
-	private List<V> getChildrenOfNoSort(V vertex)
+	private synchronized List<V> getChildrenOfNoSort(V vertex)
 	{
 		List<V> l;
 		if (useNeighborIndex)
@@ -282,7 +282,7 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 			return super.getMaxHeightToLeaf(vertex);
 	}
 
-	public int getNumEnclosedLeaves(V vertex)
+	public synchronized int getNumEnclosedLeaves(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -294,7 +294,7 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 	}
 
 	@Override
-	public boolean isLeaf(V vertex)
+	public synchronized boolean isLeaf(V vertex)
 	{
 		sync();
 		if (inSync())
@@ -335,11 +335,13 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 		super.setBranchLength(vertex, weight);
 	}
 
-	@Override
-	public void reverseSubtree(V vertex)
-	{
-		super.reverseSubtree(vertex);
-	}
+//	@Override
+//	public void reverseSubtree(V vertex)
+//	{
+////		setHoldCalculations(true);
+//		super.reverseSubtree(vertex);
+////		setHoldCalculations(false);
+//	}
 	
 	public void modPlus()
 	{

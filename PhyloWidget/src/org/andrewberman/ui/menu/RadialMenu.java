@@ -18,6 +18,7 @@
  */
 package org.andrewberman.ui.menu;
 
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -70,6 +71,13 @@ public class RadialMenu extends Menu
 		useHandCursor = true;
 	}
 
+	@Override
+	protected void hint()
+	{
+		super.hint();
+//		buff.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+	}
+	
 	public void setRadius(float r)
 	{
 		this.radius = r;
@@ -140,7 +148,7 @@ public class RadialMenu extends Menu
 
 		float dTheta = thetaHi - thetaLo;
 		float thetaStep = dTheta / items.size();
-		float start = thetaLo; // -PConstants.HALF_PI;
+		float start = -PConstants.HALF_PI;
 		for (int i = 0; i < items.size(); i++)
 		{
 			RadialMenuItem seg = (RadialMenuItem) items.get(i);

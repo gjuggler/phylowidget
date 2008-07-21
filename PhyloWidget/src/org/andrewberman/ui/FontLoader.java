@@ -32,6 +32,7 @@ public class FontLoader
 	
 	public PFont vera;
 	public PFont veraNonNative;
+	public Font font;
 	
 	public FontLoader(PApplet p)
 	{
@@ -48,7 +49,8 @@ public class FontLoader
 		InputStream in = p.openStream("vera.ttf");
 		try
 		{
-			vera.font = Font.createFont(Font.TRUETYPE_FONT, in);
+			font = Font.createFont(Font.TRUETYPE_FONT, in);
+			vera.font = font;
 			in.close();
 		} catch (FontFormatException e)
 		{

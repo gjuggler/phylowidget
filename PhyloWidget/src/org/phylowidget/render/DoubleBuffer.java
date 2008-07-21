@@ -1,5 +1,6 @@
 package org.phylowidget.render;
 
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -7,22 +8,31 @@ import org.andrewberman.ui.UIUtils;
 
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
-import processing.core.PImage;
 
-public abstract class DoubleBuffer implements Runnable
+public class DoubleBuffer implements Runnable
 {
-	private PGraphics offscreen;
-	private PGraphics onscreen;
+	private PGraphicsJava2D dummyGraphics;
+	private BufferedImage offscreen;
+	private BufferedImage onscreen;
+	private Graphics2D offscreenG;
+	private Graphics2D onscreenG;
+	//	private PGraphics offscreen;
+	//	private PGraphics onscreen;
 
 	Rectangle2D.Float onscreenRect;
 
 	boolean shouldRepaint;
-	static Thread repaintThread;
+	Thread repaintThread;
 
 	public DoubleBuffer()
 	{
+		dummyGraphics = new PGraphicsJava2D(1, 1, null);
 		repaintThread = new Thread(this, "DoubleBuffer");
+		//		repaintThread.setPriority(Thread.MIN_PRIORITY);
 		repaintThread.start();
+
+		//		dummyGraphics.g2.dispose();
+		//		dummyGraphics.smooth();
 	}
 
 	synchronized void triggerRepaint()
@@ -34,27 +44,29 @@ public abstract class DoubleBuffer implements Runnable
 		}
 	}
 
-	private void allocateBuffers(PGraphics canvas)
+	private synchronized void allocateBuffers(PGraphics canvas)
 	{
-		offscreen = new PGraphicsJava2D(canvas.width, canvas.height, null)
-		{
-			@Override
-			public String toString()
-			{
-				return "offscreen";
-			}
-		};
-		onscreen = new PGraphicsJava2D(canvas.width, canvas.height, null)
-		{
-			@Override
-			public String toString()
-			{
-				return "onscreen";
-			}
-		};
-		UIUtils.setRenderingHints(offscreen);
-		UIUtils.setRenderingHints(onscreen);
-		onscreen.loadPixels();
+		if (offscreen != null)
+			offscreen.flush();
+		if (onscreen != null)
+			onscreen.flush();
+		count++;
+		offscreen = new BufferedImage(canvas.width, canvas.height,
+				BufferedImage.TYPE_INT_ARGB);
+		onscreen = new BufferedImage(canvas.width, canvas.height,
+				BufferedImage.TYPE_INT_ARGB);
+		offscreenG = offscreen.createGraphics();
+		onscreenG = onscreen.createGraphics();
+		UIUtils.setRenderingHints(offscreenG);
+		UIUtils.setRenderingHints(onscreenG);
+
+		dummyGraphics.width = canvas.width;
+		dummyGraphics.height = canvas.height;
+		//		dummyGraphics.smooth();
+
+		//		UIUtils.setRenderingHints(offscreen);
+		//		UIUtils.setRenderingHints(onscreen);
+		//		onscreen.loadPixels();
 
 		//		offscreen = canvas.parent.createGraphics(canvas.width, canvas.height, PGraphics.JAVA2D);
 		//		onscreen = canvas.parent.createGraphics(canvas.width, canvas.height, PGraphics.JAVA2D);
@@ -62,8 +74,8 @@ public abstract class DoubleBuffer implements Runnable
 
 	public void drawToCanvas(PGraphics canvas)
 	{
-		if (offscreen == null || offscreen.width != canvas.width
-				|| offscreen.height != canvas.height)
+		if (offscreen == null || offscreen.getWidth() != canvas.width
+				|| offscreen.getHeight() != canvas.height)
 		{
 			/*
 			 * We have to re-allocate the offscreen image.
@@ -81,38 +93,62 @@ public abstract class DoubleBuffer implements Runnable
 			/*
 			 *  Blit the onscreen buffer onto the current canvas.
 			 */
-			canvas.image(onscreen, 0, 0);
+			BufferedImage bi = (BufferedImage) canvas.image;
+			Graphics2D g2 = bi.createGraphics();
+			g2.drawImage(onscreen, 0, 0, null);
+			g2.dispose();
 		}
 	}
 
 	public void drawToBuffer(PGraphics g)
 	{
-		
+
 	}
-	
+
 	public void run()
 	{
 		while (true)
 		{
 			if (stopRunning)
 				break;
-
 			if (shouldRepaint)
 			{
-				offscreen.beginDraw();
-				drawToBuffer(offscreen);
-				offscreen.endDraw();
+				synchronized (this)
+				{
+					dummyGraphics.image = offscreen;
+					dummyGraphics.g2 = offscreenG;
+
+					dummyGraphics.defaults();
+
+					try
+					{
+						drawToBuffer(dummyGraphics);
+					} catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+					/*
+					 * These lines are important for garbage collection!!!
+					 */
+					dummyGraphics.image = null;
+					dummyGraphics.g2 = null;
+				}
+
 				synchronized (onscreen)
 				{
 					/*
 					 * Switch the offscreen and onscreen buffers.
 					 */
-					PGraphics temp = offscreen;
+					BufferedImage temp = offscreen;
+					Graphics2D tempG = offscreenG;
 					offscreen = onscreen;
+					offscreenG = onscreenG;
 					onscreen = temp;
+					onscreenG = tempG;
 				}
 			}
-//			System.out.println("Finished rendering. Waiting for signal...");
+			if (stopRunning)
+				break;
 			try
 			{
 				synchronized (this)
@@ -121,16 +157,27 @@ public abstract class DoubleBuffer implements Runnable
 				}
 			} catch (InterruptedException e)
 			{
+				e.printStackTrace();
+				continue;
 			}
 		}
+		dummyGraphics = null;
+		offscreen = null;
+		onscreen = null;
+		offscreenG = null;
+		onscreenG = null;
+		onscreenRect = null;
+		repaintThread = null;
 	}
+
+	static int count = 0;
 
 	private boolean stopRunning = false;
 
-	public void dispose()
+	public synchronized void dispose()
 	{
 		stopRunning = true;
-		this.notify();
+		this.notifyAll();
 	}
 
 }

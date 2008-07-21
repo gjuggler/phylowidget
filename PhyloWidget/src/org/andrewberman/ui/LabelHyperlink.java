@@ -62,7 +62,7 @@ public class LabelHyperlink extends Label
 			c = color.darker(80);
 		
 		app.fill(c.getRGB());
-		app.textFont(UIGlobals.g.font());
+		app.textFont(UIGlobals.g.getPFont());
 		app.textSize(fontSize);
 		app.smooth();
 		app.textAlign(PApplet.LEFT);

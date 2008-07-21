@@ -18,12 +18,9 @@
  */
 package org.phylowidget.render;
 
-import java.awt.BorderLayout;
 import java.awt.FileDialog;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -33,22 +30,24 @@ import java.util.ArrayList;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeManager;
-import org.phylowidget.ui.PhyloTree;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
-import processing.core.PImage;
-import processing.pdf.PGraphicsPDF;
 
 public class RenderOutput
 {
 
+	public static boolean isOutputting = false;
+	
 	public static synchronized void savePDF(PApplet p, TreeRenderer r,
 			boolean zoomToFull, boolean showAllLabels)
 	{
+		isOutputting = true;
 		RootedTree t = r.getTree();
 		float oldThreshold = PhyloWidget.cfg.renderThreshold;
 		PhyloWidget.cfg.renderThreshold = Integer.MAX_VALUE;
@@ -64,8 +63,12 @@ public class RenderOutput
 			File f = p.outputFile("Save PDF as...");
 			p.noLoop();
 			if (f == null)
+			{
+				PhyloWidget.setMessage("Output cancelled.");
 				return;
-			PGraphicsPDF canvas = (PGraphicsPDF) p.createGraphics(p.width,
+			}
+			
+			PGraphics canvas = (PGraphics) p.createGraphics(p.width,
 					p.height, PConstants.PDF, f.getAbsolutePath());
 			canvas.beginDraw();
 			
@@ -92,6 +95,7 @@ public class RenderOutput
 			PhyloWidget.cfg.renderThreshold = oldThreshold;
 			PhyloWidget.cfg.minTextSize = oldTextSize;
 			PhyloWidget.cfg.useDoubleBuffering = oldDoubleBuff;
+			isOutputting = false;
 			p.loop();
 		}
 	}
@@ -100,6 +104,7 @@ public class RenderOutput
 			boolean zoomToFull, boolean showAllLabels, String fileType, int w,
 			int h)
 	{
+		isOutputting = true;
 		float oldThreshold = PhyloWidget.cfg.renderThreshold;
 		PhyloWidget.cfg.renderThreshold = Integer.MAX_VALUE;
 		boolean oldDoubleBuff = PhyloWidget.cfg.useDoubleBuffering;
@@ -121,7 +126,10 @@ public class RenderOutput
 			String directory = fd.getDirectory();
 			String filename = fd.getFile();
 			if (filename == null)
+			{
+				PhyloWidget.setMessage("Output cancelled.");
 				return;
+			}
 			if (!filename.toLowerCase().endsWith(fileType.toLowerCase()))
 			{
 				filename += "."+ fileType.toLowerCase();
@@ -150,11 +158,11 @@ public class RenderOutput
 			 * Create the render rectangle.
 			 */
 			Rectangle2D.Float rect = TreeManager.cameraRect;
-			if (zoomToFull)
-				rect.setRect(0, 0, w, h);
 			float wFactor = w / oldW;
 			float hFactor = h / oldH;
-			System.out.println(rect);
+			if (zoomToFull)
+				rect.setRect(0, 0, oldW, oldH);
+//			System.out.println(rect);
 			r.render(canvas, rect.x*wFactor, rect.y*hFactor, rect.width*wFactor, rect.height*hFactor, true);
 
 			canvas.endDraw();
@@ -169,12 +177,15 @@ public class RenderOutput
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			PhyloWidget.setMessage("Output failed!");
+			PhyloWidget.setMessage("Output failed: "+e.getMessage());
+			System.gc();
+			return;
 		} finally
 		{
 			PhyloWidget.cfg.renderThreshold = oldThreshold;
 			PhyloWidget.cfg.minTextSize = oldTextSize;
 			PhyloWidget.cfg.useDoubleBuffering = oldDoubleBuff;
+			isOutputting = false;
 			p.loop();
 		}
 	}

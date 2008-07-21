@@ -19,11 +19,13 @@
 package org.andrewberman.ui.menu;
 
 import java.awt.BasicStroke;
+import java.awt.Cursor;
 import java.awt.Stroke;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -122,7 +124,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	public static final int DOWN = 2;
 
 	public static final int OVER = 1;
-	protected static MenuTimer timer = MenuTimer.instance();
+	protected static MenuTimer timer;
 
 	/**
 	 * Constants that define the values for the "state" field.
@@ -149,8 +151,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	protected float width, height;
 	protected float x, y;
 
-	protected boolean drawnOnce; 
-	
+	protected boolean drawnOnce;
+
 	protected int z;
 
 	/**
@@ -165,9 +167,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
 		style = new MenuStyle();
+		timer = UIGlobals.g.getMenuTimer();
 	}
 
 	ArrayList<MenuItem> itemsToAdd = new ArrayList();
+	private ConditionChecker condition;
 
 	public MenuItem add(MenuItem item)
 	{
@@ -202,8 +206,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 			i.dispose();
 		}
 	}
-	
-	
+
 	protected void calcPreferredSize()
 	{
 	}
@@ -461,10 +464,10 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	protected int getState()
 	{
-		//		if (!isEnabled())
-		//			return DISABLED;
-		//		else
-		return state;
+		if (!isEnabled())
+			return DISABLED;
+		else
+			return state;
 	}
 
 	public Stroke getStroke()
@@ -486,6 +489,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public Color getStrokeColor()
 	{
+		if (!isEnabled())
+			return getStyle().getC("c.foregroundDisabled");
 		return getStyle().getC("c.foreground");
 	}
 
@@ -648,6 +653,14 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 			if (parent != null)
 				parent.needsZSort = true;
 		}
+		
+		/*
+		 * If the mouse is inside but we're disabled, we want to not show the hand cursor.
+		 */
+		if (mouseInside && !isEnabled())
+		{
+			menu.setCursor(Cursor.DEFAULT_CURSOR);
+		}
 	}
 
 	public void keyEvent(KeyEvent e)
@@ -661,11 +674,21 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		//		}
 	}
 
+	public boolean checkCondition()
+	{
+		if (condition != null)
+			return condition.isTrue();
+		else
+			return true;
+	}
+	
 	/**
 	 * Lays out this MenuItem and all of its sub-items.
 	 */
 	public synchronized void layout()
 	{
+		setEnabled(checkCondition());
+		
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem) items.get(i);
@@ -754,14 +777,16 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return this;
 	}
 
+	public MenuItem setCondition(Object object, String method)
+	{
+		this.condition = new ConditionChecker(object, method);
+		menu.layout();
+		return this;
+	}
+
 	public void setEnabled(boolean enabled)
 	{
 		this.enabled = enabled;
-	}
-
-	public void setDisabled(boolean disabled)
-	{
-		setEnabled(!disabled);
 	}
 
 	protected boolean shouldPerformFill()
@@ -927,12 +952,50 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	{
 		getStyle().set("f.fontSize", size);
 	}
-	
+
 	protected void zSort()
 	{
 		if (zComp == null)
 			zComp = new ZDepthComparator();
 		Collections.sort(zSortedItems, zComp);
+	}
+
+	class ConditionChecker
+	{
+		String ifMethod;
+		Object ifObject;
+		Method methodCall;
+
+		public ConditionChecker(Object obj, String method)
+		{
+			this.ifObject = obj;
+			this.ifMethod = method;
+			try
+			{
+				methodCall = obj.getClass().getMethod(method);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				// Do nothing.
+			}
+		}
+
+		public boolean isTrue()
+		{
+			if (methodCall != null)
+			{
+				try
+				{
+					return ((Boolean) methodCall.invoke(ifObject))
+							.booleanValue();
+				} catch (Exception e)
+				{
+					e.printStackTrace();
+					return false;
+				}
+			} else
+				return false;
+		}
 	}
 
 }

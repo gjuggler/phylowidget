@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui;
 
@@ -99,8 +99,9 @@ public final class UIUtils
 
 	public static Cursor createBlankCursor(PApplet p)
 	{
-		Image image = p.createImage(new MemoryImageSource(0,0,new int[0],0,0));
-//		Image image = UIUtils.PImageToImage(p,img);
+		Image image = p.createImage(new MemoryImageSource(0, 0, new int[0], 0,
+				0));
+		//		Image image = UIUtils.PImageToImage(p,img);
 		return Toolkit.getDefaultToolkit().createCustomCursor(image,
 				new java.awt.Point(0, 0), "asdf");
 	}
@@ -114,7 +115,7 @@ public final class UIUtils
 		PImage resized = p.createImage(d.width, d.height, PImage.ARGB);
 		resized.copy(img, 0, 0, img.width, img.height, 0, 0, img.width,
 				img.height);
-		Image image = UIUtils.PImageToImage(p,resized);
+		Image image = UIUtils.PImageToImage(p, resized);
 		return Toolkit.getDefaultToolkit().createCustomCursor(image,
 				new java.awt.Point(offsetX, offsetY), "asdf");
 	}
@@ -289,9 +290,24 @@ public final class UIUtils
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
-			FontMetrics fm = getMetrics(g, font.font, size);
-			Graphics2D g2 = ((PGraphicsJava2D) g).g2;
-			return (float) fm.getStringBounds(text, g2).getWidth();
+			FontMetrics fm = null;
+			while (fm == null)
+			{
+				try
+				{
+					fm = getMetrics(g, font.font, size);
+				} catch (Exception e)
+				{
+					try
+					{
+						Thread.sleep(200);
+					} catch (InterruptedException e1)
+					{
+						e1.printStackTrace();
+					}
+				}
+			}
+
 			// return fm.stringWidth(text);
 		}
 		char[] chars = text.toCharArray();
@@ -303,18 +319,20 @@ public final class UIUtils
 		return width;
 	}
 
-	public static float getTextWidth(Graphics2D g2, Font font, float size, String text)
+	public static float getTextWidth(Graphics2D g2, Font font, float size,
+			String text)
 	{
 		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
 		return (float) fm.getStringBounds(text, g2).getWidth();
 	}
-	
-	public static float getTextHeight(Graphics2D g2, Font font, float size, String text)
+
+	public static float getTextHeight(Graphics2D g2, Font font, float size,
+			String text)
 	{
 		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
 		return (float) fm.getStringBounds(text, g2).getHeight();
 	}
-	
+
 	/**
 	 * Convenience function for <code>isJava2D(PGraphics pg)</code>
 	 * 
@@ -604,10 +622,14 @@ public final class UIUtils
 	{
 		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_OFF);
+		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+				RenderingHints.VALUE_STROKE_PURE);
 		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 	}
-	
+
 	public static void setRenderingHints(PGraphics g)
 	{
 		if (g instanceof PGraphicsJava2D)

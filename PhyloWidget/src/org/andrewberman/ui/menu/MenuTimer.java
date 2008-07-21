@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui.menu;
 
@@ -31,28 +31,22 @@ package org.andrewberman.ui.menu;
  */
 public final class MenuTimer extends Thread
 {
-	private static MenuTimer instance;
-
-	MenuItem item;
-	MenuItem parent;
-	MenuItem lastSet;
-	static final int delay = 100;
+	public MenuItem item;
+	public MenuItem parent;
+	public MenuItem lastSet;
+	static final int delay = 50;
 	boolean unset;
 	boolean startDelay;
 
-	public static MenuTimer instance()
+	@Override
+	public String toString()
 	{
-		if (instance == null || !instance.isAlive())
-		{
-			instance = new MenuTimer();
-			instance.start();
-		}
-		return instance;
+		return "MenuTimer";
 	}
-
+	
 	public void run()
 	{
-		while (!Thread.currentThread().isInterrupted())
+		while (true)
 		{
 			synchronized (this)
 			{
@@ -85,10 +79,10 @@ public final class MenuTimer extends Thread
 						parent = null;
 					} else
 					{
-//						parent.closeMyChildren();
+						//						parent.closeMyChildren();
 						item.menuTriggerLogic();
 						parent = null;
-//						item = null;
+						//						item = null;
 					}
 				}
 			}
@@ -113,7 +107,7 @@ public final class MenuTimer extends Thread
 	{
 		if (unsetMe == item || (unsetMe == lastSet))
 		{
-//			 System.out.println("Unset item:"+unsetMe);
+			//			 System.out.println("Unset item:"+unsetMe);
 			// parent = unsetMe.nearestMenu;
 			// parent = unsetMe.parent;
 			item = unsetMe;

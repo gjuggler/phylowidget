@@ -10,27 +10,34 @@
 	</item>
 	<item name="View">
 		<item name="Zoom to Full" action="zoomToFull" shortcut="control-F"/>
-		<item name="Renderer Type">
+		<item name="Layout">
 			<item name="Rectangular" action="viewRectangular" shortcut="control-1"/>
 			<item name="Diagonal" action="viewDiagonal" shortcut="control-2"/>
 			<item name="Circular" action="viewCircular" shortcut="control-3"/>
+			<item name="Unrooted" action="viewUnrooted" shortcut="control-4"/>
+			<item name="Options">
+				<item name="Branch Scaling" type="NumberScroller" property="branchScaling" increment="0.05" min="0.01" max="30" format="0.00"/>
+				<item name="Layout Angle" type="NumberScroller" property="layoutAngle" increment="1" min="-360" max="360" format="0.0"/>
+			</item>
 		</item>
-		<item name="Render Options">
-			<!-- <item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" min="5" max="2000"/> -->
-			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="72"/>
-			<item name="Branch Length Scaling" type="NumberScroller" property="branchLengthScaling" increment="0.05" min="0" max="10" />
-			<item name="Stretch to Fit" type="CheckBox" methodCall="setStretchToFit" />
+		<item name="Rendering">
+			<!-- DEPRECATED: 
+				<item name="Render Threshold" type="NumberScroller" property="renderThreshold" increment="5" min="5" max="2000"/>
+				<item name="Branch Length Scaling" type="NumberScroller" property="branchLengthScaling" increment="0.05" min="0" max="10" />
+				<item name="Stretch to Fit" type="CheckBox" methodCall="setStretchToFit" />
+			-->
+			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="72" format="0.0"/>
 			<item name="Show Clade Labels" type="CheckBox" property="showCladeLabels" />
 			<item name="Antialias" type="CheckBox" property="antialias" />
 		</item>
 		<item name="Style">
-			<item name="Text Multiplier" type="NumberScroller" property="textScaling" increment=".02" min="0" max="4"/>
-			<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".5" min="-60" max="60"/>
-			<item name="Node Size" type="NumberScroller" property="nodeSize" increment ="0.05" min="0" max="20"/>
-			<item name="Line Weight" type="NumberScroller" property="lineWidth" increment ="0.05" min="0" max="20"/>
+			<item name="Text Size" type="NumberScroller" property="textScaling" increment=".025" min="0" max="10" format="0.00"/>
+			<item name="Node Size" type="NumberScroller" property="nodeSize" increment ="0.05" min="0" max="50" format="0.00"/>
+			<item name="Line Size" type="NumberScroller" property="lineWidth" increment ="0.05" min="0" max="50" format="0.00"/>
+			<item name="Text Angle" type="NumberScroller" property="textRotation" increment=".2" min="-60" max="60" format="0.0"/>
 		</item>
-		<item name="Show all Labels" type="CheckBox" methodCall="setShowAllLabels"/>
-		<item name="Branch Lengths" type="CheckBox" methodCall="setUseBranchLengths" shortcut="ctrl-b" />
+		<item name="Show all" type="CheckBox" methodCall="setShowAllLabels"/>
+		<item name="Branch Lengths" type="CheckBox" methodCall="setUseBranchLengths" value = "false" shortcut="ctrl-b" />
 	</item>
 	<item name="Tree">
 		<item name="Mutator">

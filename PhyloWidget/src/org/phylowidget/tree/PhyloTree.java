@@ -89,16 +89,6 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		index.add((PhyloNode) vertex);
 	}
 
-	@Override
-	public boolean shouldKeep(PhyloNode v)
-	{
-		if (filter != null)
-		{
-			return filter.shouldKeep(v);
-		} else
-			return true;
-	}
-	
 	public void updateNewick()
 	{
 		if (isValid())

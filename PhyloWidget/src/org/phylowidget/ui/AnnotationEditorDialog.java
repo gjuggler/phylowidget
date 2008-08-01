@@ -29,6 +29,7 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 {
 	PApplet p;
 	PhyloNode node;
+	private Button apply;
 	private Button ok;
 	private Button cancel;
 	private TextArea text;
@@ -84,6 +85,17 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 
 		Dimension buttonSize = new Dimension(50, 30);
 
+		apply = new Button("Apply");
+		apply.setPreferredSize(buttonSize);
+		apply.addActionListener(new ActionListener()
+		{
+
+			public void actionPerformed(ActionEvent e)
+			{
+				commitAnnotations();
+			}
+		});
+		
 		ok = new Button("Ok");
 		ok.setPreferredSize(buttonSize);
 		ok.addActionListener(new ActionListener()
@@ -92,6 +104,7 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 			public void actionPerformed(ActionEvent e)
 			{
 				commitAnnotations();
+				setVisible(false);
 			}
 
 		});
@@ -107,6 +120,7 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 
 		});
 		p.add(new Label("Esc to cancel, Ctrl-Enter to commit.     "));
+		p.add(apply);
 		p.add(ok);
 		p.add(cancel);
 		add(p, BorderLayout.SOUTH);
@@ -120,7 +134,6 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 		 * Do nothing. Just quit.
 		 */
 		setVisible(false);
-//		p.requestFocus();
 	}
 
 	void commitAnnotations()
@@ -151,8 +164,6 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 				e.printStackTrace();
 			}
 		}
-		setVisible(false);
-//		p.requestFocus();
 	}
 
 	public void setVisible(boolean visible)
@@ -191,7 +202,10 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 		if (code == KeyEvent.VK_ENTER)
 		{
 			if (e.isControlDown())
+			{
 				commitAnnotations();
+				setVisible(false);
+			}
 		} else if (code == KeyEvent.VK_ESCAPE)
 			cancelAnnotations();
 	}

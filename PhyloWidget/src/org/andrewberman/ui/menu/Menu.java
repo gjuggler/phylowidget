@@ -715,8 +715,10 @@ public abstract class Menu extends MenuItem implements UIObject
 		{
 			if (newState == MenuItem.OVER || newState == MenuItem.DOWN)
 				timer.setMenuItem(item);
+//				item.menu.menuTriggerLogic();
 			else if (newState == MenuItem.UP)
 				timer.unsetMenuItem(item);
+//				item.menu.close(item);
 		}
 
 		if (newState == MenuItem.DOWN)

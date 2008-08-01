@@ -18,6 +18,8 @@
  */
 package org.phylowidget.tree;
 
+import org.phylowidget.PhyloWidget;
+
 public class CachedVertex extends DefaultVertex
 {
 
@@ -144,6 +146,8 @@ public class CachedVertex extends DefaultVertex
 
 	public double getBranchLength()
 	{
+		if (!PhyloWidget.cfg.useBranchLengths)
+			return 1;
 		return branchLength;
 	}
 

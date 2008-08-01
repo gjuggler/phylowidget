@@ -369,7 +369,7 @@ public class MenuIO
 		}
 	}
 
-	protected static String upperFirst(String s)
+	public static String upperFirst(String s)
 	{
 		String upper = s.substring(0, 1).toUpperCase();
 		String orig = s.substring(1, s.length());

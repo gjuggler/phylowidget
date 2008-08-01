@@ -42,8 +42,7 @@ import processing.core.PImage;
 
 public class RadialMenuItem extends MenuItem
 {
-	protected static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(
-			0, 0, 0, 0, 0, 0);
+	protected static RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(0, 0, 0, 0, 0, 0);
 
 	public static final int HINT_DELAY = 60;
 
@@ -101,8 +100,7 @@ public class RadialMenuItem extends MenuItem
 			contained = true;
 		if (isShowingLabel())
 		{
-			Rectangle2D.Float temp = new Rectangle2D.Float(rectX, rectY, rectW,
-					rectH);
+			Rectangle2D.Float temp = new Rectangle2D.Float(rectX, rectY, rectW, rectH);
 			if (temp.contains(pt.x, pt.y))
 				contained = true;
 		}
@@ -118,9 +116,15 @@ public class RadialMenuItem extends MenuItem
 		float degHi = radToDeg(-tHi);
 		tempArc.setAngleStart(degLo);
 		tempArc.setAngleExtent(degHi - degLo);
-		wedge = new Area(tempArc);
-		Area delete = new Area(tempCircle);
-		wedge.subtract(delete);
+		try
+		{
+			wedge = new Area(tempArc);
+			Area delete = new Area(tempCircle);
+			wedge.subtract(delete);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -145,8 +149,8 @@ public class RadialMenuItem extends MenuItem
 		//		if (hintTrigger == -1)
 		//			dt = -1;
 		loadImage();
-		boolean drawHintInstead = (icon == null) ;
-//				|| (mouseInside && dt > HINT_DELAY);
+		boolean drawHintInstead = (icon == null);
+		//				|| (mouseInside && dt > HINT_DELAY);
 		if (drawHintInstead)
 			drawHint();
 		if (!drawHintInstead)
@@ -167,12 +171,11 @@ public class RadialMenuItem extends MenuItem
 	{
 		if (icon == null)
 			return;
-		
+
 		Graphics2D g2 = menu.buff.g2;
 
 		float rMid = (rLo + rHi) / 2;
-		float imgDiag = (float) Math.sqrt(icon.width * icon.width + icon.height
-				* icon.height);
+		float imgDiag = (float) Math.sqrt(icon.width * icon.width + icon.height * icon.height);
 		hintSize = (rHi - rLo) / imgDiag;
 		hintSize = Math.min(hintSize, (float) Math.sin(tHi - tLo) * rMid);
 		hintSize *= 0.8f;
@@ -204,11 +207,9 @@ public class RadialMenuItem extends MenuItem
 		// this.isAncestorOf(menu.currentlyHovered);
 		// if (this.isAncestorOf(menu.currentlyHovered))
 		if (isOpen())
-			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi,
-					x + rHi, y + rHi));
+			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi, x + rHi, y + rHi));
 		else
-			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi,
-					x + rHi, y + rHi));
+			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi, x + rHi, y + rHi));
 		g2.fill(wedge);
 
 		g2.setStroke(getStroke());
@@ -224,8 +225,7 @@ public class RadialMenuItem extends MenuItem
 			float scale = (rHi - rLo) / 2;
 			float dx = (float) (Math.cos(theta) * scale / 4f);
 			float dy = (float) (Math.sin(theta) * scale / 4f);
-			AffineTransform at = AffineTransform.getTranslateInstance(outerX
-					+ dx, outerY + dy);
+			AffineTransform at = AffineTransform.getTranslateInstance(outerX + dx, outerY + dy);
 			at.scale(scale, scale);
 			at.rotate(theta);
 			Area tri = (Area) getStyle().get("subTriangle");
@@ -258,8 +258,7 @@ public class RadialMenuItem extends MenuItem
 		if (items.size() > 0)
 			displayLabel = displayLabel.concat("...");
 		if (!drawingHint() && hint != 0)
-			displayLabel = displayLabel.concat(" (" + String.valueOf(hint)
-					+ ")");
+			displayLabel = displayLabel.concat(" (" + String.valueOf(hint) + ")");
 		return displayLabel;
 	}
 
@@ -399,8 +398,7 @@ public class RadialMenuItem extends MenuItem
 			RadialMenuItem seg = (RadialMenuItem) items.get(i);
 			seg.setPosition(x, y);
 			float theta = thLo + i * thetaStep;
-			seg.layout(radHi, radHi + (radHi - radLo) * SIZE_DECAY, theta,
-					theta + thetaStep);
+			seg.layout(radHi, radHi + (radHi - radLo) * SIZE_DECAY, theta, theta + thetaStep);
 		}
 	}
 
@@ -418,8 +416,7 @@ public class RadialMenuItem extends MenuItem
 		innerY = y + sin * rLo;
 		PFont font = getStyle().getFont("font");
 		FontMetrics fm = UIUtils.getMetrics(menu.canvas.g, font.font, 1);
-		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2)
-				.getHeight();
+		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2).getHeight();
 		fontSize = (rHi - rLo) / unitTextHeight * .75f;
 		// Keep the font size readable.
 		fontSize = Math.max(8, fontSize);
@@ -429,12 +426,10 @@ public class RadialMenuItem extends MenuItem
 
 		// Rectangle2D bounds = fm.getStringBounds(label, menu.buff.g2);
 
-		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize,
-				getDisplayLabel(), true);
+		textHeight = UIUtils.getTextHeight(menu.buff, font, fontSize, getDisplayLabel(), true);
 		// textHeight = (float) bounds.getHeight();
 		// textWidth = (float) bounds.getWidth();
-		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize,
-				getDisplayLabel(), true);
+		textWidth = UIUtils.getTextWidth(menu.buff, font, fontSize, getDisplayLabel(), true);
 		// Calculate the necessary x and y offsets for the text.
 		float outX = x + cos * (rHi + textHeight);
 		float outY = y + sin * (rHi + textHeight);
@@ -471,16 +466,14 @@ public class RadialMenuItem extends MenuItem
 		Rectangle2D charBounds = fm.getStringBounds(s, menu.buff.g2);
 		float charHeight = (float) charBounds.getHeight();
 		float charWidth = (float) charBounds.getWidth();
-		float charDiagonal = PApplet.sqrt(charHeight * charHeight + charWidth
-				* charWidth);
+		float charDiagonal = PApplet.sqrt(charHeight * charHeight + charWidth * charWidth);
 		hintSize = (rHi - rLo) / charDiagonal;
 		hintSize = Math.min(hintSize, (float) Math.sin(tHi - tLo) * rMid);
 		fm = UIUtils.getMetrics(menu.buff, font.font, hintSize);
 		charBounds = fm.getStringBounds(s, menu.buff.g2);
 		charHeight = (float) charBounds.getHeight();
 		charWidth = (float) charBounds.getWidth();
-		charDiagonal = PApplet.sqrt(charHeight * charHeight + charWidth
-				* charWidth);
+		charDiagonal = PApplet.sqrt(charHeight * charHeight + charWidth * charWidth);
 		float charDesc = fm.getDescent();
 
 		hintX = centerX - charWidth / 2.0f;
@@ -490,9 +483,9 @@ public class RadialMenuItem extends MenuItem
 	protected synchronized void loadImage()
 	{
 		if (icon == null && iconFile != null && menu != null && menu.canvas != null)
-			{
-				icon = menu.canvas.loadImage(iconFile);
-			}
+		{
+			icon = menu.canvas.loadImage(iconFile);
+		}
 	}
 
 	float radToDeg(float rad)

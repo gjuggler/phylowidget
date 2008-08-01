@@ -3,7 +3,7 @@ package org.phylowidget;
 public interface UsefulConstants
 {
 	/**
-	 * NHX Annotation variables.
+	 * NHX Annotation variables. (defined at http://www.phylosoft.org/forester/NHX.html).
 	 */
 	public static final String GENE_NAME = "GN";
 	public static final String BOOTSTRAP = "B";
@@ -25,9 +25,8 @@ public interface UsefulConstants
 //	public static final String SUBTREE_NEIGHBORS = "SN";
 //	public static final String SUPER_ORTHOLOGOUS = "SO";
 	
-	
-	// The above variables represent the vanilla NHX standard (defined at http://www.phylosoft.org/forester/NHX.html).
-	// Below are some of our own juicy extras.
+	 
+	// Below are some of our own juicy extras, stacked on top of the plain vanilla NHX.
 	public static final String IMG_TAG = "IMG";			// a URL to an image that will be displayed. 
 	public static final String OLD_IMG_TAG = "OLD_IMG";	// Used for internal caching purposes by PhyloWidget.
 	
@@ -37,5 +36,8 @@ public interface UsefulConstants
 	// NB: The values of the color annotations should be in R,G,B format, either with or without parentheses (your choice!)
 	//     [Alternatively, if you specify a single integer value, it will be interpreted as a single grayscale value]
 	// NB: The above color annotations take precedence over any other auto-coloring that is usually done.
-	
+	public static final String LABEL_SIZE = "LSZ"; 		// Multiplier for label text size.
+	public static final String NODE_SIZE = "NSZ";		// Multiplier for node marker size.
+	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
+	public static final String IMAGE_SIZE = "ISZ";		// Multiplier for photo size.
 }

@@ -31,7 +31,7 @@ import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.RenderStyleSet;
+import org.phylowidget.render.RenderConstants;
 
 import processing.core.PApplet;
 
@@ -97,7 +97,8 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 		dist = (dist > maxD ? maxD : dist);
 		float alpha = (maxD - dist) / maxD * 255;
 
-		float rad = r.render.getRowHeight();
+//		float rad = r.render.getNodeRadius() * 2;
+		float rad = 50;
 		rect.setFrameFromCenter(r.node.getX(), r.node.getY(), r.node.getX() - rad, r.node.getY()
 				- rad);
 		// rect.x = r.node.x;
@@ -110,7 +111,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 		hTween.update();
 
 		hoverMult = wTween.getPosition();
-		int color = RenderStyleSet.defaultStyle().hoverColor.getRGB();
+		int color = RenderConstants.hoverColor.getRGB();
 		p.stroke(color * aTween.getPosition());
 
 		if (solid)
@@ -231,7 +232,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 //		r.render.getNodePosition(r.node, tempPt);
 		tempPt.setLocation(r.node.getX(),r.node.getY());
 		// float radius = r.render.getNodeRadius();
-		float radius = r.render.getRowHeight() * wTween.getPosition();
+		float radius = r.render.getTextSize()/2 * wTween.getPosition();
 		radius = Math.max(radius,5);
 		float x = pt.x - tempPt.x;
 		float y = pt.y - tempPt.y;

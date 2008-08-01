@@ -135,9 +135,10 @@ public class RectMover extends MovableCamera
 		h = hTween.getPosition();
 	}
 	
+	static final float minZoom = 0.0001f;
+	
 	private void constrainToScreen()
 	{
-		float minZoom = 0.2f;
 		if (getZ() < minZoom)
 		{
 			nudgeTo(xTween.getBegin(),yTween.getBegin());

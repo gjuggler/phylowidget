@@ -36,6 +36,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
+import org.phylowidget.PhyloWidget;
 
 public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		extends ListenableDirectedWeightedGraph<V, E>
@@ -359,6 +360,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
+	public boolean isRoot(V vertex)
+	{
+		return getParentOf(vertex) == null;
+	}
+	
 	public int getMaxDepthToLeaf(V vertex)
 	{
 		int maxDepth = 0;

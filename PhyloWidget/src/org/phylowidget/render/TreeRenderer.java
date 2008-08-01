@@ -51,12 +51,14 @@ public interface TreeRenderer
 
 	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender);
 
-	public UIRectangle getVisibleRect();
+//	public UIRectangle getVisibleRect();
 	
 	public void layoutTrigger();
 
 	public void setTree(RootedTree t);
 
+	public void setLayout(TreeLayout layout);
+	
 	public RootedTree getTree();
 
 	public void dispose();
@@ -65,10 +67,12 @@ public interface TreeRenderer
 	
 	public void nodesInRange(ArrayList list, Rectangle2D.Float rect);
 
-	public Object rangeForNode(Object node);
+//	public Object rangeForNode(Object node);
 
-	public float getRowHeight();
+//	public float getRowHeight();
 
+	public float getNodeRadius();
+	
 	public float getTextSize();
 
 	public void positionText(PhyloNode node, TextField text);

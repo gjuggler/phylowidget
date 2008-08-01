@@ -18,35 +18,24 @@
  */
 package org.phylowidget;
 
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.Hashtable;
+import java.util.LinkedList;
 
 import javax.swing.SwingUtilities;
 
-import org.andrewberman.ui.Color;
-import org.andrewberman.ui.EventManager;
-import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
-import org.phylowidget.tree.PhyloTree;
-import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeIO;
 import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
 public class PhyloWidget extends PApplet
@@ -56,6 +45,8 @@ public class PhyloWidget extends PApplet
 	public static TreeManager trees;
 	public static PhyloConfig cfg;
 	public static PhyloUI ui;
+
+	public static PhyloWidget p;
 
 	public static float FRAMERATE = 60;
 	public static float TWEEN_FACTOR = 30f / FRAMERATE;
@@ -72,6 +63,7 @@ public class PhyloWidget extends PApplet
 	public PhyloWidget()
 	{
 		super();
+		PhyloWidget.p = this;
 	}
 
 	public void setup()
@@ -110,7 +102,10 @@ public class PhyloWidget extends PApplet
 		clipUpdater = new PWClipUpdater();
 
 		ui.setup();
+		
 		trees.setup();
+		
+		clearQueues();
 	}
 
 	DoubleBuffer dbr;
@@ -130,6 +125,9 @@ public class PhyloWidget extends PApplet
 	{
 		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
 
+		// If we have setting changes or method calls on the queue, run them now.
+		clearQueues();
+
 		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 			messageString = "";
 		if (messageString.length() != 0)
@@ -142,6 +140,30 @@ public class PhyloWidget extends PApplet
 		}
 	}
 
+	private void clearQueues()
+	{
+		if (!settingMap.isEmpty())
+		{
+			MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, settingMap);
+			settingMap.clear();
+		}
+
+		if (!methodQueue.isEmpty())
+		{
+			while (!methodQueue.isEmpty())
+			{
+				try
+				{
+					Method m = PhyloUI.class.getMethod(methodQueue.removeFirst());
+					m.invoke(ui);
+				} catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public void stop()
 	{
 		super.stop();
@@ -149,7 +171,7 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void destroy()
 	{
-//		System.out.println("Destroying.");
+		//		System.out.println("Destroying.");
 		noLoop();
 		super.destroy();
 		if (trees != null)
@@ -174,8 +196,7 @@ public class PhyloWidget extends PApplet
 		textFont(UIGlobals.g.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
-		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40,
-				height - 10);
+		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40, height - 10);
 		// Uncomment to print out the number of leaves.
 		// RootedTree t = trees.getTree();
 		// int numLeaves = t.getNumEnclosedLeaves(t.getRoot());
@@ -184,8 +205,7 @@ public class PhyloWidget extends PApplet
 
 	void drawNumLeaves()
 	{
-		int leaves = trees.getTree().getNumEnclosedLeaves(
-				trees.getRenderer().getTree().getRoot());
+		int leaves = trees.getTree().getNumEnclosedLeaves(trees.getRenderer().getTree().getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
 		textFont(UIGlobals.g.getPFont());
@@ -242,6 +262,15 @@ public class PhyloWidget extends PApplet
 		return true;
 	}
 
+	public void close()
+	{
+		if (frame != null) // We're in standalone mode
+		{
+			frame.setVisible(false);
+			destroy();
+		}
+	}
+	
 	public boolean updateTree(String s)
 	{
 		treeUpdater.triggerUpdate(s);
@@ -254,23 +283,18 @@ public class PhyloWidget extends PApplet
 		return true;
 	}
 
-	public void changeSetting(String setting, String newValue)
+	Hashtable<String, String> settingMap = new Hashtable<String, String>();
+
+	public synchronized void changeSetting(String setting, String newValue)
 	{
-		HashMap m = new HashMap();
-		m.put(setting, newValue);
-		MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, m);
+		settingMap.put(setting, newValue);
 	}
 
-	public void callMethod(String method)
+	LinkedList<String> methodQueue = new LinkedList<String>();
+
+	public synchronized void callMethod(String method)
 	{
-		try
-		{
-			Method m = PhyloUI.class.getMethod(method);
-			m.invoke(ui);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		methodQueue.add(method);
 	}
 
 	@Override

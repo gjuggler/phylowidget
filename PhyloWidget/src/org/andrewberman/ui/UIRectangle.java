@@ -18,6 +18,7 @@
  */
 package org.andrewberman.ui;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.ui.ifaces.Malleable;
@@ -42,8 +43,17 @@ public class UIRectangle extends Rectangle2D.Float
 	
 	public float distToPoint(Point pt)
 	{
-		float px = pt.x;
-		float py = pt.y;
+		return distToPoint(this,pt);
+	}
+	
+	public static float distToPoint(Rectangle2D r, Point2D pt)
+	{
+		float px = (float)pt.getX();
+		float py = (float)pt.getY();
+		float y = (float)r.getY();
+		float x = (float)r.getX();
+		float width = (float)r.getWidth();
+		float height = (float)r.getHeight();
 		/*
 		 * First, look for the "easy" case where we can do a straight subtraction.
 		 */
@@ -58,7 +68,7 @@ public class UIRectangle extends Rectangle2D.Float
 		/*
 		 * If we contain this rectangle, return 0
 		 */
-		if (this.contains(pt)) return 0;
+		if (r.contains(pt)) return 0;
 		/*
 		 * Now, handle the "hard" case, where we have to calculate from the corners.
 		 */

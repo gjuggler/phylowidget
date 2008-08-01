@@ -363,7 +363,7 @@ public class TreeIO
 				/*
 				 * All colons should be stored as "&colon;". Let's get them back.
 				 */
-				attr = attr.replaceAll("&colon;", ":");
+				attr = attr.replaceAll(COLON_REPLACE, ":");
 				int ind = attr.indexOf('=');
 				if (ind != -1)
 				{
@@ -383,7 +383,25 @@ public class TreeIO
 		{
 			String length = nameAndLength.substring(colonInd + 1);
 			name = nameAndLength.substring(0, colonInd);
+			
+			if (length.contains("[")) // We've got an annoying bootstrap value stored as )species_name:1.0[100] .
+			{
+				int startInd = length.indexOf("[");
+				int endInd = length.indexOf("]");
+				String bootstrap = length.substring(startInd+1,endInd);
+				length = length.substring(0,startInd);
+				if (v instanceof PhyloNode)
+				{
+					PhyloNode pn = (PhyloNode)v;
+					pn.setAnnotation("b", bootstrap);
+				}
+			}
+			try {
 			curLength = Double.parseDouble(length);
+			} catch (Exception e)
+			{
+				curLength = 1;
+			}
 		}
 
 		s = name;
@@ -477,7 +495,7 @@ public class TreeIO
 					/*
 					 * Turn all colons into "&colon;".
 					 */
-					value = value.replaceAll(":", "&colon;");
+					value = value.replaceAll(":", COLON_REPLACE);
 					sb.append(":" + st + "=" + value);
 				}
 				sb.append("]");
@@ -485,6 +503,7 @@ public class TreeIO
 		}
 	}
 
+	static final String COLON_REPLACE = "&colon;";
 	static Pattern escaper = Pattern.compile("([^a-zA-Z0-9])");
 
 	public static String escapeRE(String str)
@@ -722,6 +741,9 @@ public class TreeIO
 			while (m.find(index))
 			{
 				String annotation = m.group();
+				// If we recognize a URL in the annotation, replace it with the colon replacement.
+				annotation = annotation.replaceAll("http:", "http"+COLON_REPLACE);
+				annotation = annotation.replaceAll("ftp:", "ftp"+COLON_REPLACE);
 				String key = "#ANNOT_" + String.valueOf(i) + "#";
 				annotationMap.put(key, annotation);
 				sb.replace(m.start(), m.end(), key);

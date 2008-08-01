@@ -76,8 +76,14 @@ public class RenderOutput
 			 * Create the render rectangle.
 			 */
 			Rectangle2D.Float rect = TreeManager.cameraRect;
+			Rectangle2D.Float oldRect = rect;
 			if (zoomToFull)
-				rect.setRect(0, 0, p.width, p.height);
+			{
+				TreeManager.camera.fillScreen(0.5f);
+				TreeManager.camera.fforward();
+				PhyloWidget.trees.update();
+				rect = TreeManager.cameraRect;
+			}
 			/*
 			 * Do the rendering!
 			 */

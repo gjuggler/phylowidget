@@ -61,11 +61,11 @@ public class PhyloConfig
 	 */
 	public String search = "";
 	/*
-	 * Set the starting renderer type.
+	 * Set the starting layout type.
 	 * 
-	 * Possible values: Rectangular, Diagonal, and Circular
+	 * Possible values: Rectangular, Diagonal, Circular, and Unrooted.
 	 */
-	public String renderer = "Rectangular";
+	public String layout = "Rectangular";
 
 	/*
 	 * Choose the preset XML menu files which PhyloWidget will load.
@@ -76,7 +76,7 @@ public class PhyloConfig
 	 * You may also simply let this string be the XML data which you want to load. This is useful for
 	 * demonstration purposes, letting the user edit and change the menu structure in real-time.
 	 * 
-	 * The following menu files exist:
+	 * Core menu definitions:
 	 *   - "context.xml" 			The context menu which appears when you click a node.
 	 *   - "dock.xml" 				The dock, which holds the arrow, pan, and zoom tools.
 	 *   - "toolbar.xml" 			The toolbar, which sits at the top of the screen and contains 
@@ -89,15 +89,13 @@ public class PhyloConfig
 	 *   - "context-linkout.xml" 		A context menu which lets you link out to other sites.
 	 *   								See the XML file for more information.
 	 *   - "dock-hidden.xml"			A hidden dock. Useful for providing the dock's functionality without
-	 *   								cluttering up the screen. Users use the keyboard shortcuts to switch
-	 *   								between tools.
+	 *   								cluttering up the screen. Users can still use the keyboard shortcuts 
+	 *   								to switch between tools.
 	 *   - "toolbar-hidden.xml"			Same idea as above, but with the toolbar.
 	 */
 	public String menus = "dock.xml;toolbar.xml;context.xml";
 
-	/*
-	 * Colors: You can modify the foreground and background colors which PhyloWidget uses.
-	 * 
+	/* Colors: You can modify the foreground and background colors which PhyloWidget uses.
 	 * The new value should be formatted as below; a triplet of integer RGB values enclosed in parentheses.
 	 */
 	public String backgroundColor = "(255,255,255)";
@@ -113,34 +111,48 @@ public class PhyloConfig
 	public String nodeShape = "circle";
 
 	/*
-	 * The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
+	 * How to handle the angles of rotated nodes. usable values:
+	 *   "none" -- keep rotated nodes at all angles (VERY SLOW with large trees)
+	 *   "quantize" -- Quantize the rotation in 45-degree increments (a little faster...)
+	 *   "level" -- Level all angles to horizontal (much faster!)
 	 */
+	public String angleHandling = "quantize";
+	
+	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	public float textRotation = 0f; 				// Text rotation, in degrees.
-	public float textScaling = 0.5f; 					// Text scaling, where a value of 1.0 is normal size.
+	public float textScaling = .8f; 				// Text scaling, where a value of 1.0 is normal size.
 	public float imageSize = 0.95f;					// Image scaling, where a value of 1.0 is normal size.
 	public float lineWidth = 1f; 					// Line width. 0 is minimum, 1 is a pretty normal size.
-													// 10 is as high as you'll want to go.
+													//    10 is as high as you'll want to go.
 	public float nodeSize = 2f; 					// Node size. Same range as line width: 0 to 10 is reasonable.
+	public float innerNodeRatio = 1f;				// Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
 	public float renderThreshold = 150f; 			// Maximum number of nodes to render per frame.
 	public float minTextSize = 10; 					// Minimum text size for leaf node labels.
-	public float branchLengthScaling = 1f; 			// How much to scale the branch lengths?
-	
+//	public float branchLengthScaling = 1f; 			// DEPRECATED.
+	public float branchScaling = 1f;				// Only used with the Cladogram renderer... scales the width.
+	public float layoutAngle = 0;					// The starting angle for the layout (only applicable for circular and unrooted layouts)
+	public float animationFrames = 30;				// The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
+	public float viewportX = 0;						// The x position of the viewport.
+	public float viewportY = 0;						// Ditto.
+	public float viewportZoom = 0.7f;					// I'll bet you can guess this one.
 	
 	public boolean showCladeLabels = false; 		// Should we show labels of non-leaf nodes?
-	public boolean stretchToFit = false;			// Stretches the tree to fit the width of the display.
+//	public boolean stretchToFit = false;			// DEPRECATED.
 	public boolean useBranchLengths = false; 		// Should the renderer display the tree using the branch length information?
 	public boolean showAllLabels = false; 			// Should the renderer show all labels? This OVERRIDES the minTextSize setting,
-													// so that labels are shown no matter how small they must be displayed.
+													//    so that labels are shown no matter how small they must be displayed.
+	public boolean hideAllLabels = false;			// Set to TRUE to hide all labels from being drawn. OVERRIDES the showAllLabels setting.
 	public boolean prioritizeDistantLabels = false; // This controls how PhyloWidget prioritizes the display of certain nodes above others.
-													// If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
-													// the root, instead of those that are closest (in terms of # of branches to the root).
-	public boolean useDoubleBuffering = true; 		// Probably don't want to mess with this one too much -- the double buffering really helps!
-	public boolean antialias = false;				// When set to true this slows down the rendering significantly, but looks much prettier!
+													//    If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
+													//    the root, instead of those that are closest (in terms of # of branches to the root).
+	public boolean useDoubleBuffering = true; 		// To be honest you probably don't want to mess with this one -- the double buffering really helps!
+	public boolean antialias = false;				// When set to true this slows down the rendering significantly, but looks much better.
 	public boolean outputAllInnerNodes = false; 	// Kind of a strange one: if set to true, PhyloWidget will *always* output 
-													// the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
+													//    the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
 	public boolean enforceUniqueLabels = false; 	// Enforce uniqueness of node labels.
+	
 	public boolean ignoreAnnotations = false;		// ANNOTATIONS: Set to true if you want to globally disable PhyloWidget's display and output of NHX annotations.
-	public boolean showBootstrapValues = true;	 	// ANNOTATIONS: Should we show NHX-annotated bootstrap values if they exist?
+	public boolean showBootstrapValues = false;	 	// ANNOTATIONS: Should we show NHX-annotated bootstrap values if they exist?
 	public boolean colorSpecies = true;				// ANNOTATIONS: Should we assign colors to different leaf nodes NHX-annotated with a given species or taxon?
 	public boolean colorDuplications = true;		// ANNOTATIONS: Same idea as the others, but for the node duplication coloring. 
 	public boolean colorBootstrap = true;			// ANNOTATIONS: ditto for bootstrap values.
@@ -149,7 +161,7 @@ public class PhyloConfig
 	 *
 	 * END: URL API Configuration
 	 * 
-	 * The rest is all just code involved in making the configuration work...
+	 * The rest is all just code involved in making these configuration parameters work properly...
 	 */
 
 	public PhyloConfig()
@@ -238,10 +250,10 @@ public class PhyloConfig
 		PhyloWidget.ui.layout();
 	}
 
-	public void setStretchToFit(boolean fitMe)
-	{
-		stretchToFit = fitMe;
-	}
+//	public void setStretchToFit(boolean fitMe)
+//	{
+//		stretchToFit = fitMe;
+//	}
 
 	public void setSearch(String s)
 	{
@@ -257,7 +269,7 @@ public class PhyloConfig
 			t.setEnforceUniqueLabels(b);
 	}
 
-	public void setRenderer(String s)
+	public void setLayout(String s)
 	{
 		s = s.toLowerCase();
 		if (s.equals("diagonal"))
@@ -266,6 +278,9 @@ public class PhyloConfig
 		} else if (s.equals("circular"))
 		{
 			PhyloWidget.trees.circleRender();
+		} else if (s.equals("unrooted"))
+		{
+			PhyloWidget.trees.unrootedRender();
 		} else
 		{
 			PhyloWidget.trees.rectangleRender();
@@ -329,10 +344,36 @@ public class PhyloConfig
 	public void setTextSize(float textSize)
 	{
 		this.textScaling = textSize;
-		PhyloWidget.ui.layout();
+//		PhyloWidget.ui.layout();
 	}
 	
+	public void setLayoutAngle(float layoutAngle)
+	{
+		this.layoutAngle = layoutAngle;
+		PhyloWidget.ui.forceLayout();
+	}
 	
-	public final static String DEFAULT_TREE = "PhyloWidget;";
+	public void setViewportX(float newX)
+	{
+		PhyloWidget.trees.camera.nudgeTo(-newX, PhyloWidget.trees.camera.getY());
+	}
 	
+	public void setViewportY(float newY)
+	{
+		PhyloWidget.trees.camera.nudgeTo(PhyloWidget.trees.camera.getX(), -newY);
+	}
+	
+	public void setViewportZoom(float newZoom)
+	{
+		PhyloWidget.trees.camera.zoomTo(newZoom);
+	}
+	
+	public void setBranchScaling(float newBranchScaling)
+	{
+		this.branchScaling = newBranchScaling;
+		PhyloWidget.ui.forceLayout();
+	}
+	
+	public final static String DEFAULT_TREE = "PhyloWidget";
+
 }

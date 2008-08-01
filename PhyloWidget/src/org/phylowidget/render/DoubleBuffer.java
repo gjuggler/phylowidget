@@ -84,7 +84,7 @@ public class DoubleBuffer implements Runnable
 		}
 
 		/*
-		 * Trigger a repaint in the rendering thread.
+		 * Trigger a repaint in the double-buffering thread.
 		 */
 		triggerRepaint();
 

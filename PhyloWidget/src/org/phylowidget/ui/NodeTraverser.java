@@ -23,6 +23,7 @@ import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +38,11 @@ import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.RenderStyleSet;
+import org.phylowidget.render.RenderConstants;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 
@@ -75,7 +75,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 	private boolean containsPoint(NodeRange r, Point pt)
 	{
 		tempPt.setLocation(getX(r), getY(r));
-		float radius = r.render.getRowHeight() / 2f;
+		float radius = r.render.getNodeRadius();
 		float distance = (float) pt.distance(tempPt);
 		// System.out.println("rad:" + radius + " dist:" + distance);
 		if (distance < radius)
@@ -96,12 +96,12 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		if (isGlowing)
 		{
 			glowTween.update();
-			float glowRadius = PhyloWidget.trees.getRenderer().getRowHeight();
+			float glowRadius = PhyloWidget.trees.getRenderer().getTextSize() / 2;
 			glowRadius *= glowTween.getPosition();
 
 			p.noFill();
 			p.strokeWeight(glowRadius / 10f);
-			int color = RenderStyleSet.defaultStyle().hoverColor.getRGB();
+			int color = RenderConstants.hoverColor.getRGB();
 			p.stroke(color);
 			NodeRange r = getCurRange();
 			float cX = getX(r);
@@ -137,12 +137,12 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		return nr.node;
 	}
 
+	Rectangle2D.Float tempRect = new Rectangle2D.Float();
 	private NodeRange getNearestNode(float x, float y)
 	{
-		getWithinRange(x, y, 30);
+		getWithinRange(x, y, 100);
 		pt.setLocation(x, y);
-//		float nearestDist = Float.MAX_VALUE;
-		float nearestDist = 100;
+		float nearestDist = Float.MAX_VALUE;
 		NodeRange temp = null;
 		for (int i = 0; i < nearNodes.size(); i++)
 		{
@@ -152,7 +152,11 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 			{
 				case (NodeRange.NODE):
 					float dist = (float) pt.distance(getX(r), getY(r));
-
+					if (containsPoint(r, pt))
+					{
+						nearestDist = dist;
+						return r;
+					}
 					if (dist < nearestDist)
 					{
 						temp = r;
@@ -183,12 +187,12 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	float getX(NodeRange r)
 	{
-		return r.render.getX(r.node);
+		return r.node.getRealX();
 	}
 
 	float getY(NodeRange r)
 	{
-		return r.render.getY(r.node);
+		return r.node.getRealY();
 	}
 
 	public void keyEvent(KeyEvent e)
@@ -375,7 +379,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	private NodeRange rangeForNode(TreeRenderer tr, PhyloNode n)
 	{
-		return (NodeRange) tr.rangeForNode(n);
+		return n.range;
 	}
 
 	private void resetGlow()

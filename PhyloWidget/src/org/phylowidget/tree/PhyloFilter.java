@@ -9,18 +9,7 @@ public class PhyloFilter implements TreeFilter<PhyloNode>
 	
 	public boolean shouldKeep(PhyloNode vertex)
 	{
-		if (vertex.getLabel().contains("Homo"))
-		{
-//			System.out.println("Hey!");
-			return false;
-		}
-			else
-			return true;
-//		if (nodesToFilter.contains(vertex))
-//		{
-//			return false;
-//		} else
-//			return true;
+		return true;
 	}
 	
 	public void filterNode(PhyloNode n)

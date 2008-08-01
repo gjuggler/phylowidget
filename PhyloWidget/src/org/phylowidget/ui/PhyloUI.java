@@ -20,10 +20,8 @@ package org.phylowidget.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Label;
-import java.awt.TextArea;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -44,7 +42,6 @@ import org.andrewberman.ui.FocusManager;
 import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.menu.Menu;
-import org.andrewberman.ui.menu.MenuIO;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.Toolbar;
@@ -52,11 +49,9 @@ import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.NodeInfoUpdater;
 import org.phylowidget.net.SecurityChecker;
+import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.render.RenderOutput;
-import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.CachedRootedTree;
-import org.phylowidget.tree.DefaultVertex;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
@@ -84,7 +79,7 @@ public class PhyloUI implements Runnable
 	public SearchBox search;
 
 	NodeInfoUpdater nodeUpdater;
-
+	
 	public PhyloUI(PhyloWidget p)
 	{
 		this.p = p;
@@ -320,6 +315,16 @@ public class PhyloUI implements Runnable
 			PhyloWidget.trees.getRenderer().layoutTrigger();
 		updateJS();
 	}
+	
+	public void forceLayout()
+	{
+		if (PhyloWidget.trees.getRenderer() != null)
+		{
+			BasicTreeRenderer render = (BasicTreeRenderer) PhyloWidget.trees.getRenderer();
+			render.forceLayout();
+		}
+		updateJS();
+	}
 
 	public PhyloNode getCurNode()
 	{
@@ -507,6 +512,11 @@ public class PhyloUI implements Runnable
 	 * View actions.
 	 */
 
+	public void viewUnrooted()
+	{
+		PhyloWidget.trees.unrootedRender();
+	}
+	
 	public void viewRectangular()
 	{
 		PhyloWidget.trees.rectangleRender();
@@ -525,7 +535,7 @@ public class PhyloUI implements Runnable
 	public void zoomToFull()
 	{
 		//		TreeManager.camera.zoomCenterTo(0, 0, p.width, p.height);
-		TreeManager.camera.fillScreen(.8f);
+		TreeManager.camera.fillScreen(.7f);
 	}
 
 	/*

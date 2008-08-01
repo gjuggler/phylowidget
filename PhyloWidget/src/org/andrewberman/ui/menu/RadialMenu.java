@@ -41,11 +41,11 @@ public class RadialMenu extends Menu
 	public float thetaLo = 0;
 	public float thetaHi = PConstants.TWO_PI;
 	float innerRadius;
-	float radius;
+	public float radius;
 
 	private VisibleDepthComparator visComp = new VisibleDepthComparator();
 
-	UIRectangle myRect = new UIRectangle(0, 0, 0, 0);
+	protected UIRectangle myRect = new UIRectangle(0, 0, 0, 0);
 	UIRectangle buffRect = new UIRectangle(0, 0, 0, 0);
 
 	AffineTransform buffTransform, mouseTransform;

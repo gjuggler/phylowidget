@@ -18,7 +18,11 @@
  */
 package org.phylowidget.ui;
 
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.menu.RadialMenu;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
@@ -71,5 +75,35 @@ public final class PhyloContextMenu extends RadialMenu
 	private void setNodeRange(NodeRange r)
 	{
 		curNodeRange = r;
+	}
+	
+	Rectangle2D.Float nodeRect = new Rectangle2D.Float();
+	public void itemMouseEvent(MouseEvent e, Point pt)
+	{
+		super.itemMouseEvent(e, pt);
+		NodeRange r = curNodeRange;
+		if (r == null)
+			return;
+//		if (!isOpen())
+//			return;
+		
+		nodeRect.setFrameFromDiagonal(r.loX,r.loY,r.hiX,r.hiY);
+		float dist = UIRectangle.distToPoint(nodeRect,pt);
+		
+		float fadeDist = Math.max(myRect.width, myRect.height)
+				* FADE_DIST_MULTIPLIER;
+		fadeDist = Math.max(fadeDist, super.radius);
+		if (dist < fadeDist)
+		{
+			if (autoDim)
+			{
+				float normalized = 1f - (dist / fadeDist);
+				aTween.continueTo(normalized);
+				aTween.fforward();
+			}
+		} else
+		{
+			close();
+		}
 	}
 }

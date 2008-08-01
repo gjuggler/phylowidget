@@ -3,9 +3,15 @@ package org.phylowidget;
 public class PhyloRender
 {
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
-		
+		PhyloWidget.main(null);
+		PhyloWidget p = PhyloWidget.p;
+		p.changeSetting("tree", "(a,(b,c))");
+//		p.changeSetting("viewportX", "-200");
+		p.changeSetting("layout","unrooted");
+		Thread.sleep(10000);
+		p.close();
 	}
 
 }

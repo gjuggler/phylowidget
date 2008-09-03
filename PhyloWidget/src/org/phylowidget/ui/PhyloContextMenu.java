@@ -87,6 +87,9 @@ public final class PhyloContextMenu extends RadialMenu
 //		if (!isOpen())
 //			return;
 		
+		if (mouseInside)
+			return;
+		
 		nodeRect.setFrameFromDiagonal(r.loX,r.loY,r.hiX,r.hiY);
 		float dist = UIRectangle.distToPoint(nodeRect,pt);
 		

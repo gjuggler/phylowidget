@@ -36,12 +36,12 @@ import org.andrewberman.ui.tools.Tool;
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderConstants;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;

@@ -3,12 +3,13 @@ package org.phylowidget.render;
 import java.util.HashMap;
 import java.util.List;
 
+import org.andrewberman.ui.Color;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PGraphics;
 
-public class LayoutCircular extends TreeLayout
+public class LayoutCircular extends LayoutBase
 {
 	final static float STARTING_ANGLE = .75f * (float)Math.PI*2f;
 	
@@ -69,6 +70,7 @@ public class LayoutCircular extends TreeLayout
 		{
 			canvas.strokeCap(canvas.ROUND);
 //			canvas.strokeJoin(canvas.ROUND);
+//			canvas.stroke(0,0,0,1f);
 			canvas.line(c.getRealX(), c.getRealY(), rootX + (float) Math.cos(cAr.angle) * pRad, rootY
 					+ (float) Math.sin(cAr.angle) * pRad);
 		} else
@@ -76,6 +78,7 @@ public class LayoutCircular extends TreeLayout
 			// Draw the same line, but only up until the "true" leaf distance.
 			float ratio = cAr.leafRadius / cAr.radius;
 			canvas.strokeCap(canvas.ROUND);
+//			canvas.stroke(.5f,.5f,.5f,255);
 //			canvas.strokeJoin(canvas.ROUND);
 			canvas.line(rootX + (float) Math.cos(cAr.angle) * cAr.leafRadius * scaleX * drawScaleX, rootY
 					+ (float) Math.sin(cAr.angle) * cAr.leafRadius * scaleY * drawScaleY, rootX
@@ -83,8 +86,10 @@ public class LayoutCircular extends TreeLayout
 			
 			// Draw a grayer line.
 			canvas.strokeCap(canvas.SQUARE);
-//			canvas.strokeJoin(canvas.SQUARE);
-			canvas.stroke(200);
+			Color color = new Color(canvas.strokeColor);
+			int avg = (int)((color.getRed() + color.getGreen() + color.getBlue()) / 3.0);
+			avg = Math.max(avg,180);
+			canvas.stroke(new Color(avg,avg,avg).getRGB());
 			canvas.line(rootX + (float) Math.cos(cAr.angle) * cAr.leafRadius * scaleX * drawScaleX, rootY
 				+ (float) Math.sin(cAr.angle) * cAr.leafRadius * scaleY * drawScaleY, c.getRealX(),c.getRealY());
 		}

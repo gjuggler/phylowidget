@@ -46,7 +46,7 @@ public class FontLoader
 //			vera = new PFont();
 //		}
 //		vera = new PFont();
-		InputStream in = p.openStream("vera.ttf");
+		InputStream in = p.createInput("vera.ttf");
 		try
 		{
 			font = Font.createFont(Font.TRUETYPE_FONT, in);

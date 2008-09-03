@@ -20,7 +20,7 @@ package org.phylowidget.net;
 
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.TreeClipboard;
+import org.phylowidget.ui.TreeClipboard;
 
 public class PWClipUpdater extends DelayedAction
 {

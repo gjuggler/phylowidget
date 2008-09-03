@@ -16,20 +16,15 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.tree;
+package org.phylowidget;
 
 import java.util.ArrayList;
 
 import org.andrewberman.ui.unsorted.SearchIndex;
-import org.jgrapht.Graphs;
-import org.jgrapht.event.GraphEdgeChangeEvent;
-import org.jgrapht.event.GraphListener;
-import org.jgrapht.event.GraphVertexChangeEvent;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
-import org.jgrapht.graph.SimpleGraph;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.JSTreeUpdater;
+import org.phylowidget.tree.CachedRootedTree;
+import org.phylowidget.tree.PhyloNode;
 
 public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 {
@@ -39,16 +34,13 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 
 	private SearchIndex<PhyloNode> index = new SearchIndex<PhyloNode>();
 
-	private PhyloFilter filter = new PhyloFilter();
-	
 	private boolean synchronizedWithJS;
 
 	public PhyloTree()
 	{
 		super(DefaultWeightedEdge.class);
-		boolean unique = PhyloWidget.cfg.enforceUniqueLabels;
-//		boolean unique = false;
-		setEnforceUniqueLabels(unique);
+		if (PhyloWidget.cfg != null)
+			setEnforceUniqueLabels(PhyloWidget.cfg.enforceUniqueLabels);
 	}
 
 	public static PhyloTree createDefault()

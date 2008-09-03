@@ -328,7 +328,7 @@ public abstract class Menu extends MenuItem implements UIObject
 
 	protected boolean containsPoint(Point pt)
 	{
-		return false;
+		return false; // Should we just do a simple rectangular overlap with this menu's rectangle?
 	}
 
 	public abstract MenuItem create(String label);

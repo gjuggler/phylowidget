@@ -11,10 +11,10 @@ import java.util.Set;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.TextField;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
@@ -273,6 +273,7 @@ public final class NodeRenderer implements UsefulConstants
 				canvas.rect(offX - thisDotSize / 2, offY - thisDotSize / 2, thisDotSize, thisDotSize);
 			} else
 			{
+				canvas.ellipseMode(PGraphics.CENTER);
 				canvas.ellipse(offX, offY, thisDotSize, thisDotSize);
 			}
 
@@ -413,16 +414,13 @@ public final class NodeRenderer implements UsefulConstants
 
 		private float imageSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
-			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.textScaling * n.bulgeFactor;
+			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.imageSize * n.bulgeFactor;
 			thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
 
 			// If we find a NHX image size annotation, scale accordingly.
 			float iMult = getFloatAnnotation(n, IMAGE_SIZE);
 			if (iMult > -1)
 				thisRowSize *= iMult;
-
-			// Multiply by the scaling factor.
-			thisRowSize *= PhyloWidget.cfg.imageSize;
 
 			return thisRowSize;
 		}
@@ -499,7 +497,6 @@ public final class NodeRenderer implements UsefulConstants
 		@Override
 		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender)
 		{
-			canvas.fill(PhyloWidget.cfg.getTextColor().getRGB());
 			// Calculate the row / text size.
 			float curTextSize = textSizeForNode(r, n);
 
@@ -551,7 +548,8 @@ public final class NodeRenderer implements UsefulConstants
 			/*
 			 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
 			 */
-			canvas.textFont(r.font);
+			canvas.fill(textColor(n));
+//			canvas.textFont(r.font);
 			curTextSize = Math.min(curTextSize, 128);
 			canvas.textSize(curTextSize);
 			//		canvas.textSize(10);
@@ -566,14 +564,13 @@ public final class NodeRenderer implements UsefulConstants
 				{
 					curTextSize *= 0.75f;
 					canvas.textSize(curTextSize);
-					canvas.fill(PhyloWidget.cfg.getTextColor().getRGB());
 					canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
 					float s = strokeForNode(n);
+//					registerPoint(canvas,n,)
 					if (actuallyRender)
 					{
 						canvas.text(n.getLabel(), n.getRealX()-curTextSize / 3 - s, n.getRealY()-s - curTextSize / 5);
 					}
-					
 				}
 			} else
 			{
@@ -611,7 +608,7 @@ public final class NodeRenderer implements UsefulConstants
 
 		static int textColor(PhyloNode n)
 		{
-			if (n.isNHX() && PhyloWidget.cfg.colorSpecies)
+			if (n.isNHX())
 			{
 				int c = Color.black.getRGB();
 				String labelColor = n.getAnnotation(LABEL_COLOR);
@@ -620,10 +617,10 @@ public final class NodeRenderer implements UsefulConstants
 				if (labelColor != null)
 				{
 					c = Color.parseColor(labelColor).getRGB();
-				} else if (tax != null)
+				} else if (tax != null && PhyloWidget.cfg.colorSpecies)
 				{
 					c = taxonColorMap.get(tax).intValue();
-				} else if (spec != null)
+				} else if (spec != null && PhyloWidget.cfg.colorSpecies)
 				{
 					c = taxonColorMap.get(spec);
 				}

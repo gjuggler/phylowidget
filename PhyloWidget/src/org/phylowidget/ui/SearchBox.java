@@ -7,8 +7,8 @@ import org.andrewberman.ui.LayoutUtils;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.menu.TextBox;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.PhyloTree;
 
 import processing.core.PApplet;
 

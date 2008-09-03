@@ -25,7 +25,7 @@ public class UniqueLabeler
 {
 	public static final char sep = '#';
 
-	private HashMap vertexLabels = new HashMap();
+	private HashMap<String,Object> vertexLabels = new HashMap<String,Object>();
 
 	protected void makeLabelUnique(Object object)
 	{

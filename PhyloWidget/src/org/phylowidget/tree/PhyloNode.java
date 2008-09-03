@@ -67,6 +67,7 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 	private Tween xTween;
 	private Tween yTween;
 	public boolean labelWasDrawn;
+	public boolean nodeWasDrawn;
 	public float lastTextSize;
 
 	private ImageSearcher searchResults;
@@ -92,6 +93,14 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 //						searchResults.getImageURL();
 	}
 
+	@Override
+	public double getBranchLength()
+	{
+		if (!PhyloWidget.cfg.useBranchLengths)
+			return 1;
+		return super.getBranchLength();
+	}
+	
 	public void setPosition(PhyloNode n)
 	{
 		if (n == null)

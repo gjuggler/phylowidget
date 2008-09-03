@@ -31,9 +31,9 @@ import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.TreeManager;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 

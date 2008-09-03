@@ -118,7 +118,7 @@ public class DoubleBuffer implements Runnable
 					dummyGraphics.image = offscreen;
 					dummyGraphics.g2 = offscreenG;
 
-					dummyGraphics.defaults();
+//					dummyGraphics.
 
 					try
 					{

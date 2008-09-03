@@ -19,8 +19,8 @@
 package org.phylowidget.net;
 
 import org.andrewberman.ui.unsorted.DelayedAction;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.TreeIO;
 
 /**

@@ -20,12 +20,15 @@ package org.phylowidget.tree;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.WeakHashMap;
@@ -36,10 +39,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
-import org.phylowidget.PhyloWidget;
 
-public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
-		extends ListenableDirectedWeightedGraph<V, E>
+public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> extends
+		ListenableDirectedWeightedGraph<V, E>
 {
 
 	/**
@@ -194,6 +196,28 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
+	public List<V> getVerticesForLabels(Collection<String> labels)
+	{
+		ArrayList<V> verts = new ArrayList<V>(labels.size());
+		for (String label : labels)
+		{
+			V v = getVertexForLabel(label);
+			if (v != null)
+				verts.add(v);
+		}
+		return verts;
+	}
+	
+	public List<String> getLabelsForVertices(Collection<V> verts)
+	{
+		ArrayList<String> labels = new ArrayList<String>(verts.size());
+		for (V vert : verts)
+		{
+			labels.add(getLabel(vert));
+		}
+		return labels;
+	}
+	
 	public V getVertexForLabel(String label)
 	{
 		if (enforceUniqueLabels)
@@ -201,7 +225,18 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 			V o = (V) uniqueLabeler.getNodeForLabel(label);
 			return o;
 		} else
+		{
+			DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, getRoot());
+			while (it.hasNext())
+			{
+				V vertex = it.next();
+				if (getLabel(vertex).equals(label))
+				{
+					return vertex;
+				}
+			}
 			return null;
+		}
 	}
 
 	public double getBranchLength(V vertex)
@@ -210,13 +245,13 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		return getEdgeWeight(getEdge(parent, vertex));
 	}
 
-	public void setBranchLength(V vertex, double weight)
+	public void setBranchLength(V vertex, double length)
 	{
 		V parent = getParentOf(vertex);
 		if (parent == null)
 			return;
 		E edge = getEdge(parent, vertex);
-		setEdgeWeight(edge, weight);
+		setEdgeWeight(edge, length);
 	}
 
 	public void resetVertexLabels()
@@ -299,11 +334,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	{
 		// Sort the resulting list.
 		Collections.sort(l, sorter);
-//		if (sorting.containsKey(vertex))
-//		{
-//			if (sorting.get(vertex) == REVERSE)
-//				Collections.reverse(l);
-//		}
+		//		if (sorting.containsKey(vertex))
+		//		{
+		//			if (sorting.get(vertex) == REVERSE)
+		//				Collections.reverse(l);
+		//		}
 		if (getSorting(vertex) == REVERSE_I)
 		{
 			Collections.reverse(l);
@@ -364,12 +399,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	{
 		return getParentOf(vertex) == null;
 	}
-	
+
 	public int getMaxDepthToLeaf(V vertex)
 	{
 		int maxDepth = 0;
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this,
-				vertex);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this, vertex);
 		while (bfi.hasNext())
 		{
 			V o = bfi.next();
@@ -385,27 +419,41 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 
 	public int getDepthToRoot(V vertex)
 	{
+		if (vertex == getRoot())
+			return 0;
 		return getDepthToVertex(vertex, getRoot());
 	}
 
 	int getDepthToVertex(V vertex, V target)
 	{
-		int depth = 0;
-		while (vertex != target)
-		{
-			depth += 1;
-			vertex = getParentOf(vertex);
-			if (vertex == root)
-				return depth;
-		}
-		return depth;
+		return Math.abs(getDepthToRoot(vertex)-getDepthToRoot(target));
+//		int depth = 0;
+//		while (vertex != target)
+//		{
+//			depth += 1;
+//			vertex = getParentOf(vertex);
+//			if (vertex == getRoot() || vertex == null)
+//				return depth;
+//		}
+//		if (depth > 0)
+//			return depth;
+//		return -depth;
+	}
+
+	// Note that this method doesn't check whether target is a descendant of vertex.
+	public double getHeightToVertex(V vertex, V target)
+	{
+		double vHeight = getHeightToRoot(vertex);
+		double tHeight = getHeightToRoot(target);
+
+		return tHeight - vHeight;
 	}
 
 	public double getMaxHeightToLeaf(V vertex)
 	{
+		double vertexHeight = getHeightToRoot(vertex);
 		double maxHeight = 0;
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this,
-				vertex);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this, vertex);
 		while (bfi.hasNext())
 		{
 			V o = bfi.next();
@@ -416,12 +464,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 					maxHeight = curHeight;
 			}
 		}
-		return maxHeight;
+		return maxHeight - vertexHeight;
 	}
 
 	public double getHeightToRoot(V vertex)
 	{
-		// System.out.println("htr!");
 		double height = 0;
 		while (vertex != root)
 		{
@@ -475,8 +522,8 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		while (!s.isEmpty())
 		{
 			V v = s.pop();
-			if (!shouldKeep(v))
-				continue;
+//			if (!shouldKeep(v))
+//				continue;
 			if (isLeaf(v))
 			{
 				if (leaves != null)
@@ -494,16 +541,10 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
-	public boolean shouldKeep(V vertex)
-	{
-		return true;
-	}
-	
 	private List<V> getEnclosedVertices(V vertex)
 	{
 		ArrayList<V> l = new ArrayList<V>();
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this,
-				vertex);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this, vertex);
 		while (bfi.hasNext())
 		{
 			l.add(bfi.next());
@@ -514,8 +555,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	private List<V> getEnclosedLeaves(V vertex)
 	{
 		ArrayList<V> l = new ArrayList<V>();
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this,
-				vertex);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this, vertex);
 		while (bfi.hasNext())
 		{
 			V o = bfi.next();
@@ -532,12 +572,31 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 			V newRoot = createAndAddVertex();
 			setRoot(newRoot);
 		}
-		List<V> nodes = getEnclosedVertices(vertex);
-		synchronized (this)
+		if (isLeaf(vertex))
 		{
-			for (int i = 0; i < nodes.size(); i++)
+			removeVertex(vertex);
+		} else
+		{
+			List<V> nodes = getEnclosedVertices(vertex);
+			synchronized (this)
 			{
-				removeVertex(nodes.get(i));
+				for (int i = 0; i < nodes.size(); i++)
+				{
+					removeVertex(nodes.get(i));
+				}
+			}
+		}
+	}
+
+	public void deleteLeafLineage(V vertex)
+	{
+		V parent = getParentOf(vertex);
+		removeVertex(vertex);
+		if (parent != null)
+		{
+			if (isLeaf(parent))
+			{
+				deleteLeafLineage(parent);
 			}
 		}
 	}
@@ -570,8 +629,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		RootedTree<V, E> newTree;
 		try
 		{
-			Constructor<? extends RootedTree> c = this.getClass()
-					.getConstructor();
+			Constructor<? extends RootedTree> c = this.getClass().getConstructor();
 			newTree = c.newInstance();
 		} catch (Exception e)
 		{
@@ -629,15 +687,15 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		if (v == getRoot())
 		{
 			setRoot(newParent);
-			addEdge(newParent,newSister);
-			addEdge(newParent,v);
+			addEdge(newParent, newSister);
+			addEdge(newParent, v);
 		} else
 		{
 			insertNodeBetween(curParent, v, newParent);
 		}
 		addEdge(newParent, newSister);
-		double ew = getEdgeWeight(getEdge(newParent,v));
-		setEdgeWeight(getEdge(newParent,newSister), ew);
+		double ew = getEdgeWeight(getEdge(newParent, v));
+		setEdgeWeight(getEdge(newParent, newSister), ew);
 		modPlus();
 	}
 
@@ -663,7 +721,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 *            the child node (edge target)
 	 * @param insertMe
 	 */
-	protected void insertNodeBetween(V a, V b, V insertMe)
+	public void insertNodeBetween(V a, V b, V insertMe)
 	{
 		E e = getEdge(a, b);
 		double weight = getEdgeWeight(e);
@@ -753,8 +811,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		//
 		// Iterate over an undirected version of this graph, so we can "go
 		// against the grain" when we need to.
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(Graphs
-				.undirectedGraph(this), root);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(Graphs.undirectedGraph(this), root);
 		// Toss all the nodes into a linked list.
 		LinkedList<V> linked = new LinkedList();
 		while (bfi.hasNext())
@@ -816,11 +873,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		// If we've already stored a sorting value, then toggle it.
 		Integer o = sorting.get(parent);
 		if (o == null)
-			setSorting(parent,REVERSE);
+			setSorting(parent, REVERSE);
 		else if (o == REVERSE)
-			setSorting(parent,FORWARD);
+			setSorting(parent, FORWARD);
 		else
-			setSorting(parent,REVERSE);
+			setSorting(parent, REVERSE);
 	}
 
 	/**
@@ -848,8 +905,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 */
 	public void ladderizeSubtree(V vertex)
 	{
-		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this,
-				vertex);
+		BreadthFirstIterator<V, E> bfi = new BreadthFirstIterator<V, E>(this, vertex);
 		while (bfi.hasNext())
 		{
 			V o = bfi.next();
@@ -858,12 +914,13 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	}
 
 	int fInt = FORWARD.intValue();
+
 	public void setSorting(V vertex, int direction)
 	{
 		if (fInt == direction)
 			sorting.put(vertex, FORWARD);
 		else
-			sorting.put(vertex,REVERSE);
+			sorting.put(vertex, REVERSE);
 	}
 
 	public int getSorting(V v)
@@ -874,7 +931,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		else
 			return REVERSE_I;
 	}
-	
+
 	/**
 	 * Removes "elbowed" nodes from the subtree below the given vertex. An
 	 * elbowed node is defined as a node that has a single parent and a single
@@ -883,7 +940,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	 * @param vertex
 	 *            the node at which to begin culling
 	 */
-	public void cullElbowsBelow(V vertex)
+	public void removeElbowsBelow(V vertex)
 	{
 		ArrayList<V> list = new ArrayList<V>();
 		getAll(vertex, null, list);
@@ -930,16 +987,13 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 	/**
 	 * Aligns the leaves of the tree, adjusting branch lengths accordingly.
 	 * 
-	 * General algorithm is this:
-	 *  - Start at root.
-	 *  - For each node:
-	 *      - Find the mean height-to-leaf among children nodes.
-	 *      - Scale each child node's branch length accordingly, then iterate. 
+	 * General algorithm is this: - Start at root. - For each node: - Find the
+	 * mean height-to-leaf among children nodes. - Scale each child node's
+	 * branch length accordingly, then iterate.
 	 */
 	public void alignLeaves()
 	{
-		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this,
-				getRoot());
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, getRoot());
 		LinkedList<V> list = new LinkedList<V>();
 		while (it.hasNext())
 		{
@@ -951,7 +1005,6 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 			V v = list.removeLast();
 			if (isLeaf(v))
 				continue;
-			System.out.println(v);
 			List<V> children = getChildrenOf(v);
 			double totalHeight = 0;
 			for (V child : children)
@@ -974,13 +1027,176 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		}
 	}
 
-	void scaleSubtree(V v, double scale)
+	public V getCommonAncestorOf(String... nodeLabels)
+	{
+		ArrayList<String> labels = new ArrayList<String>();
+		Collections.addAll(labels, nodeLabels);
+		List<V> nodes = getVerticesForLabels(labels);
+		if (nodes.size() == 0)
+			return null;
+		return getCommonAncestorOf(nodes.toArray(emptyArray(nodes.get(0))));
+	}
+
+	private V[] emptyArray(V ... array)
+	{
+		V[] a = (V[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), 0);
+		return a;
+	}
+
+	public V getCommonAncestorOf(V... nodes)
+	{
+		V a = nodes[0];
+		V b = null;
+
+		for (int i = 1; i < nodes.length; i++)
+		{
+			b = nodes[i];
+			a = getCommonAncestorOf(a, b);
+		}
+		return a;
+	}
+
+	public V getCommonAncestorOf(String labelA, String labelB)
+	{
+		return getCommonAncestorOf(getVertexForLabel(labelA), getVertexForLabel(labelB));
+	}
+
+	public V getCommonAncestorOf(V a, V b)
+	{
+		HashSet<V> seenAncestors = new HashSet<V>();
+
+		V ancA = a;
+		V ancB = b;
+		V root = getRoot();
+		while (true) // Maybe we should have some fail-safe cutoff here.
+		{
+			if (ancA != root && ancA != null)
+			{
+				if (seenAncestors.contains(ancA))
+					return ancA;
+				seenAncestors.add(ancA);
+				ancA = getParentOf(ancA);
+			}
+			if (ancB != root && ancB != null)
+			{
+				if (seenAncestors.contains(ancB))
+					return ancB;
+				seenAncestors.add(ancB);
+				ancB = getParentOf(ancB);
+			}
+			if (ancA == root && ancB == root)
+				return ancA;
+			if (ancA == null)
+				return null;
+		}
+	}
+
+	public void scaleSubtree(V v, double scale)
 	{
 		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);
+		it.next(); // Should I be doing this?
 		while (it.hasNext())
 		{
 			V curV = it.next();
 			setBranchLength(curV, getBranchLength(curV) * scale);
+		}
+	}
+
+	public void evenlySpaceLineage(V start, V end)
+	{
+		double totalHeight = getHeightToVertex(start, end);
+		double depth = getDepthToVertex(start, end);
+		double evenStep = totalHeight / depth;
+		
+		V v = end;
+		while (v != start)
+		{
+			setBranchLength(v, evenStep);
+			v = getParentOf(v);
+		}
+	}
+	
+	public void makeSubtreeUltrametric(V v)
+	{
+		makeSubtreeUltrametric(v,1,false);
+	}
+	
+	public void makeSubtreeUltrametric(V v, double totalHeight, boolean changeCurrentLength)
+	{
+//		double subtreeHeight = getMaxHeightToLeaf(v);
+		double subtreeDepth = getMaxDepthToLeaf(v);
+		if (changeCurrentLength)
+			subtreeDepth = getMaxDepthToLeaf(getParentOf(v));
+		double step = totalHeight / (subtreeDepth);
+
+		//		System.out.println("sHeight: "+subtreeHeight+"  sDepth:"+subtreeDepth+" step:"+step);
+
+		HashMap<V, Double> branchLengths = new HashMap<V,Double>();
+		
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);
+		while (it.hasNext())
+		{
+			V curV = it.next();
+			if (curV == v && !changeCurrentLength)
+				continue;
+			if (isLeaf(curV))
+			{
+				double curDepth = getDepthToVertex(curV, v);
+				double curHeight = curDepth * step;
+				double desiredHeight = totalHeight - curHeight;
+				branchLengths.put(curV,desiredHeight);
+			} else
+			{
+				branchLengths.put(curV, step);
+			}
+		}
+		
+		setBranchLengths(branchLengths);
+	}
+
+	public void setBranchLengths(Map<V,Double> branchLengths)
+	{
+		Set<V> set = branchLengths.keySet();
+		for (V v : set)
+		{
+			setBranchLength(v, branchLengths.get(v));
+		}
+	}
+	
+	public void pruneNodes(List<V> vertices)
+	{
+		int i = 0;
+		for (V v : vertices)
+		{
+			i++;
+			if (i % 1000 == 0)
+				System.out.print(".");
+			deleteLeafLineage(v);
+		}
+	}
+
+	public void translateLabels(V v, Map<String, String> oldToNew)
+	{
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);
+		while (it.hasNext())
+		{
+			V vertex = it.next();
+			String oldS = getLabel(vertex);
+			String newS = oldToNew.get(oldS);
+			if (newS == null)
+			{
+				continue;
+			}
+			setLabel(vertex, newS);
+		}
+	}
+
+	public void pruneNodesByLabel(List<String> vertexLabels)
+	{
+		List<V> verts = getVerticesForLabels(vertexLabels);
+		for (V v : verts)
+		{
+			deleteSubtree(v);
 		}
 	}
 
@@ -991,7 +1207,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge>
 		root = null;
 		uniqueLabeler = null;
 	}
-	
+
 	class VertexAndDouble
 	{
 		public V v;

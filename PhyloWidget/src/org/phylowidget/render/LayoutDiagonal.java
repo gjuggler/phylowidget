@@ -9,7 +9,7 @@ import org.phylowidget.tree.RootedTree;
 
 import processing.core.PGraphics;
 
-public class LayoutDiagonal extends TreeLayout
+public class LayoutDiagonal extends LayoutBase
 {
 	int numLeaves;
 	
@@ -47,11 +47,11 @@ public class LayoutDiagonal extends TreeLayout
 		for (int i=0; i < children.size(); i++)
 		{
 			PhyloNode child = children.get(i);
-			if (!tree.shouldKeep(child))
-			{
-				children.remove(i);
-				i--;
-			}
+//			if (!tree.shouldKeep(child))
+//			{
+//				children.remove(i);
+//				i--;
+//			}
 		}
 		for (int i = 0; i < children.size(); i++)
 		{
@@ -91,11 +91,11 @@ public class LayoutDiagonal extends TreeLayout
 		int numEnclosed = tree.getNumEnclosedLeaves(n);
 		int orig = numEnclosed;
 		List<PhyloNode> children = tree.getChildrenOf(n);
-		for (PhyloNode child : children)
-		{
-			if (!tree.shouldKeep(child))
-				numEnclosed -= tree.getNumEnclosedLeaves(child);
-		}
+//		for (PhyloNode child : children)
+//		{
+////			if (!tree.shouldKeep(child))
+////				numEnclosed -= tree.getNumEnclosedLeaves(child);
+//		}
 //		System.out.println(n.getLabel()+"  "+numEnclosed);
 		return numEnclosed;
 	}

@@ -48,6 +48,8 @@ import org.phylowidget.render.images.ImageLoader;
 public class TreeIO
 {
 
+	public static final boolean DEBUG = false;
+	
 	public static RootedTree parseFile(RootedTree t, File f)
 	{
 		try
@@ -100,6 +102,8 @@ public class TreeIO
 
 	public static RootedTree parseNewickString(RootedTree tree, String s)
 	{
+		if (DEBUG)
+			System.out.println(System.currentTimeMillis()+"\tStarting parse...");
 		DefaultVertex root = null;
 		/*
 		 * See if this String is a valid URL... if it is, then load up the resource!
@@ -109,20 +113,17 @@ public class TreeIO
 		 */
 		int endInd = Math.min(10, s.length() - 1);
 		String test = s.substring(0, endInd).toLowerCase();
-		if (test.startsWith("http://") || test.startsWith("ftp://")
-				|| test.startsWith("file://"))
+		if (test.startsWith("http://") || test.startsWith("ftp://") || test.startsWith("file://"))
 		{
 			try
 			{
 				URL url = new URL(s);
-				BufferedReader r = new BufferedReader(new InputStreamReader(url
-						.openStream()));
+				BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
 				return TreeIO.parseReader(tree, r);
 			} catch (SecurityException e)
 			{
 				e.printStackTrace();
-				PhyloWidget
-						.setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
+				PhyloWidget.setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
 			} catch (MalformedURLException e)
 			{
 				e.printStackTrace();
@@ -132,25 +133,22 @@ public class TreeIO
 				e.printStackTrace();
 			}
 		}
-		
-		
+
 		/*
 		 * Pre-process the string as a whole.
 		 */
 		if (s.startsWith("'"))
 			s = s.substring(1);
 		if (s.endsWith("'"))
-			s = s.substring(0,s.length()-1);
+			s = s.substring(0, s.length() - 1);
 		if (s.indexOf(';') == -1)
 			s = s + ';';
-		
-//		System.out.println(s);
-		
+
 		/*
 		 * Snag the annotations and store them in a hashtable for later retrieval.
 		 */
 		s = NHXHandler.stripAnnotations(s);
-		
+
 		/*
 		 * Contains an Integer of the number of items for each depth level.
 		 */
@@ -169,8 +167,8 @@ public class TreeIO
 		/*
 		 * Stacks for the vertices and their associated lengths.
 		 */
-		Stack vertices = new Stack();
-		Stack lengths = new Stack();
+		Stack<DefaultVertex> vertices = new Stack<DefaultVertex>();
+		Stack<Double> lengths = new Stack<Double>();
 		/*
 		 * Booleans.
 		 */
@@ -186,6 +184,8 @@ public class TreeIO
 		 */
 		StringBuffer temp = new StringBuffer();
 		String curLabel = new String();
+		if (DEBUG)
+			System.out.println(System.currentTimeMillis()+"\tChar loop...");
 		for (int i = 0; i < s.length(); i++)
 		{
 			char c = s.charAt(i);
@@ -210,8 +210,7 @@ public class TreeIO
 					if (curDepth >= countForDepth.length)
 					{
 						int[] newArr = new int[countForDepth.length << 2];
-						System.arraycopy(countForDepth, 0, newArr, 0,
-								countForDepth.length);
+						System.arraycopy(countForDepth, 0, newArr, 0, countForDepth.length);
 						countForDepth = newArr;
 					}
 				}
@@ -252,8 +251,7 @@ public class TreeIO
 						{
 							// Pop out the child node and connect to the parent.
 							child = vertices.pop();
-							double length = ((Double) lengths.pop())
-									.doubleValue();
+							double length = ((Double) lengths.pop()).doubleValue();
 							if (!tree.containsEdge(curNode, child))
 								tree.addEdge(curNode, child);
 							Object o = tree.getEdge(curNode, child);
@@ -267,7 +265,7 @@ public class TreeIO
 					}
 					// Push onto the stack and keep count.
 					vertices.push(curNode);
-					lengths.push(new Double(curLength));
+					lengths.push(curLength);
 					countForDepth[curDepth]++;
 					// Reset all the states.
 					temp.replace(0, temp.length(), "");
@@ -285,32 +283,32 @@ public class TreeIO
 					innerNode = true;
 				}
 			}
-//			else if (c == ':')
-//			{
-//				curLabel = temp.toString();
-//				curLabel = curLabel.replace('_', ' ');
-//				curLabel = curLabel.trim();
-//				temp.replace(0, temp.length(), "");
-//				parsingNumber = true;
-//			} 
+			//			else if (c == ':')
+			//			{
+			//				curLabel = temp.toString();
+			//				curLabel = curLabel.replace('_', ' ');
+			//				curLabel = curLabel.trim();
+			//				temp.replace(0, temp.length(), "");
+			//				parsingNumber = true;
+			//			} 
 			else
 			{
 				temp.append(c);
 			}
 		}
 		tree.setRoot(root);
-
+		if (DEBUG)
+			System.out.println(System.currentTimeMillis()+"\tSorting nodes...");
 		/*
 		 * Now, to recreate the newick file's node sorting. We previously
 		 * recorded the "first" child node for each parent node, which we'll now
 		 * use to determine whether we want to sort that node in forward or
 		 * reverse.
 		 */
-		BreadthFirstIterator dfi = new BreadthFirstIterator(tree, tree
-				.getRoot());
+		BreadthFirstIterator dfi = new BreadthFirstIterator(tree, tree.getRoot());
 		while (dfi.hasNext())
 		{
-			DefaultVertex p = (DefaultVertex)dfi.next();
+			DefaultVertex p = (DefaultVertex) dfi.next();
 			if (!tree.isLeaf(p))
 			{
 				List l = tree.getChildrenOf(p);
@@ -341,23 +339,26 @@ public class TreeIO
 		oldTree = t;
 	}
 
+	public static final String POOR_MANS_NHX = "**";
+	public static final String POOR_MANS_DELIM = "*";
+
 	static DefaultVertex newNode(RootedTree t, String s)
 	{
+		PhyloNode v = new PhyloNode();
+
 		/*
 		 * The input string is the *entire* Newick / Nexus / NHX string, including all annotations and labels.
 		 */
 		s = NHXHandler.replaceAnnotation(s);
-
+		
 		int nhxInd = s.indexOf("[&&NHX");
 		String nameAndLength = s;
-		DefaultVertex v = null;
 		if (nhxInd != -1)
 		{
 			nameAndLength = s.substring(0, nhxInd);
 			String nhx = s.substring(nhxInd, s.length());
 			nhx = nhx.replaceAll("(\\[&&NHX:|\\])", "");
 			String[] attrs = nhx.split(":");
-			PhyloNode node = new PhyloNode();
 			for (String attr : attrs)
 			{
 				/*
@@ -367,14 +368,9 @@ public class TreeIO
 				int ind = attr.indexOf('=');
 				if (ind != -1)
 				{
-					node.setAnnotation(attr.substring(0,ind),attr.substring(ind+1,attr.length()));
-//					node.setAnnotation(split[0], split[1]);
+					v.setAnnotation(attr.substring(0, ind), attr.substring(ind + 1, attr.length()));
 				}
 			}
-			v = node;
-		} else
-		{
-			v = new PhyloNode();
 		}
 
 		int colonInd = nameAndLength.indexOf(":");
@@ -383,31 +379,55 @@ public class TreeIO
 		{
 			String length = nameAndLength.substring(colonInd + 1);
 			name = nameAndLength.substring(0, colonInd);
-			
+
 			if (length.contains("[")) // We've got an annoying bootstrap value stored as )species_name:1.0[100] .
 			{
 				int startInd = length.indexOf("[");
 				int endInd = length.indexOf("]");
-				String bootstrap = length.substring(startInd+1,endInd);
-				length = length.substring(0,startInd);
+				String bootstrap = length.substring(startInd + 1, endInd);
+				length = length.substring(0, startInd);
 				if (v instanceof PhyloNode)
 				{
-					PhyloNode pn = (PhyloNode)v;
+					PhyloNode pn = (PhyloNode) v;
 					pn.setAnnotation("b", bootstrap);
 				}
 			}
-			try {
-			curLength = Double.parseDouble(length);
+			try
+			{
+				curLength = Double.parseDouble(length);
 			} catch (Exception e)
 			{
 				curLength = 1;
 			}
 		}
 
+		// If there's no NHX annotation, try and break up the label using the "poor man's" NHX delimiters.
+		if (nhxInd == -1)
+		{
+			int poorInd = name.indexOf(POOR_MANS_NHX);
+			if (poorInd != -1)
+			{
+				String keeperName = name.substring(0,poorInd);
+				String nhx = name.substring(poorInd + POOR_MANS_NHX.length(), name.length());
+//				System.out.println(nhx);
+				String[] attrs = nhx.split("\\" + POOR_MANS_DELIM);
+				for (int i = 0; i < attrs.length; i++)
+				{
+					String attr = attrs[i];
+					i++;
+					if (i > attrs.length - 1)
+						break;
+					String attr2 = attrs[i];
+					v.setAnnotation(attr, attr2);
+				}
+				name = keeperName;
+			}
+		}
+
 		s = name;
 		s = translateName(s);
 		s = parseNexusLabel(s);
-
+		
 		if (oldTree != null)
 		{
 			DefaultVertex existingNode = oldTree.getVertexForLabel(s);
@@ -422,6 +442,7 @@ public class TreeIO
 
 	/**
 	 * Translates this node label using the translation table.
+	 * 
 	 * @param s
 	 */
 	static String translateName(String s)
@@ -433,16 +454,14 @@ public class TreeIO
 			return s;
 	}
 
-	public static String createNewickString(RootedTree tree,
-			boolean includeStupidLabels)
+	public static String createNewickString(RootedTree tree, boolean includeStupidLabels)
 	{
 		StringBuffer sb = new StringBuffer();
 		outputVertex(tree, sb, tree.getRoot(), includeStupidLabels);
 		return sb.toString() + ";";
 	}
 
-	private static void outputVertex(RootedTree tree, StringBuffer sb,
-			DefaultVertex v, boolean includeStupidLabels)
+	private static void outputVertex(RootedTree tree, StringBuffer sb, DefaultVertex v, boolean includeStupidLabels)
 	{
 		/*
 		 * Ok, I was gonna make this one iterative instead of recursive (like
@@ -517,8 +536,7 @@ public class TreeIO
 
 	static Pattern quotePattern = Pattern.compile("'");
 
-	private static String getNexusCompliantLabel(RootedTree t, DefaultVertex v,
-			boolean includeStupidLabels)
+	private static String getNexusCompliantLabel(RootedTree t, DefaultVertex v, boolean includeStupidLabels)
 	{
 		String s = v.toString();
 		Matcher m = naughtyPattern.matcher(s);
@@ -579,8 +597,7 @@ public class TreeIO
 	 */
 	static Pattern createPattern(String pattern)
 	{
-		return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE
-				| Pattern.DOTALL);
+		return Pattern.compile(pattern, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 	}
 
 	static String removeComments(String s)
@@ -669,49 +686,50 @@ public class TreeIO
 
 	public static BufferedImage createBufferedImage(Image image)
 	{
-	   if(image instanceof BufferedImage) {
-	      return (BufferedImage)image;
-	   }
-	  BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null),
-	    BufferedImage.TYPE_INT_RGB); // ARGB to support transparency if in original image
-	  Graphics2D g = bi.createGraphics();
-	  g.drawImage(image, 0, 0, null);
-	  g.dispose(); // supposedly recommended for cleanup...
-	  return bi;
+		if (image instanceof BufferedImage)
+		{
+			return (BufferedImage) image;
+		}
+		BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB); // ARGB to support transparency if in original image
+		Graphics2D g = bi.createGraphics();
+		g.drawImage(image, 0, 0, null);
+		g.dispose(); // supposedly recommended for cleanup...
+		return bi;
 	}
-	
-	public static void outputTreeImages(RootedTree t,File dir)
+
+	public static void outputTreeImages(RootedTree t, File dir)
 	{
 		ImageLoader loader = PhyloWidget.trees.imageLoader;
 		ArrayList<PhyloNode> nodes = new ArrayList<PhyloNode>();
 		t.getAll(t.getRoot(), null, nodes);
-		
+
 		int img_id = 0;
 		for (PhyloNode n : nodes)
 		{
-			try {
-			if (n.getAnnotation("img") != null)
+			try
 			{
-				String imgURL = n.getAnnotation("img");
-				Image img = loader.getImageForNode(n);
-				if (img != null)
+				if (n.getAnnotation("img") != null)
 				{
-					img = createBufferedImage(img);
-					File f = new File(dir.getAbsolutePath()+File.separator+img_id+".jpg");
-					System.out.println(f);
-					n.setAnnotation("img", f.toURL().toString());
-					System.out.println(n.getAnnotation("img"));
-					try
+					String imgURL = n.getAnnotation("img");
+					Image img = loader.getImageForNode(n);
+					if (img != null)
 					{
-						ImageIO.write((RenderedImage) img,"jpg",f);
-					} catch (IOException e)
-					{
-						e.printStackTrace();
+						img = createBufferedImage(img);
+						File f = new File(dir.getAbsolutePath() + File.separator + img_id + ".jpg");
+//						System.out.println(f);
+						n.setAnnotation("img", f.toURL().toString());
+						System.out.println(n.getAnnotation("img"));
+						try
+						{
+							ImageIO.write((RenderedImage) img, "jpg", f);
+						} catch (IOException e)
+						{
+							e.printStackTrace();
+						}
+
+						img_id++;
 					}
-							
-					img_id++;
 				}
-			}
 			} catch (Exception e)
 			{
 				e.printStackTrace();
@@ -719,7 +737,7 @@ public class TreeIO
 			}
 		}
 	}
-	
+
 	static class NHXHandler
 	{
 		static HashMap<String, String> annotationMap = new HashMap<String, String>();
@@ -742,9 +760,9 @@ public class TreeIO
 			{
 				String annotation = m.group();
 				// If we recognize a URL in the annotation, replace it with the colon replacement.
-				annotation = annotation.replaceAll("http:", "http"+COLON_REPLACE);
-				annotation = annotation.replaceAll("ftp:", "ftp"+COLON_REPLACE);
-				String key = "#ANNOT_" + String.valueOf(i) + "#";
+				annotation = annotation.replaceAll("http:", "http" + COLON_REPLACE);
+				annotation = annotation.replaceAll("ftp:", "ftp" + COLON_REPLACE);
+				String key = ANNOT_PREFIX + String.valueOf(i) + "#";
 				annotationMap.put(key, annotation);
 				sb.replace(m.start(), m.end(), key);
 				index = m.start();
@@ -753,13 +771,23 @@ public class TreeIO
 			return sb.toString();
 		}
 
+		private static final String ANNOT_PREFIX = "#ANNOT_";
+		
 		static String replaceAnnotation(String s)
 		{
-			Set<String> set = annotationMap.keySet();
-			for (String key : set)
+			int ind = s.indexOf(ANNOT_PREFIX);
+			if (ind != -1)
 			{
-				s = s.replace(key, annotationMap.get(key));
+				String annot = s.substring(ind,s.length());
+				String repl = annotationMap.get(annot);
+				if (repl != null)
+					s = s.replace(annot, repl);
 			}
+//			Set<String> set = annotationMap.keySet();
+//			for (String key : set)
+//			{
+//				s = s.replace(key, annotationMap.get(key));
+//			}
 			return s;
 		}
 	}

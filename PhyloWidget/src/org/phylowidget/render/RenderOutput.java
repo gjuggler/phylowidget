@@ -28,11 +28,11 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.UIUtils;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.TreeManager;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
-import org.phylowidget.tree.TreeManager;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -43,9 +43,8 @@ public class RenderOutput
 {
 
 	public static boolean isOutputting = false;
-	
-	public static synchronized void savePDF(PApplet p, TreeRenderer r,
-			boolean zoomToFull, boolean showAllLabels)
+
+	public static synchronized void savePDF(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels)
 	{
 		isOutputting = true;
 		RootedTree t = r.getTree();
@@ -60,18 +59,33 @@ public class RenderOutput
 		{
 			PhyloWidget.setMessage("Outputting PDF...");
 			preprocess(t);
-			File f = p.outputFile("Save PDF as...");
+			//			File f = p.outputFile("Save PDF as...");
+			//			String s = p.selectOutput("Save PDF as...");
 			p.noLoop();
-			if (f == null)
+			String fileType = "PDF";
+			FileDialog fd =
+					new FileDialog(PhyloWidget.ui.getFrame(), "Choose your desination " + fileType + " file.",
+							FileDialog.SAVE);
+			fd.pack();
+			fd.setVisible(true);
+			String directory = fd.getDirectory();
+			String filename = fd.getFile();
+			if (filename == null)
 			{
 				PhyloWidget.setMessage("Output cancelled.");
 				return;
 			}
-			
-			PGraphics canvas = (PGraphics) p.createGraphics(p.width,
-					p.height, PConstants.PDF, f.getAbsolutePath());
+			// Fix a non-PDF extension.
+			if (!filename.toLowerCase().endsWith((".pdf")))
+			{
+				
+				filename += ".pdf";
+			}
+			File f = new File(directory,filename);
+
+			PGraphics canvas = (PGraphics) p.createGraphics(p.width, p.height, PConstants.PDF, f.getAbsolutePath());
 			canvas.beginDraw();
-			
+
 			/*
 			 * Create the render rectangle.
 			 */
@@ -106,9 +120,8 @@ public class RenderOutput
 		}
 	}
 
-	public static synchronized void save(PApplet p, TreeRenderer r,
-			boolean zoomToFull, boolean showAllLabels, String fileType, int w,
-			int h)
+	public static synchronized void save(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels,
+			String fileType, int w, int h)
 	{
 		isOutputting = true;
 		float oldThreshold = PhyloWidget.cfg.renderThreshold;
@@ -124,9 +137,9 @@ public class RenderOutput
 			RootedTree t = r.getTree();
 			preprocess(t);
 
-			FileDialog fd = new FileDialog(PhyloWidget.ui.getFrame(),
-					"Choose your desination " + fileType + " file.",
-					FileDialog.SAVE);
+			FileDialog fd =
+					new FileDialog(PhyloWidget.ui.getFrame(), "Choose your desination " + fileType + " file.",
+							FileDialog.SAVE);
 			fd.pack();
 			fd.setVisible(true);
 			String directory = fd.getDirectory();
@@ -138,7 +151,7 @@ public class RenderOutput
 			}
 			if (!filename.toLowerCase().endsWith(fileType.toLowerCase()))
 			{
-				filename += "."+ fileType.toLowerCase();
+				filename += "." + fileType.toLowerCase();
 			}
 			File f = new File(directory, filename);
 
@@ -150,8 +163,8 @@ public class RenderOutput
 			int oldH = canvas.height;
 			canvas.width = w;
 			canvas.height = h;
-			BufferedImage img = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-			
+			BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
 			Graphics2D g2 = img.createGraphics();
 			UIUtils.setRenderingHints(g2);
 			canvas.image = img;
@@ -168,8 +181,8 @@ public class RenderOutput
 			float hFactor = h / oldH;
 			if (zoomToFull)
 				rect.setRect(0, 0, oldW, oldH);
-//			System.out.println(rect);
-			r.render(canvas, rect.x*wFactor, rect.y*hFactor, rect.width*wFactor, rect.height*hFactor, true);
+			//			System.out.println(rect);
+			r.render(canvas, rect.x * wFactor, rect.y * hFactor, rect.width * wFactor, rect.height * hFactor, true);
 
 			canvas.endDraw();
 			canvas.loadPixels();
@@ -183,7 +196,7 @@ public class RenderOutput
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			PhyloWidget.setMessage("Output failed: "+e.getMessage());
+			PhyloWidget.setMessage("Output failed: " + e.getMessage());
 			System.gc();
 			return;
 		} finally
@@ -199,12 +212,9 @@ public class RenderOutput
 	private static void prettyHints(PGraphicsJava2D g)
 	{
 		Graphics2D g2 = g.g2;
-		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-				RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_OFF);
 	}
 
 	private static void preprocess(RootedTree t)

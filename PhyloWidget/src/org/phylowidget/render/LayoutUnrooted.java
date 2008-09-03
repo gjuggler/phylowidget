@@ -12,7 +12,7 @@ import processing.core.PGraphics;
  * @author Greg
  *
  */
-public class LayoutUnrooted extends TreeLayout
+public class LayoutUnrooted extends LayoutBase
 {
 	static final float STARTING_ANGLE = (float)-Math.PI/2;
 	

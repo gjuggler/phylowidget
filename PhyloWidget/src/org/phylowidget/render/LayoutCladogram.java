@@ -7,7 +7,7 @@ import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PGraphics;
 
-public class LayoutCladogram extends TreeLayout
+public class LayoutCladogram extends LayoutBase
 {
 	int numLeaves;
 	float depthLeafRatio;

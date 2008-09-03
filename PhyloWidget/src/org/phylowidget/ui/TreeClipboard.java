@@ -16,13 +16,18 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.tree;
+package org.phylowidget.ui;
 
 import org.andrewberman.ui.StringClipboard;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.net.JSClipUpdater;
+import org.phylowidget.tree.CachedRootedTree;
+import org.phylowidget.tree.DefaultVertex;
+import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
@@ -197,7 +202,7 @@ public class TreeClipboard
 			if (origVertex != null && origVertex.getState() == PhyloNode.CUT)
 			{
 				origTree.deleteSubtree(origVertex);
-				origTree.cullElbowsBelow(origTree.getRoot());
+				origTree.removeElbowsBelow(origTree.getRoot());
 				setStateRecursive(origTree, (PhyloNode) origTree.getRoot(),
 						PhyloNode.NONE);
 				origVertex.found = false;

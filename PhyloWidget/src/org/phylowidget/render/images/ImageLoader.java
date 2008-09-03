@@ -108,7 +108,7 @@ public class ImageLoader implements Runnable
 //						continue;
 //					}
 					Image img = p.getImage(new URL(imgS));
-					System.out.println(img);
+//					System.out.println(img);
 //					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
 //					bytes = null;
 					imageMap.put(imgS, img);

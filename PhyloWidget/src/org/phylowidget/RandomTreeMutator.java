@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.tree;
+package org.phylowidget;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,10 +26,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.tree.TreeNode;
-
 import org.andrewberman.ui.UIGlobals;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.tree.DefaultVertex;
+import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.RootedTree;
 
 public class RandomTreeMutator implements Runnable
 {

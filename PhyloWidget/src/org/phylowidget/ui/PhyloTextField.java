@@ -25,10 +25,10 @@ import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIGlobals;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;

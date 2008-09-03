@@ -31,7 +31,6 @@ import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
-import org.phylowidget.tree.TreeManager;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
 
@@ -43,26 +42,25 @@ public class PhyloWidget extends PApplet
 	private static final long serialVersionUID = -7096870051293017660L;
 
 	public static TreeManager trees;
-	public static PhyloConfig cfg;
+	public static PhyloConfig cfg = new PhyloConfig();
 	public static PhyloUI ui;
 
 	public static PhyloWidget p;
 
 	public static float FRAMERATE = 60;
-	public static float TWEEN_FACTOR = 30f / FRAMERATE;
 
-	public static boolean isOutputting;
-
-	private static PWTreeUpdater treeUpdater;
-	private static PWClipUpdater clipUpdater;
+	protected static PWTreeUpdater treeUpdater;
+	protected static PWClipUpdater clipUpdater;
 
 	private static String messageString = new String();
 
 	boolean DEBUG = false;
 
+	long time = 0;
 	public PhyloWidget()
 	{
 		super();
+		time = System.currentTimeMillis();
 		PhyloWidget.p = this;
 	}
 
@@ -98,14 +96,21 @@ public class PhyloWidget extends PApplet
 		ui = new PhyloUI(this);
 		trees = new TreeManager(this);
 
-		treeUpdater = new PWTreeUpdater();
-		clipUpdater = new PWClipUpdater();
+//		treeUpdater = new PWTreeUpdater();
+//		clipUpdater = new PWClipUpdater();
 
-		ui.setup();
+		new Thread() {
+			public void run()
+			{
+				ui.setup();
+				trees.setup();		
+			}
+		}.start();
 		
-		trees.setup();
 		
 		clearQueues();
+		
+		System.out.println(System.currentTimeMillis() - time);
 	}
 
 	DoubleBuffer dbr;
@@ -121,12 +126,14 @@ public class PhyloWidget extends PApplet
 
 	}
 
+	boolean drawnOnce = false;
 	public synchronized void draw()
 	{
 		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
 
 		// If we have setting changes or method calls on the queue, run them now.
-		clearQueues();
+		if (drawnOnce)
+			clearQueues();
 
 		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 			messageString = "";
@@ -138,9 +145,10 @@ public class PhyloWidget extends PApplet
 			drawNumLeaves();
 			drawFrameRate();
 		}
+		drawnOnce = true;
 	}
 
-	private void clearQueues()
+	protected void clearQueues()
 	{
 		if (!settingMap.isEmpty())
 		{
@@ -190,7 +198,7 @@ public class PhyloWidget extends PApplet
 		UIGlobals.g.destroyGlobals();
 	}
 
-	void drawFrameRate()
+	protected void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
 		textFont(UIGlobals.g.getPFont());
@@ -203,7 +211,7 @@ public class PhyloWidget extends PApplet
 		// text(numLeaves,5,height-10);
 	}
 
-	void drawNumLeaves()
+	protected void drawNumLeaves()
 	{
 		int leaves = trees.getTree().getNumEnclosedLeaves(trees.getRenderer().getTree().getRoot());
 		String nleaves = String.valueOf(leaves);
@@ -214,7 +222,7 @@ public class PhyloWidget extends PApplet
 		text(nleaves, width - 100, height - 10);
 	}
 
-	void drawMessage()
+	protected void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
 		textFont(UIGlobals.g.getPFont());
@@ -287,7 +295,11 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void changeSetting(String setting, String newValue)
 	{
-		settingMap.put(setting, newValue);
+//		System.out.println(setting+"\t"+newValue);
+		synchronized (settingMap)
+		{
+			settingMap.put(setting, newValue);
+		}
 	}
 
 	LinkedList<String> methodQueue = new LinkedList<String>();

@@ -270,11 +270,11 @@ getQueryParameters: function(destObject,url)
 	 * 
 	 * This avoids problems when trees muck up with the query parsing (usually when NHX contains the '&' character)...
 	 */ 
-	 var treePattern = /tree=(.*?;)/;
+	 var treePattern = /tree=(.*?)[;&]/;
 	 var result = url.match(treePattern);
 	 if (result != null)
 	 {
-	 	destObject['tree'] = result[1];
+	 	destObject['tree'] = unescape(result[1]).replace(/["']/g,"");
 	 	url = url.replace(treePattern,"");
 	 }
 	 

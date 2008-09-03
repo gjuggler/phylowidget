@@ -40,10 +40,10 @@ import org.andrewberman.ui.unsorted.BulgeUtil;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.PhyloTree;
 import org.phylowidget.tree.RootedTree;
 
 import processing.core.PConstants;
@@ -61,7 +61,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 {
 	float baseStroke;
 
-	protected TreeLayout treeLayout = new LayoutUnrooted();
+	protected LayoutBase treeLayout = new LayoutUnrooted();
 
 	protected OverlapDetector overlap = new OverlapDetector();
 
@@ -211,6 +211,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	ArrayList<PhyloNode> foundItems = new ArrayList<PhyloNode>();
 
+	private Area a;
+
 	protected void draw()
 	{
 		float minSize = Math.min(rowSize, colSize);
@@ -233,6 +235,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		 * "threshold" status.
 		 * Also set each node's drawMe flag to FALSE.
 		 */
+		a = new Area();
 		foundItems.clear();
 		int nodesDrawn = 0;
 		PhyloNode[] nodesToDraw = new PhyloNode[nodes.length];
@@ -246,7 +249,9 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			updateNode(n);
 			n.drawMe = false;
 			n.labelWasDrawn = false;
+			n.nodeWasDrawn = false;
 			n.isWithinScreen = isNodeWithinScreen(n);
+			//			System.out.println(n+"   "+n.isWithinScreen);
 			n.bulgeFactor = 1;
 			if (n.found && n.isWithinScreen)
 				foundItems.add(n);
@@ -310,6 +315,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			 */
 			NodeRenderer.r = this;
 			handleNode(n);
+			n.nodeWasDrawn = true;
 			//			decorator.lr.render(canvas, n, true);
 			//			decorator.nr.renderUntransformed(canvas, n);
 		}
@@ -320,8 +326,6 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		 * 
 		 * 
 		 */
-		Area a = new Area();
-		Polygon p = new Polygon();
 
 		/*
 		 * If we have a hovered node, always draw it.
@@ -342,7 +346,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 					else
 						h.bulgeFactor = 1f;
 				}
-				insertAndReturnOverlap(h, a);
+				insertAndReturnOverlap(h);
 				decorator.renderNode(this, h);
 				//				handleNode(h);
 				h.labelWasDrawn = true;
@@ -362,13 +366,16 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				decorator.lineRender.render(canvas, n, true);
 			} else if (tree.isLabelSignificant(n.getLabel()))
 			{
-				if (insertAndReturnOverlap(n, a))
+				if (insertAndReturnOverlap(n))
 					continue;
 				decorator.renderNode(this, n);
 				n.labelWasDrawn = true;
 			}
 		}
 
+		/*
+		 * Now, go through the significance-sorted list of leaves, drawing and occluding as we go.
+		 */
 		Thread.yield();
 		for (int i = 0; i < sigLeaves.length; i++)
 		{
@@ -377,10 +384,12 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			if (!n.isWithinScreen || n.labelWasDrawn)
 				continue;
 			NodeRange r = n.range;
-			if (insertAndReturnOverlap(n, a))
+			if (insertAndReturnOverlap(n))
 				continue;
 
 			n.labelWasDrawn = true;
+			if (!n.nodeWasDrawn)
+				decorator.nr.renderUntransformed(canvas, n);
 			decorator.renderNode(this, n);
 			//			handleNode(n);
 		}
@@ -393,10 +402,10 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	private Polygon tempP = new Polygon();
 
-	private final boolean insertAndReturnOverlap(PhyloNode n, Area a)
+	private final boolean insertAndReturnOverlap(PhyloNode n)
 	{
-		if (!tree.isLeaf(n)) // Do nothing and pretend no overlap for branch nodes.
-			return false;
+		//		if (!tree.isLeaf(n)) // Do nothing and pretend no overlap for branch nodes.
+		//			return false;
 		if (PhyloWidget.cfg.showAllLabels)
 			return false;
 		float angle = n.getAngle();
@@ -566,11 +575,15 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			 */
 			drawBootstrap(n);
 
-			if (PhyloWidget.cfg.showCladeLabels)
+			if (PhyloWidget.cfg.showCladeLabels && tree.isLabelSignificant(tree.getLabel(n)))
 			{
-				decorator.lr.render(canvas, n, true);
+				boolean overlap = insertAndReturnOverlap(n);
+				if (!overlap)
+				{
+					decorator.lr.render(canvas, n, true);
+				}
 			}
-			
+
 			/*
 			 * Do some extra stuff to clean up the thresholding artifacts.
 			 */
@@ -650,20 +663,28 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		return false;
 	}
 
+	Rectangle2D.Float rect1 = new Rectangle2D.Float();
+	Rectangle2D.Float rect2 = new Rectangle2D.Float();
+	Rectangle2D.Float rect3 = new Rectangle2D.Float();
+
 	protected boolean isNodeWithinScreen(PhyloNode n)
 	{
 		/*
 		 * Get this node range and set the rect.
 		 */
 		NodeRange r = n.range;
-		Rectangle rect1 = new Rectangle();
+		//		Rectangle rect1 = new Rectangle();
 		float EXPAND = 50;
-		rect1.setFrameFromDiagonal(r.loX - EXPAND, r.loY - EXPAND, r.hiX + EXPAND, r.hiY + EXPAND);
-
+		float EXPAND2 = 100;
 		/*
 		 * Try to get the parental noderange and set it.
 		 */
 		PhyloNode p = (PhyloNode) tree.getParentOf(n);
+		rect1.x = r.loX - EXPAND;
+		rect1.y = r.loY - EXPAND;
+		rect1.width = r.hiX - r.loX + EXPAND2;
+		rect1.height = r.hiY - r.loY + EXPAND2;
+
 		if (p == null)
 		{
 			/*
@@ -677,11 +698,13 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			 * Find the union of ourselves and our parent, and then intersect with screen.
 			 * (This fixes the problem where a node is off the screen but we want its parent-line drawn.
 			 */
-			Rectangle rect2 = new Rectangle();
-			rect2.setFrameFromDiagonal(r2.loX, r2.loY, r2.hiX, r2.hiY);
-			Rectangle comb = new Rectangle();
-			Rectangle.union(rect1, rect2, comb);
-			return screenRect.intersects(comb);
+			rect2.x = r2.loX - EXPAND;
+			rect2.y = r2.loY - EXPAND;
+			rect2.width = r2.hiX - r2.loX + EXPAND2;
+			rect2.height = r2.hiY - r2.loY + EXPAND2;
+
+			Rectangle.union(rect1, rect2, rect3);
+			return screenRect.intersects(rect3);
 		}
 	}
 
@@ -1045,10 +1068,10 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		needsLayout = true;
 	}
 
-	private TreeLayout oldLayout = null;
+	private LayoutBase oldLayout = null;
 	private int framesToSwitch = 0;
 
-	public void setLayout(TreeLayout layout)
+	public void setLayout(LayoutBase layout)
 	{
 		this.oldLayout = this.treeLayout;
 		this.treeLayout = layout;
@@ -1056,7 +1079,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		framesToSwitch = (int) PhyloWidget.cfg.animationFrames / 2;
 	}
 
-	public TreeLayout getTreeLayout()
+	public LayoutBase getTreeLayout()
 	{
 		//		if (framesToSwitch > 0)
 		//			return oldLayout;

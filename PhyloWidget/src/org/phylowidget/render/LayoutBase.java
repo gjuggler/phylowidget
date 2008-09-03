@@ -9,7 +9,7 @@ import org.phylowidget.tree.RootedTree;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
-public abstract class TreeLayout
+public abstract class LayoutBase
 {
 	protected RootedTree tree;
 	protected PhyloNode[] leaves;
@@ -20,6 +20,9 @@ public abstract class TreeLayout
 	protected double hiX;
 	protected double hiY;
 
+	public static final float TWOPI = (float) (Math.PI*2);
+	public static final float PI = (float) Math.PI;
+	
 	protected int angleHandling;
 	public static final int ANGLE_NONE = 0;
 	public static final int ANGLE_QUANTIZE = 1;
@@ -125,6 +128,8 @@ public abstract class TreeLayout
 
 	protected final void setAngle(PhyloNode n, float theta)
 	{
+		theta += (float)TWOPI;
+		theta %= (float)TWOPI;
 		n.setAngle(theta);
 		switch (angleHandling)
 		{
@@ -145,7 +150,6 @@ public abstract class TreeLayout
 		float theta = n.getAngle();
 		float degrees = theta / (float) (Math.PI * 2) * 360f;
 		boolean alignRight = false;
-
 		if (between(degrees,0,90) || between(degrees,270,360))
 		{
 			;

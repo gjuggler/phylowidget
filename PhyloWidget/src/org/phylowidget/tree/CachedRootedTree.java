@@ -19,23 +19,14 @@
 package org.phylowidget.tree;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.Stack;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.traverse.BreadthFirstIterator;
-import org.phylowidget.tree.RootedTree.EnclosedLeavesComparator;
-
-import sun.misc.Queue;
 
 public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEdge> extends RootedTree<V,E>
 {
@@ -65,7 +56,7 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 	 * the tree. If the tree is already updated (i.e. modID == calcID), then
 	 * nothing happens.
 	 */
-	private void sync()
+	public void sync()
 	{
 		if (holdCalculations)
 		{
@@ -353,6 +344,14 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 	public void alignLeaves()
 	{
 		super.alignLeaves();
+	}
+	
+	@Override
+	public void setBranchLengths(Map<V, Double> branchLengths)
+	{
+		setHoldCalculations(true);
+		super.setBranchLengths(branchLengths);
+		setHoldCalculations(false);
 	}
 	
 	class CachedEnclosedLeavesComparator implements Comparator

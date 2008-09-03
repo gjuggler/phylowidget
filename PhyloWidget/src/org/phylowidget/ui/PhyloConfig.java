@@ -116,47 +116,47 @@ public class PhyloConfig
 	 *   "quantize" -- Quantize the rotation in 45-degree increments (a little faster...)
 	 *   "level" -- Level all angles to horizontal (much faster!)
 	 */
-	public String angleHandling = "quantize";
-	
+	public String angleHandling = "level";
+
 	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
-	public float textRotation = 0f; 				// Text rotation, in degrees.
-	public float textScaling = .8f; 				// Text scaling, where a value of 1.0 is normal size.
-	public float imageSize = 0.95f;					// Image scaling, where a value of 1.0 is normal size.
-	public float lineWidth = 1f; 					// Line width. 0 is minimum, 1 is a pretty normal size.
-													//    10 is as high as you'll want to go.
-	public float nodeSize = 2f; 					// Node size. Same range as line width: 0 to 10 is reasonable.
-	public float innerNodeRatio = 1f;				// Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
-	public float renderThreshold = 150f; 			// Maximum number of nodes to render per frame.
-	public float minTextSize = 10; 					// Minimum text size for leaf node labels.
-//	public float branchLengthScaling = 1f; 			// DEPRECATED.
-	public float branchScaling = 1f;				// Only used with the Cladogram renderer... scales the width.
-	public float layoutAngle = 0;					// The starting angle for the layout (only applicable for circular and unrooted layouts)
-	public float animationFrames = 30;				// The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
-	public float viewportX = 0;						// The x position of the viewport.
-	public float viewportY = 0;						// Ditto.
-	public float viewportZoom = 0.7f;					// I'll bet you can guess this one.
-	
-	public boolean showCladeLabels = false; 		// Should we show labels of non-leaf nodes?
-//	public boolean stretchToFit = false;			// DEPRECATED.
-	public boolean useBranchLengths = false; 		// Should the renderer display the tree using the branch length information?
-	public boolean showAllLabels = false; 			// Should the renderer show all labels? This OVERRIDES the minTextSize setting,
-													//    so that labels are shown no matter how small they must be displayed.
-	public boolean hideAllLabels = false;			// Set to TRUE to hide all labels from being drawn. OVERRIDES the showAllLabels setting.
+	public float textRotation = 0f; // Text rotation, in degrees.
+	public float textScaling = .8f; // Text scaling, where a value of 1.0 is normal size.
+	public float imageSize = 0.95f; // Image scaling, where a value of 1.0 is normal size.
+	public float lineWidth = 1f; // Line width. 0 is minimum, 1 is a pretty normal size.
+	//    10 is as high as you'll want to go.
+	public float nodeSize = 2f; // Node size. Same range as line width: 0 to 10 is reasonable.
+	public float innerNodeRatio = 1f; // Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
+	public float renderThreshold = 150f; // Maximum number of nodes to render per frame.
+	public float minTextSize = 10; // Minimum text size for leaf node labels.
+	//	public float branchLengthScaling = 1f; 			// DEPRECATED.
+	public float branchScaling = 1f; // Only used with the Cladogram renderer... scales the width.
+	public float layoutAngle = 0; // The starting angle for the layout (only applicable for circular and unrooted layouts)
+	public float animationFrames = 30; // The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
+	public float viewportX = 0; // The x position of the viewport.
+	public float viewportY = 0; // Ditto.
+	public float viewportZoom = 0.7f; // I'll bet you can guess this one.
+
+	public boolean showCladeLabels = false; // Should we show labels of non-leaf nodes?
+	//	public boolean stretchToFit = false;			// DEPRECATED.
+	public boolean useBranchLengths = false; // Should the renderer display the tree using the branch length information?
+	public boolean showAllLabels = false; // Should the renderer show all labels? This OVERRIDES the minTextSize setting,
+	//    so that labels are shown no matter how small they must be displayed.
+	public boolean hideAllLabels = false; // Set to TRUE to hide all labels from being drawn. OVERRIDES the showAllLabels setting.
 	public boolean prioritizeDistantLabels = false; // This controls how PhyloWidget prioritizes the display of certain nodes above others.
-													//    If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
-													//    the root, instead of those that are closest (in terms of # of branches to the root).
-	public boolean useDoubleBuffering = true; 		// To be honest you probably don't want to mess with this one -- the double buffering really helps!
-	public boolean antialias = false;				// When set to true this slows down the rendering significantly, but looks much better.
-	public boolean outputAllInnerNodes = false; 	// Kind of a strange one: if set to true, PhyloWidget will *always* output 
-													//    the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
-	public boolean enforceUniqueLabels = false; 	// Enforce uniqueness of node labels.
-	
-	public boolean ignoreAnnotations = false;		// ANNOTATIONS: Set to true if you want to globally disable PhyloWidget's display and output of NHX annotations.
-	public boolean showBootstrapValues = false;	 	// ANNOTATIONS: Should we show NHX-annotated bootstrap values if they exist?
-	public boolean colorSpecies = true;				// ANNOTATIONS: Should we assign colors to different leaf nodes NHX-annotated with a given species or taxon?
-	public boolean colorDuplications = true;		// ANNOTATIONS: Same idea as the others, but for the node duplication coloring. 
-	public boolean colorBootstrap = true;			// ANNOTATIONS: ditto for bootstrap values.
-	
+	//    If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
+	//    the root, instead of those that are closest (in terms of # of branches to the root).
+	public boolean useDoubleBuffering = true; // To be honest you probably don't want to mess with this one -- the double buffering really helps!
+	public boolean antialias = false; // When set to true this slows down the rendering significantly, but looks much better.
+	public boolean outputAllInnerNodes = false; // Kind of a strange one: if set to true, PhyloWidget will *always* output 
+	//    the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
+	public boolean enforceUniqueLabels = true; // Enforce uniqueness of node labels.
+
+	public boolean ignoreAnnotations = false; // ANNOTATIONS: Set to true if you want to globally disable PhyloWidget's display and output of NHX annotations.
+	public boolean showBootstrapValues = false; // ANNOTATIONS: Should we show NHX-annotated bootstrap values if they exist?
+	public boolean colorSpecies = true; // ANNOTATIONS: Should we assign colors to different leaf nodes NHX-annotated with a given species or taxon?
+	public boolean colorDuplications = true; // ANNOTATIONS: Same idea as the others, but for the node duplication coloring. 
+	public boolean colorBootstrap = true; // ANNOTATIONS: ditto for bootstrap values.
+
 	/*
 	 *
 	 * END: URL API Configuration
@@ -238,10 +238,16 @@ public class PhyloConfig
 	 * END COLOR CRAP
 	 */
 
-	public void setTree(String s)
+	public void setTree(final String s)
 	{
-		PhyloWidget.trees.setTree(s);
-		tree = s;
+		new Thread()
+		{
+			public void run()
+			{
+				PhyloWidget.trees.setTree(s);
+				tree = s;
+			}
+		}.start();
 	}
 
 	public void setUseBranchLengths(boolean useEm)
@@ -250,10 +256,10 @@ public class PhyloConfig
 		PhyloWidget.ui.layout();
 	}
 
-//	public void setStretchToFit(boolean fitMe)
-//	{
-//		stretchToFit = fitMe;
-//	}
+	//	public void setStretchToFit(boolean fitMe)
+	//	{
+	//		stretchToFit = fitMe;
+	//	}
 
 	public void setSearch(String s)
 	{
@@ -293,8 +299,7 @@ public class PhyloConfig
 		{
 			HashMap<String, String> map = new HashMap<String, String>();
 			URL url = new URL(s);
-			BufferedReader in = new BufferedReader(new InputStreamReader(url
-					.openStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 			String line = null;
 			while ((line = in.readLine()) != null)
 			{
@@ -312,68 +317,69 @@ public class PhyloConfig
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setMenus(String menus)
 	{
 		this.menus = menus;
-		new Thread("Menu Loader"){
+		new Thread("Menu Loader")
+		{
 			@Override
 			public void run()
 			{
-				PhyloWidget.ui.setMenus();		
+				PhyloWidget.ui.setMenus();
 			}
 		}.start();
 	}
-	
+
 	public void setShowAllLabels(boolean showAllLabels)
 	{
 		this.showAllLabels = showAllLabels;
 	}
-	
+
 	public void setPrioritizeDistantLabels(boolean prioritizeDistanceLabels)
 	{
 		this.prioritizeDistantLabels = prioritizeDistanceLabels;
 		PhyloWidget.ui.layout();
 	}
-	
+
 	public void destroy()
 	{
 		tree = null;
 	}
-	
+
 	public void setTextSize(float textSize)
 	{
 		this.textScaling = textSize;
-//		PhyloWidget.ui.layout();
+		//		PhyloWidget.ui.layout();
 	}
-	
+
 	public void setLayoutAngle(float layoutAngle)
 	{
 		this.layoutAngle = layoutAngle;
 		PhyloWidget.ui.forceLayout();
 	}
-	
+
 	public void setViewportX(float newX)
 	{
 		PhyloWidget.trees.camera.nudgeTo(-newX, PhyloWidget.trees.camera.getY());
 	}
-	
+
 	public void setViewportY(float newY)
 	{
 		PhyloWidget.trees.camera.nudgeTo(PhyloWidget.trees.camera.getX(), -newY);
 	}
-	
+
 	public void setViewportZoom(float newZoom)
 	{
 		PhyloWidget.trees.camera.zoomTo(newZoom);
 	}
-	
+
 	public void setBranchScaling(float newBranchScaling)
 	{
 		this.branchScaling = newBranchScaling;
 		PhyloWidget.ui.forceLayout();
 	}
-	
+
 	public final static String DEFAULT_TREE = "PhyloWidget";
 
 }

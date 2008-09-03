@@ -57,7 +57,7 @@ public interface TreeRenderer
 
 	public void setTree(RootedTree t);
 
-	public void setLayout(TreeLayout layout);
+	public void setLayout(LayoutBase layout);
 	
 	public RootedTree getTree();
 

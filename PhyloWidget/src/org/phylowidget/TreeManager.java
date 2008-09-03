@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phylowidget.tree;
+package org.phylowidget;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.LayoutCircular;
 import org.phylowidget.render.LayoutCladogram;
@@ -33,6 +32,8 @@ import org.phylowidget.render.LayoutDiagonal;
 import org.phylowidget.render.LayoutUnrooted;
 import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.render.images.ImageLoader;
+import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
@@ -65,11 +66,12 @@ public class TreeManager extends AbstractUIObject
 	public void setup()
 	{
 		imageLoader = new ImageLoader();
-		
+
 		cameraRect = new UIRectangle(0, 0, 0, 0);
 		camera = new RectMover(p);
-		camera.fillScreen(.7f);
+		fillScreen();
 		camera.nudgeTo(-PhyloWidget.cfg.viewportX, -PhyloWidget.cfg.viewportY);
+		camera.zoomTo(PhyloWidget.cfg.viewportZoom);
 		camera.fforward();
 		/*
 		 * We need to let the ToolManager know our current Camera object.
@@ -77,10 +79,9 @@ public class TreeManager extends AbstractUIObject
 		UIGlobals.g.event().setCamera(camera);
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
-		
+
 		setRenderer(new BasicTreeRenderer());
 		PhyloWidget.cfg.setLayout(PhyloWidget.cfg.layout);
-
 		try
 		{
 			PhyloTree pt = (PhyloTree) getTree();
@@ -96,14 +97,23 @@ public class TreeManager extends AbstractUIObject
 		update();
 	}
 
-	public void update()
+	protected void updateCameraRect()
 	{
-		camera.update();
 		cameraRect.setRect(camera.getRect());
 		cameraRect.translate(p.width / 2, p.height / 2);
-		r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width,
-				cameraRect.height, true);
+	}
 
+	public void update()
+	{
+		if (camera != null && r != null)
+		{
+			camera.update();
+			updateCameraRect();
+			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width, cameraRect.height, true);
+			PhyloWidget.cfg.viewportX = -camera.getX();
+			PhyloWidget.cfg.viewportY = -camera.getY();
+			PhyloWidget.cfg.viewportZoom = camera.getZ();
+		}
 		if (mutateMe)
 		{
 			mutator.randomlyMutateTree();
@@ -111,10 +121,8 @@ public class TreeManager extends AbstractUIObject
 		}
 
 		// Synchronize with the PhyloConfig values.
-		PhyloWidget.cfg.viewportX = -camera.getX();
-		PhyloWidget.cfg.viewportY = -camera.getY();
-		PhyloWidget.cfg.viewportZoom = camera.getZ();
 		
+
 		//		if (runMe != null)
 		//		{
 		//			Runnable r = runMe;
@@ -169,7 +177,7 @@ public class TreeManager extends AbstractUIObject
 		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
 	}
 
-	public synchronized void setTree(final RootedTree tree)
+	public void setTree(final RootedTree tree)
 	{
 		if (t != null)
 		{
@@ -199,19 +207,19 @@ public class TreeManager extends AbstractUIObject
 
 	public synchronized void diagonalRender()
 	{
-//		setRenderer(new DiagonalCladogram());
+		//		setRenderer(new DiagonalCladogram());
 		getRenderer().setLayout(new LayoutDiagonal());
 	}
 
 	public synchronized void rectangleRender()
 	{
-//		setRenderer(new BasicTreeRenderer());
+		//		setRenderer(new BasicTreeRenderer());
 		getRenderer().setLayout(new LayoutCladogram());
 	}
 
 	public synchronized void circleRender()
 	{
-//		setRenderer(new Circlegram());
+		//		setRenderer(new Circlegram());
 		getRenderer().setLayout(new LayoutCircular());
 	}
 
@@ -219,7 +227,7 @@ public class TreeManager extends AbstractUIObject
 	{
 		getRenderer().setLayout(new LayoutUnrooted());
 	}
-	
+
 	synchronized void setRenderer(BasicTreeRenderer r)
 	{
 		if (getRenderer() != null)
@@ -240,12 +248,12 @@ public class TreeManager extends AbstractUIObject
 		mutateMe = true;
 	}
 
-//	public UIRectangle getVisibleRect()
-//	{
-//		UIRectangle fl = getRenderer().getVisibleRect();
-//		fl.translate(-p.width / 2, -p.height / 2);
-//		return fl;
-//	}
+	//	public UIRectangle getVisibleRect()
+	//	{
+	//		UIRectangle fl = getRenderer().getVisibleRect();
+	//		fl.translate(-p.width / 2, -p.height / 2);
+	//		return fl;
+	//	}
 
 	public void destroy()
 	{
@@ -261,5 +269,10 @@ public class TreeManager extends AbstractUIObject
 		if (imageLoader != null)
 			imageLoader.dispose();
 		imageLoader = null;
+	}
+
+	public void fillScreen()
+	{
+		camera.fillScreen(0.7f);
 	}
 }

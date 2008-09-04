@@ -42,22 +42,39 @@ public class ImageSearcher implements UsefulConstants
 
 	}
 
-	public void getThumbnailURL()
+
+	public void loadThumbnailURL()
 	{
-		if (pos >= results.size())
+		String imgT = node.getAnnotation(IMG_TAG);
+		if (imgT != null && imgT.equals(getThumbnailURL()))
 			return;
-		SingleResult sr = results.get(pos);
 		node.setAnnotation(OLD_IMG_TAG, node.getAnnotation(IMG_TAG));
-		node.setAnnotation(IMG_TAG, sr.thumbURL);
+		node.setAnnotation(IMG_TAG, getThumbnailURL());
 	}
 
-	public void getImageURL()
+	public String getThumbnailURL()
 	{
 		if (pos >= results.size())
-			return;
+			return null;
 		SingleResult sr = results.get(pos);
+		return sr.thumbURL;
+	}
+	
+	public void loadFullImageURL()
+	{
+		String imgT = node.getAnnotation(IMG_TAG);
+		if (imgT != null && imgT.equals(getFullImageURL()))
+			return;
 		node.setAnnotation(OLD_IMG_TAG, node.getAnnotation(IMG_TAG));
-		node.setAnnotation(IMG_TAG, sr.imgURL);
+		node.setAnnotation(IMG_TAG, getFullImageURL());
+	}
+	
+	public String getFullImageURL()
+	{
+		if (pos >= results.size())
+			return null;
+		SingleResult sr = results.get(pos);
+		return sr.imgURL;
 	}
 
 	public void skipTo(int n)

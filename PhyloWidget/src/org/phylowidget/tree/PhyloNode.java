@@ -82,17 +82,26 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 		range.node = this;
 	}
 
-	public void loadImage()
+	public void loadThumbImage()
 	{
 		if (searchResults == null)
 			searchResults = new ImageSearcher(this);
 		else
 			searchResults.next();
 
-		searchResults.getThumbnailURL();
-//						searchResults.getImageURL();
+		searchResults.loadThumbnailURL();
+	}
+	
+	public void loadFullImage()
+	{
+		searchResults.loadFullImageURL();
 	}
 
+	public String getFullImageURL()
+	{
+		return searchResults.getFullImageURL();
+	}
+	
 	@Override
 	public double getBranchLength()
 	{

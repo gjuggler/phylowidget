@@ -1,12 +1,12 @@
 package org.phylowidget.render.images;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.imageio.ImageIO;
 
 import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.PhyloWidget;
@@ -24,6 +24,8 @@ public class ImageLoader implements Runnable
 	{
 	}
 
+	boolean loadingImg = false;
+	PhyloNode loadingNode = null;
 	public Image getImageForNode(PhyloNode n)
 	{
 		if (thread == null)
@@ -48,14 +50,16 @@ public class ImageLoader implements Runnable
 				if (oldImgS != null)
 				{
 					removeImage(oldImgS);
+					n.clearAnnotation(ImageSearcher.OLD_IMG_TAG);
 				}
-				n.clearAnnotation(ImageSearcher.OLD_IMG_TAG);
 				return img;
 			}
+			PhyloWidget.setMessage("Loading image...");
 			String oldImgS = n.getAnnotation(ImageSearcher.OLD_IMG_TAG);
 			if (oldImgS != null)
 			{
 				img = imageMap.get(oldImgS);
+				
 				return img;
 			} else
 				return null;
@@ -65,9 +69,14 @@ public class ImageLoader implements Runnable
 
 	synchronized void removeImage(String imageURL)
 	{
+		Image i = imageMap.get(imageURL);
+		if (i != null)
+		{
+			i.flush();
+			i = null;
+		}
 		imageMap.remove(imageURL);
 		loadedImageURLs.remove(imageURL);
-//		System.out.println(imageMap.keySet());
 	}
 
 	static final Integer integer = new Integer(0);
@@ -100,21 +109,23 @@ public class ImageLoader implements Runnable
 				{
 					imgS = imagesToLoad.remove();
 					PApplet p = UIGlobals.g.getP();
-//					InputStream in = p.openStream(imgS);
-//					byte[] bytes = PApplet.loadBytes(in);
-//					if (bytes == null)
-//					{
-//						in.close();
-//						continue;
-//					}
-					Image img = p.getImage(new URL(imgS));
-//					System.out.println(img);
-//					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
-//					bytes = null;
+					//					InputStream in = p.openStream(imgS);
+					//					byte[] bytes = PApplet.loadBytes(in);
+					//					if (bytes == null)
+					//					{
+					//						in.close();
+					//						continue;
+					//					}
+//					Image img = p.getImage(new URL(imgS));
+					Image img = ImageIO.read(new URL(imgS));
+					PhyloWidget.setMessage("Finished loading image!");
+					//					System.out.println(img);
+					//					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
+					//					bytes = null;
 					imageMap.put(imgS, img);
 				} catch (Exception e)
 				{
-					e.printStackTrace();
+//					e.printStackTrace();
 					loadedImageURLs.remove(imgS);
 				}
 			}
@@ -134,9 +145,6 @@ public class ImageLoader implements Runnable
 		}
 	}
 
-	
-
-	
 	public void dispose()
 	{
 		if (imageMap != null)
@@ -153,5 +161,5 @@ public class ImageLoader implements Runnable
 		}
 		thread = null;
 	}
-	
+
 }

@@ -41,7 +41,6 @@ import processing.core.PGraphicsJava2D;
 
 public class RenderOutput
 {
-
 	public static boolean isOutputting = false;
 
 	public static synchronized void savePDF(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels)
@@ -61,7 +60,6 @@ public class RenderOutput
 			preprocess(t);
 			//			File f = p.outputFile("Save PDF as...");
 			//			String s = p.selectOutput("Save PDF as...");
-			p.noLoop();
 			String fileType = "PDF";
 			FileDialog fd =
 					new FileDialog(PhyloWidget.ui.getFrame(), "Choose your desination " + fileType + " file.",
@@ -82,7 +80,7 @@ public class RenderOutput
 				filename += ".pdf";
 			}
 			File f = new File(directory,filename);
-
+			p.noLoop();
 			PGraphics canvas = (PGraphics) p.createGraphics(p.width, p.height, PConstants.PDF, f.getAbsolutePath());
 			canvas.beginDraw();
 

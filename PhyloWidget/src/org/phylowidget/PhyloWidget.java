@@ -31,6 +31,7 @@ import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
+import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
 
@@ -54,7 +55,7 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
-	boolean DEBUG = false;
+	boolean DEBUG = true;
 
 	long time = 0;
 	public PhyloWidget()
@@ -107,10 +108,9 @@ public class PhyloWidget extends PApplet
 			}
 		}.start();
 		
+		unregisterDraw(UIGlobals.g.event());
 		
 		clearQueues();
-		
-		System.out.println(System.currentTimeMillis() - time);
 	}
 
 	DoubleBuffer dbr;
@@ -135,19 +135,24 @@ public class PhyloWidget extends PApplet
 		if (drawnOnce)
 			clearQueues();
 
+		drawnOnce = true;
+
+		UIGlobals.g.event().draw();
+		
 		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 			messageString = "";
 		if (messageString.length() != 0)
+		{
 			drawMessage();
+		}
 
 		if (DEBUG)
 		{
 			drawNumLeaves();
 			drawFrameRate();
 		}
-		drawnOnce = true;
 	}
-
+	
 	protected void clearQueues()
 	{
 		if (!settingMap.isEmpty())
@@ -213,7 +218,10 @@ public class PhyloWidget extends PApplet
 
 	protected void drawNumLeaves()
 	{
-		int leaves = trees.getTree().getNumEnclosedLeaves(trees.getRenderer().getTree().getRoot());
+		RootedTree tree = trees.getTree();
+		if (tree == null)
+			return;
+		int leaves = tree.getNumEnclosedLeaves(tree.getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
 		textFont(UIGlobals.g.getPFont());
@@ -227,6 +235,11 @@ public class PhyloWidget extends PApplet
 		textAlign(PApplet.LEFT);
 		textFont(UIGlobals.g.getPFont());
 		textSize(10);
+		float w = textWidth(messageString);
+		fill(255,255,255);
+		stroke(255,255,255);
+		strokeWeight(3);
+		rect(5,height-20,w,12);
 		fill(255, 0, 0);
 		text(messageString, 5, height - 10);
 	}
@@ -295,9 +308,10 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void changeSetting(String setting, String newValue)
 	{
-//		System.out.println(setting+"\t"+newValue);
+		System.out.println(setting+"\t"+newValue);
 		synchronized (settingMap)
 		{
+//			System.out.println(System.currentTimeMillis()+"Setting change: "+setting+" = "+newValue);
 			settingMap.put(setting, newValue);
 		}
 	}
@@ -306,6 +320,7 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void callMethod(String method)
 	{
+//		System.out.println(System.currentTimeMillis()+"Method call: "+method);
 		methodQueue.add(method);
 	}
 

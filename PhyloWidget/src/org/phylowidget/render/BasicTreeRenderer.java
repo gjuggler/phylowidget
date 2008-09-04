@@ -255,6 +255,9 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			n.bulgeFactor = 1;
 			if (n.found && n.isWithinScreen)
 				foundItems.add(n);
+			// GJ 2008-09-03: Add ALWAYS_SHOW nodes to the foundItems list.
+			if (n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW) != null && n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW).equals("1"))
+				foundItems.add(0, n);
 			if (nodesDrawn >= PhyloWidget.cfg.renderThreshold)
 				continue;
 			if (!n.isWithinScreen)
@@ -311,7 +314,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			}
 			/*
 			 * Ok, we've skipped all the non-drawn nodes,
-			 * let's do the actual drawing.
+			 * let's do the actual (non-label) drawing.
 			 */
 			NodeRenderer.r = this;
 			handleNode(n);

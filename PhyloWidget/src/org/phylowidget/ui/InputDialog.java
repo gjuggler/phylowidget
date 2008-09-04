@@ -27,10 +27,12 @@ public class InputDialog extends Dialog implements WindowListener, KeyListener
 	TextArea text;
 	Button ok;
 	Button cancel;
+	public String str = null;
 
 	public InputDialog(Frame owner, String title)
 	{
-		super(owner, title, true);
+		super(owner, title, false);
+//		setModal(false);
 
 		addKeyListener(this);
 		
@@ -55,6 +57,7 @@ public class InputDialog extends Dialog implements WindowListener, KeyListener
 
 			public void actionPerformed(ActionEvent e)
 			{
+				str = text.getText();
 				dispose();
 			}
 
@@ -67,6 +70,7 @@ public class InputDialog extends Dialog implements WindowListener, KeyListener
 			public void actionPerformed(ActionEvent e)
 			{
 				text.setText("");
+				str = "";
 				dispose();
 			}
 

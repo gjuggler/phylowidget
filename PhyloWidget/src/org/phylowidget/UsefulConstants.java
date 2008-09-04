@@ -40,4 +40,5 @@ public interface UsefulConstants
 	public static final String NODE_SIZE = "NSZ";		// Multiplier for node marker size.
 	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
 	public static final String IMAGE_SIZE = "ISZ";		// Multiplier for photo size.
+	public static final String LABEL_ALWAYSSHOW = "PW_ALWAYS";    // Pretty hacky, but this is a tag to make sure a label is ALWAYS shown, no matter what.
 }

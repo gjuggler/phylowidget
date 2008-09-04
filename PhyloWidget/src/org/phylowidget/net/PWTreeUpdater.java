@@ -47,7 +47,7 @@ public class PWTreeUpdater extends DelayedAction
 		{
 			PhyloTree t = new PhyloTree();
 			TreeIO.setOldTree(PhyloWidget.trees.getTree());
-			System.out.println(parseMe.length());
+//			System.out.println(parseMe.length());
 			PhyloWidget.trees.setTree(TreeIO.parseNewickString(t, parseMe));
 			PhyloWidget.setMessage("Tree text updated.");
 		} catch (Exception e)

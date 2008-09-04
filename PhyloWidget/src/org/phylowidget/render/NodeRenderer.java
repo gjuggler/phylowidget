@@ -3,11 +3,12 @@ package org.phylowidget.render;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.TextField;
@@ -453,8 +454,32 @@ public final class NodeRenderer implements UsefulConstants
 				if (alignRight)
 					dx -= scaledW;
 
-				Image img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+				Image img = null;
+				if (RenderOutput.isOutputting && PhyloWidget.cfg.outputFullSizeImages)
+				{
+					try
+					{
+						img = ImageIO.read(new URL(n.getFullImageURL()));
+					} catch (Exception e)
+					{
+						e.printStackTrace();
+						img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+					}
+				} else
+				{
+					float minSide = Math.min(scaledH,scaledW);
+					if (minSide > 300)
+					{
+						n.loadFullImage();
+					}
+					img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+				}
 				g2.drawImage(img, (int) dx, (int) -scaledH / 2, (int) scaledW, (int) scaledH, null);
+				if (RenderOutput.isOutputting && img != null)
+				{
+					img.flush();
+					img = null;
+				}
 				//		canvas.image(img, dx, -scaledH / 2, scaledW, scaledH);
 			}
 
@@ -512,10 +537,16 @@ public final class NodeRenderer implements UsefulConstants
 			//			canvas.strokeWeight(nodeStroke(r,n));
 			//			canvas.fill(textColor(n));
 
+			
+			boolean alwaysRender = false;
+			float always = getFloatAnnotation(n,LABEL_ALWAYSSHOW);
+			if (always > -1)
+				alwaysRender = true;
+			
 			/*
 			 * Early exit strategy if text is too small. Don't do this if we're outputting to a file.
 			 */
-			if (curTextSize < .5f && !RenderOutput.isOutputting)
+			if (curTextSize < .5f && !RenderOutput.isOutputting && !alwaysRender)
 			{
 				return ZEROES;
 			}
@@ -549,7 +580,7 @@ public final class NodeRenderer implements UsefulConstants
 			 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
 			 */
 			canvas.fill(textColor(n));
-//			canvas.textFont(r.font);
+			//			canvas.textFont(r.font);
 			curTextSize = Math.min(curTextSize, 128);
 			canvas.textSize(curTextSize);
 			//		canvas.textSize(10);
@@ -566,10 +597,11 @@ public final class NodeRenderer implements UsefulConstants
 					canvas.textSize(curTextSize);
 					canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
 					float s = strokeForNode(n);
-//					registerPoint(canvas,n,)
+					//					registerPoint(canvas,n,)
 					if (actuallyRender)
 					{
-						canvas.text(n.getLabel(), n.getRealX()-curTextSize / 3 - s, n.getRealY()-s - curTextSize / 5);
+						canvas.text(n.getLabel(), n.getRealX() - curTextSize / 3 - s, n.getRealY() - s - curTextSize
+								/ 5);
 					}
 				}
 			} else
@@ -595,7 +627,11 @@ public final class NodeRenderer implements UsefulConstants
 
 		private float textSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
-			if (PhyloWidget.cfg.hideAllLabels)
+			String always = n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW);
+			boolean alwaysShow = false;
+			if (always != null && always.equals("1"))
+				alwaysShow = true;
+			if (PhyloWidget.cfg.hideAllLabels && !alwaysShow)
 				return 0;
 			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.textScaling * n.bulgeFactor;
 

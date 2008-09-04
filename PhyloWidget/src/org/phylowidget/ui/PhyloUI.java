@@ -23,6 +23,8 @@ import java.awt.Component;
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.Label;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -58,6 +60,8 @@ import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
+
+import com.lowagie.tools.SwingWorker;
 
 import processing.core.PApplet;
 
@@ -643,7 +647,7 @@ public class PhyloUI implements Runnable
 		{
 			public void run()
 			{
-				getCurNode().loadImage();
+				getCurNode().loadThumbImage();
 			}
 		}.start();
 	}
@@ -659,7 +663,7 @@ public class PhyloUI implements Runnable
 				tree.getAll(tree.getRoot(), leaves, null);
 				for (PhyloNode n : leaves)
 				{
-					n.loadImage();
+					n.loadThumbImage();
 				}
 			}
 		}.start();
@@ -768,33 +772,39 @@ public class PhyloUI implements Runnable
 	{
 		Frame parentFrame = getFrame();
 
-		InputDialog d = new InputDialog(parentFrame, "Enter your Newick-formatted tree here.");
+		final InputDialog d = new InputDialog(null, "Enter your Newick-formatted tree here.");
 		SecurityChecker sc = new SecurityChecker(p);
 		if (sc.canAccessInternet())
 		{
 			Label l = new Label("A URL pointing to a Newick/NHX/Nexus file is also valid input.");
 			d.add(l, BorderLayout.NORTH);
 		}
-
-		d.setVisible(true);
-
-		final String treeString = d.text.getText();
-		if (treeString == null || treeString.length() == 0)
-			return;
-
-		new Thread()
-		{
-			public void run()
+		d.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e)
 			{
-				setMessage("Loading tree...");
-				PhyloTree t = (PhyloTree) TreeIO.parseNewickString(new PhyloTree(), treeString);
-				p.noLoop();
-				PhyloWidget.trees.setTree(t);
-				p.loop();
-				setMessage("");
-				layout();
+				super.windowClosed(e);
+				final String treeString = d.text.getText();
+				if (treeString == null || treeString.length() == 0)
+					return;
+
+				new Thread()
+				{
+					public void run()
+					{
+						setMessage("Loading tree...");
+//						p.changeSetting("tree", treeString);
+						PhyloTree t = (PhyloTree) TreeIO.parseNewickString(new PhyloTree(), treeString);
+						p.noLoop();
+						PhyloWidget.trees.setTree(t);
+						p.loop();
+						setMessage("");
+						layout();
+					}
+				}.start();
 			}
-		}.start();
+		});
+		d.setVisible(true);
 	}
 
 	/*

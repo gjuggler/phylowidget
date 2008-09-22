@@ -26,10 +26,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.andrewberman.ui.camera.Camera;
 import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.menu.MenuItem;
+import org.andrewberman.ui.menu.MenuItem.ZDepthComparator;
 import org.andrewberman.ui.tools.ToolManager;
 
 import processing.core.PApplet;

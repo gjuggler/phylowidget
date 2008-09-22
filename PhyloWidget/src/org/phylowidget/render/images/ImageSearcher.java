@@ -42,7 +42,6 @@ public class ImageSearcher implements UsefulConstants
 
 	}
 
-
 	public void loadThumbnailURL()
 	{
 		String imgT = node.getAnnotation(IMG_TAG);
@@ -59,16 +58,19 @@ public class ImageSearcher implements UsefulConstants
 		SingleResult sr = results.get(pos);
 		return sr.thumbURL;
 	}
-	
+
 	public void loadFullImageURL()
 	{
 		String imgT = node.getAnnotation(IMG_TAG);
 		if (imgT != null && imgT.equals(getFullImageURL()))
 			return;
-		node.setAnnotation(OLD_IMG_TAG, node.getAnnotation(IMG_TAG));
-		node.setAnnotation(IMG_TAG, getFullImageURL());
+		if (imgT.contains("google.com"))
+		{
+			node.setAnnotation(OLD_IMG_TAG, node.getAnnotation(IMG_TAG));
+			node.setAnnotation(IMG_TAG, getFullImageURL());
+		}
 	}
-	
+
 	public String getFullImageURL()
 	{
 		if (pos >= results.size())
@@ -124,8 +126,7 @@ public class ImageSearcher implements UsefulConstants
 
 	static class Google
 	{
-		public static ArrayList[] imageSearch(String imageQuery,
-				int startingIndex)
+		public static ArrayList[] imageSearch(String imageQuery, int startingIndex)
 		{
 			/*
 			 * Format our query nicely.
@@ -143,8 +144,7 @@ public class ImageSearcher implements UsefulConstants
 			 * Create the query string.
 			 */
 			String queryS = new String();
-			queryS += "http://images.google.com/images?gbv=1&start="
-					+ startingIndex + "&q=" + imageQuery;
+			queryS += "http://images.google.com/images?gbv=1&start=" + startingIndex + "&q=" + imageQuery;
 			//			System.out.println(queryS);
 			String result = "";
 
@@ -154,13 +154,11 @@ public class ImageSearcher implements UsefulConstants
 			try
 			{
 				URL query = new URL(queryS);
-				HttpURLConnection urlc = (HttpURLConnection) query
-						.openConnection();
+				HttpURLConnection urlc = (HttpURLConnection) query.openConnection();
 				urlc.setInstanceFollowRedirects(true);
 				urlc.setRequestProperty("User-Agent", "");
 				urlc.connect();
-				BufferedReader in = new BufferedReader(new InputStreamReader(
-						urlc.getInputStream()));
+				BufferedReader in = new BufferedReader(new InputStreamReader(urlc.getInputStream()));
 				StringBuffer response = new StringBuffer();
 				char[] buffer = new char[1024];
 				while (true)
@@ -209,10 +207,9 @@ public class ImageSearcher implements UsefulConstants
 				/*
 				 * Just re-encode the "=" and ":" characters.
 				 */
-//				thumb = thumb.replaceAll("=", "");
-//				thumb = thumb.replaceAll(":","&colon;");
-//				System.out.println(thumb);
-
+				//				thumb = thumb.replaceAll("=", "");
+				//				thumb = thumb.replaceAll(":","&colon;");
+				//				System.out.println(thumb);
 				thumbs.add(thumb);
 				imgs.add(url);
 			}
@@ -220,8 +217,7 @@ public class ImageSearcher implements UsefulConstants
 		}
 
 		static Pattern imgres = Pattern.compile("/imgres?");
-		static Pattern imgBlock = RegexUtils.grabUntilClosingElement("a",
-				imgres);
+		static Pattern imgBlock = RegexUtils.grabUntilClosingElement("a", imgres);
 		static Pattern imgurl = Pattern.compile("imgurl=(.*?)&");
 		static Pattern imgsrc = Pattern.compile("img src=(\\S*?) ");
 

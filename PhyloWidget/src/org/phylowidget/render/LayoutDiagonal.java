@@ -30,7 +30,7 @@ public class LayoutDiagonal extends LayoutBase
 	@Override
 	public void drawLine(PGraphics canvas, PhyloNode p, PhyloNode c)
 	{
-		canvas.line(c.getRealX(), c.getRealY(), p.getRealX(),p.getRealY());
+		canvas.line(c.getX(), c.getY(), p.getX(),p.getY());
 	}
 	
 	protected float branchPosition(PhyloNode n)

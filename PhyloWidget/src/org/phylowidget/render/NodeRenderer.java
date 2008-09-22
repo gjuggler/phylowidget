@@ -40,13 +40,18 @@ public final class NodeRenderer implements UsefulConstants
 	static LabelRender lr = new LabelRender();
 
 	static RenderItem[] renderables = new RenderItem[] { ir, lr };
-	static RenderItem[] untransformed = new RenderItem[] {};
+	static RenderItem[] structRenderables = new RenderItem[] { lineRender, nr };
 
 	public NodeRenderer()
 	{
 	}
 
-	public static final void renderNode(BasicTreeRenderer r, PhyloNode n)
+	public static final void render(BasicTreeRenderer r, PhyloNode n)
+	{
+		renderImpl(r, n, true);
+	}
+
+	static final void renderImpl(BasicTreeRenderer r, PhyloNode n, boolean actuallyRender)
 	{
 		PGraphics canvas = r.canvas;
 		g2 = r.canvas.g2;
@@ -54,8 +59,8 @@ public final class NodeRenderer implements UsefulConstants
 		NodeRenderer.r = r;
 
 		// Translate the canvas to the node's x and y coords.
-		float x = n.getRealX();
-		float y = n.getRealY();
+		float x = n.getX();
+		float y = n.getY();
 		canvas.pushMatrix();
 		canvas.translate(x, y);
 		canvas.rotate(n.getAngle());
@@ -64,76 +69,48 @@ public final class NodeRenderer implements UsefulConstants
 		if (n.getTextAlign() == PhyloNode.ALIGN_RIGHT)
 			dMult = -1;
 
-		n.rect.setFrame(n.getRealX(), n.getRealY(), 0, 0);
+		n.rect.setFrame(n.getX(), n.getY(), 0, 0);
 
-		canvas.translate(nr.render(canvas, n, false)[0] * dMult + RenderConstants.labelSpacing * dMult, 0);
+		// GJ 19-09-08: fixed the spacing of rendered elements.
+		float rowHeight = r.getTextSize();
+		float dotWidth = r.getNodeOffset(n);
+
+		if (PhyloWidget.cfg.treatNodesAsLabels)
+		{
+			boolean drawNode = (actuallyRender && n.drawLabel) || PhyloWidget.cfg.showAllLeafNodes;
+			nr.render(canvas, n, drawNode, true);
+		}
+
+		canvas.translate(dotWidth * dMult + RenderConstants.labelSpacing * dMult * rowHeight, 0);
 		float dx = 0;
 		for (RenderItem ri : renderables)
 		{
-			float[] xy = ri.render(canvas, n, true);
+			boolean drawLabel = (n.drawLabel && actuallyRender);
+			float[] xy = ri.render(canvas, n, drawLabel, true);
 			dx = xy[0];
-			canvas.translate((dx + RenderConstants.labelSpacing) * dMult, 0);
+			canvas.translate(dx + (RenderConstants.labelSpacing) * dMult * rowHeight, 0);
 		}
 
 		canvas.popMatrix();
 
-		for (RenderItem ri : untransformed)
+		for (RenderItem ri : structRenderables)
 		{
-			ri.render(canvas, n, true);
+			boolean drawNode = (actuallyRender && n.drawLineAndNode);
+			if (ri == nr)
+			{
+				if (PhyloWidget.cfg.treatNodesAsLabels)
+					continue;
+				// GJ 19-09-08 clarify: this is a special case, where we want all nodes to be drawn.
+				drawNode = (actuallyRender && n.drawLineAndNode) || PhyloWidget.cfg.showAllLeafNodes;	
+			}
+			ri.render(canvas, n, drawNode, false);
 		}
+
 	}
 
 	public final static void setCornerPoints(BasicTreeRenderer r, PhyloNode n)
 	{
-		PGraphics canvas = r.canvas;
-		g2 = r.canvas.g2;
-
-		NodeRenderer.r = r;
-
-		// Translate the canvas to the node's x and y coords.
-		float x = n.getRealX();
-		float y = n.getRealY();
-		canvas.pushMatrix();
-		canvas.translate(x, y);
-		canvas.rotate(n.getAngle());
-
-		float dMult = 1;
-		if (n.getTextAlign() == PhyloNode.ALIGN_RIGHT)
-			dMult = -1;
-
-		n.rect.setFrame(n.getRealX(), n.getRealY(), 0, 0);
-
-		float dx = 0;
-		float dy = 1;
-		float maxHeight = 0;
-		float totalWidth = 0;
-		for (RenderItem ri : renderables)
-		{
-			float[] xy = ri.render(canvas, n, false);
-			dx = xy[0];
-			dy = xy[1];
-			totalWidth += dx;
-			maxHeight = Math.max(dy, maxHeight);
-			//			canvas.translate((dx + RenderConstants.labelSpacing) * dMult, 0);
-		}
-
-		// Here's where we calculate the corners and register those points.
-		if (dMult == -1)
-			canvas.translate(-totalWidth, 0);
-		setPoint(canvas, n, 0, -maxHeight / 2, n.corners[0]); // Top left.
-		setPoint(canvas, n, totalWidth, -maxHeight / 2, n.corners[1]); // Top right..
-		setPoint(canvas, n, totalWidth, maxHeight / 2, n.corners[2]); // Bottom right.
-		setPoint(canvas, n, 0, maxHeight / 2, n.corners[3]); // Bottom left.
-
-		canvas.popMatrix();
-	}
-
-	private static void setPoint(PGraphics canvas, PhyloNode n, float x, float y, Point2D pt)
-	{
-		float screenX = canvas.screenX(x, y);
-		float screenY = canvas.screenY(x, y);
-		pt.setLocation(screenX, screenY);
-		//		canvas.ellipse(x, y, 5, 5); // For simple debugging.
+		renderImpl(r, n, false);
 	}
 
 	static void getColorsForSpeciesMap()
@@ -200,27 +177,31 @@ public final class NodeRenderer implements UsefulConstants
 
 	public static abstract class RenderItem
 	{
-		public abstract float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender);
+		protected float offX;
+		protected float offY;
+
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
+		{
+			if (preTransformed)
+			{
+				offX = 0;
+				offY = 0;
+			} else
+			{
+				offX = n.getX();
+				offY = n.getY();
+			}
+			return null;
+		}
 	}
 
 	public static class NodeRender extends RenderItem
 	{
 		@Override
-		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender)
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
 		{
-			offX = 0;
-			offY = 0;
+			super.render(canvas, n, actuallyRender, preTransformed);
 			return drawNodeMarkerImpl(canvas, n, actuallyRender);
-		}
-
-		static float offX;
-		static float offY;
-
-		public void renderUntransformed(PGraphics canvas, PhyloNode n)
-		{
-			offX = n.getRealX();
-			offY = n.getRealY();
-			drawNodeMarkerImpl(canvas, n, true);
 		}
 
 		private float nodeSizeForNode(PhyloNode n)
@@ -266,9 +247,17 @@ public final class NodeRenderer implements UsefulConstants
 				}
 			}
 
-			if (!actuallyRender)
-				return new float[] { thisDotSize / 2, thisDotSize / 2 };
+			// GJ 19-09-08: Try out registering node points for overlap...
+			if (PhyloWidget.cfg.treatNodesAsLabels)
+			{
+				registerPoint(canvas, n, offX - thisDotSize / 2, offY - thisDotSize / 2);
+				registerPoint(canvas, n, offX + thisDotSize / 2, offY + thisDotSize / 2);
+			}
 
+			if (!actuallyRender)
+			{
+				return new float[] { thisDotSize / 2, thisDotSize / 2 };
+			}
 			if (PhyloWidget.cfg.nodeShape.equals("square"))
 			{
 				canvas.rect(offX - thisDotSize / 2, offY - thisDotSize / 2, thisDotSize, thisDotSize);
@@ -287,7 +276,7 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				return RenderConstants.foundColor.getRGB();
 			}
-			if (n == ((PhyloTree) r.tree).hoveredNode)
+			if (n == ((PhyloTree) r.tree).hoveredNode && PhyloWidget.cfg.colorHoveredBranch)
 			{
 				return RenderConstants.hoverColor.getRGB();
 			}
@@ -315,8 +304,9 @@ public final class NodeRenderer implements UsefulConstants
 	public static class LineRender extends RenderItem
 	{
 		@Override
-		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender)
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
 		{
+			super.render(canvas, n, actuallyRender, preTransformed);
 			if (!actuallyRender)
 				return ZEROES;
 			PhyloNode parent = (PhyloNode) n.getParent();
@@ -345,7 +335,7 @@ public final class NodeRenderer implements UsefulConstants
 			r.canvas.stroke(lineColor(c));
 
 			PhyloTree tree = (PhyloTree) r.getTree();
-			if (c == tree.hoveredNode)
+			if (c == tree.hoveredNode && PhyloWidget.cfg.colorHoveredBranch)
 			{
 				r.canvas.stroke(RenderConstants.hoverColor.getRGB());
 				r.canvas.strokeWeight(weight * RenderConstants.hoverStroke);
@@ -363,7 +353,6 @@ public final class NodeRenderer implements UsefulConstants
 			}
 
 			r.getTreeLayout().drawLine(r.canvas, p, c);
-
 			//			r.canvas.line(p.getRealX(), p.getRealY(), p.getRealX(), c.getRealY());
 			//			r.canvas.line(p.getRealX(), c.getRealY(), c.getRealX(),c.getRealY());
 		}
@@ -408,8 +397,9 @@ public final class NodeRenderer implements UsefulConstants
 		static boolean fitImagesToSquare = true;
 
 		@Override
-		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender)
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
 		{
+			super.render(canvas, n, actuallyRender, preTransformed);
 			return renderImage(r, n, actuallyRender);
 		}
 
@@ -467,7 +457,7 @@ public final class NodeRenderer implements UsefulConstants
 					}
 				} else
 				{
-					float minSide = Math.min(scaledH,scaledW);
+					float minSide = Math.min(scaledH, scaledW);
 					if (minSide > 300)
 					{
 						n.loadFullImage();
@@ -520,8 +510,9 @@ public final class NodeRenderer implements UsefulConstants
 	static class LabelRender extends RenderItem
 	{
 		@Override
-		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender)
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
 		{
+			super.render(canvas, n, actuallyRender, preTransformed);
 			// Calculate the row / text size.
 			float curTextSize = textSizeForNode(r, n);
 
@@ -537,12 +528,11 @@ public final class NodeRenderer implements UsefulConstants
 			//			canvas.strokeWeight(nodeStroke(r,n));
 			//			canvas.fill(textColor(n));
 
-			
 			boolean alwaysRender = false;
-			float always = getFloatAnnotation(n,LABEL_ALWAYSSHOW);
+			float always = getFloatAnnotation(n, LABEL_ALWAYSSHOW);
 			if (always > -1)
 				alwaysRender = true;
-			
+
 			/*
 			 * Early exit strategy if text is too small. Don't do this if we're outputting to a file.
 			 */
@@ -557,15 +547,15 @@ public final class NodeRenderer implements UsefulConstants
 			}
 
 			RootedTree tree = r.tree;
-			if (tree.isLeaf(n) && n.found)
+			if (tree.isLeaf(n) && (n.found || alwaysRender) )
 			{
 				/*
 				 * Draw a background rect.
 				 */
-				canvas.noStroke();
-				canvas.fill(RenderConstants.foundBackground.getRGB());
 				if (actuallyRender)
 				{
+					canvas.noStroke();
+					canvas.fill(RenderConstants.foundBackground.getRGB());
 					if (alignRight)
 						canvas.rect(-n.unitTextWidth * curTextSize, -curTextSize / 2,
 							(float) (n.unitTextWidth * curTextSize), curTextSize);
@@ -580,10 +570,8 @@ public final class NodeRenderer implements UsefulConstants
 			 * THIS IS THE MAIN LABEL DRAWING CODE. SO SLEEK, SO SIMPLE!!!
 			 */
 			canvas.fill(textColor(n));
-			//			canvas.textFont(r.font);
 			curTextSize = Math.min(curTextSize, 128);
 			canvas.textSize(curTextSize);
-			//		canvas.textSize(10);
 			if (n.found)
 			{
 				canvas.fill(RenderConstants.foundForeground.getRGB());
@@ -593,15 +581,30 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				if (PhyloWidget.cfg.showCladeLabels)
 				{
-					curTextSize *= 0.75f;
-					canvas.textSize(curTextSize);
-					canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
 					float s = strokeForNode(n);
-					//					registerPoint(canvas,n,)
+
+					// TODO: Make a background rect, like we do for found nodes.
+//					if (actuallyRender)
+//					{
+//						canvas.fill(RenderConstants.foundBackground.getRGB());
+//						//					canvas.noStroke();
+//						canvas.rect(offX - dx, offY + curTextSize / 2 - curTextSize / 3 - s, offX, offY - curTextSize
+//								/ 2 - curTextSize / 3 - s);
+//					}
+
+					canvas.fill(textColor(n));
+					curTextSize *= 0.75f;
+
+					dx = curTextSize * n.unitTextWidth;
+					registerPoint(canvas, n, offX, offY - curTextSize / 2 - curTextSize / 3 - s);
+					registerPoint(canvas, n, offX - dx, offY + curTextSize / 2 - curTextSize / 3 - s);
 					if (actuallyRender)
 					{
-						canvas.text(n.getLabel(), n.getRealX() - curTextSize / 3 - s, n.getRealY() - s - curTextSize
-								/ 5);
+						canvas.textSize(curTextSize);
+						canvas.textAlign(canvas.RIGHT, canvas.BASELINE);
+						canvas.fill(textColor(n));
+						//						canvas.text(n.getLabel(), 0, r.dFont * curTextSize / r.textSize);
+						canvas.text(n.getLabel(), offX - curTextSize / 3 - s, offY - s - curTextSize / 3);
 					}
 				}
 			} else
@@ -682,12 +685,12 @@ public final class NodeRenderer implements UsefulConstants
 			PGraphics canvas = null;
 			if (canvas != null)
 			{
-				dX += nr.render(canvas, n, false)[0];
-				dX += ir.render(canvas, n, false)[0];
+				dX += nr.render(canvas, n, false, true)[0];
+				dX += ir.render(canvas, n, false, true)[0];
 			}
 
-			float x = n.getRealX() + r.getNodeRadius() + r.getNormalLineWidth() * 2;
-			float y = n.getRealY();
+			float x = n.getX() + r.getNodeRadius() + r.getNormalLineWidth() * 2;
+			float y = n.getY();
 			tf.setTextSize(curTextSize);
 			tf.setWidth(textWidth);
 			tf.setPositionByBaseline(x + dX, y + dY);

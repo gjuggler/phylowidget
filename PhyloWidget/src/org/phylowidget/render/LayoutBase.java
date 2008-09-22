@@ -81,7 +81,7 @@ public abstract class LayoutBase
 		
 		for (PhyloNode n : nodes)
 		{
-			n.setPosition((n.getX() + dX) * scaleX + offsetX, (n.getY() + dY) * scaleY + offsetY);
+			n.setPosition((n.getLayoutX() + dX) * scaleX + offsetX, (n.getLayoutY() + dY) * scaleY + offsetY);
 		}
 		
 		// Keep the node centered and on the left if it's the only one.
@@ -93,7 +93,7 @@ public abstract class LayoutBase
 //			System.out.println(dX);
 			for (PhyloNode n : nodes)
 			{
-				n.setPosition(n.getX()+dX,n.getY());
+				n.setPosition(n.getLayoutX()+dX,n.getLayoutY());
 			}
 		}
 	}

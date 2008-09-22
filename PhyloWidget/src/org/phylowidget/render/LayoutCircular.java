@@ -36,8 +36,8 @@ public class LayoutCircular extends LayoutBase
 
 			branchPosition((PhyloNode) tree.getRoot());
 			root = (PhyloNode) tree.getRoot();
-			rootX = ((PhyloNode) tree.getRoot()).getRealX();
-			rootY = ((PhyloNode) tree.getRoot()).getRealY();
+			rootX = ((PhyloNode) tree.getRoot()).getX();
+			rootY = ((PhyloNode) tree.getRoot()).getY();
 	}
 
 	@Override
@@ -50,8 +50,8 @@ public class LayoutCircular extends LayoutBase
 		if (root == null)
 			return;
 		
-		float rootX = root.getRealX();
-		float rootY = root.getRealY();
+		float rootX = root.getX();
+		float rootY = root.getY();
 
 		float cRad = getDistance(root, c);
 		float pRad = getDistance(root, p);
@@ -71,7 +71,7 @@ public class LayoutCircular extends LayoutBase
 			canvas.strokeCap(canvas.ROUND);
 //			canvas.strokeJoin(canvas.ROUND);
 //			canvas.stroke(0,0,0,1f);
-			canvas.line(c.getRealX(), c.getRealY(), rootX + (float) Math.cos(cAr.angle) * pRad, rootY
+			canvas.line(c.getX(), c.getY(), rootX + (float) Math.cos(cAr.angle) * pRad, rootY
 					+ (float) Math.sin(cAr.angle) * pRad);
 		} else
 		{
@@ -91,16 +91,16 @@ public class LayoutCircular extends LayoutBase
 			avg = Math.max(avg,180);
 			canvas.stroke(new Color(avg,avg,avg).getRGB());
 			canvas.line(rootX + (float) Math.cos(cAr.angle) * cAr.leafRadius * scaleX * drawScaleX, rootY
-				+ (float) Math.sin(cAr.angle) * cAr.leafRadius * scaleY * drawScaleY, c.getRealX(),c.getRealY());
+				+ (float) Math.sin(cAr.angle) * cAr.leafRadius * scaleY * drawScaleY, c.getX(),c.getY());
 		}
 	}
 
 	private float getDistance(PhyloNode a, PhyloNode b)
 	{
-		float aX = a.getRealX();
-		float aY = a.getRealY();
-		float bX = b.getRealX();
-		float bY = b.getRealY();
+		float aX = a.getX();
+		float aY = a.getY();
+		float bX = b.getX();
+		float bY = b.getY();
 
 		return (float) Math.sqrt((bX - aX) * (bX - aX) + (bY - aY) * (bY - aY));
 	}

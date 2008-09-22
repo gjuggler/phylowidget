@@ -57,7 +57,7 @@ public class MenuUtils
 	{
 		PGraphicsJava2D buff = item.menu.buff;
 		MenuStyle style = item.getStyle();
-		Menu menu = item.menu;
+		MenuItem menu = item.menu;
 
 		float ro = style.getF("f.roundOff");
 
@@ -195,7 +195,7 @@ public class MenuUtils
 	public static synchronized void drawBlankRect(MenuItem item, float x,
 			float y, float w, float h)
 	{
-		Menu menu = item.menu;
+		MenuItem menu = item.menu;
 		MenuStyle style = item.getStyle();
 
 		roundRect.setRoundRect(x, y, w, h, 0, 0);

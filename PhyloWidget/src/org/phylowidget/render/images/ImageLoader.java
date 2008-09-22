@@ -59,7 +59,6 @@ public class ImageLoader implements Runnable
 			if (oldImgS != null)
 			{
 				img = imageMap.get(oldImgS);
-				
 				return img;
 			} else
 				return null;
@@ -83,11 +82,11 @@ public class ImageLoader implements Runnable
 
 	synchronized void addImage(String imageURL)
 	{
-		if (!PhyloWidget.ui.canAccessInternet())
-		{
-			PhyloWidget.setMessage("Image loading failed: requires PhyloWidget full!");
-			return;
-		}
+//		if (!PhyloWidget.ui.canAccessInternet())
+//		{
+//			PhyloWidget.setMessage("Image loading failed: requires PhyloWidget full!");
+//			return;
+//		}
 		if (!loadedImageURLs.containsKey(imageURL))
 		{
 			loadedImageURLs.put(imageURL, integer);

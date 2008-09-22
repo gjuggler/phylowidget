@@ -1,0 +1,8 @@
+<menuset>
+	<menu name="context" type="org.phylowidget.ui.PhyloContextMenu" glow="false"/> 
+	<menu type="EmptyMenu">
+		<menu type="org.andrewberman.evogame.DragDropImage" image="0.jpg" targetNodeLabel="gorilla" x="300" y="100"/>
+		<menu type="org.andrewberman.evogame.DragDropImage" image="1.jpg" targetNodeLabel="human" x="320" y="200"/>
+		<menu type="org.andrewberman.evogame.DragDropImage" image="2.jpg" targetNodeLabel="rabbit" x="300" y="300"/>
+	</menu>
+</menuset>

@@ -19,6 +19,7 @@
 package org.phylowidget;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.andrewberman.ui.unsorted.SearchIndex;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -101,17 +102,9 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		}
 	}
 
-	public void search(String s)
+	public void markNodesAsFound(List<PhyloNode> matches)
 	{
 		removeFound();
-		
-		String[] searches = s.split(";");
-
-		ArrayList<PhyloNode> matches = new ArrayList<PhyloNode>();
-		for (String s2 : searches)
-		{
-			matches.addAll(index.search(s2));
-		}
 		for (PhyloNode n : matches)
 		{
 			PhyloNode cur = n;
@@ -120,12 +113,25 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 				cur.found = true;
 				cur = (PhyloNode) getParentOf(cur);
 			}
-
-			//			if (n.getState() == PhyloNode.NONE)
-			//			{
-			//				n.setState(PhyloNode.FOUND);
-			//			}
 		}
+	}
+	
+	public void searchAndMarkFound(String s)
+	{
+		List<PhyloNode> matches = search(s);
+		markNodesAsFound(matches);
+	}
+	
+	public List<PhyloNode> search(String s)
+	{
+		String[] searches = s.split(";");
+
+		ArrayList<PhyloNode> matches = new ArrayList<PhyloNode>();
+		for (String s2 : searches)
+		{
+			matches.addAll(index.search(s2));
+		}
+		return matches;
 	}
 
 	@Override

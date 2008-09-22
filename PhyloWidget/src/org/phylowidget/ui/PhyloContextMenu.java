@@ -24,14 +24,15 @@ import java.awt.geom.Rectangle2D;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.menu.RadialMenu;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.NodeRange;
+import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 
 public final class PhyloContextMenu extends RadialMenu
 {
-	HoverHalo hover;
+//	HoverHalo hover;
+	public NodeTraverser traverser;
 	
 	NodeRange curNodeRange;
 	Point nodePt = new Point(0,0);
@@ -39,6 +40,7 @@ public final class PhyloContextMenu extends RadialMenu
 	public PhyloContextMenu(PApplet p)
 	{
 		super(p);
+		traverser = new NodeTraverser(p);
 	}
 
 	public void setOptions()
@@ -53,7 +55,7 @@ public final class PhyloContextMenu extends RadialMenu
 		if (curNodeRange != null)
 		{
 			// Update our position based on the current menu node.
-			setPosition(curNodeRange.node.getRealX(),curNodeRange.node.getRealY());
+			setPosition(curNodeRange.node.getX(),curNodeRange.node.getY());
 		}
 		super.draw();
 	}
@@ -69,7 +71,22 @@ public final class PhyloContextMenu extends RadialMenu
 	public void close()
 	{
 		super.close();
-		PhyloWidget.ui.traverser.getCurRange();
+		traverser.getCurRange();
+	}
+	
+	private boolean shouldGlow = true;
+	public void setGlow(boolean glow)
+	{
+		traverser.setGlow(glow);
+	}
+	
+	public PhyloNode getNearestNode()
+	{
+		PhyloNode n = traverser.getCurrentNode();
+		if (n != null)
+			return n;
+		else
+			return null;
 	}
 	
 	private void setNodeRange(NodeRange r)

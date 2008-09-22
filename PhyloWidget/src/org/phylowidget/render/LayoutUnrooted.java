@@ -26,7 +26,7 @@ public class LayoutUnrooted extends LayoutBase
 	@Override
 	public void drawLine(PGraphics canvas, PhyloNode p, PhyloNode c)
 	{
-		canvas.line(c.getRealX(), c.getRealY(), p.getRealX(),p.getRealY());
+		canvas.line(c.getX(), c.getY(), p.getX(),p.getY());
 	}
 	
 	void layoutNode(PhyloNode n, double loAngle, double hiAngle)
@@ -39,8 +39,8 @@ public class LayoutUnrooted extends LayoutBase
 			return;
 		
 		float numEnclosed = tree.getNumEnclosedLeaves(n); // Total enclosed leaves for this node.
-		double curX = n.getX();
-		double curY = n.getY();
+		double curX = n.getLayoutX();
+		double curY = n.getLayoutY();
 		
 		List<PhyloNode> children = tree.getChildrenOf(n);
 		double curAngle = loAngle;

@@ -146,13 +146,6 @@ public abstract class Menu extends MenuItem implements UIObject
 	protected boolean clickToggles;
 	public boolean consumeEvents;
 
-	protected boolean hidden;
-
-	public void setHidden(boolean hideMe)
-	{
-		hidden = hideMe;
-	}
-
 	protected int cursor;
 	/**
 	 * The "dim" alpha value to drop to. Only effective when
@@ -233,7 +226,7 @@ public abstract class Menu extends MenuItem implements UIObject
 	 * overriding the <code>setOptions</code> method.
 	 */
 	public boolean useCameraCoordinates;
-
+	
 	/**
 	 * If true, this Menu will change to the hand cursor when one of its
 	 * constituent sub-MenuItems is selected. I am the walrus.
@@ -343,13 +336,15 @@ public abstract class Menu extends MenuItem implements UIObject
 		// System.out.println(hovered);
 		if (hidden)
 			return;
+		aTween.update();
+		
 		if (!isRootMenu())
 		{
+			hint();
 			super.draw();
+			unhint();
 			return;
 		}
-		if (autoDim)
-			aTween.update();
 		if (UIUtils.isJava2D(canvas))
 		{
 			/*
@@ -473,7 +468,7 @@ public abstract class Menu extends MenuItem implements UIObject
 			buff = (PGraphicsJava2D) canvas.g;
 		else if (usesJava2D)
 			createBuffer(START_SIZE, START_SIZE);
-		if (autoDim)
+//		if (autoDim)
 			aTween = new PropertyTween(this, "alpha",
 					TweenFriction.tween(.25f), Tween.OUT, fullAlpha, fullAlpha,
 					15);
@@ -744,5 +739,4 @@ public abstract class Menu extends MenuItem implements UIObject
 		buff.g2.setRenderingHints(origRH);
 		buff.g2.setComposite(origComp);
 	}
-
 }

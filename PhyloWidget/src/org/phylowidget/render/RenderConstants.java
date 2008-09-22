@@ -48,7 +48,7 @@ public class RenderConstants
 	public static Color foundBackground = new Color(255,255,255);
 	public static Color foundForeground = foundColor;
 	
-	public static float labelSpacing = 2f;
+	public static float labelSpacing = .1f;
 
 	public static Stroke stroke(float weight)
 	{

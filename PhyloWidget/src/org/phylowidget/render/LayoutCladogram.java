@@ -38,9 +38,9 @@ public class LayoutCladogram extends LayoutBase
 		canvas.strokeJoin(canvas.ROUND);
 		canvas.noFill();
 		canvas.beginShape();
-		canvas.vertex(p.getRealX(), p.getRealY());
-		canvas.vertex(p.getRealX(), c.getRealY());
-		canvas.vertex(c.getRealX(), c.getRealY());
+		canvas.vertex(p.getX(), p.getY());
+		canvas.vertex(p.getX(), c.getY());
+		canvas.vertex(c.getX(), c.getY());
 		canvas.endShape();
 		canvas.strokeCap(canvas.ROUND);
 	}

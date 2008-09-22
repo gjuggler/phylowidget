@@ -1,20 +1,20 @@
-/**************************************************************************
+/*******************************************************************************
  * Copyright (c) 2007, 2008 Gregory Jordan
  * 
  * This file is part of PhyloWidget.
  * 
- * PhyloWidget is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
+ * PhyloWidget is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 2 of the License, or (at your option) any later
+ * version.
  * 
- * PhyloWidget is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * PhyloWidget is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with PhyloWidget.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * PhyloWidget. If not, see <http://www.gnu.org/licenses/>.
  */
 package org.andrewberman.ui;
 
@@ -128,7 +128,7 @@ public class TextField extends AbstractUIObject implements Malleable
 
 		canvas = p;
 		style = new TextFieldStyle();
-		style.set("f.fontSize",12);
+		style.set("f.fontSize", 12);
 		pFont = style.getFont("font");
 		font = pFont.font;
 		blinker = Blinker.instance;
@@ -158,8 +158,7 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	PGraphicsJava2D createBuffer(int w, int h)
 	{
-		PGraphicsJava2D asdf = (PGraphicsJava2D) canvas.createGraphics(w, h,
-				PApplet.JAVA2D);
+		PGraphicsJava2D asdf = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
 		return asdf;
 	}
 
@@ -216,7 +215,10 @@ public class TextField extends AbstractUIObject implements Malleable
 		} else
 		{
 			// resetMatrix();
-			doTheDrawing();
+			synchronized (text)
+			{
+				doTheDrawing();
+			}
 		}
 		canvas.popMatrix();
 	}
@@ -238,8 +240,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		int h = (int) (height + OFFSET * 2);
 		// canvas.pushMatrix();
 		// resetMatrix();
-		canvas.image(pg, (int) (x - OFFSET), (int) (y - OFFSET), w, h, 0, 0, w,
-				h);
+		canvas.image(pg, (int) (x - OFFSET), (int) (y - OFFSET), w, h, 0, 0, w, h);
 		// canvas.popMatrix();
 	}
 
@@ -262,12 +263,12 @@ public class TextField extends AbstractUIObject implements Malleable
 		blinker.stop();
 		blinker = null;
 	}
-	
+
 	protected void doTheDrawing()
 	{
 		Color bgFill = style.getC("c.backgroundFill");
 		Color stroke = style.getC("c.foreground");
-		
+
 		/*
 		 * Draw the padded outer region of the textarea.
 		 */
@@ -284,11 +285,10 @@ public class TextField extends AbstractUIObject implements Malleable
 		pg.g2.setClip(clipRect);
 		pg.g2.setFont(pFont.font.deriveFont(fontSize));
 		pg.g2.setPaint(stroke);
-		synchronized (this)
-		{
-			pg.g2.drawString(text.substring(viewLo, viewHi), x + pad + offsetX,
-					y + pad + offsetY);
-		}
+//		synchronized (this)
+//		{
+			pg.g2.drawString(substring(viewLo, viewHi), x + pad + offsetX, y + pad + offsetY);
+//		}
 		/*
 		 * Draw the selection box.
 		 */
@@ -303,17 +303,15 @@ public class TextField extends AbstractUIObject implements Malleable
 			pg.g2.fill(clipRect);
 			pg.g2.setClip(clipRect);
 			pg.g2.setPaint(stroke.inverse());
-			synchronized (this)
-			{
-				pg.g2.drawString(text.substring(lo, hi), x + pad + loX, y + pad
-						+ offsetY);
-			}
+//			synchronized (this)
+//			{
+				pg.g2.drawString(substring(lo, hi), x + pad + loX, y + pad + offsetY);
+//			}
 		}
 		/*
 		 * Draw the caret.
 		 */
-		if (blinker.isOn && UIGlobals.g.focus().isFocused(this)
-				&& selHi - selLo == 0)
+		if (blinker.isOn && UIGlobals.g.focus().isFocused(this) && selHi - selLo == 0)
 		{
 			// System.out.println("Heyoo");
 			pg.g2.setStroke(new BasicStroke(1));
@@ -321,8 +319,7 @@ public class TextField extends AbstractUIObject implements Malleable
 			int caretX = (int) (x + pad + getPosForIndex(caret));
 			if (caret == text.length() && caret != 0)
 				caretX--;
-			pg.g2.drawLine(caretX, (int) (y + pad + height / 10), caretX,
-					(int) (y + pad + height - height / 10));
+			pg.g2.drawLine(caretX, (int) (y + pad + height / 10), caretX, (int) (y + pad + height - height / 10));
 		}
 		pg.g2.setClip(null);
 
@@ -332,6 +329,17 @@ public class TextField extends AbstractUIObject implements Malleable
 		handleDragScroll();
 	}
 
+	private synchronized String substring(int lo, int hi)
+	{
+		if (hi > text.length())
+			hi = text.length();
+		if (lo < 0)
+			lo = 0;
+		if (hi - lo == 0)
+			return "";
+		return text.substring(lo,hi);
+	}
+	
 	protected void handleDragScroll()
 	{
 		if (!mouseDragging)
@@ -356,12 +364,9 @@ public class TextField extends AbstractUIObject implements Malleable
 	protected void hint()
 	{
 		oldRH = pg.g2.getRenderingHints();
-		pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
-		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_OFF);
+		pg.g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		pg.g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+		pg.g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 	}
 
 	protected void unhint()
@@ -398,6 +403,8 @@ public class TextField extends AbstractUIObject implements Malleable
 		}
 	}
 
+	float lastWidth = 0;
+
 	protected float getWidth(int lo, int hi)
 	{
 		if (lo > hi) // Switch lo and hi if they're reversed.
@@ -407,11 +414,17 @@ public class TextField extends AbstractUIObject implements Malleable
 		}
 		synchronized (text)
 		{
-			FontMetrics fm = UIUtils.getMetrics(pg, pFont.font, fontSize);
-			float f = (float) fm.getStringBounds(text.substring(lo, hi), pg.g2)
-					.getWidth();
-			// System.out.println(Math.round(f)+" "+text.substring(lo,hi));
-			return f;
+			try
+			{
+				FontMetrics fm = UIUtils.getMetrics(pg, pFont.font, fontSize);
+				float f = (float) fm.getStringBounds(text.substring(lo, hi), pg.g2).getWidth();
+				// System.out.println(Math.round(f)+" "+text.substring(lo,hi));
+				lastWidth = f;
+				return f;
+			} catch (Exception e)
+			{
+				return lastWidth;
+			}
 		}
 	}
 
@@ -432,7 +445,7 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public void setPosition(float x, float y)
 	{
-		 setPositionByCorner(x,y);
+		setPositionByCorner(x, y);
 	}
 
 	public void setPositionByCorner(float x, float y)
@@ -590,14 +603,12 @@ public class TextField extends AbstractUIObject implements Malleable
 		fireEvent(UIEvent.TEXT_CARET);
 	}
 
-
 	protected void insertCharAt(char c, int pos)
 	{
-		insert(String.valueOf(c),pos);
+		insert(String.valueOf(c), pos);
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
-	
-	
+
 	protected void insert(String s, int pos)
 	{
 		text.insert(pos, s);
@@ -611,9 +622,9 @@ public class TextField extends AbstractUIObject implements Malleable
 		// Remove the char that exists before index pos.
 		if (pos <= 0)
 			return;
-//		text.deleteCharAt(pos - 1);
-		deleteAt(pos-1);
-		moveCaretTo(pos-1);
+		//		text.deleteCharAt(pos - 1);
+		deleteAt(pos - 1);
+		moveCaretTo(pos - 1);
 		fireEvent(UIEvent.TEXT_VALUE);
 	}
 
@@ -629,16 +640,16 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	protected void deleteRange(int lo, int hi)
 	{
-		for(int i=hi; i >= lo; i--)
+		for (int i = hi; i >= lo; i--)
 		{
 			deleteAt(i);
 		}
 	}
-	
+
 	protected void deleteSelection()
 	{
-//		text.delete(selLo, selHi);
-		deleteRange(selLo,selHi);
+		//		text.delete(selLo, selHi);
+		deleteRange(selLo, selHi);
 		// selHi = selAnchor = caret = selLo; // Need to resolve selection
 		// // deletion before calling
 		// // moveCaretTo.
@@ -656,8 +667,8 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	protected void cut()
 	{
-//		String s = text.substring(selLo, selHi);
-		String s = getText(selLo,selHi);
+		//		String s = text.substring(selLo, selHi);
+		String s = getText(selLo, selHi);
 		clip.toClipboard(s);
 		deleteSelection();
 	}
@@ -683,24 +694,23 @@ public class TextField extends AbstractUIObject implements Malleable
 		deleteSelection();
 		insert(replacement, 0);
 	}
-	
-	public String getText(int lo,int hi)
+
+	public String getText(int lo, int hi)
 	{
 		return text.substring(lo, hi);
 	}
-	
+
 	public String getText()
 	{
-//		return text.toString();
-		return getText(0,text.length());
+		//		return text.toString();
+		return getText(0, text.length());
 	}
 
 	synchronized protected void printState()
 	{
 		System.err.println("Text: " + text.toString());
 		System.err.println("Text length: " + text.length());
-		System.err.println("Anchor: " + (anchorRight ? "Right" : "Left")
-				+ "   Position: " + anchorPos);
+		System.err.println("Anchor: " + (anchorRight ? "Right" : "Left") + "   Position: " + anchorPos);
 		System.err.println("View Low: " + viewLo + "   View High: " + viewHi);
 		System.err.println("Caret Position: " + caret);
 		System.err.println("Selection: " + text.substring(selLo, selHi));
@@ -715,8 +725,8 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			return;
 		}
-		
-//		System.out.println(getText());
+
+		//		System.out.println(getText());
 		// System.out.println(e);
 		int code = e.getKeyCode();
 		boolean meta = ((e.getModifiersEx() & metaMask) != 0);
@@ -830,7 +840,7 @@ public class TextField extends AbstractUIObject implements Malleable
 				 * Consume the event so the ToolManager doesn't dispatch the
 				 * event to any tools.
 				 */
-//				e.consume();
+				//				e.consume();
 			}
 		}
 	}
@@ -864,17 +874,14 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			mouseDragging = false;
 
-			if (UIGlobals.g.focus().isFocused(this)
-					&& UIGlobals.g.focus().isModal())
+			if (UIGlobals.g.focus().isFocused(this) && UIGlobals.g.focus().isModal())
 			{
 				UIGlobals.g.focus().removeFromFocus(this);
 				UIGlobals.g.focus().setFocus(this);
 			}
 		}
-		if (e.getID() == MouseEvent.MOUSE_MOVED
-				|| e.getID() == MouseEvent.MOUSE_RELEASED
-				|| e.getID() == MouseEvent.MOUSE_ENTERED
-				|| e.getID() == MouseEvent.MOUSE_EXITED)
+		if (e.getID() == MouseEvent.MOUSE_MOVED || e.getID() == MouseEvent.MOUSE_RELEASED
+				|| e.getID() == MouseEvent.MOUSE_ENTERED || e.getID() == MouseEvent.MOUSE_EXITED)
 		{
 			if (withinInnerRect(pt) || mouseDragging)
 			{
@@ -923,8 +930,7 @@ public class TextField extends AbstractUIObject implements Malleable
 					UIGlobals.g.focus().setModalFocus(this);
 					mouseDragPos = pt.x;
 					// if (insertionIndex <= viewLo || insertionIndex >= viewHi)
-					if (insertionIndex > 1
-							&& insertionIndex < text.length() - 1)
+					if (insertionIndex > 1 && insertionIndex < text.length() - 1)
 						handleDragScroll();
 					selectChar(diff);
 				} else if (e.getID() == MouseEvent.MOUSE_PRESSED)
@@ -978,22 +984,22 @@ public class TextField extends AbstractUIObject implements Malleable
 	{
 		return y + pad + ascent;
 	}
-	
+
 	public float getHeight()
 	{
-		return height + 2*pad;
+		return height + 2 * pad;
 	}
 
 	public float getWidth()
 	{
-		return width + 2*pad;
+		return width + 2 * pad;
 	}
 
 	public float getFontSize()
 	{
 		return fontSize;
 	}
-	
+
 	public void setHeight(float h)
 	{
 		// TODO
@@ -1003,22 +1009,21 @@ public class TextField extends AbstractUIObject implements Malleable
 	{
 		// TODO
 	}
-	
+
 	public StringBuffer getTextModel()
 	{
 		return text;
 	}
-	
-	
+
 	class TextFieldStyle extends MenuStyle
 	{
 
 		public TextFieldStyle()
 		{
 			super();
-			set("c.highlight",new Color(40, 40, 255));
-			set("c.backgroundFill",new Color(255,255,255));
+			set("c.highlight", new Color(40, 40, 255));
+			set("c.backgroundFill", new Color(255, 255, 255));
 		}
-		
+
 	}
 }

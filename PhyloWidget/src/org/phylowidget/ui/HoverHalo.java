@@ -90,7 +90,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 			return;
 
 		float maxD = 100;
-		tempPt.setLocation(r.node.getX(),r.node.getY());
+		tempPt.setLocation(r.node.getLayoutX(),r.node.getLayoutY());
 //		r.render.getNodePosition(r.node, tempPt);
 		UIUtils.modelToScreen(tempPt);
 		float dist = (float) tempPt.distance(p.mouseX, p.mouseY);
@@ -99,7 +99,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 
 //		float rad = r.render.getNodeRadius() * 2;
 		float rad = 50;
-		rect.setFrameFromCenter(r.node.getX(), r.node.getY(), r.node.getX() - rad, r.node.getY()
+		rect.setFrameFromCenter(r.node.getLayoutX(), r.node.getLayoutY(), r.node.getLayoutX() - rad, r.node.getLayoutY()
 				- rad);
 		// rect.x = r.node.x;
 		// rect.y = r.node.y;
@@ -230,7 +230,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 		if (r == null)
 			return false;
 //		r.render.getNodePosition(r.node, tempPt);
-		tempPt.setLocation(r.node.getX(),r.node.getY());
+		tempPt.setLocation(r.node.getLayoutX(),r.node.getLayoutY());
 		// float radius = r.render.getNodeRadius();
 		float radius = r.render.getTextSize()/2 * wTween.getPosition();
 		radius = Math.max(radius,5);

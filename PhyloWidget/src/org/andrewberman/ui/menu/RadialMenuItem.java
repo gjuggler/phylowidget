@@ -207,7 +207,7 @@ public class RadialMenuItem extends MenuItem
 		// this.isAncestorOf(menu.currentlyHovered);
 		// if (this.isAncestorOf(menu.currentlyHovered))
 		if (isOpen())
-			g2.setPaint(getStyle().getGradient(Menu.OVER, x - rHi, y - rHi, x + rHi, y + rHi));
+			g2.setPaint(getStyle().getGradient(MenuItem.OVER, x - rHi, y - rHi, x + rHi, y + rHi));
 		else
 			g2.setPaint(getStyle().getGradient(getState(), x - rHi, y - rHi, x + rHi, y + rHi));
 		g2.fill(wedge);

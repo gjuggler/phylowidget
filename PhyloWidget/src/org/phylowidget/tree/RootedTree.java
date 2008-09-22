@@ -196,6 +196,42 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
+	public RootedTree<V,E> extractSubtree(V... vertices)
+	{
+		// TODO: Implement me!
+		return null;
+	}
+	
+	public int getNumLineagesAtHeight(double height)
+	{
+		List<V> nodes = getAllNodes(getRoot());
+		int numLineages = 0;
+		for (V v : nodes)
+		{
+			// Look for nodes whose parental branch covers the depth we're looking for.
+			double curHeight = getHeightToRoot(v);
+			double heightToParent = getBranchLength(v);
+			if (curHeight > height && heightToParent < height)
+				numLineages++;
+		}
+		return numLineages;
+	}
+	
+	public List<V> getNodesAtHeight(double height)
+	{
+		List<V> nodes = getAllNodes(getRoot());
+		ArrayList<V> keepers = new ArrayList<V>(nodes.size());
+		for (V v : nodes)
+		{
+			// Look for nodes whose parental branch covers the depth we're looking for.
+			double curHeight = getHeightToRoot(v);
+			double heightToParent = getBranchLength(v);
+			if (curHeight > height && heightToParent < height)
+				keepers.add(v);
+		}
+		return keepers;
+	}
+	
 	public List<V> getVerticesForLabels(Collection<String> labels)
 	{
 		ArrayList<V> verts = new ArrayList<V>(labels.size());
@@ -206,6 +242,20 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 				verts.add(v);
 		}
 		return verts;
+	}
+	
+	public List<V> getAllLeaves(V vertex)
+	{
+		List<V> leaves = new ArrayList<V>();
+		getAll(vertex,leaves,null);
+		return leaves;
+	}
+	
+	public List<V> getAllNodes(V vertex)
+	{
+		List<V> nodes = new ArrayList<V>();
+		getAll(vertex,nodes,null);
+		return nodes;
 	}
 	
 	public List<String> getLabelsForVertices(Collection<V> verts)
@@ -400,6 +450,18 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return getParentOf(vertex) == null;
 	}
 
+	public boolean isParentChild(V parent, V child)
+	{
+		V v = child;
+		while (v != null)
+		{
+			if (v == parent)
+				return true;
+			v = getParentOf(v);
+		}
+		return false;
+	}
+	
 	public int getMaxDepthToLeaf(V vertex)
 	{
 		int maxDepth = 0;
@@ -956,6 +1018,12 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 				removeVertex(o);
 				addEdge(parent, child);
 				setEdgeWeight(getEdge(parent, child), edgeWeight);
+			} else if (getParentOf(o) == null && getChildrenOf(o).size() == 1)
+			{
+				V child = getChildrenOf(o).get(0);
+				setBranchLength(child, 0);
+				setRoot(child);
+				removeVertex(o);
 			}
 		}
 	}
@@ -1169,12 +1237,19 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		for (V v : vertices)
 		{
 			i++;
-			if (i % 1000 == 0)
-				System.out.print(".");
-			deleteLeafLineage(v);
+			if (isLeaf(v))
+				deleteLeafLineage(v);
+			else
+				deleteNode(v);
 		}
 	}
 
+	public void spliceOutInternalNode(V vertex)
+	{
+		List<V> children = getChildrenOf(vertex);
+		
+	}
+	
 	public void translateLabels(V v, Map<String, String> oldToNew)
 	{
 		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);

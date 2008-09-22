@@ -54,8 +54,7 @@ public class MenuIO
 	 *            for this menu set.
 	 * @return
 	 */
-	public ArrayList<MenuItem> loadFromXML(Reader in, PApplet p,
-			Object... actionHolders)
+	public ArrayList<MenuItem> loadFromXML(Reader in, PApplet p, Object... actionHolders)
 	{
 		ArrayList<MenuItem> menus = new ArrayList<MenuItem>();
 		app = p;
@@ -98,7 +97,7 @@ public class MenuIO
 
 	public MenuItem processElement(MenuItem parent, XMLElement el)
 	{
-//		long t = System.currentTimeMillis();
+		//		long t = System.currentTimeMillis();
 		MenuItem newItem = null;
 		String elName = el.getName();
 		String itemName = el.getStringAttribute("name");
@@ -124,19 +123,18 @@ public class MenuIO
 		 * let's make sure it has a parent Menu or MenuItem:
 		 */
 		if (parent == null && !elName.equalsIgnoreCase("menu"))
-			throw new RuntimeException("[MenuIO] XML menu parsing error on "
-					+ elName
+			throw new RuntimeException("[MenuIO] XML menu parsing error on " + elName
 					+ " element: <item> requires a parent <menu> or <item>!");
 
-		if (elName.equalsIgnoreCase("item"))
+		if (elName.equalsIgnoreCase("item") || elName.equalsIgnoreCase("menu"))
 		{
 			/*
 			 * If all is well, then we use the parent item's add() method to
 			 * create this new Item element.
 			 */
-			if (newItem != null)
+			if (newItem != null && parent != null)
 				newItem = parent.add(newItem);
-			else
+			else if (parent != null)
 				newItem = parent.add(itemName);
 		} else if (elName.equalsIgnoreCase("methodcall"))
 		{
@@ -146,8 +144,7 @@ public class MenuIO
 			el.removeAttribute("param");
 			try
 			{
-				Method m = parent.getClass().getMethod(mName,
-						new Class[] { String.class });
+				Method m = parent.getClass().getMethod(mName, new Class[] { String.class });
 				m.invoke(parent, new Object[] { p });
 			} catch (Exception e)
 			{
@@ -165,10 +162,10 @@ public class MenuIO
 			String attr = (String) attrs.nextElement();
 			setAttribute(newItem, attr, el.getStringAttribute(attr));
 		}
-		
-//		long curT = System.currentTimeMillis();
-//		long dt = curT - t;
-//		System.out.println((dt / 1000f) + "   " + itemName);
+
+		//		long curT = System.currentTimeMillis();
+		//		long dt = curT - t;
+		//		System.out.println((dt / 1000f) + "   " + itemName);
 
 		/*
 		 * Now, keep the recursion going: go through the current XMLElement's
@@ -221,7 +218,7 @@ public class MenuIO
 		{
 			for (String menuPackage : menuPackages)
 			{
-//				System.out.println("H");
+				//				System.out.println("H");
 				String fullClass = menuPackage + "." + classType;
 				try
 				{
@@ -239,27 +236,27 @@ public class MenuIO
 				}
 			}
 		}
-//
-//		/*
-//		 * If using the predefined package names didn't work, try loading as if we were given the full class name.
-//		 */
-//		if (c == null)
-//		{
-//			try
-//			{
-//				c = Class.forName(classType);
-//			} catch (java.lang.ClassNotFoundException e2)
-//			{
-//				e2.printStackTrace();
-//			}
-//		}
+		//
+		//		/*
+		//		 * If using the predefined package names didn't work, try loading as if we were given the full class name.
+		//		 */
+		//		if (c == null)
+		//		{
+		//			try
+		//			{
+		//				c = Class.forName(classType);
+		//			} catch (java.lang.ClassNotFoundException e2)
+		//			{
+		//				e2.printStackTrace();
+		//			}
+		//		}
 
 		Constructor construct;
 		try
 		{
 			construct = c.getConstructor(new Class[] { PApplet.class });
 			Object newMenu = construct.newInstance(new Object[] { app });
-			return (Menu) newMenu;
+			return (MenuItem) newMenu;
 		} catch (Exception e)
 		{
 			//			e.printStackTrace();
@@ -355,11 +352,12 @@ public class MenuIO
 			{
 				try
 				{
+//					System.out.println(item + "  " + ao + "  " + value);
 					m.invoke(item, ao, value);
 					break;
 				} catch (Exception e)
 				{
-					//					e.printStackTrace();
+//					e.printStackTrace();
 					continue;
 				}
 			}

@@ -152,6 +152,16 @@ public class CachedVertex extends DefaultVertex
 	{
 		this.branchLength = branchLength;
 	}
+	
+	public void setBranchLengthCache(double blCache)
+	{
+		this.blCache = blCache;
+	}
+	private double blCache;
+	public double getBranchLengthCache()
+	{
+		return this.blCache;
+	}
 
 	
 	

@@ -38,14 +38,7 @@ public class FontLoader
 	{
 		this.p = p;
 		
-//		try {
 		vera = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
-////		veraNonNative = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
-//		} catch (Exception e)
-//		{
-//			vera = new PFont();
-//		}
-//		vera = new PFont();
 		InputStream in = p.createInput("vera.ttf");
 		try
 		{

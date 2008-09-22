@@ -29,55 +29,57 @@ import org.phylowidget.UsefulConstants;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.images.ImageSearcher;
 
-public class PhyloNode extends CachedVertex implements Comparable, UsefulConstants
+final public class PhyloNode extends CachedVertex implements Comparable, UsefulConstants
 {
-	private double x, y; // Layout position.
+	private double layoutX, layoutY; // Layout position.
 	private float realX, realY; // Real-world (i.e. screen) position, after scaling and translation of the layout.
 	private float angle; // Angle (in radians) at which the node should be drawn. Clockwise from horizontal.
-	
-	public Point2D[] corners = new Point2D.Float[]{new Point2D.Float(),new Point2D.Float(),new Point2D.Float(),new Point2D.Float()};
+
+	public Point2D[] corners =
+			new Point2D.Float[] { new Point2D.Float(), new Point2D.Float(), new Point2D.Float(), new Point2D.Float() };
 	public Rectangle2D.Float rect = new Rectangle2D.Float();
-	
+
 	private byte textAlign = ALIGN_LEFT;
 	public static final byte ALIGN_LEFT = 0;
 	public static final byte ALIGN_RIGHT = 1;
-		
+
 	public float textMult;
 	public float unitTextWidth;
-//	public float aspectRatio; // Almost ready to get rid of this one...
+	//	public float aspectRatio; // Almost ready to get rid of this one...
 	public boolean drawMe, isWithinScreen;
 
 	public float bulgeFactor = 1;
 	public boolean found = false;
-	
+
 	private int sorting = RootedTree.FORWARD.intValue();
-	
+
 	private int state = 0;
 	public static final int NONE = 0;
 	public static final int CUT = 1;
 	public static final int COPY = 2;
 
-//	static TweenFriction fric = TweenFriction
-//			.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
+	//	static TweenFriction fric = TweenFriction
+	//			.tween(0.3f * PhyloWidget.TWEEN_FACTOR);
 	static TweenQuad quad = TweenQuad.tween;
-	static final float mult = 10000f;	
-	
+	static final float mult = 10000f;
+
 	HashMap<String, String> annotations;
-	
+
 	private Tween xTween;
 	private Tween yTween;
 	public boolean labelWasDrawn;
-	public boolean nodeWasDrawn;
+	public boolean drawLineAndNode;
+	public boolean drawLabel;
 	public float lastTextSize;
 
 	private ImageSearcher searchResults;
 	public NodeRange range;
-	
+
 	public PhyloNode()
 	{
 		super();
-		xTween = new Tween(null, quad, Tween.OUT, (float) x, (float) x, 30f);
-		yTween = new Tween(null, quad, Tween.OUT, (float) y, (float) y, 30f);
+		xTween = new Tween(null, quad, Tween.OUT, (float) layoutX, (float) layoutX, 30f);
+		yTween = new Tween(null, quad, Tween.OUT, (float) layoutY, (float) layoutY, 30f);
 		range = new NodeRange();
 		range.node = this;
 	}
@@ -91,17 +93,20 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 
 		searchResults.loadThumbnailURL();
 	}
-	
+
 	public void loadFullImage()
 	{
-		searchResults.loadFullImageURL();
+		if (searchResults != null)
+		{
+			searchResults.loadFullImageURL();
+		}
 	}
 
 	public String getFullImageURL()
 	{
 		return searchResults.getFullImageURL();
 	}
-	
+
 	@Override
 	public double getBranchLength()
 	{
@@ -109,28 +114,35 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 			return 1;
 		return super.getBranchLength();
 	}
-	
+
 	public void setPosition(PhyloNode n)
 	{
 		if (n == null)
 			return;
-		setPosition(n.getX(), n.getY());
+		setPosition(n.getLayoutX(), n.getLayoutY());
 		fforward();
 	}
 
 	public void update()
 	{
 		//		zoomTextSize *= 0.9f;
+		if (PhyloWidget.cfg.useAnimations)
+		{
 		xTween.update();
 		yTween.update();
-		x = xTween.getPosition() / mult;
-		y = yTween.getPosition() / mult;
+		} else
+		{
+			xTween.fforward();
+			yTween.fforward();
+		}
+		layoutX = xTween.getPosition() / mult;
+		layoutY = yTween.getPosition() / mult;
 	}
 
 	public void setPosition(float x, float y)
 	{
-		setX(x);
-		setY(y);
+		setLayoutX(x);
+		setLayoutY(y);
 	}
 
 	public void fforward()
@@ -140,26 +152,26 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 		update();
 	}
 
-	public void setX(float x)
+	public void setLayoutX(float x)
 	{
-		xTween.continueTo(x * mult,PhyloWidget.cfg.animationFrames);
-		this.x = x;
+		xTween.continueTo(x * mult, PhyloWidget.cfg.animationFrames);
+		this.layoutX = x;
 	}
 
-	public void setY(float y)
+	public void setLayoutY(float y)
 	{
-		yTween.continueTo(y * mult,PhyloWidget.cfg.animationFrames);
-		this.y = y;
+		yTween.continueTo(y * mult, PhyloWidget.cfg.animationFrames);
+		this.layoutY = y;
 	}
 
-	public float getX()
+	public float getLayoutX()
 	{
-		return (float) x;
+		return (float) layoutX;
 	}
 
-	public float getY()
+	public float getLayoutY()
 	{
-		return (float) y;
+		return (float) layoutY;
 	}
 
 	public float getTargetX()
@@ -214,22 +226,22 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 		return state;
 	}
 
-	public float getRealX()
+	public float getX()
 	{
 		return realX;
 	}
 
-	public void setRealX(float realX)
+	public void setX(float realX)
 	{
 		this.realX = realX;
 	}
 
-	public float getRealY()
+	public float getY()
 	{
 		return realY;
 	}
 
-	public void setRealY(float realY)
+	public void setY(float realY)
 	{
 		this.realY = realY;
 	}
@@ -263,7 +275,8 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 	}
 
 	/**
-	 * Warning: MAY RETURN NULL 
+	 * Warning: MAY RETURN NULL
+	 * 
 	 * @param key
 	 * @return
 	 */
@@ -279,6 +292,7 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 
 	/**
 	 * May return null!
+	 * 
 	 * @return
 	 */
 	public HashMap<String, String> getAnnotations()
@@ -287,12 +301,12 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 			return null;
 		return annotations;
 	}
-	
+
 	public void setAngle(float angle)
 	{
 		this.angle = angle;
 	}
-	
+
 	public float getAngle()
 	{
 		return angle;
@@ -305,16 +319,16 @@ public class PhyloNode extends CachedVertex implements Comparable, UsefulConstan
 
 	public void setTextAlign(int textAlign)
 	{
-		this.textAlign = (byte)textAlign;
+		this.textAlign = (byte) textAlign;
 	}
 
-//	public float getTrueAngle()
-//	{
-//		return trueAngle;
-//	}
-//
-//	public void setTrueAngle(float trueAngle)
-//	{
-//		this.trueAngle = trueAngle;
-//	}
+	//	public float getTrueAngle()
+	//	{
+	//		return trueAngle;
+	//	}
+	//
+	//	public void setTrueAngle(float trueAngle)
+	//	{
+	//		this.trueAngle = trueAngle;
+	//	}
 }

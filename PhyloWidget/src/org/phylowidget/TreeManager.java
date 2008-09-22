@@ -174,6 +174,10 @@ public class TreeManager extends AbstractUIObject
 
 	public synchronized void setTree(String s)
 	{
+		if (getTree() != null)
+		{
+			TreeIO.setOldTree(getTree());
+		}
 		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
 	}
 

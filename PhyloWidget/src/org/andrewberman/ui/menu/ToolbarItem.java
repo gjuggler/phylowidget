@@ -345,6 +345,8 @@ public class ToolbarItem extends MenuItem
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
+			if (item.isHidden())
+				continue;
 			item.setPosition(curX, curY);
 			//			if (layoutMode == LAYOUT_BELOW)
 			//				item.setWidth(maxWidth);

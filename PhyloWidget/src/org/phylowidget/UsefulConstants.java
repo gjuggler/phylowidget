@@ -41,4 +41,5 @@ public interface UsefulConstants
 	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
 	public static final String IMAGE_SIZE = "ISZ";		// Multiplier for photo size.
 	public static final String LABEL_ALWAYSSHOW = "PW_ALWAYS";    // Pretty hacky, but this is a tag to make sure a label is ALWAYS shown, no matter what.
+	public static final String LABEL_ZORDER = "PW_Z"; // Another hack: specify the z-order of the node, to be used in combination with ALWAYSSHOW.
 }

@@ -22,6 +22,8 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
@@ -55,9 +57,8 @@ public class PhyloWidget extends PApplet
 
 	private static String messageString = new String();
 
-	boolean DEBUG = true;
-
 	long time = 0;
+
 	public PhyloWidget()
 	{
 		super();
@@ -97,19 +98,20 @@ public class PhyloWidget extends PApplet
 		ui = new PhyloUI(this);
 		trees = new TreeManager(this);
 
-//		treeUpdater = new PWTreeUpdater();
-//		clipUpdater = new PWClipUpdater();
+		//		treeUpdater = new PWTreeUpdater();
+		//		clipUpdater = new PWClipUpdater();
 
-		new Thread() {
+		new Thread()
+		{
 			public void run()
 			{
 				ui.setup();
-				trees.setup();		
+				trees.setup();
 			}
 		}.start();
-		
+
 		unregisterDraw(UIGlobals.g.event());
-		
+
 		clearQueues();
 	}
 
@@ -127,6 +129,7 @@ public class PhyloWidget extends PApplet
 	}
 
 	boolean drawnOnce = false;
+
 	public synchronized void draw()
 	{
 		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
@@ -138,21 +141,26 @@ public class PhyloWidget extends PApplet
 		drawnOnce = true;
 
 		UIGlobals.g.event().draw();
-		
-		if (frameCount - messageFrame > (frameRateTarget * messageDecay))
-			messageString = "";
-		if (messageString.length() != 0)
-		{
-			drawMessage();
-		}
 
-		if (DEBUG)
+		if (!cfg.suppressMessages)
 		{
-			drawNumLeaves();
-			drawFrameRate();
+			if (frameCount - messageFrame > (frameRateTarget * messageDecay))
+				messageString = "";
+			if (messageString.length() != 0)
+			{
+				drawMessage();
+			}
+
+			if (cfg.debug)
+			{
+				drawNumLeaves();
+				drawFrameRate();
+			}
 		}
 	}
-	
+
+	Pattern parens = Pattern.compile("(.*?)\\((.*)\\)");
+
 	protected void clearQueues()
 	{
 		if (!settingMap.isEmpty())
@@ -167,8 +175,25 @@ public class PhyloWidget extends PApplet
 			{
 				try
 				{
-					Method m = PhyloUI.class.getMethod(methodQueue.removeFirst());
-					m.invoke(ui);
+					String s = methodQueue.removeFirst();
+					Method m = null;
+					Object[] args = new Object[] {};
+					Matcher match = parens.matcher(s);
+					boolean matched = false;
+					while (match.find())
+					{
+						matched = true;
+						s = match.group(1);
+						args = new Object[] { match.group(2) };
+						System.out.println(s+"  "+args);
+						m = PhyloUI.class.getMethod(s, String.class);
+						m.invoke(ui, args);
+					}
+					if (!matched)
+					{
+						m = PhyloUI.class.getMethod(s);
+						m.invoke(ui);
+					}
 				} catch (Exception e)
 				{
 					e.printStackTrace();
@@ -176,7 +201,7 @@ public class PhyloWidget extends PApplet
 			}
 		}
 	}
-	
+
 	public void stop()
 	{
 		super.stop();
@@ -236,10 +261,10 @@ public class PhyloWidget extends PApplet
 		textFont(UIGlobals.g.getPFont());
 		textSize(10);
 		float w = textWidth(messageString);
-		fill(255,255,255);
-		stroke(255,255,255);
+		fill(255, 255, 255);
+		stroke(255, 255, 255);
 		strokeWeight(3);
-		rect(5,height-20,w,12);
+		rect(5, height - 20, w, 12);
 		fill(255, 0, 0);
 		text(messageString, 5, height - 10);
 	}
@@ -291,7 +316,7 @@ public class PhyloWidget extends PApplet
 			destroy();
 		}
 	}
-	
+
 	public boolean updateTree(String s)
 	{
 		treeUpdater.triggerUpdate(s);
@@ -308,10 +333,13 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void changeSetting(String setting, String newValue)
 	{
-		System.out.println(setting+"\t"+newValue);
+		if (cfg.debug)
+		{
+			System.out.println(setting + "\t" + newValue);
+		}
 		synchronized (settingMap)
 		{
-//			System.out.println(System.currentTimeMillis()+"Setting change: "+setting+" = "+newValue);
+			//			System.out.println(System.currentTimeMillis()+"Setting change: "+setting+" = "+newValue);
 			settingMap.put(setting, newValue);
 		}
 	}
@@ -320,7 +348,7 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void callMethod(String method)
 	{
-//		System.out.println(System.currentTimeMillis()+"Method call: "+method);
+		//		System.out.println(System.currentTimeMillis()+"Method call: "+method);
 		methodQueue.add(method);
 	}
 

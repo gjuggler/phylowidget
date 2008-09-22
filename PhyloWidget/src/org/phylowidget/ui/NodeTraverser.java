@@ -72,10 +72,13 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		UIGlobals.g.event().add(this);
 	}
 
-	private boolean containsPoint(NodeRange r, Point pt)
+	public boolean containsPoint(NodeRange r, Point pt)
 	{
 		tempPt.setLocation(getX(r), getY(r));
+		if (r == null || r.render == null)
+			return false;
 		float radius = r.render.getNodeRadius();
+		radius = Math.max(radius, 2);
 		float distance = (float) pt.distance(tempPt);
 		// System.out.println("rad:" + radius + " dist:" + distance);
 		if (distance < radius)
@@ -88,12 +91,18 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		return rc.contains(pt);
 	}
 
+	private boolean glow = true;
+	public void setGlow(boolean glow)
+	{
+		this.glow = glow;
+	}
+	
 	public synchronized void draw()
 	{
 		/*
 		 * Update the glowing circle's radius.
 		 */
-		if (isGlowing)
+		if (isGlowing && glow)
 		{
 			glowTween.update();
 			float glowRadius = PhyloWidget.trees.getRenderer().getTextSize() / 2;
@@ -187,12 +196,12 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 
 	float getX(NodeRange r)
 	{
-		return r.node.getRealX();
+		return r.node.getX();
 	}
 
 	float getY(NodeRange r)
 	{
-		return r.node.getRealY();
+		return r.node.getY();
 	}
 
 	public void keyEvent(KeyEvent e)
@@ -343,8 +352,8 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 				break;
 		}
 
-		pt.setLocation(cur.node.getX(), cur.node.getY());
-		getWithinRange(cur.node.getX(), cur.node.getY(), 200);
+		pt.setLocation(cur.node.getLayoutX(), cur.node.getLayoutY());
+		getWithinRange(cur.node.getLayoutX(), cur.node.getLayoutY(), 200);
 		Point pt2 = new Point();
 		float maxScore = -Float.MAX_VALUE;
 		NodeRange maxRange = null;
@@ -355,7 +364,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 				continue;
 			if (r.node == cur.node)
 				continue;
-			pt2.setLocation(r.node.getX(), r.node.getY());
+			pt2.setLocation(r.node.getLayoutX(), r.node.getLayoutY());
 			float score = score(pt, pt2, base);
 			if (score > maxScore)
 			{

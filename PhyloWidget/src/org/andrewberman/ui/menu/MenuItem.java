@@ -102,7 +102,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	}
 
-	class ZDepthComparator implements Comparator
+	public static class ZDepthComparator implements Comparator
 	{
 		public int compare(Object o1, Object o2)
 		{
@@ -172,6 +172,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	ArrayList<MenuItem> itemsToAdd = new ArrayList();
 	private ConditionChecker condition;
+	protected boolean hidden;
 
 	public MenuItem add(MenuItem item)
 	{
@@ -275,6 +276,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	 */
 	public synchronized void draw()
 	{
+		if (hidden)
+			return;
 		drawMyself();
 		if (!isOpen())
 			return;
@@ -396,7 +399,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return max;
 	}
 
-	public Menu getMenu()
+	public MenuItem getMenu()
 	{
 		return menu;
 	}
@@ -406,7 +409,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return name;
 	}
 
-	protected Menu getNearestMenu()
+	protected MenuItem getNearestMenu()
 	{
 		// if (nearestMenu != null) return nearestMenu;
 		MenuItem item = this;
@@ -692,8 +695,15 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem seg = (MenuItem) items.get(i);
+			if (seg.isHidden())
+				continue;
 			seg.layout();
 		}
+	}
+	
+	public boolean isHidden()
+	{
+		return hidden;
 	}
 
 	public void focusEvent(FocusEvent e)
@@ -777,7 +787,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return this;
 	}
 
-	public MenuItem setCondition(Object object, String method)
+	public MenuItem setCondition(Object object, String method) throws Exception
 	{
 		this.condition = new ConditionChecker(object, method);
 		menu.layout();
@@ -901,6 +911,8 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
+		if (isHidden())
+			return;
 		boolean containsPoint = containsPoint(tempPt);
 		if (containsPoint)
 			mouseInside = true;
@@ -953,11 +965,16 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		getStyle().set("f.fontSize", size);
 	}
 
-	protected void zSort()
+	public void zSort()
 	{
 		if (zComp == null)
 			zComp = new ZDepthComparator();
 		Collections.sort(zSortedItems, zComp);
+	}
+
+	public void setHidden(boolean hideMe)
+	{
+		hidden = hideMe;
 	}
 
 	class ConditionChecker
@@ -966,18 +983,11 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		Object ifObject;
 		Method methodCall;
 
-		public ConditionChecker(Object obj, String method)
+		public ConditionChecker(Object obj, String method) throws Exception
 		{
 			this.ifObject = obj;
 			this.ifMethod = method;
-			try
-			{
 				methodCall = obj.getClass().getMethod(method);
-			} catch (Exception e)
-			{
-				e.printStackTrace();
-				// Do nothing.
-			}
 		}
 
 		public boolean isTrue()

@@ -29,6 +29,8 @@
 			<item name="Minimum Text Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="72" format="0.0"/>
 			<item name="Show Clade Labels" type="CheckBox" property="showCladeLabels" />
 			<item name="Antialias" type="CheckBox" property="antialias" />
+			<item name="Animate" type="CheckBox" property="useAnimations" />
+			<item name="Threshold" type="NumberScroller" property="renderThreshold" increment="10" min="10" max="2000" />
 		</item>
 		<item name="Style">
 			<item name="Text Size" type="NumberScroller" property="textScaling" increment=".025" min="0" max="10" format="0.00"/>
@@ -40,7 +42,7 @@
 		<item name="Branch Lengths" type="CheckBox" methodCall="setUseBranchLengths" shortcut="ctrl-b" />
 	</item>
 	<item name="Tree">
-		<item name="Mutator">
+		<item name="Mutator" hidden="true">
 			<item name="Mutate Once" action="treeMutateOnce" shortcut="control-M"/>
 			<item name="Mutate Slow" action="treeMutateSlow"/>
 			<item name="Mutate Fast" action="treeMutateFast"/>

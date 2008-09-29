@@ -1,4 +1,4 @@
-<menu name="context" type="org.phylowidget.ui.PhyloContextMenu">
+<menu name="context" type="org.phylowidget.ui.PhyloContextMenu" glow="true">
 	<item name="Node Edit" hint="e">
 		<item name="Name" action="nodeEditName" hint="n"/>
 		<item name="Branch length" action="nodeEditBranchLength" hint="b"/>

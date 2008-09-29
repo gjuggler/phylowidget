@@ -54,7 +54,12 @@ public final class NodeRenderer implements UsefulConstants
 	static final void renderImpl(BasicTreeRenderer r, PhyloNode n, boolean actuallyRender)
 	{
 		PGraphics canvas = r.canvas;
-		g2 = r.canvas.g2;
+		if (canvas == null)
+		{
+//			throw new RuntimeException("Null canvas!");
+			return;
+		}
+//		g2 = r.canvas.g2;
 
 		NodeRenderer.r = r;
 
@@ -101,7 +106,7 @@ public final class NodeRenderer implements UsefulConstants
 				if (PhyloWidget.cfg.treatNodesAsLabels)
 					continue;
 				// GJ 19-09-08 clarify: this is a special case, where we want all nodes to be drawn.
-				drawNode = (actuallyRender && n.drawLineAndNode) || PhyloWidget.cfg.showAllLeafNodes;	
+				drawNode = (actuallyRender && n.drawLineAndNode) || PhyloWidget.cfg.showAllLeafNodes;
 			}
 			ri.render(canvas, n, drawNode, false);
 		}
@@ -351,7 +356,6 @@ public final class NodeRenderer implements UsefulConstants
 					r.canvas.stroke(PhyloWidget.cfg.getBranchColor().brighter(d).getRGB());
 				}
 			}
-
 			r.getTreeLayout().drawLine(r.canvas, p, c);
 			//			r.canvas.line(p.getRealX(), p.getRealY(), p.getRealX(), c.getRealY());
 			//			r.canvas.line(p.getRealX(), c.getRealY(), c.getRealX(),c.getRealY());
@@ -460,11 +464,18 @@ public final class NodeRenderer implements UsefulConstants
 					float minSide = Math.min(scaledH, scaledW);
 					if (minSide > 300)
 					{
+						System.out.println("Loading full image...");
 						n.loadFullImage();
 					}
 					img = PhyloWidget.trees.imageLoader.getImageForNode(n);
 				}
-				g2.drawImage(img, (int) dx, (int) -scaledH / 2, (int) scaledW, (int) scaledH, null);
+				if (img != null)
+				{
+					if (RenderOutput.isOutputting)
+						System.out.println("DRAW IMAGE "+n.getLabel());
+//					img.flush();
+					g2.drawImage(img, (int) dx, (int) -scaledH / 2, (int) scaledW, (int) scaledH, null);
+				}
 				if (RenderOutput.isOutputting && img != null)
 				{
 					img.flush();
@@ -525,9 +536,6 @@ public final class NodeRenderer implements UsefulConstants
 			if (labelMult > -1)
 				curTextSize *= labelMult;
 
-			//			canvas.strokeWeight(nodeStroke(r,n));
-			//			canvas.fill(textColor(n));
-
 			boolean alwaysRender = false;
 			float always = getFloatAnnotation(n, LABEL_ALWAYSSHOW);
 			if (always > -1)
@@ -547,7 +555,7 @@ public final class NodeRenderer implements UsefulConstants
 			}
 
 			RootedTree tree = r.tree;
-			if (tree.isLeaf(n) && (n.found || alwaysRender) )
+			if (tree.isLeaf(n) && (n.found || alwaysRender))
 			{
 				/*
 				 * Draw a background rect.
@@ -571,6 +579,8 @@ public final class NodeRenderer implements UsefulConstants
 			 */
 			canvas.fill(textColor(n));
 			curTextSize = Math.min(curTextSize, 128);
+//			if (curTextSize*100 == 0 && actuallyRender)
+//				return new float[]{dx,curTextSize};
 			canvas.textSize(curTextSize);
 			if (n.found)
 			{
@@ -584,13 +594,13 @@ public final class NodeRenderer implements UsefulConstants
 					float s = strokeForNode(n);
 
 					// TODO: Make a background rect, like we do for found nodes.
-//					if (actuallyRender)
-//					{
-//						canvas.fill(RenderConstants.foundBackground.getRGB());
-//						//					canvas.noStroke();
-//						canvas.rect(offX - dx, offY + curTextSize / 2 - curTextSize / 3 - s, offX, offY - curTextSize
-//								/ 2 - curTextSize / 3 - s);
-//					}
+					//					if (actuallyRender)
+					//					{
+					//						canvas.fill(RenderConstants.foundBackground.getRGB());
+					//						//					canvas.noStroke();
+					//						canvas.rect(offX - dx, offY + curTextSize / 2 - curTextSize / 3 - s, offX, offY - curTextSize
+					//								/ 2 - curTextSize / 3 - s);
+					//					}
 
 					canvas.fill(textColor(n));
 					curTextSize *= 0.75f;

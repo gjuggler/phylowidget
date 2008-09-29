@@ -22,6 +22,7 @@ import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
 
-public class NodeTraverser extends AbstractUIObject implements TweenListener
+public class NodeTraverser extends AbstractUIObject implements TweenListener, KeyListener
 {
 	public static final int LEFT = 0, RIGHT = 1, UP = 2, DOWN = 3;
 	private NodeRange curNodeRange;
@@ -70,6 +71,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		this.p = p;
 		glowTween = new Tween(this, TweenQuad.tween, Tween.INOUT, 1f, .75f, 30);
 		UIGlobals.g.event().add(this);
+		p.addKeyListener(this);
 	}
 
 	public boolean containsPoint(NodeRange r, Point pt)
@@ -133,6 +135,8 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 			 * node.
 			 */
 			TreeRenderer render = PhyloWidget.trees.getRenderer();
+			if (render == null)
+				return null;
 			RootedTree t = render.getTree();
 			PhyloNode n = (PhyloNode) t.getRoot();
 			curNodeRange = rangeForNode(render, n);
@@ -213,7 +217,9 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 		if (UIGlobals.g.focus().getFocusedObject() != null)
 			return;
 		int code = e.getKeyCode();
-		// System.out.println(e);
+		
+		Tool t = UIGlobals.g.event().getToolManager().getCurrentTool();
+		
 		switch (code)
 		{
 			case (KeyEvent.VK_LEFT):
@@ -229,9 +235,11 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 				navigate(DOWN);
 				break;
 			case (KeyEvent.VK_ENTER):
-				// System.out.println("Open!");
-				if (getCurRange() != null)
+				if (t.respondToOtherEvents() && isGlowing)
+				{
 					openContextMenu();
+					isGlowing = false;
+				}
 				break;
 		}
 	}
@@ -441,6 +449,21 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener
 	{
 		if (eventType == Tween.FINISHED)
 			source.yoyo();
+	}
+
+	public void keyPressed(KeyEvent e)
+	{
+		keyEvent(e);
+	}
+
+	public void keyReleased(KeyEvent e)
+	{
+		keyEvent(e);
+	}
+
+	public void keyTyped(KeyEvent e)
+	{
+		keyEvent(e);
 	}
 
 }

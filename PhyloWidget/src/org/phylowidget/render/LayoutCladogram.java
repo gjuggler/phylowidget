@@ -90,7 +90,12 @@ public class LayoutCladogram extends LayoutBase
 		{
 			if (tree.isRoot(n))
 				return 0;
-			float asdf = (float) tree.getHeightToRoot(n) / (float) tree.getMaxHeightToLeaf(tree.getRoot());
+			float asdf = 0;
+			if (tree.getMaxHeightToLeaf(tree.getRoot()) == 0)
+			{
+				System.out.println("Tree height is zero!");				
+			}
+			asdf = (float) tree.getHeightToRoot(n) / (float) tree.getMaxHeightToLeaf(tree.getRoot());
 			return asdf * depthLeafRatio;
 		} else
 		{

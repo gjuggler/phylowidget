@@ -146,7 +146,7 @@ public class TreeIO
 		/*
 		 * Pre-process the string as a whole.
 		 */
-		if (s.startsWith("'"))
+		if (s.startsWith("'("))
 			s = s.substring(1);
 		if (s.endsWith("'"))
 			s = s.substring(0, s.length() - 1);
@@ -200,26 +200,26 @@ public class TreeIO
 		long len = s.length();
 		for (int i = 0; i < len; i++)
 		{
+			char c = s.charAt(i);
+			boolean isControl = (c == '(' || c == ')' || c == ';' || c == ',');
 			if (DEBUG)
 			{
 				if (i % (len / 100 + 1) == 0)
 					System.out.print(".");
 			}
-			char c = s.charAt(i);
 			if (withinEscapedString)
 			{
 				temp.append(c);
 				if (c == '\'')
 					withinEscapedString = false;
 				continue;
-			} else if (c == '\'')
+				// GJ 2008-09-29: only let a string become escaped if it's got an apostrophe on the first char. 
+			} else if (c == '\'' && temp.length() == 0)
 			{
 				temp.append(c);
 				withinEscapedString = true;
 				continue;
 			}
-			//			String controlChars = "();,";
-			boolean isControl = (c == '(' || c == ')' || c == ';' || c == ',');
 			if (isControl)
 			{
 				if (c == '(')
@@ -249,7 +249,7 @@ public class TreeIO
 					curLabel = temp.toString();
 					curLabel = curLabel.trim();
 					curLabel = nhxHandler.replaceAnnotation(curLabel);
-
+					
 					PhyloNode curNode = newNode(tree, curLabel, nhx, poorMans);
 
 					if (c == ';')
@@ -268,8 +268,8 @@ public class TreeIO
 							Object o = null;
 							if (!tree.containsEdge(curNode, child))
 								o = tree.addEdge(curNode, child);
-//							o = tree.getEdge(curNode, child);
-							((WeightedGraph) tree).setEdgeWeight(o, length);
+							o = tree.getEdge(curNode, child);
+							tree.setEdgeWeight(o, length);
 						}
 						// Flush out the depth counter for the current depth.
 						countForDepth[curDepth] = 0;
@@ -283,7 +283,6 @@ public class TreeIO
 					countForDepth[curDepth]++;
 					// Reset all the states.
 					temp.replace(0, temp.length(), "");
-					//					curLength = 1.0;
 					parsingNumber = false;
 					innerNode = false;
 				}
@@ -389,6 +388,7 @@ public class TreeIO
 
 		int colonInd = nameAndLength.indexOf(":");
 		String name = nameAndLength;
+		double curLength = 1;
 		if (colonInd != -1)
 		{
 			String length = nameAndLength.substring(colonInd + 1);
@@ -406,7 +406,6 @@ public class TreeIO
 					pn.setAnnotation("b", bootstrap);
 				}
 			}
-			double curLength = 1;
 			try
 			{
 				curLength = Double.parseDouble(length);
@@ -415,9 +414,10 @@ public class TreeIO
 				e.printStackTrace();
 				curLength = 1;
 			}
-			v.setBranchLengthCache(curLength);
 		}
 
+		v.setBranchLengthCache(curLength);
+		
 		// If there's no NHX annotation, try and break up the label using the "poor man's" NHX delimiters.
 		if (poorMan && nhxInd == -1)
 		{

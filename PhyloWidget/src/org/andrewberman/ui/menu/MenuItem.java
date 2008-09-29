@@ -920,6 +920,9 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		if (!isEnabled())
 			return;
 
+		if (menu == null)
+			return;
+		
 		switch (e.getID())
 		{
 			case MouseEvent.MOUSE_MOVED:

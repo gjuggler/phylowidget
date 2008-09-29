@@ -26,7 +26,7 @@ public class DoubleBuffer implements Runnable
 
 	public DoubleBuffer()
 	{
-		dummyGraphics = new PGraphicsJava2D(1, 1, null);
+		dummyGraphics = new PGraphicsJava2D();
 		repaintThread = new Thread(this, "DoubleBuffer");
 		//		repaintThread.setPriority(Thread.MIN_PRIORITY);
 		repaintThread.start();

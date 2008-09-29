@@ -127,7 +127,7 @@ public class PhyloConfig
 	public float lineWidth = 1f; // Line width. 0 is minimum, 1 is a pretty normal size.
 	//    10 is as high as you'll want to go.
 	public float nodeSize = 2f; // Node size. Same range as line width: 0 to 10 is reasonable.
-	public float innerNodeRatio = 0f; // Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
+	public float innerNodeRatio = 1f; // Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
 	public float renderThreshold = 200f; // Maximum number of nodes to render per frame.
 	public float minTextSize = 10; // Minimum text size for leaf node labels.
 	//	public float branchLengthScaling = 1f; 			// DEPRECATED.

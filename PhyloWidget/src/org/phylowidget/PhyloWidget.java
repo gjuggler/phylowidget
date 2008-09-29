@@ -20,6 +20,8 @@ package org.phylowidget;
 
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -30,6 +32,7 @@ import javax.swing.SwingUtilities;
 import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
+import org.andrewberman.ui.unsorted.StringPair;
 import org.phylowidget.net.PWClipUpdater;
 import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
@@ -161,21 +164,20 @@ public class PhyloWidget extends PApplet
 
 	Pattern parens = Pattern.compile("(.*?)\\((.*)\\)");
 
+	ArrayList<StringPair> settingsAndMethods = new ArrayList<StringPair>();
+	static final String METHOD_FLAG = "!!method!!"; 
+	
 	protected void clearQueues()
 	{
-		if (!settingMap.isEmpty())
+		while (!settingsAndMethods.isEmpty())
 		{
-			MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, settingMap);
-			settingMap.clear();
-		}
-
-		if (!methodQueue.isEmpty())
-		{
-			while (!methodQueue.isEmpty())
+			StringPair sp = settingsAndMethods.remove(0); // Remove first.
+			System.out.println(sp);
+			if (sp.a == METHOD_FLAG)
 			{
 				try
 				{
-					String s = methodQueue.removeFirst();
+					String s = sp.b;
 					Method m = null;
 					Object[] args = new Object[] {};
 					Matcher match = parens.matcher(s);
@@ -197,7 +199,12 @@ public class PhyloWidget extends PApplet
 				} catch (Exception e)
 				{
 					e.printStackTrace();
-				}
+				}				
+			} else
+			{
+				HashMap<String,String> map = new HashMap<String,String>();
+				map.put(sp.a, sp.b);
+				MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, map);
 			}
 		}
 	}
@@ -275,7 +282,8 @@ public class PhyloWidget extends PApplet
 	public static void setMessage(String s)
 	{
 		messageString = s;
-		messageFrame = UIGlobals.g.getP().frameCount;
+		if (p != null)
+			messageFrame = p.frameCount;
 	}
 
 	//	public void size(int w, int h)
@@ -329,27 +337,21 @@ public class PhyloWidget extends PApplet
 		return true;
 	}
 
-	Hashtable<String, String> settingMap = new Hashtable<String, String>();
-
 	public synchronized void changeSetting(String setting, String newValue)
 	{
 		if (cfg.debug)
 		{
 			System.out.println(setting + "\t" + newValue);
 		}
-		synchronized (settingMap)
+		synchronized (settingsAndMethods)
 		{
-			//			System.out.println(System.currentTimeMillis()+"Setting change: "+setting+" = "+newValue);
-			settingMap.put(setting, newValue);
+			settingsAndMethods.add(new StringPair(setting,newValue));
 		}
 	}
 
-	LinkedList<String> methodQueue = new LinkedList<String>();
-
 	public synchronized void callMethod(String method)
 	{
-		//		System.out.println(System.currentTimeMillis()+"Method call: "+method);
-		methodQueue.add(method);
+		settingsAndMethods.add(new StringPair(METHOD_FLAG,method));
 	}
 
 	@Override

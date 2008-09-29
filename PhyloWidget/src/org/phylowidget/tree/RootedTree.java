@@ -39,6 +39,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
+import org.phylowidget.UsefulConstants;
 
 public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> extends
 		ListenableDirectedWeightedGraph<V, E>
@@ -254,7 +255,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 	public List<V> getAllNodes(V vertex)
 	{
 		List<V> nodes = new ArrayList<V>();
-		getAll(vertex,nodes,null);
+		getAll(vertex,null,nodes);
 		return nodes;
 	}
 	
@@ -522,10 +523,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 			if (isLeaf(o))
 			{
 				double curHeight = getHeightToRoot(o);
-				if (curHeight > maxHeight)
+				if (curHeight >= maxHeight)
 					maxHeight = curHeight;
 			}
 		}
+//		System.out.println("mh:"+maxHeight);
 		return maxHeight - vertexHeight;
 	}
 
@@ -1045,10 +1047,10 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 	 */
 	public void setRoot(V newRoot)
 	{
-		if (!containsVertex(newRoot))
-		{
-			addVertex(newRoot);
-		}
+//		if (!containsVertex(newRoot))
+//		{
+//			addVertex(newRoot);
+//		}
 		root = newRoot;
 	}
 
@@ -1095,6 +1097,47 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
+	public void resolvePolytomy(V v)
+	{
+		List<V> children = getChildrenOf(v);
+		if (children.size() <= 2)
+		{
+//			System.err.println("Node "+getLabel(v)+" Not a polytomy!");
+			return; // Dummy check -- exit if we have a bifurcation.
+		}
+//		System.err.println("Resolving "+getLabel(v));
+		// Find the smallest branch length of either myself or all my children.
+		double minBranchLength = getBranchLength(v);
+		for (V child : children)
+		{
+			double bl = getBranchLength(child);
+			if (bl < minBranchLength)
+				minBranchLength = bl;
+		}
+		
+		double resolutionWindow = minBranchLength / 3;
+		
+		// Choose the "first" child.
+		V child = children.get(0);
+		// Create a new node to go below V.
+		V newV = createAndAddVertex();
+		addEdge(v, newV);
+		setBranchLength(newV, resolutionWindow);
+		setBranchLength(v,getBranchLength(v)-resolutionWindow/2);
+		
+		for (V child2 : children)
+		{
+			if (child2 == child)
+				continue;
+			double bl = getBranchLength(child2);
+			removeEdge(v, child2);
+			addEdge(newV, child2);
+			setBranchLength(child2, bl - resolutionWindow/2);
+		}
+		modPlus();
+		resolvePolytomy(newV);
+	}
+	
 	public V getCommonAncestorOf(String... nodeLabels)
 	{
 		ArrayList<String> labels = new ArrayList<String>();
@@ -1306,6 +1349,27 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 
 		public int compare(Object o1, Object o2)
 		{
+			if (o1.getClass() == PhyloNode.class)
+			{
+				String z1 = ((PhyloNode)o1).getAnnotation(UsefulConstants.Z_ORDER);
+				String z2 = ((PhyloNode)o2).getAnnotation(UsefulConstants.Z_ORDER);
+				if (z1 != null && z2 == null)
+					return 1*-dir;
+				else if (z2 != null && z1 == null)
+					return -1*-dir;
+				else if (z1 != null && z2 != null)
+				{
+					int z1i = Integer.parseInt(z1);
+					int z2i = Integer.parseInt(z2);
+					if (z1i == z2i)
+						return 0;
+					else if (z1i > z2i)
+						return 1*-dir;
+					else
+						return -1*-dir;
+				}
+			}
+			
 			int a = getDepthToRoot((V) o1);
 			int b = getDepthToRoot((V) o2);
 

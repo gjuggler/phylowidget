@@ -71,7 +71,8 @@ public final class PhyloContextMenu extends RadialMenu
 	public void close()
 	{
 		super.close();
-		traverser.getCurRange();
+		if (traverser != null)
+			traverser.getCurRange();
 	}
 	
 	private boolean shouldGlow = true;

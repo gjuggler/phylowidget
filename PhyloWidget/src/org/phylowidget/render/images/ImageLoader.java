@@ -26,7 +26,7 @@ public class ImageLoader implements Runnable
 
 	boolean loadingImg = false;
 	PhyloNode loadingNode = null;
-	public Image getImageForNode(PhyloNode n)
+	public synchronized Image getImageForNode(PhyloNode n)
 	{
 		if (thread == null)
 		{

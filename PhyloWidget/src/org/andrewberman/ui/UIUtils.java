@@ -38,7 +38,7 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
-import processing.core.PMatrix;
+import processing.core.PMatrix3D;
 
 /**
  * The <code>UIUtils</code> class is a disgusting mess of static utility
@@ -52,27 +52,27 @@ import processing.core.PMatrix;
 public final class UIUtils
 {
 	static Cursor baseCursor = Cursor.getDefaultCursor();
-	private static PMatrix camera = new PMatrix();
-	private static PMatrix cameraInv = new PMatrix();
+	private static PMatrix3D camera = new PMatrix3D();
+	private static PMatrix3D cameraInv = new PMatrix3D();
 	static Object cursorOwner;
 
-	private static PMatrix modelview = new PMatrix();
+	private static PMatrix3D modelview = new PMatrix3D();
 
-	private static PMatrix modelviewInv = new PMatrix();
+	private static PMatrix3D modelviewInv = new PMatrix3D();
 	private static double[] temp = new double[6];
 
 	private static Point tPoint = new Point(0, 0);
 
 	/**
 	 * Copies the transformation data from an <code>AffineTransformation</code>
-	 * into a <code>PMatrix</code>.
+	 * into a <code>PMatrix3D</code>.
 	 * 
 	 * @param tr
 	 *            the source <code>AffineTransformation</code>
 	 * @param mat
-	 *            the destination <code>PMatrix</code>
+	 *            the destination <code>PMatrix3D</code>
 	 */
-	public static void affineToPMatrix(AffineTransform tr, PMatrix mat)
+	public static void affineToPMatrix3D(AffineTransform tr, PMatrix3D mat)
 	{
 		tr.getMatrix(temp);
 		mat.set((float) temp[0], (float) temp[2], 0, (float) temp[4],
@@ -599,9 +599,9 @@ public final class UIUtils
 			AffineTransform tr = g.g2.getTransform();
 			try
 			{
-				affineToPMatrix(tr, modelview);
+				affineToPMatrix3D(tr, modelview);
 				// tr.invert();
-				affineToPMatrix(tr.createInverse(), modelviewInv);
+				affineToPMatrix3D(tr.createInverse(), modelviewInv);
 				camera.reset();
 				cameraInv.reset();
 			} catch (NoninvertibleTransformException e)
@@ -645,11 +645,11 @@ public final class UIUtils
 	 * Performs an in-place matrix transformation of a <code>Point</code>.
 	 * 
 	 * @param mat
-	 *            the transformation <code>PMatrix</code>
+	 *            the transformation <code>PMatrix3D</code>
 	 * @param pt
 	 *            the <code>Point</code> to be transformed in place
 	 */
-	public static void transform(PMatrix mat, Point2D.Float pt)
+	public static void transform(PMatrix3D mat, Point2D.Float pt)
 	{
 		float x = pt.x;
 		float y = pt.y;

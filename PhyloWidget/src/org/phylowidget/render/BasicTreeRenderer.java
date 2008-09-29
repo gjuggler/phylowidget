@@ -260,7 +260,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				foundItems.add(n);
 			// GJ 2008-09-03: Add ALWAYS_SHOW nodes to the foundItems list.
 			if (n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW) != null)
-				foundItems.add(0, n);
+				foundItems.add(n);
 			if (nodesDrawn >= PhyloWidget.cfg.renderThreshold && !PhyloWidget.cfg.showAllLabels)
 				continue;
 			if (!n.isWithinScreen)
@@ -317,12 +317,13 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		/*
 		 * Sort the found items.
 		 */
-		Collections.sort(foundItems, new ZOrderComparator());
+//		Collections.sort(foundItems, new ZOrderComparator());
 		
 		/*
 		 * Also always try to draw nodes that are "found".
 		 */
 		Thread.yield();
+		Collections.reverse(foundItems);
 		for (PhyloNode n : foundItems)
 		{
 			Thread.yield();
@@ -1077,8 +1078,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		public int compare(PhyloNode o1, PhyloNode o2)
 		{
-			String z1 = o1.getAnnotation(UsefulConstants.LABEL_ZORDER);
-			String z2 = o2.getAnnotation(UsefulConstants.LABEL_ZORDER);
+			String z1 = o1.getAnnotation(UsefulConstants.Z_ORDER);
+			String z2 = o2.getAnnotation(UsefulConstants.Z_ORDER);
 			if (z1 == null)
 				return -1;
 			else if (z2 == null)

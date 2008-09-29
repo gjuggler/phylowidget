@@ -39,10 +39,14 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
 
+import com.lowagie.text.Document;
+
 public class RenderOutput
 {
 	public static boolean isOutputting = false;
 
+	public static Document doc;
+	
 	public static synchronized void savePDF(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels)
 	{
 		isOutputting = true;
@@ -76,13 +80,16 @@ public class RenderOutput
 			// Fix a non-PDF extension.
 			if (!filename.toLowerCase().endsWith((".pdf")))
 			{
-				
 				filename += ".pdf";
 			}
 			File f = new File(directory,filename);
 			p.noLoop();
-			PGraphics canvas = (PGraphics) p.createGraphics(p.width, p.height, PConstants.PDF, f.getAbsolutePath());
+			PGraphics canvas = p.createGraphics(p.width, p.height, PConstants.PDF);
+			canvas.setPath(f.getAbsolutePath());
+			canvas.setSize(p.width, p.height);
 			canvas.beginDraw();
+			if (PhyloWidget.cfg.debug)
+				System.out.println("BEGIN DRAW");
 
 			/*
 			 * Create the render rectangle.
@@ -101,6 +108,8 @@ public class RenderOutput
 			 */
 			r.render(canvas, rect.x, rect.y, rect.width, rect.height, true);
 
+			if (PhyloWidget.cfg.debug)
+				System.out.println("END DRAW");
 			canvas.endDraw();
 			canvas.dispose();
 			PhyloWidget.setMessage("Output complete.");

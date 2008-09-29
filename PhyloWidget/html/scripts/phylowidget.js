@@ -175,6 +175,7 @@ getTextFieldHTML: function(id,fnToCall,msg)
  
 changeSetting: function(setting,value)
 {
+	//alert(document.getElementById('pulpcore_object'));
 	AppletLoader.callAppletMethod("changeSetting",setting,value);
 },
 
@@ -318,6 +319,7 @@ function selectOnce(el)
  * MINIFIED appletloader.js, from FreeLoader project
  * http://www.andrewberman.org/projects/preload/
  */
+
 
 function pulpcore_getCookie(name){name=name+"=";var i;if(document.cookie.substring(0,name.length)==name){i=name.length;}
 else{i=document.cookie.indexOf('; '+name);if(i==-1){return null;}

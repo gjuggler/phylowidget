@@ -52,7 +52,8 @@
 			<item name="Align all Leaves" action="treeAlignLeaves" shortcut="control-shift-A"/>
 			<item name="Flip Tree" action="treeFlip" shortcut="control-R"/>
 			<item name="Auto-sort Tree" action="treeAutoSort" shortcut="control-L"/>
-			<item name="Remove Elbow Nodes" action="treeRemoveElbows" shortcut="control-E"/>		
+			<item name="Remove Elbow Nodes" action="treeRemoveElbows" shortcut="control-E"/>
+			<item name="Uncollapse All" action="treeUncollapseAll" shortcut="control-U"/>			
 		</item>
 		<item name="Annotation">
 			<item name="Enforce Unique Labels" type="CheckBox" methodCall="setEnforceUniqueLabels"/>

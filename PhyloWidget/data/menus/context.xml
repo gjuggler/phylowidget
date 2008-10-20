@@ -13,6 +13,7 @@
 			<item name="This node" action="nodeDelete" hint="t"/>
 			<item name="Subtree" action="nodeDeleteSubtree" hint="s"/>
 		</item>
+		<item name="Collapse" action="nodeCollapse" hint="c"/>
 	</item>
 	<item name="Web" hint="w" icon="links/hyperlink.png">
 		<item name="Load Image" hint="i" action="nodeLoadImage" condition="canAccessInternet"/>

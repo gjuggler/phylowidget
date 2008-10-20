@@ -153,17 +153,18 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 				String key = line.substring(0, firstInd);
 				String val = line.substring(firstInd+1, line.length());
 				node.setAnnotation(key, val);
-				/*
-				 * Need to re-layout so that the tree renderer has a chance to re-assign
-				 * node colors and whatnot... There should be a better way to avoid having to 
-				 * trigger a layout from here, but frankly I'm too lazy to think of one!
-				 */
-				PhyloWidget.ui.layout();
 			} catch (Exception e)
 			{
 				e.printStackTrace();
 			}
 		}
+		/*
+		 * Need to re-layout so that the tree renderer has a chance to re-assign
+		 * node colors and whatnot... There should be a better way to avoid having to 
+		 * trigger a layout from here, but frankly I'm too lazy to think of one!
+		 */
+		PhyloWidget.ui.layout();
+		node.getTree().modPlus();
 	}
 
 	public void setVisible(boolean visible)

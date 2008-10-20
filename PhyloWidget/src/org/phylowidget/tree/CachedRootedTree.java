@@ -287,12 +287,12 @@ public class CachedRootedTree<V extends CachedVertex,E extends DefaultWeightedEd
 	@Override
 	public synchronized boolean isLeaf(V vertex)
 	{
-		sync();
-		if (inSync())
-		{
-			CachedVertex cv = (CachedVertex) vertex;
-			return cv.getNumEnclosed() == 0;
-		} else
+//		sync();
+//		if (inSync())
+//		{
+//			CachedVertex cv = (CachedVertex) vertex;
+//			return cv.getNumEnclosed() == 0;
+//		} else
 			return super.isLeaf(vertex);
 	}
 

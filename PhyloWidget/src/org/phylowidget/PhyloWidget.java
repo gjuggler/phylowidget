@@ -55,8 +55,8 @@ public class PhyloWidget extends PApplet
 
 	public static float FRAMERATE = 60;
 
-	protected static PWTreeUpdater treeUpdater;
-	protected static PWClipUpdater clipUpdater;
+	public static PWTreeUpdater treeUpdater;
+	public static PWClipUpdater clipUpdater;
 
 	private static String messageString = new String();
 
@@ -90,20 +90,18 @@ public class PhyloWidget extends PApplet
 			/*
 			 * We're locked into an applet. Don't fight it.
 			 */
-			size(getWidth(), getHeight());
+			size(getWidth(), getHeight(), JAVA2D);
 		}
 		frameRate(FRAMERATE);
-
-		PGraphicsJava2D pg = (PGraphicsJava2D) g;
 
 		new UIGlobals(this);
 		cfg = new PhyloConfig();
 		ui = new PhyloUI(this);
 		trees = new TreeManager(this);
 
-		//		treeUpdater = new PWTreeUpdater();
-		//		clipUpdater = new PWClipUpdater();
-
+		treeUpdater = new PWTreeUpdater();
+		clipUpdater = new PWClipUpdater();
+		
 		new Thread()
 		{
 			public void run()
@@ -114,7 +112,7 @@ public class PhyloWidget extends PApplet
 		}.start();
 
 		unregisterDraw(UIGlobals.g.event());
-
+		
 		clearQueues();
 	}
 
@@ -124,10 +122,10 @@ public class PhyloWidget extends PApplet
 	public void resize(int width, int height)
 	{
 		super.resize(width, height);
-		PGraphicsJava2D pg = (PGraphicsJava2D) g;
-		if (pg == null)
-			return;
-		UIUtils.setRenderingHints(pg);
+		//		PGraphicsJava2D pg = (PGraphicsJava2D) g;
+		//		if (pg == null)
+		//			return;
+		UIUtils.setRenderingHints(g);
 
 	}
 
@@ -165,8 +163,8 @@ public class PhyloWidget extends PApplet
 	Pattern parens = Pattern.compile("(.*?)\\((.*)\\)");
 
 	ArrayList<StringPair> settingsAndMethods = new ArrayList<StringPair>();
-	static final String METHOD_FLAG = "!!method!!"; 
-	
+	static final String METHOD_FLAG = "!!method!!";
+
 	protected void clearQueues()
 	{
 		while (!settingsAndMethods.isEmpty())
@@ -187,7 +185,7 @@ public class PhyloWidget extends PApplet
 						matched = true;
 						s = match.group(1);
 						args = new Object[] { match.group(2) };
-						System.out.println(s+"  "+args);
+						System.out.println(s + "  " + args);
 						m = PhyloUI.class.getMethod(s, String.class);
 						m.invoke(ui, args);
 					}
@@ -199,10 +197,10 @@ public class PhyloWidget extends PApplet
 				} catch (Exception e)
 				{
 					e.printStackTrace();
-				}				
+				}
 			} else
 			{
-				HashMap<String,String> map = new HashMap<String,String>();
+				HashMap<String, String> map = new HashMap<String, String>();
 				map.put(sp.a, sp.b);
 				MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, map);
 			}
@@ -327,16 +325,16 @@ public class PhyloWidget extends PApplet
 
 	public boolean updateTree(String s)
 	{
-		treeUpdater.triggerUpdate(s);
+		PhyloWidget.p.treeUpdater.triggerUpdate(s);
 		return true;
 	}
 
 	public boolean updateClip(String s)
 	{
-		clipUpdater.triggerUpdate(s);
+		PhyloWidget.p.clipUpdater.triggerUpdate(s);
 		return true;
 	}
-
+	
 	public synchronized void changeSetting(String setting, String newValue)
 	{
 		if (cfg.debug)
@@ -345,13 +343,13 @@ public class PhyloWidget extends PApplet
 		}
 		synchronized (settingsAndMethods)
 		{
-			settingsAndMethods.add(new StringPair(setting,newValue));
+			settingsAndMethods.add(new StringPair(setting, newValue));
 		}
 	}
 
 	public synchronized void callMethod(String method)
 	{
-		settingsAndMethods.add(new StringPair(METHOD_FLAG,method));
+		settingsAndMethods.add(new StringPair(METHOD_FLAG, method));
 	}
 
 	@Override

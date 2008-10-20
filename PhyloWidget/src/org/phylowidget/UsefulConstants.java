@@ -30,16 +30,21 @@ public interface UsefulConstants
 	public static final String IMG_TAG = "IMG";			// a URL to an image that will be displayed. 
 	public static final String OLD_IMG_TAG = "OLD_IMG";	// Used for internal caching purposes by PhyloWidget.
 	
+	public static final String CIGAR = "CIGAR"; // Cigar line, for gene tree alignments.
+	
 	public static final String LABEL_COLOR = "LCOL";	// Color of a node's label
 	public static final String NODE_COLOR = "NCOL";		// Color of a node's dot marker
 	public static final String BRANCH_COLOR = "BCOL";	// Color of a node's branch (the branch leading to its parent)
+	public static final String ALIGNMENT_COLOR = "ALNCOL";	// Color of a node's branch (the branch leading to its parent)
 	// NB: The values of the color annotations should be in R,G,B format, either with or without parentheses (your choice!)
 	//     [Alternatively, if you specify a single integer value, it will be interpreted as a single grayscale value]
 	// NB: The above color annotations take precedence over any other auto-coloring that is usually done.
 	public static final String LABEL_SIZE = "LSZ"; 		// Multiplier for label text size.
 	public static final String NODE_SIZE = "NSZ";		// Multiplier for node marker size.
+	public static final String NODE_SHAPE = "NSH";
 	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
 	public static final String IMAGE_SIZE = "ISZ";		// Multiplier for photo size.
+	public static final String CIGAR_SIZE = "ALNSZ";		// Multiplier for photo size.
 	public static final String LABEL_ALWAYSSHOW = "PW_ALWAYS";    // Pretty hacky, but this is a tag to make sure a label is ALWAYS shown, no matter what.
 	public static final String Z_ORDER = "PW_Z"; // Another hack: specify the z-order of the node, to be used in combination with ALWAYSSHOW.
 }

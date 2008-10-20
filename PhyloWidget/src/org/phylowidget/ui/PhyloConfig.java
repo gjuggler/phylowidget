@@ -104,6 +104,7 @@ public class PhyloConfig
 	public String textColor = "(0,0,0)";
 	public String nodeColor = "(0,0,0)";
 	public String branchColor = "(0,0,0)";
+	public String alignmentColor = "(140,190,50)";
 
 	/*
 	 * Node shapes -- usable values are:
@@ -132,6 +133,7 @@ public class PhyloConfig
 	public float minTextSize = 10; // Minimum text size for leaf node labels.
 	//	public float branchLengthScaling = 1f; 			// DEPRECATED.
 	public float branchScaling = 1f; // Only used with the Cladogram renderer... scales the width.
+	public float cigarScaling = 10f; // How wide should 1bp of cigar line be, relative to the row height
 	public float layoutAngle = 0; // The starting angle for the layout (only applicable for circular and unrooted layouts)
 	public float animationFrames = 30; // The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
 	public float viewportX = 0; // The x position of the viewport.
@@ -149,6 +151,7 @@ public class PhyloConfig
 	public boolean prioritizeDistantLabels = false; // This controls how PhyloWidget prioritizes the display of certain nodes above others.
 	//    If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
 	//    the root, instead of those that are closest (in terms of # of branches to the root).
+	public boolean alignLabels = false; // When drawing with branch lengths, whether all labels should be aligned.
 	public boolean useDoubleBuffering = true; // To be honest you probably don't want to mess with this one -- the double buffering really helps!
 	public boolean antialias = false; // When set to true this slows down the rendering significantly, but looks much better.
 	public boolean outputAllInnerNodes = false; // Kind of a strange one: if set to true, PhyloWidget will *always* output 
@@ -243,6 +246,22 @@ public class PhyloConfig
 			return branchC;
 		else
 			return Color.parseColor(branchColor);
+	}
+	
+	private Color alignmentC = Color.parseColor(alignmentColor);
+
+	public void setAlignmentColor(String s)
+	{
+		alignmentC = Color.parseColor(s);
+		alignmentColor = s;
+	}
+
+	public Color getAlignmentColor()
+	{
+		if (alignmentC != null)
+			return alignmentC;
+		else
+			return Color.parseColor(alignmentColor);
 	}
 
 	/*

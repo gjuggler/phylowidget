@@ -112,10 +112,11 @@ public class PhyloUI implements Runnable
 		 */
 		try
 		{
-			loadFromApplet(p);
 			p.callMethod("setMenusIfNull");
+			loadFromApplet(p);
 		} catch (Exception e)
 		{
+			e.printStackTrace();
 			// Do nothing. Continue on...
 		}
 		checkPermissions();
@@ -154,12 +155,16 @@ public class PhyloUI implements Runnable
 	public synchronized void setMenus()
 	{
 		disposeMenus();
+		if (PhyloWidget.cfg.debug)
+			System.out.println("Disposed!"); 
 		String[] menuFiles = PhyloWidget.cfg.menus.split(";");
 		ArrayList<MenuItem> allMenus = new ArrayList<MenuItem>();
 		for (String menuFile : menuFiles)
 		{
 			if (menuFile.trim().length() == 0)
 				continue;
+			if (PhyloWidget.cfg.debug)
+				System.out.println(menuFile);
 			// GJ 27-8-08: remove quotes from menu specification.
 			menuFile.replaceAll("'", "");
 			menuFile.replaceAll("\"", "");
@@ -191,9 +196,9 @@ public class PhyloUI implements Runnable
 					String path = p.getDocumentBase().toString();
 					int ind = path.lastIndexOf("/");
 					if (ind != -1)
-						path = path.substring(0,ind);
-//					System.out.println(path);
-					in = p.createInput(path+"/"+menuFile);
+						path = path.substring(0, ind);
+					//					System.out.println(path);
+					in = p.createInput(path + "/" + menuFile);
 				}
 			}
 			/*
@@ -208,10 +213,13 @@ public class PhyloUI implements Runnable
 				//				r = new StringReader(fileS);
 			}
 			ArrayList<MenuItem> theseMenus = io.loadFromXML(r, p, PhyloWidget.ui, p, PhyloWidget.cfg);
+			System.out.println(menuFile);
 			configureMenus(theseMenus);
 			allMenus.addAll(theseMenus);
 		}
 		this.menus = allMenus;
+		if (PhyloWidget.cfg.debug)
+			System.out.println("Finished!");
 	}
 
 	String streamToString(InputStream in)
@@ -272,6 +280,7 @@ public class PhyloUI implements Runnable
 			MenuItem menu = (MenuItem) menus.get(i);
 			if (menu instanceof PhyloContextMenu)
 			{
+				System.out.println("ASDF");
 				this.context = (PhyloContextMenu) menu;
 				continue;
 			}
@@ -422,7 +431,7 @@ public class PhyloUI implements Runnable
 			r.render.getTree().reroot(getCurNode());
 		}
 	}
-	
+
 	public void reroot()
 	{
 		nodeReroot();
@@ -556,6 +565,15 @@ public class PhyloUI implements Runnable
 		}
 	}
 
+	public void nodeCollapse()
+	{
+		NodeRange r = curRange();
+		RootedTree g = r.render.getTree();
+		g.collapseNode(getCurNode());
+		g.modPlus();
+		layout();
+	}
+
 	/*
 	 * View actions.
 	 */
@@ -621,6 +639,12 @@ public class PhyloUI implements Runnable
 		{
 			tree.removeElbowsBelow(tree.getRoot());
 		}
+		layout();
+	}
+
+	public void treeUncollapseAll()
+	{
+		getCurTree().uncollapseAllNodes();
 		layout();
 	}
 
@@ -836,9 +860,15 @@ public class PhyloUI implements Runnable
 					public void run()
 					{
 						setMessage("Loading tree...");
-						//						p.changeSetting("tree", treeString);
-						PhyloTree t = (PhyloTree) TreeIO.parseNewickString(new PhyloTree(), treeString);
-						p.noLoop();
+						PhyloTree t = null;
+						try
+						{
+							t = (PhyloTree) TreeIO.parseNewickString(new PhyloTree(), treeString);
+							p.noLoop();
+						} catch (Exception e)
+						{
+							t = null;
+						}
 						if (t != null)
 						{
 							PhyloWidget.trees.setTree(t);
@@ -880,7 +910,19 @@ public class PhyloUI implements Runnable
 			return true;
 		return (getCurTree().getRoot() != getCurNode());
 	}
-	
+
+	public boolean isLeafNode()
+	{
+		return getCurTree().isLeaf(getCurNode());
+	}
+
+	public boolean isInternalNode()
+	{
+		if (getCurTree() == null || getCurNode() == null)
+			return true;
+		return !getCurTree().isLeaf(getCurNode());
+	}
+
 	public void destroy()
 	{
 		if (annotation != null)

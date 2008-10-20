@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.andrewberman.ui.Color;
+import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 
@@ -68,18 +69,20 @@ public class LayoutCircular extends LayoutBase
 
 		if (!PhyloWidget.cfg.useBranchLengths || !tree.isLeaf(c))
 		{
-			canvas.strokeCap(canvas.ROUND);
-//			canvas.strokeJoin(canvas.ROUND);
-//			canvas.stroke(0,0,0,1f);
+			if (UIUtils.isJava2D(canvas))
+			{
+				canvas.strokeCap(canvas.ROUND);
+			}
 			canvas.line(c.getX(), c.getY(), rootX + (float) Math.cos(cAr.angle) * pRad, rootY
 					+ (float) Math.sin(cAr.angle) * pRad);
 		} else
 		{
 			// Draw the same line, but only up until the "true" leaf distance.
 			float ratio = cAr.leafRadius / cAr.radius;
-			canvas.strokeCap(canvas.ROUND);
-//			canvas.stroke(.5f,.5f,.5f,255);
-//			canvas.strokeJoin(canvas.ROUND);
+			if (UIUtils.isJava2D(canvas))
+			{
+				canvas.strokeCap(canvas.ROUND);
+			}
 			canvas.line(rootX + (float) Math.cos(cAr.angle) * cAr.leafRadius * scaleX * drawScaleX, rootY
 					+ (float) Math.sin(cAr.angle) * cAr.leafRadius * scaleY * drawScaleY, rootX
 					+ (float) Math.cos(cAr.angle) * pRad, rootY + (float) Math.sin(cAr.angle) * pRad);

@@ -375,7 +375,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		{
 			/*
 			 * If our root canvas is either OpenGL or P3D, we need to draw to
-			 * the offscreen Java2D buffer and then blit it onto the canvas
+			 * the offscreen Java2D buffer and then copy it onto the canvas
 			 * PGraphics.
 			 */
 			resizeBuffer();

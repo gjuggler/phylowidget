@@ -24,6 +24,7 @@ import java.util.HashMap;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenQuad;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
 import org.phylowidget.render.NodeRange;
@@ -322,6 +323,28 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 		this.textAlign = (byte) textAlign;
 	}
 
+	public static boolean parseTruth(String s)
+	{
+		if (s.startsWith("T") || s.startsWith("t") || s.startsWith("y") || s.startsWith("Y") || s.equals("1"))
+			return true;
+		else
+			return false;
+	}
+	
+	public synchronized PhyloTree getTree()
+	{
+		if (range != null)
+		{
+			if (range.render != null)
+			{
+				return (PhyloTree) range.render.getTree();
+			}
+			System.out.println("Render null!");
+		}
+		System.out.println("Range null!");
+		return null;
+	}
+	
 	//	public float getTrueAngle()
 	//	{
 	//		return trueAngle;

@@ -169,7 +169,8 @@ public final class UIUtils
 	 */
 	public static FontMetrics getMetrics(PGraphics pg, Font font, float size)
 	{
-		Graphics2D g2 = ((PGraphicsJava2D) pg).g2;
+		Graphics2D g2 = (Graphics2D)UIGlobals.g.getP().getGraphics();
+//		Graphics2D g2 = ((PGraphicsJava2D) pg).g2;
 		Font f = font.deriveFont(size);
 		FontMetrics fm = g2.getFontMetrics(f);
 		return fm;
@@ -358,7 +359,8 @@ public final class UIUtils
 	 */
 	public static boolean isJava2D(PGraphics pg)
 	{
-		return pg.getClass().getName().equals(PApplet.JAVA2D);
+		boolean is = pg.getClass() == PGraphicsJava2D.class;
+		return is;
 	}
 
 	/**

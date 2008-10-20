@@ -254,7 +254,8 @@ public class Dock extends Menu
 		 */
 		if (usesJava2D)
 		{
-			Graphics2D g2 = ((PGraphicsJava2D) menu.canvas.g).g2;
+			Graphics2D g2 = menu.buff.g2;
+//			Graphics2D g2 = ((PGraphicsJava2D) menu.canvas.g).g2;
 			g2.setPaint(getStyle().getGradient(MenuItem.UP, 0, (float) drawRect
 					.getMinY(), 0, (float) drawRect.getMaxY()));
 			g2.fill(drawRect);

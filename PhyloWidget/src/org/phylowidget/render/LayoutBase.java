@@ -131,6 +131,11 @@ public abstract class LayoutBase
 		theta += (float)TWOPI;
 		theta %= (float)TWOPI;
 		n.setAngle(theta);
+		String s = n.getAnnotation("collapse");
+		if (s != null && PhyloNode.parseTruth(s))
+		{
+			return;
+		}
 		switch (angleHandling)
 		{
 			case (ANGLE_NONE):

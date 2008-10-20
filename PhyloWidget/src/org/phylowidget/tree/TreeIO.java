@@ -249,7 +249,7 @@ public class TreeIO
 					curLabel = temp.toString();
 					curLabel = curLabel.trim();
 					curLabel = nhxHandler.replaceAnnotation(curLabel);
-					
+
 					PhyloNode curNode = newNode(tree, curLabel, nhx, poorMans);
 
 					if (c == ';')
@@ -417,7 +417,7 @@ public class TreeIO
 		}
 
 		v.setBranchLengthCache(curLength);
-		
+
 		// If there's no NHX annotation, try and break up the label using the "poor man's" NHX delimiters.
 		if (poorMan && nhxInd == -1)
 		{
@@ -447,14 +447,14 @@ public class TreeIO
 
 		if (oldTree != null)
 		{
-//			PhyloNode existingNode = (PhyloNode) oldTree.getVertexForLabel(s);
-//			if (existingNode != null)
-//			{
-//				t.addVertex(existingNode);
-//				t.setLabel(existingNode,existingNode.getLabel());
-//				existingNode.setBranchLength(v.getBranchLength());
-//				return existingNode;
-//			}
+			//			PhyloNode existingNode = (PhyloNode) oldTree.getVertexForLabel(s);
+			//			if (existingNode != null)
+			//			{
+			//				t.addVertex(existingNode);
+			//				t.setLabel(existingNode,existingNode.getLabel());
+			//				existingNode.setBranchLength(v.getBranchLength());
+			//				return existingNode;
+			//			}
 		}
 		//		DefaultVertex o = t.createAndAddVertex();
 		t.addVertex(v);
@@ -479,7 +479,10 @@ public class TreeIO
 	public static String createNewickString(RootedTree tree, boolean includeStupidLabels)
 	{
 		StringBuffer sb = new StringBuffer();
-		outputVertex(tree, sb, tree.getRoot(), includeStupidLabels);
+		synchronized (tree)
+		{
+			outputVertex(tree, sb, tree.getRoot(), includeStupidLabels);
+		}
 		return sb.toString() + ";";
 	}
 
@@ -490,7 +493,7 @@ public class TreeIO
 		 * the parser), but it's just too annoying. So maybe on reeeeally large
 		 * trees, this will result in heap problems. Oh, well...
 		 */
-		if (!tree.isLeaf(v))
+		if (!tree.isLeaf(v) || tree.isCollapsed(v)) // GJ 2008-10-15: Still output children if collapsed.
 		{
 			sb.append('(');
 			List<DefaultVertex> l = tree.getChildrenOf(v);

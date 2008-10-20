@@ -5,8 +5,12 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.Point2D;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -20,6 +24,7 @@ import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PGraphicsJava2D;
 
 public final class NodeRenderer implements UsefulConstants
 {
@@ -36,10 +41,11 @@ public final class NodeRenderer implements UsefulConstants
 
 	static NodeRender nr = new NodeRender();
 	static LineRender lineRender = new LineRender();
+	static CigarRender cr = new CigarRender();
 	static ImageRender ir = new ImageRender();
 	static LabelRender lr = new LabelRender();
 
-	static RenderItem[] renderables = new RenderItem[] { ir, lr };
+	static RenderItem[] renderables = new RenderItem[] { ir, cr, lr };
 	static RenderItem[] structRenderables = new RenderItem[] { lineRender, nr };
 
 	public NodeRenderer()
@@ -56,16 +62,24 @@ public final class NodeRenderer implements UsefulConstants
 		PGraphics canvas = r.canvas;
 		if (canvas == null)
 		{
-//			throw new RuntimeException("Null canvas!");
+			//			throw new RuntimeException("Null canvas!");
 			return;
 		}
-//		g2 = r.canvas.g2;
+		//		g2 = r.canvas.g2;
 
 		NodeRenderer.r = r;
 
 		// Translate the canvas to the node's x and y coords.
 		float x = n.getX();
 		float y = n.getY();
+		if (r.treeLayout instanceof LayoutCladogram && r.tree.isLeaf(n))
+		{
+			if (PhyloWidget.cfg.alignLabels || n.getAnnotation("cigar") != null)
+			{
+				PhyloNode mostDistant = (PhyloNode) r.tree.getFurthestLeafFromVertex(r.tree.getRoot());
+				x = mostDistant.getX();
+			}
+		}
 		canvas.pushMatrix();
 		canvas.translate(x, y);
 		canvas.rotate(n.getAngle());
@@ -84,6 +98,11 @@ public final class NodeRenderer implements UsefulConstants
 		{
 			boolean drawNode = (actuallyRender && n.drawLabel) || PhyloWidget.cfg.showAllLeafNodes;
 			nr.render(canvas, n, drawNode, true);
+		}
+
+		if (r.getTree().isCollapsed(n))
+		{
+			canvas.translate(rowHeight * .3f, 0);
 		}
 
 		canvas.translate(dotWidth * dMult + RenderConstants.labelSpacing * dMult * rowHeight, 0);
@@ -229,11 +248,14 @@ public final class NodeRenderer implements UsefulConstants
 
 		protected float[] drawNodeMarkerImpl(PGraphics canvas, PhyloNode n, boolean actuallyRender)
 		{
+			float thisDotSize = nodeSizeForNode(n);
+			if (canvas == null)
+				return new float[] { thisDotSize / 2, thisDotSize / 2 };
+
 			canvas.fill(nodeColor(n));
 			canvas.noStroke();
 
 			RootedTree tree = r.tree;
-			float thisDotSize = nodeSizeForNode(n);
 
 			if (thisDotSize == 0)
 				return ZEROES;
@@ -242,7 +264,7 @@ public final class NodeRenderer implements UsefulConstants
 				String s = n.getAnnotation(DUPLICATION);
 				if (s != null)
 				{
-					if (s.toLowerCase().startsWith("t") || s.toLowerCase().startsWith("y"))
+					if (PhyloNode.parseTruth(s))
 					{
 						canvas.fill(RenderConstants.copyColor.getRGB());
 					} else
@@ -263,16 +285,48 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				return new float[] { thisDotSize / 2, thisDotSize / 2 };
 			}
-			if (PhyloWidget.cfg.nodeShape.equals("square"))
+
+			int shape = getNodeShape(n);
+
+			if (shape == TRIANGLE)
+			{
+				canvas.beginShape();
+				float r = thisDotSize * .75f;
+				canvas.vertex(offX + 0.866f * r, offY + 0.5f * r);
+				canvas.vertex(offX - 0.866f * r, offY + 0.5f * r);
+				canvas.vertex(offX, offY - 1 * r);
+				canvas.endShape();
+			} else if (shape == SQUARE)
 			{
 				canvas.rect(offX - thisDotSize / 2, offY - thisDotSize / 2, thisDotSize, thisDotSize);
 			} else
+			// Default to circle
 			{
 				canvas.ellipseMode(PGraphics.CENTER);
 				canvas.ellipse(offX, offY, thisDotSize, thisDotSize);
 			}
 
 			return new float[] { thisDotSize / 2, thisDotSize / 2 };
+		}
+
+		static final int CIRCLE = 0;
+		static final int SQUARE = 1;
+		static final int TRIANGLE = 2;
+
+		static int getNodeShape(PhyloNode n)
+		{
+			String annotation = n.getAnnotation(UsefulConstants.NODE_SHAPE);
+			String shape = PhyloWidget.cfg.nodeShape.toLowerCase();
+			if (annotation != null)
+			{
+				shape = annotation.toLowerCase();
+			}
+			if (shape.startsWith("t"))
+				return TRIANGLE;
+			else if (shape.startsWith("s"))
+				return SQUARE;
+			else
+				return CIRCLE;
 		}
 
 		static int nodeColor(PhyloNode n)
@@ -410,7 +464,8 @@ public final class NodeRenderer implements UsefulConstants
 		private float imageSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
 			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.imageSize * n.bulgeFactor;
-			thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+			if (!PhyloWidget.cfg.showAllLabels)
+				thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
 
 			// If we find a NHX image size annotation, scale accordingly.
 			float iMult = getFloatAnnotation(n, IMAGE_SIZE);
@@ -441,7 +496,7 @@ public final class NodeRenderer implements UsefulConstants
 
 			if (actuallyRender)
 			{
-				Graphics2D g2 = r.canvas.g2;
+				Graphics2D g2 = ((PGraphicsJava2D) r.canvas).g2;
 				PGraphics canvas = r.canvas;
 
 				float dx = (rowHeight - scaledW) / 2;
@@ -472,8 +527,8 @@ public final class NodeRenderer implements UsefulConstants
 				if (img != null)
 				{
 					if (RenderOutput.isOutputting)
-						System.out.println("DRAW IMAGE "+n.getLabel());
-//					img.flush();
+						System.out.println("DRAW IMAGE " + n.getLabel());
+					//					img.flush();
 					g2.drawImage(img, (int) dx, (int) -scaledH / 2, (int) scaledW, (int) scaledH, null);
 				}
 				if (RenderOutput.isOutputting && img != null)
@@ -536,6 +591,12 @@ public final class NodeRenderer implements UsefulConstants
 			if (labelMult > -1)
 				curTextSize *= labelMult;
 
+			// If collapsed, label size is smaller.
+			if (r.getTree().isCollapsed(n))
+			{
+				curTextSize *= .6f;
+			}
+
 			boolean alwaysRender = false;
 			float always = getFloatAnnotation(n, LABEL_ALWAYSSHOW);
 			if (always > -1)
@@ -579,8 +640,8 @@ public final class NodeRenderer implements UsefulConstants
 			 */
 			canvas.fill(textColor(n));
 			curTextSize = Math.min(curTextSize, 128);
-//			if (curTextSize*100 == 0 && actuallyRender)
-//				return new float[]{dx,curTextSize};
+			//			if (curTextSize*100 == 0 && actuallyRender)
+			//				return new float[]{dx,curTextSize};
 			canvas.textSize(curTextSize);
 			if (n.found)
 			{
@@ -614,7 +675,7 @@ public final class NodeRenderer implements UsefulConstants
 						canvas.textAlign(canvas.RIGHT, canvas.BASELINE);
 						canvas.fill(textColor(n));
 						//						canvas.text(n.getLabel(), 0, r.dFont * curTextSize / r.textSize);
-						canvas.text(n.getLabel(), offX - curTextSize / 3 - s, offY - s - curTextSize / 3);
+						canvas.text(tree.getLabel(n), offX - curTextSize / 3 - s, offY - s - curTextSize / 3);
 					}
 				}
 			} else
@@ -631,7 +692,7 @@ public final class NodeRenderer implements UsefulConstants
 					registerPoint(canvas, n, dx, curTextSize / 2);
 				}
 				if (actuallyRender)
-					canvas.text(n.getLabel(), 0, 0 + r.dFont * curTextSize / r.textSize);
+					canvas.text(tree.getLabel(n), 0, 0 + r.dFont * curTextSize / r.textSize);
 			}
 			if (actuallyRender)
 				n.lastTextSize = curTextSize;
@@ -657,6 +718,10 @@ public final class NodeRenderer implements UsefulConstants
 
 		static int textColor(PhyloNode n)
 		{
+			if (r.getTree().isCollapsed(n))
+			{
+				return PhyloWidget.cfg.getTextColor().brighter(128).getRGB();
+			}
 			if (n.isNHX())
 			{
 				int c = Color.black.getRGB();
@@ -705,5 +770,115 @@ public final class NodeRenderer implements UsefulConstants
 			tf.setWidth(textWidth);
 			tf.setPositionByBaseline(x + dX, y + dY);
 		}
+	}
+
+	public static class CigarRender extends RenderItem
+	{
+		static Pattern p = Pattern.compile("(\\d*?)([MD])", Pattern.CASE_INSENSITIVE);
+
+		public float[] render(PGraphics canvas, PhyloNode n, boolean actuallyRender, boolean preTransformed)
+		{
+			super.render(canvas, n, actuallyRender, preTransformed);
+
+			boolean alignRight = false;
+			if (n.getTextAlign() == PhyloNode.ALIGN_RIGHT)
+				alignRight = true;
+
+			String cigarLine = null;
+			cigarLine = n.getAnnotation(UsefulConstants.CIGAR);
+			if (cigarLine == null)
+				return ZEROES;
+
+			AlignmentBlocks abs = parseCigarBreakpoints(cigarLine);
+			List<Integer> bps = abs.blocks;
+			int length = abs.totalLength;
+
+			// Calculate how much to scale the aligned blocks.
+			float thisRowSize = cigarSizeForNode(r, n);
+			float totalWidth = PhyloWidget.cfg.cigarScaling * thisRowSize;
+			float widthPerBp = totalWidth / (float) length;
+
+			if (actuallyRender)
+			{
+				for (int i = 0; i < bps.size() - 1; i += 2)
+				{
+					int lo = bps.get(i);
+					int hi = bps.get(i + 1);
+
+					float loX = lo * widthPerBp;
+					float hiX = hi * widthPerBp;
+
+					canvas.noStroke();
+					canvas.fill(alignmentColor(n));
+					canvas.rect(loX, -thisRowSize / 2, hiX - loX, thisRowSize);
+				}
+			}
+			return new float[] { totalWidth, thisRowSize };
+		}
+
+		private AlignmentBlocks parseCigarBreakpoints(String cigarLine)
+		{
+			// Turn a cigar line into an array of match start and end points.
+			Matcher m = p.matcher(cigarLine);
+			int count = 0;
+			ArrayList<Integer> breakpoints = new ArrayList<Integer>();
+			while (m.find())
+			{
+				String numS = m.group(1);
+				int num = 1;
+				if (numS.length() > 0)
+					num = Integer.parseInt(numS);
+				String type = m.group(2);
+
+				if (type.equals("M"))
+					breakpoints.add(count);
+				for (int i = 0; i < num; i++)
+				{
+					count++;
+				}
+				if (type.equals("M"))
+					breakpoints.add(count);
+			}
+			AlignmentBlocks ab = new AlignmentBlocks();
+			ab.totalLength = count;
+			ab.blocks = breakpoints;
+			return ab;
+		}
+
+		private float cigarSizeForNode(BasicTreeRenderer r, PhyloNode n)
+		{
+			float thisRowSize = r.getTextSize();
+			if (!PhyloWidget.cfg.showAllLabels)
+				thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+
+			// If we find a NHX image size annotation, scale accordingly.
+			float iMult = getFloatAnnotation(n, CIGAR_SIZE);
+			if (iMult > -1)
+				thisRowSize *= iMult;
+
+			return thisRowSize;
+		}
+
+		static int alignmentColor(PhyloNode n)
+		{
+			if (n.isNHX())
+			{
+				String labelColor = n.getAnnotation(ALIGNMENT_COLOR);
+				String tax = n.getAnnotation(TAXON_ID);
+				String spec = n.getAnnotation(SPECIES_NAME);
+				if (labelColor != null)
+				{
+					int c = Color.parseColor(labelColor).getRGB();
+					return c;
+				}
+			}
+			return PhyloWidget.cfg.getAlignmentColor().getRGB();
+		}
+	}
+
+	static class AlignmentBlocks
+	{
+		int totalLength;
+		List<Integer> blocks;
 	}
 }

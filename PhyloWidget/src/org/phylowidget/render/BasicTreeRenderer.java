@@ -47,6 +47,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.ui.NodeUncollapser;
 
 import processing.core.PConstants;
 import processing.core.PFont;
@@ -69,7 +70,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	protected PhyloNode widestNode;
 
-	protected PGraphicsJava2D canvas;
+	protected PGraphics canvas;
 
 	/**
 	 * These variables are set in the calculateSizes() method during every round
@@ -253,7 +254,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			n.labelWasDrawn = false;
 			n.drawLineAndNode = false;
 			n.drawLabel = false;
-//			n.occluded = false;
+			//			n.occluded = false;
 			n.isWithinScreen = isNodeWithinScreen(n);
 			n.bulgeFactor = 1;
 			if (n.found && n.isWithinScreen)
@@ -270,7 +271,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			nodesDrawn++;
 		}
 		fforwardMe = false;
-		
+
 		/*
 		 * THIRD LOOP: Drawing nodes
 		 *   - This loop actually does the drawing.
@@ -280,12 +281,12 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			Thread.yield();
 			PhyloNode n = nodesToDraw[i];
-//			canvas.fill(100,100);
+			//			canvas.fill(100,100);
 			NodeRenderer.r = this;
 			n.drawLineAndNode = true;
 			n.drawLabel = false;
 			handleNode(n);
-//			canvas.rect(n.range.loX,n.range.loY,n.range.hiX-n.range.loX,n.range.hiY-n.range.loY);
+			//			canvas.rect(n.range.loX,n.range.loY,n.range.hiX-n.range.loX,n.range.hiY-n.range.loY);
 		}
 
 		/*
@@ -317,8 +318,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		/*
 		 * Sort the found items.
 		 */
-//		Collections.sort(foundItems, new ZOrderComparator());
-		
+		//		Collections.sort(foundItems, new ZOrderComparator());
 		/*
 		 * Also always try to draw nodes that are "found".
 		 */
@@ -328,9 +328,9 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			Thread.yield();
 			NodeRange r = n.range;
-				// GJ 19-09-2008 change: Found nodes will ALWAYS be drawn, regardless of whether they're overlapping something else.
-				insertAndReturnOverlap(n);
-				// GJ 22-09-2008 change: Don't render the found nodes quite yet; we want them to show up over the nodes!
+			// GJ 19-09-2008 change: Found nodes will ALWAYS be drawn, regardless of whether they're overlapping something else.
+			insertAndReturnOverlap(n);
+			// GJ 22-09-2008 change: Don't render the found nodes quite yet; we want them to show up over the nodes!
 		}
 
 		/*
@@ -358,12 +358,11 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			Thread.yield();
 			NodeRange r = n.range;
-				n.drawLabel = true;
-				decorator.render(this, n);
-				n.labelWasDrawn = true;
+			n.drawLabel = true;
+			decorator.render(this, n);
+			n.labelWasDrawn = true;
 		}
 
-		
 		/*
 		 * Finally, unhint the canvas.
 		 */
@@ -496,10 +495,10 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		return dotWidth / 2f;
 	}
-	
+
 	public float getNodeOffset(PhyloNode n)
 	{
-		float w = decorator.nr.render(canvas, n, false,true)[1];
+		float w = decorator.nr.render(canvas, n, false, true)[1];
 		return w;
 	}
 
@@ -541,22 +540,22 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		if (tree.isLeaf(n))
 		{
 			decorator.render(this, n);
-//			decorator.lineRender.render(canvas, n, true,false);
-//			decorator.nr.render(canvas, n,true,false);
+			//			decorator.lineRender.render(canvas, n, true,false);
+			//			decorator.nr.render(canvas, n,true,false);
 		} else
 		{
 			n.drawLabel = true;
 			if (insertAndReturnOverlap(n))
 				n.drawLabel = false;
-			decorator.render(this,n);
-//			decorator.lineRender.render(canvas, n, true,false);
-//			decorator.nr.render(canvas, n,true,false);
+			decorator.render(this, n);
+			//			decorator.lineRender.render(canvas, n, true,false);
+			//			decorator.nr.render(canvas, n,true,false);
 			/*
 			 * If we're a NHX node, then draw the bootstrap (if the config says so).
 			 */
 			drawBootstrap(n);
 
-//			drawCladeLabelIfNeeded(n);
+			//			drawCladeLabelIfNeeded(n);
 
 			/*
 			 * Do some extra stuff to clean up the thresholding artifacts.
@@ -586,13 +585,13 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 					// GJ 19-09-08 change: Loop to render from the first / last leaf all the way to the current node.
 					while (leaf != n)
 					{
-//						decorator.lineRender.render(canvas, leaf, true,false);
-//						decorator.nr.render(canvas, leaf,true,false);
-//						drawCladeLabelIfNeeded(leaf);
+						//						decorator.lineRender.render(canvas, leaf, true,false);
+						//						decorator.nr.render(canvas, leaf,true,false);
+						//						drawCladeLabelIfNeeded(leaf);
 						leaf.drawLineAndNode = true;
 						leaf.drawLabel = false;
-						decorator.render(this,leaf);
-						leaf = (PhyloNode)tree.getParentOf(leaf);
+						decorator.render(this, leaf);
+						leaf = (PhyloNode) tree.getParentOf(leaf);
 					}
 				}
 			}
@@ -608,19 +607,26 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			boolean overlap = insertAndReturnOverlap(n);
 			if (!overlap)
 			{
-//				decorator.lr.render(canvas, n, true,false);
+				//				decorator.lr.render(canvas, n, true,false);
 			}
 		}
 	}
-	
+
 	void hint()
 	{
-		Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
-		oldRH = g2.getRenderingHints();
-		if (PhyloWidget.cfg.antialias)
+		if (UIUtils.isJava2D(canvas))
 		{
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
+			oldRH = g2.getRenderingHints();
+			if (PhyloWidget.cfg.antialias)
+			{
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			} else
+			{
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+			}
 		}
+
 		//		if (textSize > 100)
 		//		{
 		//			g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
@@ -738,7 +744,10 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			for (int i = 0; i < nodes.length; i++)
 			{
 				PhyloNode n = (PhyloNode) nodes[i];
-				n.range.render = this;
+				synchronized (n)
+				{
+					n.range.render = this;
+				}
 				list.insert(n.range, false);
 			}
 			list.sortFull();
@@ -749,10 +758,18 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		 * ASSUMPTION: the leaves ArrayList contains a "sorted" view of the
 		 * tree's leaves, i.e. in the correct ordering from top to bottom.
 		 */
-		FontMetrics fm = canvas.g2.getFontMetrics(font.font);
+		//		FontMetrics fm = canvas.g2.getFontMetrics(font.font);
+		//		FontMetrics fm = UIUtils.getMetrics(canvas, font.font, font.size);
 		for (int i = 0; i < nodes.length; i++)
 		{
 			PhyloNode n = nodes[i];
+
+			// GJ 2008-10-15: Add a NodeUncollapser if it doesn't exist.
+			if (tree.isCollapsed(n) && !NodeUncollapser.containsNode(n))
+			{
+				tree.collapseNode(n);
+			}
+
 			/*
 			 * If we have NHX annotations, put our species into the colors map.
 			 * This is done within this loop just to save the effort of looping through all
@@ -862,7 +879,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			synchronized (tree)
 			{
-				this.canvas = (PGraphicsJava2D) canvas;
+				this.canvas = canvas;
 				layout();
 				recalc();
 				draw();
@@ -886,7 +903,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	public void drawToBuffer(PGraphics g)
 	{
-		this.canvas = (PGraphicsJava2D) g;
+		this.canvas = g;
 		g.background(0, 0);
 		/*
 		 * All operations requiring integrity of the tree structure should synchronize on the tree object!
@@ -949,8 +966,11 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		//		if (textSize > 100 && UIUtils.isJava2D(canvas))
 		//		{
-		Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
-		g2.setRenderingHints(oldRH);
+		if (UIUtils.isJava2D(canvas))
+		{
+			Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
+			g2.setRenderingHints(oldRH);
+		}
 		//		}
 	}
 
@@ -1096,7 +1116,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 					return -1;
 			}
 		}
-		
+
 	}
-	
+
 }

@@ -26,8 +26,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.ui.NodeUncollapser;
 
-public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
+public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -44,12 +45,42 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 			setEnforceUniqueLabels(PhyloWidget.cfg.enforceUniqueLabels);
 	}
 
-	public static PhyloTree createDefault()
+	@Override
+	public void uncollapseNode(PhyloNode v)
 	{
-		PhyloTree t = new PhyloTree();
-		PhyloNode v = t.createAndAddVertex();
-		t.setRoot(v);
-		return t;
+		v.clearAnnotation("collapse");
+		
+		// Set all subtree nodes to current position.
+		List<PhyloNode> nodes = getAllNodes(v);
+		for (PhyloNode n : nodes)
+		{
+			n.setLayoutX(v.getLayoutX());
+			n.setLayoutY(v.getLayoutY());
+			n.setX(v.getX());
+			n.setY(v.getY());
+			n.fforward();
+		}
+		modPlus();
+	}
+	
+	@Override
+	public void collapseNode(PhyloNode v)
+	{
+		v.setAnnotation("collapse", "yes");
+		new NodeUncollapser(PhyloWidget.p,v);
+		modPlus();
+	}
+	
+	@Override
+	public boolean isCollapsed(PhyloNode v)
+	{
+		String annot = v.getAnnotation("collapse");
+		if (annot != null)
+		{
+			if (PhyloNode.parseTruth(annot))
+				return true;
+		}
+		return false;
 	}
 
 	public PhyloNode hoveredNode;
@@ -63,7 +94,7 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 	{
 		return new PhyloNode();
 	}
-	
+
 	public void flipChildren(PhyloNode parent)
 	{
 		super.flipChildren(parent);
@@ -115,13 +146,13 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 			}
 		}
 	}
-	
+
 	public void searchAndMarkFound(String s)
 	{
 		List<PhyloNode> matches = search(s);
 		markNodesAsFound(matches);
 	}
-	
+
 	public List<PhyloNode> search(String s)
 	{
 		String[] searches = s.split(";");
@@ -158,42 +189,42 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		super.modPlus();
 		updateNewick();
 	}
-	
-//	class NewickUpdater implements GraphListener
-//	{
-//		public void edgeAdded(GraphEdgeChangeEvent e)
-//		{
-//			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
-//			{
-//				updateNewick();
-//			}
-//		}
-//
-//		public void edgeRemoved(GraphEdgeChangeEvent e)
-//		{
-//			if (e.getType() == GraphEdgeChangeEvent.EDGE_REMOVED)
-//			{
-//				updateNewick();
-//			}
-//		}
-//
-//		public void vertexAdded(GraphVertexChangeEvent e)
-//		{
-//			if (e.getType() == GraphVertexChangeEvent.VERTEX_ADDED)
-//			{
-//				updateNewick();
-//			}
-//		}
-//
-//		public void vertexRemoved(GraphVertexChangeEvent e)
-//		{
-//			if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
-//			{
-//				//				index.remove((PhyloNode) e.getVertex());
-//				updateNewick();
-//			}
-//		}
-//	}
+
+	//	class NewickUpdater implements GraphListener
+	//	{
+	//		public void edgeAdded(GraphEdgeChangeEvent e)
+	//		{
+	//			if (e.getType() == GraphEdgeChangeEvent.EDGE_ADDED)
+	//			{
+	//				updateNewick();
+	//			}
+	//		}
+	//
+	//		public void edgeRemoved(GraphEdgeChangeEvent e)
+	//		{
+	//			if (e.getType() == GraphEdgeChangeEvent.EDGE_REMOVED)
+	//			{
+	//				updateNewick();
+	//			}
+	//		}
+	//
+	//		public void vertexAdded(GraphVertexChangeEvent e)
+	//		{
+	//			if (e.getType() == GraphVertexChangeEvent.VERTEX_ADDED)
+	//			{
+	//				updateNewick();
+	//			}
+	//		}
+	//
+	//		public void vertexRemoved(GraphVertexChangeEvent e)
+	//		{
+	//			if (e.getType() == GraphVertexChangeEvent.VERTEX_REMOVED)
+	//			{
+	//				//				index.remove((PhyloNode) e.getVertex());
+	//				updateNewick();
+	//			}
+	//		}
+	//	}
 
 	public boolean isSynchronizedWithJS()
 	{
@@ -206,29 +237,29 @@ public class PhyloTree extends CachedRootedTree<PhyloNode,DefaultWeightedEdge>
 		if (synchronizedWithJS && updater == null)
 		{
 			updater = new JSTreeUpdater();
-//			addGraphListener(new NewickUpdater());
+			//			addGraphListener(new NewickUpdater());
 		}
 	}
 
-//	public static void main(String... args)
-//	{
-//		SimpleDirectedGraph<String, String> g = new SimpleDirectedGraph<String, String>(
-//				String.class);
-//		g.addVertex("Hello");
-//		g.addVertex("World!");
-//		g.addEdge("World!", "Hello");
-//
-//		SimpleDirectedGraph<String, String> g2 = new SimpleDirectedGraph<String, String>(
-//				String.class)
-//		{
-//			public boolean addVertex(String s)
-//			{
-//				System.out.println(s);
-//				return super.addVertex(s);
-//			}
-//		};
-//		System.out.println(g2);
-//		Graphs.addGraph(g2, g);
-//		System.out.println(g2);
-//	}
+	//	public static void main(String... args)
+	//	{
+	//		SimpleDirectedGraph<String, String> g = new SimpleDirectedGraph<String, String>(
+	//				String.class);
+	//		g.addVertex("Hello");
+	//		g.addVertex("World!");
+	//		g.addEdge("World!", "Hello");
+	//
+	//		SimpleDirectedGraph<String, String> g2 = new SimpleDirectedGraph<String, String>(
+	//				String.class)
+	//		{
+	//			public boolean addVertex(String s)
+	//			{
+	//				System.out.println(s);
+	//				return super.addVertex(s);
+	//			}
+	//		};
+	//		System.out.println(g2);
+	//		Graphs.addGraph(g2, g);
+	//		System.out.println(g2);
+	//	}
 }

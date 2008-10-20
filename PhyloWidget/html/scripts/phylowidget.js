@@ -245,6 +245,7 @@ updateFooter: function(text) {
 updateJavaTree: function()
 {
 	var value = getObject(this.treeInputID).value;
+//	PhyloWidget.callMethod("updateTree",value);
 	AppletLoader.callAppletMethod("updateTree",value);
 //	document.PhyloWidget.updateTree(getObject(this.treeInputID).value);
 },
@@ -256,6 +257,7 @@ updateJavaTree: function()
 updateJavaClip: function()
 {
   var value = getObject(this.clipInputID).value;
+//  PhyloWidget.callMethod("updateClip",value);
   AppletLoader.callAppletMethod("updateClip",value);
 //  document.PhyloWidget.updateClip(getObject(clipInputID).value);
 },

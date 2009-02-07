@@ -38,6 +38,7 @@ import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloConfig;
+import org.phylowidget.ui.PhyloScaleBar;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
@@ -91,6 +92,7 @@ public class PhyloWidget extends PApplet
 			 * We're locked into an applet. Don't fight it.
 			 */
 			size(getWidth(), getHeight(), JAVA2D);
+//			size(getWidth(),getHeight(),P2D);
 		}
 		frameRate(FRAMERATE);
 

@@ -179,6 +179,9 @@ public final class NodeRenderer implements UsefulConstants
 
 	private static final void registerPoint(PGraphics canvas, PhyloNode n, float x, float y)
 	{
+		if (n.getLabel().length() == 0)
+			return;
+		
 		float screenX = canvas.screenX(x, y);
 		float screenY = canvas.screenY(x, y);
 		//		if (n.rect.contains(screenX,screenY))
@@ -196,7 +199,13 @@ public final class NodeRenderer implements UsefulConstants
 		String ann = n.getAnnotation(key);
 		if (ann == null)
 			return -1;
-		return Float.parseFloat(ann);
+		try {
+			float f = Float.parseFloat(ann);
+			return f;
+		} catch (Exception e)
+		{
+			return -1;
+		}
 	}
 
 	public static abstract class RenderItem
@@ -274,6 +283,8 @@ public final class NodeRenderer implements UsefulConstants
 				}
 			}
 
+			// Transparent google chart: http://chart.apis.google.com/chart?cht=p&chd=t:60,40&chs=50x50&chf=bg,s,FFFFFF00
+			
 			// GJ 19-09-08: Try out registering node points for overlap...
 			if (PhyloWidget.cfg.treatNodesAsLabels)
 			{
@@ -299,9 +310,41 @@ public final class NodeRenderer implements UsefulConstants
 			} else if (shape == SQUARE)
 			{
 				canvas.rect(offX - thisDotSize / 2, offY - thisDotSize / 2, thisDotSize, thisDotSize);
-			} else
-			// Default to circle
+			} else if (shape == STAR)
 			{
+				canvas.pushMatrix();
+				canvas.translate(offX,offY);
+				canvas.beginShape();
+				float r = thisDotSize ;
+				float s = thisDotSize * .4f;
+				for (int i=0; i < 10; i++)
+				{
+					double theta = Math.PI*2 * (i/10f) - Math.PI/2;
+					if (i % 2 == 0)
+					{
+						canvas.vertex((float)(r * Math.cos(theta)),(float)(r*Math.sin(theta)));
+					} else
+					{
+						canvas.vertex((float)(s * Math.cos(theta)),(float)(s*Math.sin(theta)));
+					}
+				}
+				canvas.endShape();
+				canvas.popMatrix();
+			} else if (shape == FILLED_CIRCLE)
+			{
+				// Inside.
+				canvas.ellipseMode(PGraphics.CENTER);
+				canvas.ellipse(offX, offY, thisDotSize, thisDotSize);
+				
+				// Outline.
+				canvas.ellipseMode(PGraphics.CENTER);
+				canvas.strokeWeight(thisDotSize/10f);
+				canvas.stroke(Color.black.getRGB());
+				canvas.noFill();
+				canvas.ellipse(offX,offY,thisDotSize,thisDotSize);
+			} else
+			{
+				// Default to circle
 				canvas.ellipseMode(PGraphics.CENTER);
 				canvas.ellipse(offX, offY, thisDotSize, thisDotSize);
 			}
@@ -312,6 +355,8 @@ public final class NodeRenderer implements UsefulConstants
 		static final int CIRCLE = 0;
 		static final int SQUARE = 1;
 		static final int TRIANGLE = 2;
+		static final int STAR = 3;
+		static final int FILLED_CIRCLE = 4;
 
 		static int getNodeShape(PhyloNode n)
 		{
@@ -321,10 +366,14 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				shape = annotation.toLowerCase();
 			}
-			if (shape.startsWith("t"))
+			if (shape.startsWith(SHAPE_TRIANGLE))
 				return TRIANGLE;
-			else if (shape.startsWith("s"))
+			else if (shape.startsWith(SHAPE_SQUARE))
 				return SQUARE;
+			else if (shape.startsWith(SHAPE_STAR))
+				return STAR;
+			else if (shape.startsWith(SHAPE_FILLED_CIRCLE))
+				return FILLED_CIRCLE;
 			else
 				return CIRCLE;
 		}
@@ -436,7 +485,6 @@ public final class NodeRenderer implements UsefulConstants
 					return RenderConstants.dimColor.getRGB();
 				case (PhyloNode.COPY):
 					return RenderConstants.copyColor.getRGB();
-
 				case (PhyloNode.NONE):
 				default:
 					int c = PhyloWidget.cfg.getBranchColor().getRGB();
@@ -601,6 +649,9 @@ public final class NodeRenderer implements UsefulConstants
 			float always = getFloatAnnotation(n, LABEL_ALWAYSSHOW);
 			if (always > -1)
 				alwaysRender = true;
+			always = getFloatAnnotation(n, LABEL_ALWAYSSHOW_ALT);
+			if (always > -1)
+				alwaysRender = true;
 
 			/*
 			 * Early exit strategy if text is too small. Don't do this if we're outputting to a file.
@@ -680,6 +731,10 @@ public final class NodeRenderer implements UsefulConstants
 				}
 			} else
 			{
+//				if (PhyloWidget.cfg.textRotation != 0)
+//				{
+//					canvas.rotate(-PApplet.radians(PhyloWidget.cfg.textRotation));
+//				}
 				if (alignRight)
 				{
 					canvas.textAlign(canvas.RIGHT, canvas.BASELINE);
@@ -688,9 +743,16 @@ public final class NodeRenderer implements UsefulConstants
 				} else
 				{
 					canvas.textAlign(canvas.LEFT, canvas.BASELINE);
+					
+					
 					registerPoint(canvas, n, 0, -curTextSize / 2);
 					registerPoint(canvas, n, dx, curTextSize / 2);
+					
 				}
+//				if (PhyloWidget.cfg.textRotation != 0)
+//				{
+//					canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
+//				}
 				if (actuallyRender)
 					canvas.text(tree.getLabel(n), 0, 0 + r.dFont * curTextSize / r.textSize);
 			}
@@ -702,6 +764,8 @@ public final class NodeRenderer implements UsefulConstants
 		private float textSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
 			String always = n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW);
+			if (always == null)
+				always = n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW_ALT);
 			boolean alwaysShow = false;
 			if (always != null && always.equals("1"))
 				alwaysShow = true;
@@ -712,7 +776,9 @@ public final class NodeRenderer implements UsefulConstants
 			if (PhyloWidget.cfg.showAllLabels) // If showing all labels, don't do the mintext setting.
 				return r.getTextSize() * PhyloWidget.cfg.textScaling;
 
-			thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+//			thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+			if (thisRowSize < PhyloWidget.cfg.minTextSize)
+				thisRowSize = PhyloWidget.cfg.minTextSize;
 			return thisRowSize;
 		}
 

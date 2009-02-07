@@ -262,6 +262,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			// GJ 2008-09-03: Add ALWAYS_SHOW nodes to the foundItems list.
 			if (n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW) != null)
 				foundItems.add(n);
+			else if (n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW_ALT) != null)
+				foundItems.add(n);
 			if (nodesDrawn >= PhyloWidget.cfg.renderThreshold && !PhyloWidget.cfg.showAllLabels)
 				continue;
 			if (!n.isWithinScreen)
@@ -624,6 +626,15 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			} else
 			{
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+			}
+		} else
+		{
+			if (PhyloWidget.cfg.antialias)
+			{
+				canvas.smooth();
+			} else
+			{
+				canvas.noSmooth();
 			}
 		}
 

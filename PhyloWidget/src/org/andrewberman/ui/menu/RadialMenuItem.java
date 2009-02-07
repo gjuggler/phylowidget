@@ -161,7 +161,7 @@ public class RadialMenuItem extends MenuItem
 	{
 		Graphics2D g2 = menu.buff.g2;
 		PFont pf = getStyle().getFont("font");
-		Font f = pf.font.deriveFont(hintSize);
+		Font f = pf.getFont().deriveFont(hintSize);
 		g2.setFont(f);
 		g2.setPaint(getStrokeColor());
 		g2.drawString(String.valueOf(hint), hintX, hintY);
@@ -239,7 +239,7 @@ public class RadialMenuItem extends MenuItem
 	{
 		Graphics2D g2 = menu.buff.g2;
 		PFont pf = getStyle().getFont("font");
-		Font f = pf.font.deriveFont(fontSize);
+		Font f = pf.getFont().deriveFont(fontSize);
 		g2.setFont(f);
 		g2.setPaint(getStrokeColor());
 		g2.drawString(getDisplayLabel(), textX, textY);
@@ -415,12 +415,14 @@ public class RadialMenuItem extends MenuItem
 		innerX = x + cos * rLo;
 		innerY = y + sin * rLo;
 		PFont font = getStyle().getFont("font");
-		FontMetrics fm = UIUtils.getMetrics(menu.canvas.g, font.font, 1);
+		FontMetrics fm = UIUtils.getMetrics(menu.canvas.g, font.getFont(), 1);
+		if (fm == null)
+			return;
 		float unitTextHeight = (float) fm.getMaxCharBounds(menu.buff.g2).getHeight();
 		fontSize = (rHi - rLo) / unitTextHeight * .75f;
 		// Keep the font size readable.
 		fontSize = Math.max(8, fontSize);
-		fm = UIUtils.getMetrics(menu.buff, font.font, fontSize);
+		fm = UIUtils.getMetrics(menu.buff, font.getFont(), fontSize);
 		// float descent = fm.getDescent();
 		float ascent = fm.getAscent();
 
@@ -461,7 +463,7 @@ public class RadialMenuItem extends MenuItem
 		/*
 		 * Measure the character at 1px, then scale up accordingly.
 		 */
-		fm = UIUtils.getMetrics(menu.buff, font.font, 1);
+		fm = UIUtils.getMetrics(menu.buff, font.getFont(), 1);
 		String s = String.valueOf(hint);
 		Rectangle2D charBounds = fm.getStringBounds(s, menu.buff.g2);
 		float charHeight = (float) charBounds.getHeight();
@@ -469,7 +471,7 @@ public class RadialMenuItem extends MenuItem
 		float charDiagonal = PApplet.sqrt(charHeight * charHeight + charWidth * charWidth);
 		hintSize = (rHi - rLo) / charDiagonal;
 		hintSize = Math.min(hintSize, (float) Math.sin(tHi - tLo) * rMid);
-		fm = UIUtils.getMetrics(menu.buff, font.font, hintSize);
+		fm = UIUtils.getMetrics(menu.buff, font.getFont(), hintSize);
 		charBounds = fm.getStringBounds(s, menu.buff.g2);
 		charHeight = (float) charBounds.getHeight();
 		charWidth = (float) charBounds.getWidth();

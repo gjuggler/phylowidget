@@ -31,13 +31,21 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
 
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
+import processing.core.PGraphics2D;
 import processing.core.PGraphicsJava2D;
 import processing.core.PImage;
+import processing.core.PMatrix;
 import processing.core.PMatrix3D;
 
 /**
@@ -75,15 +83,14 @@ public final class UIUtils
 	public static void affineToPMatrix3D(AffineTransform tr, PMatrix3D mat)
 	{
 		tr.getMatrix(temp);
-		mat.set((float) temp[0], (float) temp[2], 0, (float) temp[4],
-				(float) temp[1], (float) temp[3], 0, (float) temp[5], 0, 0, 0,
-				0, 0, 0, 0, 0);
+		mat.set((float) temp[0], (float) temp[2], 0, (float) temp[4], (float) temp[1], (float) temp[3], 0,
+			(float) temp[5], 0, 0, 0, 0, 0, 0, 0, 0);
 	}
 
 	/**
 	 * Turns a <code>Color</code> object into an int value, using the current
-	 * <code>PGraphics</code> object's <code>color</code> method. Yeah, I'm
-	 * just lazy enough not to do it myself in the <code>Color</code> class.
+	 * <code>PGraphics</code> object's <code>color</code> method. Yeah, I'm just
+	 * lazy enough not to do it myself in the <code>Color</code> class.
 	 * 
 	 * @param g
 	 *            the current <code>PGraphics</code>
@@ -99,25 +106,31 @@ public final class UIUtils
 
 	public static Cursor createBlankCursor(PApplet p)
 	{
-		Image image = p.createImage(new MemoryImageSource(0, 0, new int[0], 0,
-				0));
+		Image image = p.createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));
 		//		Image image = UIUtils.PImageToImage(p,img);
-		return Toolkit.getDefaultToolkit().createCustomCursor(image,
-				new java.awt.Point(0, 0), "asdf");
+		return Toolkit.getDefaultToolkit().createCustomCursor(image, new java.awt.Point(0, 0), "asdf");
 	}
 
-	public static Cursor createCursor(PApplet p, String filename, int offsetX,
-			int offsetY)
+	public static Cursor createCursor(PApplet p, String filename, int offsetX, int offsetY)
 	{
-		PImage img = p.loadImage(filename);
-		Dimension d = Toolkit.getDefaultToolkit().getBestCursorSize(img.width,
-				img.height);
-		PImage resized = p.createImage(d.width, d.height, PImage.ARGB);
-		resized.copy(img, 0, 0, img.width, img.height, 0, 0, img.width,
-				img.height);
-		Image image = UIUtils.PImageToImage(p, resized);
-		return Toolkit.getDefaultToolkit().createCustomCursor(image,
-				new java.awt.Point(offsetX, offsetY), "asdf");
+		InputStream in = p.createInput(filename);
+		BufferedImage img = null;
+		try
+		{
+			img = ImageIO.read(in);
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		Dimension d = Toolkit.getDefaultToolkit().getBestCursorSize(img.getWidth(), img.getHeight());
+		BufferedImage img2 = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = img2.createGraphics();
+		g2.drawImage(img, 0, 0, null);
+		g2.dispose();
+
+		//		Image image = resized.getImage();
+		return Toolkit.getDefaultToolkit().createCustomCursor(img2, new java.awt.Point(offsetX, offsetY), "asdf");
 	}
 
 	public static Object getCursorOwner()
@@ -134,8 +147,8 @@ public final class UIUtils
 	 * In Mac OSX, the meta mask usually ends up as <code>META_DOWN_MASK</code>.
 	 * <p>
 	 * Either way, if a UI object wishes to implement standard shortcuts like
-	 * <code>Ctrl-X</code>, then it should make sure to turn all references
-	 * to "control" into the current system's "meta" mask. See the
+	 * <code>Ctrl-X</code>, then it should make sure to turn all references to
+	 * "control" into the current system's "meta" mask. See the
 	 * <code>Shortcut</code> class for an attempt at achieving this
 	 * platform-compatibility.
 	 * 
@@ -169,11 +182,22 @@ public final class UIUtils
 	 */
 	public static FontMetrics getMetrics(PGraphics pg, Font font, float size)
 	{
-		Graphics2D g2 = (Graphics2D)UIGlobals.g.getP().getGraphics();
-//		Graphics2D g2 = ((PGraphicsJava2D) pg).g2;
-		Font f = font.deriveFont(size);
-		FontMetrics fm = g2.getFontMetrics(f);
-		return fm;
+		//		Graphics2D g2 = (Graphics2D)UIGlobals.g.getP().getGraphics();
+		if (pg == null)
+			return null;
+		if (pg instanceof PGraphicsJava2D)
+		{
+			Graphics2D g2 = ((PGraphicsJava2D) pg).g2;
+			if (g2 == null)
+				return null;
+			if (font == null)
+				return null;
+			Font f = font.deriveFont(size);
+			FontMetrics fm = g2.getFontMetrics(f);
+			return fm;
+		} else {
+			return pg.parent.getGraphics().getFontMetrics();
+		}
 	}
 
 	/**
@@ -191,13 +215,13 @@ public final class UIUtils
 	 *            functionality
 	 * @return the font ascent
 	 */
-	public static float getTextAscent(PGraphics g, PFont font, float size,
-			boolean useNativeFonts)
+	public static float getTextAscent(PGraphics g, PFont font, float size, boolean useNativeFonts)
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
-			FontMetrics fm = getMetrics(g, font.font, size);
-			return fm.getAscent();
+			FontMetrics fm = getMetrics(g, font.getFont(), size);
+			if (fm != null)
+				return fm.getAscent();
 		}
 		return font.ascent() * size;
 	}
@@ -217,13 +241,13 @@ public final class UIUtils
 	 *            functionality
 	 * @return the font descent
 	 */
-	public static float getTextDescent(PGraphics g, PFont font, float size,
-			boolean useNativeFonts)
+	public static float getTextDescent(PGraphics g, PFont font, float size, boolean useNativeFonts)
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
-			FontMetrics fm = getMetrics(g, font.font, size);
-			return fm.getDescent();
+			FontMetrics fm = getMetrics(g, font.getFont(), size);
+			if (fm != null)
+				return fm.getDescent();
 		}
 		return font.descent() * size;
 	}
@@ -243,32 +267,32 @@ public final class UIUtils
 	 *            functionality
 	 * @return the font height
 	 */
-	public static float getTextHeight(PGraphics g, PFont font, float size,
-			String text, boolean useNativeFonts)
+	public static float getTextHeight(PGraphics g, PFont font, float size, String text, boolean useNativeFonts)
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
-			FontMetrics fm = getMetrics(g, font.font, size);
-			return fm.getAscent() + fm.getDescent();
+			FontMetrics fm = getMetrics(g, font.getFont(), size);
+			if (fm != null)
+				return fm.getAscent() + fm.getDescent();
 		}
 		return font.ascent() * size + font.descent() * size;
 	}
 
-	public static Rectangle2D getTextRect(PGraphics g, PFont font, float size,
-			String text, boolean useNativeFonts)
+	public static Rectangle2D getTextRect(PGraphics g, PFont font, float size, String text, boolean useNativeFonts)
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
-			FontMetrics fm = getMetrics(g, font.font, size);
-			Graphics2D g2 = ((PGraphicsJava2D) g).g2;
-			return fm.getStringBounds(text, g2);
-		} else
-		{
-			Rectangle2D.Float rect = new Rectangle2D.Float();
-			rect.width = getTextWidth(g, font, size, text, useNativeFonts);
-			rect.height = getTextHeight(g, font, size, text, useNativeFonts);
-			return rect;
+			FontMetrics fm = getMetrics(g, font.getFont(), size);
+			if (fm != null)
+			{
+				Graphics2D g2 = ((PGraphicsJava2D) g).g2;
+				return fm.getStringBounds(text, g2);
+			}
 		}
+		Rectangle2D.Float rect = new Rectangle2D.Float();
+		rect.width = getTextWidth(g, font, size, text, useNativeFonts);
+		rect.height = getTextHeight(g, font, size, text, useNativeFonts);
+		return rect;
 	}
 
 	/**
@@ -286,8 +310,7 @@ public final class UIUtils
 	 *            functionality
 	 * @return the width of the indicated text
 	 */
-	public static float getTextWidth(PGraphics g, PFont font, float size,
-			String text, boolean useNativeFonts)
+	public static float getTextWidth(PGraphics g, PFont font, float size, String text, boolean useNativeFonts)
 	{
 		if (isJava2D(g) && useNativeFonts)
 		{
@@ -296,7 +319,7 @@ public final class UIUtils
 			{
 				try
 				{
-					fm = getMetrics(g, font.font, size);
+					fm = getMetrics(g, font.getFont(), size);
 				} catch (Exception e)
 				{
 					try
@@ -320,15 +343,13 @@ public final class UIUtils
 		return width;
 	}
 
-	public static float getTextWidth(Graphics2D g2, Font font, float size,
-			String text)
+	public static float getTextWidth(Graphics2D g2, Font font, float size, String text)
 	{
 		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
 		return (float) fm.getStringBounds(text, g2).getWidth();
 	}
 
-	public static float getTextHeight(Graphics2D g2, Font font, float size,
-			String text)
+	public static float getTextHeight(Graphics2D g2, Font font, float size, String text)
 	{
 		FontMetrics fm = g2.getFontMetrics(font.deriveFont(size));
 		return (float) fm.getStringBounds(text, g2).getHeight();
@@ -364,9 +385,9 @@ public final class UIUtils
 	}
 
 	/**
-	 * Calls the <code>lazyLoad()</code> method on all of the relevant
-	 * "singlet" classes that are required for the correct functioning of all UI
-	 * objects in this package.
+	 * Calls the <code>lazyLoad()</code> method on all of the relevant "singlet"
+	 * classes that are required for the correct functioning of all UI objects
+	 * in this package.
 	 * <p>
 	 * This should be called in the constructor of every UIObject, so that the
 	 * user doesn't need to call it him or herself.
@@ -405,8 +426,9 @@ public final class UIUtils
 
 	public static Image PImageToImage(PApplet p, PImage image)
 	{
-		Image newImage = p.createImage(new MemoryImageSource(image.width,
-				image.height, image.pixels, 0, image.width));
+		Image newImage = image.getImage();
+		//		Image newImage = p.createImage(new MemoryImageSource(image.width,
+		//				image.height, image.pixels, 0, image.width));
 		return newImage;
 	}
 
@@ -460,7 +482,7 @@ public final class UIUtils
 	 */
 	public static void resetMatrix(PGraphics pg)
 	{
-		if (isJava2D(pg))
+		if (isJava2D(pg) || pg.getClass() == PGraphics2D.class)
 			pg.resetMatrix();
 		else
 		{
@@ -483,16 +505,15 @@ public final class UIUtils
 	}
 
 	/**
-	 * Converts a <code>Rectangle2D</code> from "screen" to "model"
-	 * coordinates.
+	 * Converts a <code>Rectangle2D</code> from "screen" to "model" coordinates.
 	 * <p>
 	 * Note that this package's definition of "model" coordintes is different
 	 * from the standard Processing definition. It's all quite confusing, but
 	 * this strategy seems to work. Maybe there's a better way?
 	 * 
 	 * @param rect
-	 *            the <code>Redtangle2D</code> to convert (in place) from
-	 *            screen to model coordinates.
+	 *            the <code>Redtangle2D</code> to convert (in place) from screen
+	 *            to model coordinates.
 	 */
 	public static void screenToModel(Rectangle2D.Float rect)
 	{
@@ -538,7 +559,8 @@ public final class UIUtils
 	}
 
 	/**
-	 *  Sets the base cursor. Generally called by ToolManager.
+	 * Sets the base cursor. Generally called by ToolManager.
+	 * 
 	 * @param c
 	 */
 	public static void setBaseCursor(PApplet p, Cursor c)
@@ -551,16 +573,16 @@ public final class UIUtils
 	/**
 	 * Sets the displayed cursor. This method effectively registers the Object
 	 * <code>o</code> as the "owner" of the cursor from this point on. This
-	 * means that for the cursor to be reset back to normal, the same object (<code>o</code>)
-	 * must call the <code>releaseCursor</code> method. If any other object
-	 * calls <code>releaseCursor</code> before <code>o</code>, nothing will
-	 * happen.
+	 * means that for the cursor to be reset back to normal, the same object (
+	 * <code>o</code>) must call the <code>releaseCursor</code> method. If any
+	 * other object calls <code>releaseCursor</code> before <code>o</code>,
+	 * nothing will happen.
 	 * <p>
 	 * Note, however, that any other object can, at any point, call
-	 * <code>setCursor</code> and override <code>o's</code> "ownership" of
-	 * the cursor. This causes some flickering when two objects are
-	 * simultaneously trying to <code>set</code> and <code>release</code>
-	 * the cursor, in particular when two objects are on top of each other.
+	 * <code>setCursor</code> and override <code>o's</code> "ownership" of the cursor.
+	 * This causes some flickering when two objects are simultaneously trying to
+	 * <code>set</code> and <code>release</code> the cursor, in particular when
+	 * two objects are on top of each other.
 	 * <p>
 	 * TODO: Figure out a way to deal with objects on top of each other, without
 	 * resorting to something extremely annoying like z-values.
@@ -580,8 +602,7 @@ public final class UIUtils
 
 	/**
 	 * Copies the relevant transformation matrices from the indicated
-	 * <code>PApplet</code> into <code>UIUtils'</code> internal static
-	 * cache.
+	 * <code>PApplet</code> into <code>UIUtils'</code> internal static cache.
 	 * <p>
 	 * This should be called at every iteration of the draw() cycle,
 	 * <em><b>after</b></em> all relevant matrix transformations have been
@@ -612,24 +633,24 @@ public final class UIUtils
 			}
 		} else
 		{
-			camera.set(p.g.camera);
-			cameraInv.set(p.g.cameraInv);
-			modelview.set(p.g.modelview);
-			modelviewInv.set(p.g.modelviewInv);
+			p.g.getMatrix();
+			camera.set(p.g.getMatrix());
+			PMatrix pm = p.g.getMatrix();
+			pm.invert();
+			cameraInv.set(pm);
+			//			p.g.get
+			//			modelview.set(p.g.modelview);
+			//			modelviewInv.set(p.g.modelviewInv);
 
 		}
 	}
 
 	public static void setRenderingHints(Graphics2D g2)
 	{
-		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_OFF);
-		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-				RenderingHints.VALUE_STROKE_PURE);
-		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 	}
 
 	public static void setRenderingHints(PGraphics g)

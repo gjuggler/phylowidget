@@ -34,6 +34,7 @@ import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.render.images.ImageLoader;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
+import org.phylowidget.ui.PhyloScaleBar;
 
 import processing.core.PApplet;
 
@@ -56,6 +57,8 @@ public class TreeManager extends AbstractUIObject
 	private Runnable runMe;
 
 	private boolean fforwardMe;
+	
+	private PhyloScaleBar scaleBar;
 
 	public TreeManager(PApplet p)
 	{
@@ -90,8 +93,26 @@ public class TreeManager extends AbstractUIObject
 		{
 			// Do nothing.
 		}
+		
+		if (PhyloWidget.cfg.showScaleBar)
+			scaleBar = new PhyloScaleBar(p);
 	}
 
+	public void showScaleBar()
+	{
+		if (scaleBar == null)
+			scaleBar = new PhyloScaleBar(p);
+	}
+	
+	public void hideScaleBar()
+	{
+		if (scaleBar != null)
+		{
+			scaleBar.dispose();
+			scaleBar = null;
+		}
+	}
+	
 	public void draw()
 	{
 		update();

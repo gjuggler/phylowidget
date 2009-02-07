@@ -112,6 +112,8 @@ public class RadialMenu extends Menu
 		{
 			charInd = 0; // Oh well, let's just use the first char again.
 		}
+		if (s.length() == 0)
+			return create(s,' ');
 		return create(s, s.charAt(charInd));
 	}
 

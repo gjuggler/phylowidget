@@ -280,7 +280,7 @@ public class PhyloUI implements Runnable
 			MenuItem menu = (MenuItem) menus.get(i);
 			if (menu instanceof PhyloContextMenu)
 			{
-				System.out.println("ASDF");
+//				System.out.println("ASDF");
 				this.context = (PhyloContextMenu) menu;
 				continue;
 			}

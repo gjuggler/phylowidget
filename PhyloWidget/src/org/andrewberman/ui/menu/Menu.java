@@ -175,7 +175,7 @@ public abstract class Menu extends MenuItem implements UIObject
 	/**
 	 * Our UIListeners.
 	 */
-	protected ArrayList listeners = new ArrayList(1);
+	protected ArrayList<UIListener> listeners = new ArrayList<UIListener>(3);
 	/**
 	 * If set to true, then this menu grabs modal focus when opened.
 	 */
@@ -268,8 +268,14 @@ public abstract class Menu extends MenuItem implements UIObject
 	public void addListener(UIListener o)
 	{
 		listeners.add(o);
+		System.out.println("Listeners: " + listeners);
 	}
 
+	public void removeListener(UIListener o)
+	{
+		listeners.remove(o);
+	}
+	
 	protected void clickaway()
 	{
 		switch (clickAwayBehavior)
@@ -386,7 +392,7 @@ public abstract class Menu extends MenuItem implements UIObject
 			buff.translate(-offsetX, -offsetY);
 			// buff.translate(offsetX, offsetX);
 			super.draw(); // Draws all of the sub segments.
-			buff.modified = true;
+			buff.setModified(true);
 			buff.endDraw();
 			drawToCanvas();
 			unhint();
@@ -572,11 +578,6 @@ public abstract class Menu extends MenuItem implements UIObject
 		if (i.isOpen())
 			close();
 		i.isOpen = true;
-	}
-
-	public void removeListener(UIListener o)
-	{
-		listeners.remove(o);
 	}
 
 	protected void resetMatrix(PGraphics graphics)

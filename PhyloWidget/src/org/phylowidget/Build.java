@@ -13,6 +13,6 @@
             public static final String PROJECT = "PhyloWidget";
             
             /** The build date. */
-            public static final String BUILD_DATE = "October 20 2008";
+            public static final String BUILD_DATE = "February 5 2009";
         }
         

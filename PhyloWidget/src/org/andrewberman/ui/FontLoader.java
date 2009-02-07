@@ -36,22 +36,22 @@ public class FontLoader
 	
 	public FontLoader(PApplet p)
 	{
+//		p.hint(PApplet.ENABLE_NATIVE_FONTS);
 		this.p = p;
-		
 		vera = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
+//		vera = p.createFont("Courier New",12);
 		InputStream in = p.createInput("vera.ttf");
 		try
 		{
 			font = Font.createFont(Font.TRUETYPE_FONT, in);
-			vera.font = font;
 			in.close();
+			vera.setFont(font);
+			System.out.println(vera);
 		} catch (FontFormatException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

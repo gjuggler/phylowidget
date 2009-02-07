@@ -74,6 +74,13 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 		p.addKeyListener(this);
 	}
 
+	public void destroy()
+	{
+		UIGlobals.g.event().remove(this);
+		p.removeKeyListener(this);
+		glowTween = null;
+	}
+	
 	public boolean containsPoint(NodeRange r, Point pt)
 	{
 		tempPt.setLocation(getX(r), getY(r));

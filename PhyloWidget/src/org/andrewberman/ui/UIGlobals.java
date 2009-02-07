@@ -26,11 +26,11 @@ public class UIGlobals extends Globals
 	{
 		UIGlobals.g = this;
 		this.p = p;
+		setFontLoader(new FontLoader(p));
 		setEventManager(new EventManager(p));
 		setFocusManager(new FocusManager(p));
 		setToolManager(new ToolManager(p));
 		setShortcutManager(new ShortcutManager(p));
-		setFontLoader(new FontLoader(p));
 		menuTimer = new MenuTimer();
 		menuTimer.start();
 	}

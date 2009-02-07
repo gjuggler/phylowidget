@@ -1,6 +1,7 @@
 package org.phylowidget.render.images;
 
 import java.awt.Image;
+import java.io.File;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Queue;
@@ -9,8 +10,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.imageio.ImageIO;
 
 import org.andrewberman.ui.UIGlobals;
+import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
+import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
 
@@ -107,6 +110,20 @@ public class ImageLoader implements Runnable
 				try
 				{
 					imgS = imagesToLoad.remove();
+					URL url = null;
+					try {
+						url = new URL(imgS);
+					} catch (Exception e) {
+						RootedTree t = PhyloWidget.p.trees.getTree();
+						PhyloTree pt = (PhyloTree) t;
+						if (pt.getBaseURL().length() > 0)
+						{
+							imgS = imgS.replaceAll("\"", "");
+							File f = new File(pt.getBaseURL(),imgS);
+							url = f.toURL();
+						}
+					}
+					
 					PApplet p = UIGlobals.g.getP();
 					//					InputStream in = p.openStream(imgS);
 					//					byte[] bytes = PApplet.loadBytes(in);
@@ -116,7 +133,7 @@ public class ImageLoader implements Runnable
 					//						continue;
 					//					}
 //					Image img = p.getImage(new URL(imgS));
-					Image img = ImageIO.read(new URL(imgS));
+					Image img = ImageIO.read(url);
 					PhyloWidget.setMessage("Finished loading image!");
 					//					System.out.println(img);
 					//					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
@@ -124,7 +141,7 @@ public class ImageLoader implements Runnable
 					imageMap.put(imgS, img);
 				} catch (Exception e)
 				{
-//					e.printStackTrace();
+					e.printStackTrace();
 					loadedImageURLs.remove(imgS);
 				}
 			}

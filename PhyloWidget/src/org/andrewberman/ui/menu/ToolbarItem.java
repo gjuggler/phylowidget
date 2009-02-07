@@ -221,7 +221,7 @@ public class ToolbarItem extends MenuItem
 			float shortSize = fs * shortcutTextSize;
 			float descent = UIUtils.getTextDescent(menu.buff, font, shortSize,
 					true);
-			g2.setFont(font.font.deriveFont(shortSize));
+			g2.setFont(font.getFont().deriveFont(shortSize));
 			g2.setPaint(strokeC.brighter(100));
 			float ht = UIUtils.getTextHeight(menu.canvas.g, font, shortSize,
 					shortcut.label, true);

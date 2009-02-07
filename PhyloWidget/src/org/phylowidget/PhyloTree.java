@@ -63,6 +63,20 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 		modPlus();
 	}
 	
+	private static String baseURL;
+	
+	public void setBaseURL(String baseURL)
+	{
+		this.baseURL = baseURL;
+	}
+	
+	public String getBaseURL()
+	{
+		if (baseURL == null)
+			return "";
+		return this.baseURL;
+	}
+	
 	@Override
 	public void collapseNode(PhyloNode v)
 	{

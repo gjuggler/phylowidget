@@ -60,6 +60,12 @@ public class TreeIO
 			InputStream is = url.openStream();
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
+			if (t instanceof PhyloTree)
+			{
+				PhyloTree pt = (PhyloTree)t;
+				String str = f.getParent();
+				pt.setBaseURL(str);
+			}
 			return parseReader(t, br);
 		} catch (Exception e)
 		{
@@ -514,8 +520,8 @@ public class TreeIO
 		if (p != null)
 		{
 			double ew = tree.getEdgeWeight(tree.getEdge(p, v));
-			if (ew != 1.0)
-				sb.append(":" + Double.toString(ew));
+//			if (ew != 1.0)
+			sb.append(":" + Double.toString(ew));
 		}
 		if (v instanceof PhyloNode)
 		{
@@ -574,9 +580,19 @@ public class TreeIO
 			 * 
 			 * 2. double-escape single quotes
 			 */
-			Matcher quoteM = quotePattern.matcher(s);
-			s = quoteM.replaceAll("''");
-			s = "'" + s + "'";
+			if (PhyloWidget.cfg.scrapeNaughtyChars)
+			{
+				/*
+				 * If this setting is set, simply scrape away naughty characters from the label.
+				 */
+				s = m.replaceAll("");
+				s = s.replaceAll(" ", "_");
+			} else
+			{
+				Matcher quoteM = quotePattern.matcher(s);
+				s = quoteM.replaceAll("''");
+				s = "'" + s + "'";
+			}
 		} else
 		{
 			// Otherwise, just turn whitespace into underbars.
@@ -656,14 +672,14 @@ public class TreeIO
 	static String getTranslateBlock(String s)
 	{
 		/*
-		 * The "?" is important here: we want to 
+		 * The "?" is important here: we want to do this in a non-greedy manner.
 		 */
 		return matchGroup(s, "translate(.*?);", 1);
 	}
 
 	static String getTreeFromTreesBlock(String treesBlock)
 	{
-		return matchGroup(treesBlock, "tree(.*?);", 1);
+		return matchGroup(treesBlock, "^??tree (.*?);", 1);
 	}
 
 	static void getTranslationMap(String treesBlock)

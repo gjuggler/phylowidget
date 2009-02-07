@@ -47,7 +47,7 @@ public class NumberScroller extends MenuItem
 
 	static float NaN = Float.NaN;
 
-	private float min = -Float.MAX_VALUE, max = Float.MAX_VALUE;
+	protected float min = -Float.MAX_VALUE, max = Float.MAX_VALUE;
 	boolean scrolling;
 	float startY, startVal;
 
@@ -82,7 +82,7 @@ public class NumberScroller extends MenuItem
 	{
 		df = new DecimalFormat(f);
 		df.setDecimalSeparatorAlwaysShown(false);
-		
+
 		int ind = f.indexOf(".");
 		if (ind > -1)
 		{
@@ -90,7 +90,7 @@ public class NumberScroller extends MenuItem
 			df.setMinimumFractionDigits(digCount);
 			df.setMaximumFractionDigits(digCount);
 		}
-		
+
 		customFormat = true;
 		updateString();
 	}
@@ -184,7 +184,22 @@ public class NumberScroller extends MenuItem
 		try
 		{
 			if (useReflection)
-				value = field.getFloat(fieldObj);
+			{
+				try
+				{
+					value = field.getFloat(fieldObj);
+				} catch (Exception e)
+				{
+					try
+					{
+						value = parseValueFromString(field.get(fieldObj));
+					} catch (Exception e2)
+					{
+						e2.printStackTrace();
+						System.err.println(e.getMessage());
+					}
+				}
+			}
 		} catch (Exception e)
 		{
 			useReflection = false;
@@ -192,6 +207,20 @@ public class NumberScroller extends MenuItem
 		}
 		if (value != oldValue)
 			updateString();
+		return value;
+	}
+
+	protected float parseValueFromString(Object s)
+	{
+		if (s == null || s.equals("")) return 0;
+		return Float.parseFloat(s.toString());
+	}
+
+	// This is bad programming! Do as I say, not as I do!!
+	// This is here so subclasses can directly get the current value, without
+	// going through the reflection nonsense. Maybe I could get rid of it?
+	protected float getValueDirectly()
+	{
 		return value;
 	}
 
@@ -270,7 +299,16 @@ public class NumberScroller extends MenuItem
 				field.setFloat(fieldObj, getValue());
 			} catch (Exception e)
 			{
-				e.printStackTrace();
+				// Try setting the String value.
+				String s = getStringValueForNumber(value);
+				try
+				{
+					field.set(fieldObj, s);
+				} catch (Exception e2)
+				{
+					e.printStackTrace();
+					e2.printStackTrace();
+				}
 			}
 		} else
 		{
@@ -305,7 +343,17 @@ public class NumberScroller extends MenuItem
 					field.setFloat(fieldObj, value);
 				} catch (Exception e)
 				{
-					e.printStackTrace();
+					// Try setting the String value.
+					String s = getStringValueForNumber(value);
+					try
+					{
+						field.set(fieldObj, s);
+					} catch (Exception e2)
+					{
+						e.printStackTrace();
+						e2.printStackTrace();
+					}
+
 				}
 			}
 		}
@@ -314,7 +362,12 @@ public class NumberScroller extends MenuItem
 
 	void updateString()
 	{
-		stringValue = df.format(value);
+		stringValue = getStringValueForNumber(value);
+	}
+
+	protected String getStringValueForNumber(float value)
+	{
+		return df.format(value);
 	}
 
 	private boolean controlDown = false;

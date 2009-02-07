@@ -1156,15 +1156,14 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
-	public void resolvePolytomy(V v)
+	public void resolvePolytomy(V v, double maxDistanceToSpread)
 	{
+
 		List<V> children = getChildrenOf(v);
 		if (children.size() <= 2)
 		{
-			//			System.err.println("Node "+getLabel(v)+" Not a polytomy!");
 			return; // Dummy check -- exit if we have a bifurcation.
 		}
-		//		System.err.println("Resolving "+getLabel(v));
 		// Find the smallest branch length of either myself or all my children.
 		double minBranchLength = getBranchLength(v);
 		for (V child : children)
@@ -1175,7 +1174,8 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 
 		double resolutionWindow = minBranchLength / 3;
-
+		resolutionWindow = Math.min(resolutionWindow, maxDistanceToSpread);
+		
 		// Choose the "first" child.
 		V child = children.get(0);
 		// Create a new node to go below V.
@@ -1187,7 +1187,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		for (V child2 : children)
 		{
 			if (child2 == child)
+			{
+				double bl = getBranchLength(child);
+				setBranchLength(child,bl+resolutionWindow/2);
 				continue;
+			}
 			double bl = getBranchLength(child2);
 			removeEdge(v, child2);
 			addEdge(newV, child2);
@@ -1195,6 +1199,12 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 		modPlus();
 		resolvePolytomy(newV);
+	}
+	
+	public void resolvePolytomy(V v)
+	{
+		double maxResolutionDistance = Double.MAX_VALUE;
+		resolvePolytomy(v,maxResolutionDistance);
 	}
 
 	public V getCommonAncestorOf(String... nodeLabels)

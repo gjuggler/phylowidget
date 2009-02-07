@@ -39,7 +39,7 @@ public class PhyloConfig
 	 * The configurable parameters are displayed below, generally in order from most to least useful. Enjoy!
 	 */
 
-	public boolean debug = false;
+	public boolean debug = true;
 
 	/*
 	 * If you specify a valid URL pointing to a properties file, then PhyloWidget will attempt to load the properties remotely.
@@ -95,7 +95,7 @@ public class PhyloConfig
 	 *   								to switch between tools.
 	 *   - "toolbar-hidden.xml"			Same idea as above, but with the toolbar.
 	 */
-	public String menus = "dock.xml;toolbar.xml;context.xml";
+	public String menus = "dock.xml;toolbar-new.xml;context-subtree.xml";
 
 	/* Colors: You can modify the foreground and background colors which PhyloWidget uses.
 	 * The new value should be formatted as below; a triplet of integer RGB values enclosed in parentheses.
@@ -110,6 +110,8 @@ public class PhyloConfig
 	 * Node shapes -- usable values are:
 	 *   - "square"
 	 *   - "circle"
+	 *   - "triangle"
+	 *   - "x" (star shape)
 	 */
 	public String nodeShape = "circle";
 
@@ -119,7 +121,7 @@ public class PhyloConfig
 	 *   "quantize" -- Quantize the rotation in 45-degree increments (a little faster...)
 	 *   "level" -- Level all angles to horizontal (much faster!)
 	 */
-	public String angleHandling = "level";
+	public String angleHandling = "none";
 
 	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	public float textRotation = 0f; // Text rotation, in degrees.
@@ -140,6 +142,7 @@ public class PhyloConfig
 	public float viewportY = 0; // Ditto.
 	public float viewportZoom = 0.8f; // I'll bet you can guess this one.
 
+	public boolean showScaleBar = false; // Show a scale bar when showing branch lengths.
 	public boolean showCladeLabels = false; // Should we show labels of non-leaf nodes?
 	//	public boolean stretchToFit = false;			// DEPRECATED.
 	public boolean useBranchLengths = false; // Should the renderer display the tree using the branch length information?
@@ -152,11 +155,12 @@ public class PhyloConfig
 	//    If set to "true", then PhyloWidget will first display the nodes that are *farthest* from
 	//    the root, instead of those that are closest (in terms of # of branches to the root).
 	public boolean alignLabels = false; // When drawing with branch lengths, whether all labels should be aligned.
-	public boolean useDoubleBuffering = true; // To be honest you probably don't want to mess with this one -- the double buffering really helps!
+	public boolean useDoubleBuffering = false; // To be honest you probably don't want to mess with this one -- the double buffering really helps!
 	public boolean antialias = false; // When set to true this slows down the rendering significantly, but looks much better.
 	public boolean outputAllInnerNodes = false; // Kind of a strange one: if set to true, PhyloWidget will *always* output 
 	//    the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
 	public boolean enforceUniqueLabels = false; // Enforce uniqueness of node labels.
+    public boolean scrapeNaughtyChars = false; // Should we scrape away naughty characters from node labels when exporting the tree file?
 	public boolean outputFullSizeImages = false; // Output images in the tree at full size, instead of thumbnail (may require LOTS of memory!!)
 	public boolean useAnimations = true; // Use animated transitions?
 	public boolean animateNewTree = false; // Try to animate between the current tree and new tree? (EXPERIMENTAL IF SET TO TRUE)
@@ -421,6 +425,17 @@ public class PhyloConfig
 		PhyloWidget.ui.forceLayout();
 	}
 
+	public void setShowScaleBar(boolean show)
+	{
+		if (show)
+		{
+			PhyloWidget.trees.showScaleBar();
+		} else
+		{
+			PhyloWidget.trees.hideScaleBar();
+		}
+	}
+	
 	public final static String DEFAULT_TREE = "PhyloWidget";
 
 }

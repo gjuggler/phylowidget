@@ -130,7 +130,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		style = new TextFieldStyle();
 		style.set("f.fontSize", 12);
 		pFont = style.getFont("font");
-		font = pFont.font;
+		font = pFont.getFont();
 		blinker = Blinker.instance;
 		clipRect = new Rectangle2D.Float(0, 0, 0, 0);
 		buffRect = new Rectangle2D.Float(0, 0, 0, 0);
@@ -209,7 +209,8 @@ public class TextField extends AbstractUIObject implements Malleable
 			pg.translate(-x, -y);
 			pg.translate(OFFSET, OFFSET);
 			doTheDrawing();
-			pg.modified = true;
+			pg.setModified(true);
+//			pg.modified = true;
 			pg.endDraw();
 			drawToCanvas();
 		} else
@@ -283,7 +284,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		 */
 		clipRect.setRect(x + pad, y + pad, width, height);
 		pg.g2.setClip(clipRect);
-		pg.g2.setFont(pFont.font.deriveFont(fontSize));
+		pg.g2.setFont(pFont.getFont().deriveFont(fontSize));
 		pg.g2.setPaint(stroke);
 //		synchronized (this)
 //		{
@@ -416,7 +417,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			try
 			{
-				FontMetrics fm = UIUtils.getMetrics(pg, pFont.font, fontSize);
+				FontMetrics fm = UIUtils.getMetrics(pg, pFont.getFont(), fontSize);
 				float f = (float) fm.getStringBounds(text.substring(lo, hi), pg.g2).getWidth();
 				// System.out.println(Math.round(f)+" "+text.substring(lo,hi));
 				lastWidth = f;

@@ -257,8 +257,9 @@ public class MenuUtils
 	public static void drawText(MenuItem item, String s, boolean centerH,
 			boolean centerV, float x, float y, float width, float height)
 	{
-
-		Graphics2D g2 = item.menu.buff.g2;
+		
+		try {
+		Graphics2D g2 = (Graphics2D) item.menu.buff.g2;
 
 		float descent = getTextDescent(item);
 
@@ -279,13 +280,16 @@ public class MenuUtils
 		PFont font = style.getFont("font");
 		float fs = style.getF("f.fontSize");
 
-		g2.setFont(font.font.deriveFont(fs));
+		g2.setFont(font.getFont().deriveFont(fs));
 		if (!item.isEnabled())
 			g2.setPaint(style.getC("c.foreground").brighter(120));
 		else
 			g2.setPaint(style.getC("c.foreground"));
 		g2.setStroke(new BasicStroke(style.getF("f.strokeWeight")));
 		g2.drawString(s, x + xOffset, y + yOffset);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static float getTextWidth(MenuItem item, String s)

@@ -24,7 +24,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.ifaces.Positionable;
 
 import processing.core.PApplet;
@@ -115,7 +114,7 @@ public class Toolbar extends Menu
 	public void open(MenuItem i)
 	{
 		super.open(i);
-		UIGlobals.g.focus().setFocus(this);
+		context.focus().setFocus(this);
 	}
 
 	@Override
@@ -123,7 +122,7 @@ public class Toolbar extends Menu
 	{
 		super.close(item);
 		if (!isActive())
-			UIGlobals.g.focus().removeFromFocus(this);
+			context.focus().removeFromFocus(this);
 	}
 
 	@Override
@@ -158,7 +157,7 @@ public class Toolbar extends Menu
 		super.clickaway();
 		if (isModal)
 		{
-			UIGlobals.g.focus().removeFromFocus(this);
+			context.focus().removeFromFocus(this);
 		}
 	}
 
@@ -273,7 +272,7 @@ public class Toolbar extends Menu
 		// }
 		// if (isActive() && isModal)
 		// {
-		// UIGlobals.g.focus().setModalFocus(this);
+		// context.focus().setModalFocus(this);
 		// }
 	}
 
@@ -310,7 +309,7 @@ public class Toolbar extends Menu
 	public void keyEvent(KeyEvent e)
 	{
 		super.keyEvent(e);
-		if (UIGlobals.g.focus().getFocusedObject() != this)
+		if (context.focus().getFocusedObject() != this)
 			return;
 		// System.out.println("EVENT!");
 		if (kbFocus == null)

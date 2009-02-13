@@ -19,6 +19,8 @@
 package org.phylowidget.net;
 
 import org.andrewberman.ui.unsorted.DelayedAction;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.TreeIO;
@@ -48,8 +50,9 @@ public class PWTreeUpdater extends DelayedAction
 			PhyloTree t = new PhyloTree();
 //			TreeIO.setOldTree(PhyloWidget.trees.getTree());
 //			System.out.println(parseMe.length());
-			PhyloWidget.trees.setTree(TreeIO.parseNewickString(t, parseMe));
-			PhyloWidget.setMessage("Tree text updated.");
+			PWContext context = PWPlatform.getInstance().getThisAppContext();
+			context.trees().setTree(TreeIO.parseNewickString(t, parseMe));
+			context.getPW().setMessage("Tree text updated.");
 		} catch (Exception e)
 		{
 			e.printStackTrace();

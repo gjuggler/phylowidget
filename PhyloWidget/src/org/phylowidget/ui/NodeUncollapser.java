@@ -12,8 +12,8 @@ import java.util.List;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
+import org.phylowidget.PWContext;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.RenderConstants;
 import org.phylowidget.tree.PhyloNode;
 
@@ -21,6 +21,7 @@ import processing.core.PApplet;
 
 public class NodeUncollapser extends Menu{
 
+	PWContext pwContext;
 	PhyloNode node;
 	Shape s;
 	
@@ -31,6 +32,7 @@ public class NodeUncollapser extends Menu{
 	public NodeUncollapser(PApplet app, PhyloNode node)
 	{
 		super(app);
+		pwContext = (PWContext) context;
 		this.node = node;
 		
 		Polygon p = new Polygon();
@@ -106,9 +108,9 @@ public class NodeUncollapser extends Menu{
 	public void performAction()
 	{
 		super.performAction();
-		PhyloWidget.setMessage("");
+		pwContext.getPW().setMessage("");
 		node.getTree().uncollapseNode(node);
-		PhyloWidget.ui.layout();
+		pwContext.ui().layout();
 		dispose();
 	}
 	
@@ -146,7 +148,7 @@ public class NodeUncollapser extends Menu{
 			for (PhyloNode n : kids) {
 				numLeaves += n.getNumLeaves();
 			}
-			PhyloWidget.setMessage("Click to uncollapse "+numLeaves+" leaf nodes.");
+			pwContext.getPW().setMessage("Click to uncollapse "+numLeaves+" leaf nodes.");
 		}
 		
 		if (!mouseInside && !mouseJustLeft)
@@ -157,7 +159,7 @@ public class NodeUncollapser extends Menu{
 		if (mouseJustLeft)
 		{
 			mouseJustLeft = false;
-			PhyloWidget.setMessage("");
+			pwContext.getPW().setMessage("");
 		}
 	}
 	

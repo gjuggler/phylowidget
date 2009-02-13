@@ -51,7 +51,7 @@ import processing.core.PApplet;
  * <ul>
  * <li>Call the static method <code>UIUtils.lazyLoad</code>. This causes all
  * "singlet" objects to load up their instances if they haven't done so already.</li>
- * <li>Call <code>UIGlobals.g.event().add(this)</code>. This causes the
+ * <li>Call <code>p.event().add(this)</code>. This causes the
  * EventManager to begin managing this UIObject. This consists of: calling the
  * draw() method every frame, and if the FocusManager allows it, calling the
  * mouseEvent, keyEvent, and focusEvent methods accordingly.</li>
@@ -67,6 +67,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		MouseWheelListener, KeyListener
 {
 	private PApplet p;
+	private UIContext c;
 	private ArrayList delegates = new ArrayList(5);
 	private ToolManager toolManager;
 	public Camera toolCamera;
@@ -74,9 +75,10 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	Point screen = new Point(0, 0);
 	Point model = new Point(0, 0);
 
-	public EventManager(PApplet p)
+	public EventManager(UIContext c)
 	{
-		this.p = p;
+		this.p = c.getApplet();
+		this.c = c;
 		setup();
 	}
 
@@ -166,23 +168,23 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		model.setLocation(screen.x, screen.y);
 		UIUtils.screenToModel(model);
 
-		if (UIGlobals.g.focus() != null)
+		if (c.focus() != null)
 		{
 
 			/*
 			 * First, send the event directly to the focused object.
 			 */
-			if (UIGlobals.g.focus().getFocusedObject() instanceof UIObject)
+			if (c.focus().getFocusedObject() instanceof UIObject)
 			{
-				UIObject o = (UIObject) UIGlobals.g.focus().getFocusedObject();
-				// System.out.println(UIGlobals.g.focus().getFocusedObject());
+				UIObject o = (UIObject) c.focus().getFocusedObject();
+				// System.out.println(c.focus().getFocusedObject());
 				o.mouseEvent(e, screen, model);
 			}
 			/*
 			 * If the FocusManager is in a modal state, return without further
 			 * dispatching.
 			 */
-			if (UIGlobals.g.focus().isModal())
+			if (c.focus().isModal())
 				return;
 		}
 		/*
@@ -205,7 +207,7 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 				if (e.isConsumed())
 					break;
 				UIObject ui = (UIObject) delegates.get(i);
-				if (ui == UIGlobals.g.focus().getFocusedObject())
+				if (ui == c.focus().getFocusedObject())
 					continue;
 				ui.mouseEvent(e, screen, model);
 			}
@@ -217,13 +219,13 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		/*
 		 * We only send keyboard events to the focused object.
 		 */
-		if (UIGlobals.g.focus().getFocusedObject() instanceof UIObject)
-			((UIObject) UIGlobals.g.focus().getFocusedObject()).keyEvent(e);
+		if (c.focus().getFocusedObject() instanceof UIObject)
+			((UIObject) c.focus().getFocusedObject()).keyEvent(e);
 
 		/*
 		 * Lastly, dispatch to the tool manager if not consumed.
 		 */
-		if (UIGlobals.g.focus().getFocusedObject() == null)
+		if (c.focus().getFocusedObject() == null)
 		{
 			if (toolManager != null)
 				toolManager.keyEvent(e);

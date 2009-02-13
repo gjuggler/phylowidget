@@ -3,16 +3,11 @@ package org.andrewberman.evogame;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.Toolbar;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.net.PWClipUpdater;
-import org.phylowidget.net.PWTreeUpdater;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.ui.PhyloConfig;
-import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PGraphicsJava2D;
 
@@ -38,22 +33,23 @@ public class EvoGameApplet extends PhyloWidget
 
 		PGraphicsJava2D pg = (PGraphicsJava2D) g;
 
-		new UIGlobals(this);
-		cfg = new PhyloConfig();
-		trees = new EvoTreeManager(this);
-		ui = new PhyloUI(this);
+//		new UIGlobals(this);
+		PWPlatform.getInstance().registerApp(this);
+//		cfg = new PhyloConfig();
+//		trees = new EvoTreeManager(this);
+//		ui = new PhyloUI(this);
 
-		treeUpdater = new PWTreeUpdater();
-		clipUpdater = new PWClipUpdater();
+//		treeUpdater = new PWTreeUpdater();
+//		clipUpdater = new PWClipUpdater();
 
-		ui.setup();
-		trees.setup();
+//		ui.setup();
+//		trees.setup();
 		clearQueues();
 		
-		trees.camera.nudgeTo(200, 0);
-		trees.camera.zoomTo(0.7f);
+//		trees.camera.nudgeTo(200, 0);
+//		trees.camera.zoomTo(0.7f);
 		
-		unregisterDraw(UIGlobals.g.event());
+//		unregisterDraw(UIGlobals.g.event());
 		
 		DragDropImage.nodeToImage = null; // Set this to null -- applets HATE static variables left over from previous instantiations.
 		
@@ -62,8 +58,8 @@ public class EvoGameApplet extends PhyloWidget
 		changeSetting("respondToMouseWheel","false");
 		changeSetting("suppressMessages","true");
 
-		if (ui.context != null)
-			ui.context.setGlow(false);
+//		if (ui.context != null)
+//			ui.context.setGlow(false);
 		
 //		next = new Toolbar(this);
 //		next.add("Next");
@@ -97,10 +93,10 @@ public class EvoGameApplet extends PhyloWidget
 	public synchronized void draw()
 	{
 		super.draw();		
-		for (MenuItem m : ui.menus)
-		{
-			m.layout();
-		}
+//		for (MenuItem m : ui.menus)
+//		{
+//			m.layout();
+//		}
 	}
 	
 	public void next()
@@ -113,15 +109,15 @@ public class EvoGameApplet extends PhyloWidget
 	
 	public boolean allNodesAreCorrect()
 	{
-		if (trees.getTree() == null)
-			return false;
+//		if (trees.getTree() == null)
+//			return false;
 		HashMap<PhyloNode,DragDropImage> map = DragDropImage.nodeToImage;
 		if (map == null)
 		{
 			return false;
 		}
 		ArrayList<PhyloNode> leaves = new ArrayList<PhyloNode>();
-		trees.getTree().getAll(trees.getTree().getRoot(), leaves, null);
+//		trees.getTree().getAll(trees.getTree().getRoot(), leaves, null);
 		int size = leaves.size();
 		if (map.size() != leaves.size())
 		{

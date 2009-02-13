@@ -22,42 +22,32 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.andrewberman.ui.unsorted.StringPair;
-import org.phylowidget.net.PWClipUpdater;
-import org.phylowidget.net.PWTreeUpdater;
+import org.phylowidget.net.JSClipUpdater;
+import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
 import org.phylowidget.tree.RootedTree;
-import org.phylowidget.ui.PhyloConfig;
-import org.phylowidget.ui.PhyloScaleBar;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
-import processing.core.PGraphicsJava2D;
 
 public class PhyloWidget extends PApplet
 {
 	private static final long serialVersionUID = -7096870051293017660L;
 
-	public static TreeManager trees;
-	public static PhyloConfig cfg = new PhyloConfig();
-	public static PhyloUI ui;
+	public PWContext context;
 
-	public static PhyloWidget p;
-
+	JSTreeUpdater treeUpdater;
+	JSClipUpdater clipUpdater;
+	
 	public static float FRAMERATE = 60;
-
-	public static PWTreeUpdater treeUpdater;
-	public static PWClipUpdater clipUpdater;
 
 	private static String messageString = new String();
 
@@ -67,7 +57,6 @@ public class PhyloWidget extends PApplet
 	{
 		super();
 		time = System.currentTimeMillis();
-		PhyloWidget.p = this;
 	}
 
 	public void setup()
@@ -92,28 +81,32 @@ public class PhyloWidget extends PApplet
 			 * We're locked into an applet. Don't fight it.
 			 */
 			size(getWidth(), getHeight(), JAVA2D);
-//			size(getWidth(),getHeight(),P2D);
+			//			size(getWidth(),getHeight(),P2D);
 		}
 		frameRate(FRAMERATE);
 
-		new UIGlobals(this);
-		cfg = new PhyloConfig();
-		ui = new PhyloUI(this);
-		trees = new TreeManager(this);
-
-		treeUpdater = new PWTreeUpdater();
-		clipUpdater = new PWClipUpdater();
+		context = (PWContext) PWPlatform.getInstance().registerApp(this);
 		
-		new Thread()
-		{
-			public void run()
-			{
-				ui.setup();
-				trees.setup();
-			}
-		}.start();
+//		cfg = new PhyloConfig();
+//		ui = new PhyloUI(this);
+//		trees = new TreeManager(this);
+//
+//		treeUpdater = new PWTreeUpdater();
+//		clipUpdater = new PWClipUpdater();
 
-		unregisterDraw(UIGlobals.g.event());
+//		new Thread()
+//		{
+//			public void run()
+//			{
+				context.ui().setup();
+				context.trees().setup();
+//			}
+//		}.start();
+
+		unregisterDraw(context.event());
+
+		treeUpdater = new JSTreeUpdater();
+		clipUpdater = new JSClipUpdater(this);
 		
 		clearQueues();
 	}
@@ -135,7 +128,7 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void draw()
 	{
-		background(PhyloWidget.cfg.getBackgroundColor().getRGB(), 1.0f);
+		background(context.config().getBackgroundColor().getRGB(), 1.0f);
 
 		// If we have setting changes or method calls on the queue, run them now.
 		if (drawnOnce)
@@ -143,9 +136,9 @@ public class PhyloWidget extends PApplet
 
 		drawnOnce = true;
 
-		UIGlobals.g.event().draw();
+		context.event().draw();
 
-		if (!cfg.suppressMessages)
+		if (!context.config().suppressMessages)
 		{
 			if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 				messageString = "";
@@ -154,7 +147,7 @@ public class PhyloWidget extends PApplet
 				drawMessage();
 			}
 
-			if (cfg.debug)
+			if (context.config().debug)
 			{
 				drawNumLeaves();
 				drawFrameRate();
@@ -189,12 +182,12 @@ public class PhyloWidget extends PApplet
 						args = new Object[] { match.group(2) };
 						System.out.println(s + "  " + args);
 						m = PhyloUI.class.getMethod(s, String.class);
-						m.invoke(ui, args);
+						m.invoke(context.ui(), args);
 					}
 					if (!matched)
 					{
 						m = PhyloUI.class.getMethod(s);
-						m.invoke(ui);
+						m.invoke(context.ui());
 					}
 				} catch (Exception e)
 				{
@@ -204,7 +197,7 @@ public class PhyloWidget extends PApplet
 			{
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put(sp.a, sp.b);
-				MethodAndFieldSetter.setMethodsAndFields(PhyloWidget.cfg, map);
+				MethodAndFieldSetter.setMethodsAndFields(context.config(), map);
 			}
 		}
 	}
@@ -219,26 +212,13 @@ public class PhyloWidget extends PApplet
 		//		System.out.println("Destroying.");
 		noLoop();
 		super.destroy();
-		if (trees != null)
-			trees.destroy();
-		trees = null;
-		cfg.destroy();
-		cfg = null;
-		ui.destroy();
-		ui = null;
-		treeUpdater = null;
-		clipUpdater = null;
-		/*
-		 * Call these guys last, because other classes (such as the UI classes) may depend on the globals still being here
-		 * in order to destroy themselves.
-		 */
-		UIGlobals.g.destroyGlobals();
+		context.destroy();
 	}
 
 	protected void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getPFont());
+		textFont(context.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40, height - 10);
@@ -250,13 +230,13 @@ public class PhyloWidget extends PApplet
 
 	protected void drawNumLeaves()
 	{
-		RootedTree tree = trees.getTree();
+		RootedTree tree = context.trees().getTree();
 		if (tree == null)
 			return;
 		int leaves = tree.getNumEnclosedLeaves(tree.getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getPFont());
+		textFont(context.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(nleaves, width - 100, height - 10);
@@ -265,7 +245,7 @@ public class PhyloWidget extends PApplet
 	protected void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(UIGlobals.g.getPFont());
+		textFont(context.getPFont());
 		textSize(10);
 		float w = textWidth(messageString);
 		fill(255, 255, 255);
@@ -279,11 +259,11 @@ public class PhyloWidget extends PApplet
 	static int messageFrame;
 	static float messageDecay = 15;
 
-	public static void setMessage(String s)
+	public void setMessage(String s)
 	{
 		messageString = s;
-		if (p != null)
-			messageFrame = p.frameCount;
+		//		if (p != null)
+		messageFrame = frameCount;
 	}
 
 	//	public void size(int w, int h)
@@ -327,19 +307,19 @@ public class PhyloWidget extends PApplet
 
 	public boolean updateTree(String s)
 	{
-		PhyloWidget.p.treeUpdater.triggerUpdate(s);
+//		treeUpdater.triggerUpdate(s);
 		return true;
 	}
 
 	public boolean updateClip(String s)
 	{
-		PhyloWidget.p.clipUpdater.triggerUpdate(s);
+		clipUpdater.triggerUpdate(s);
 		return true;
 	}
-	
+
 	public synchronized void changeSetting(String setting, String newValue)
 	{
-		if (cfg.debug)
+		if (context.config().debug)
 		{
 			System.out.println(setting + "\t" + newValue);
 		}

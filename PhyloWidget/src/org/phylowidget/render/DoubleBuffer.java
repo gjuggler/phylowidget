@@ -1,18 +1,14 @@
 package org.phylowidget.render;
 
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWPlatform;
 
 import processing.core.PGraphics;
 import processing.core.PGraphicsJava2D;
-import processing.core.PImage;
 
 public class DoubleBuffer implements Runnable
 {
@@ -32,7 +28,7 @@ public class DoubleBuffer implements Runnable
 	public DoubleBuffer()
 	{
 		dummyGraphics = new PGraphicsJava2D();
-		dummyGraphics.setParent(UIGlobals.g.getP());
+		dummyGraphics.setParent(PWPlatform.getInstance().getThisAppContext().getPW());
 		repaintThread = new Thread(this, "DoubleBuffer");
 		//		repaintThread.setPriority(Thread.MIN_PRIORITY);
 		repaintThread.start();

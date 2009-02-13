@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.andrewberman.ui.UIGlobals;
 import org.phylowidget.tree.DefaultVertex;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
@@ -48,7 +47,7 @@ public class RandomTreeMutator implements Runnable
 		random = new Random(System.currentTimeMillis());
 
 		// InputStream is = new FileInputStream("taxonomy.txt");
-		InputStream is = UIGlobals.g.getP().openStream("taxonomy.txt");
+		InputStream is = PWPlatform.getInstance().getThisAppContext().getApplet().openStream("taxonomy.txt");
 		InputStreamReader read = new InputStreamReader(is);
 		in = new BufferedReader(read);
 		try
@@ -87,7 +86,7 @@ public class RandomTreeMutator implements Runnable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			PhyloWidget.trees.triggerMutation();
+			PWPlatform.getInstance().getThisAppContext().trees().triggerMutation();
 		}
 	}
 

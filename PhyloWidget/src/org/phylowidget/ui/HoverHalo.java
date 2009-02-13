@@ -25,11 +25,12 @@ import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenListener;
 import org.andrewberman.ui.tween.TweenQuad;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderConstants;
 
@@ -38,6 +39,7 @@ import processing.core.PApplet;
 public final class HoverHalo extends AbstractUIObject implements TweenListener
 {
 	private PApplet p;
+	private PWContext context;
 	final int type = ELLIPSE;
 	static final int FRAMES = 30;
 	Rectangle2D.Float rect;
@@ -59,7 +61,9 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 	public HoverHalo(PApplet p)
 	{
 		this.p = p;
-		UIGlobals.g.event().add(this);
+		this.context = PWPlatform.getInstance().getThisAppContext();
+		context.event().add(this);
+//		UIGlobals.g.event().add(this);
 
 		rect = new Rectangle2D.Float(0, 0, 0, 0);
 		tempPt = new Point(0, 0);
@@ -75,7 +79,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 	{
 		if (hidden)
 			return;
-		if (UIGlobals.g.focus().getFocusedObject() != null)
+		if (context.focus().getFocusedObject() != null)
 			return;
 		
 		NodeRange r = curNode;
@@ -188,7 +192,7 @@ public final class HoverHalo extends AbstractUIObject implements TweenListener
 	{
 		if (hidden)
 			return;
-		if (UIGlobals.g.focus().getFocusedObject() != null)
+		if (context.focus().getFocusedObject() != null)
 			return;
 
 		// System.out.println("Hover event!");

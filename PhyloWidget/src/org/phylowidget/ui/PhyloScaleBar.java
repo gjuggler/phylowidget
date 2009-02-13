@@ -1,26 +1,26 @@
 package org.phylowidget.ui;
 
 import java.awt.geom.Point2D;
-import java.util.List;
 
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.LayoutBase;
 import org.phylowidget.render.LayoutCircular;
 import org.phylowidget.render.LayoutCladogram;
 import org.phylowidget.render.LayoutDiagonal;
 import org.phylowidget.render.LayoutUnrooted;
-import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.PhyloNode;
-import org.phylowidget.tree.RootedTree;
 
 import processing.core.PApplet;
 
 public class PhyloScaleBar extends Menu
 {
+	PWContext context;
+	
 	int mode = MODE_SCALE;
 	public static final int MODE_SCALE = 0;
 	public static final int MODE_TIME = 1;
@@ -39,6 +39,7 @@ public class PhyloScaleBar extends Menu
 	public PhyloScaleBar(PApplet app)
 	{
 		super(app);
+		this.context = PWPlatform.getInstance().getThisAppContext();
 
 		units = "";
 		
@@ -56,14 +57,14 @@ public class PhyloScaleBar extends Menu
 	protected synchronized void drawMyself()
 	{
 		super.drawMyself();
-		if (PhyloWidget.trees.camera == null)
+		if (context.trees().camera == null)
 			return;
-		if (PhyloWidget.trees.getTree() == null)
+		if (context.trees().getTree() == null)
 			return;
-		if (!PhyloWidget.cfg.useBranchLengths)
+		if (!context.config().useBranchLengths)
 			return;
 		
-		BasicTreeRenderer renderer = (BasicTreeRenderer) PhyloWidget.trees.getRenderer();
+		BasicTreeRenderer renderer = (BasicTreeRenderer) context.trees().getRenderer();
 
 		if (renderer.getTreeLayout() instanceof LayoutDiagonal)
 			return;
@@ -85,7 +86,7 @@ public class PhyloScaleBar extends Menu
 
 			// ok, so by now we have the center position and a desired width for the scale bar.
 			// Find the distance-per-pixel.
-			PhyloTree tree = (PhyloTree) PhyloWidget.trees.getTree();
+			PhyloTree tree = (PhyloTree) context.trees().getTree();
 			
 			if (tree.getNumEnclosedLeaves(tree.getRoot()) == 1)
 				return;

@@ -52,9 +52,9 @@ public class FocusManager implements FocusListener
 	private Object lostFocusHolder = null;
 	private boolean isModal = false;
 	
-	public FocusManager(PApplet app)
+	public FocusManager(UIContext context)
 	{
-		p = app;
+		p = context.getApplet();
 		p.addFocusListener(this);
 	}
 	

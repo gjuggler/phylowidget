@@ -28,15 +28,12 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
 import org.andrewberman.ui.Color;
-import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
-import processing.core.PGraphicsJava2D;
 
 /**
  * The <code>Dock</code> class is a close approximation of Apple's infamous
@@ -342,7 +339,7 @@ public class Dock extends Menu
 			menu.canvas.fill(menu.canvas.color(c.getRed(), c.getGreen(), c
 					.getBlue(), alpha));
 			// menu.canvas.fill(0,alpha);
-			menu.canvas.textFont(UIGlobals.g.getPFont());
+			menu.canvas.textFont(context.getPFont());
 			menu.canvas.textSize(fontSize);
 			menu.canvas.text(i.getLabel(), tX, tY);
 			menu.canvas.textAlign(PApplet.LEFT);
@@ -434,11 +431,11 @@ public class Dock extends Menu
 			if (containsPoint(mousePt))
 			{
 				isActivated = true;
-				UIGlobals.g.focus().setModalFocus(this);
+				context.focus().setModalFocus(this);
 			} else
 			{
 				isActivated = false;
-				UIGlobals.g.focus().removeFromFocus(this);
+				context.focus().removeFromFocus(this);
 			}
 		}
 		super.mouseEvent(e, screen, model);

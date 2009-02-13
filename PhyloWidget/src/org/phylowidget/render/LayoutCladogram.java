@@ -19,7 +19,7 @@ public class LayoutCladogram extends LayoutBase
 		float maxDepth = tree.getMaxDepthToLeaf(tree.getRoot());
 		depthLeafRatio = maxDepth / numLeaves;
 		
-		depthLeafRatio *= PhyloWidget.cfg.branchScaling;
+		depthLeafRatio *= context.config().branchScaling;
 		
 		int index = 0;
 		for (PhyloNode leaf : leaves)
@@ -93,7 +93,7 @@ public class LayoutCladogram extends LayoutBase
 
 	private float calcXPosition(PhyloNode n)
 	{
-		if (PhyloWidget.cfg.useBranchLengths)
+		if (context.config().useBranchLengths)
 		{
 			if (tree.isRoot(n))
 				return 0;

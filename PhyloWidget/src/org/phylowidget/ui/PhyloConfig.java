@@ -5,13 +5,13 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.tree.RootedTree;
-
-import processing.core.PApplet;
 
 public class PhyloConfig
 {
@@ -95,7 +95,7 @@ public class PhyloConfig
 	 *   								to switch between tools.
 	 *   - "toolbar-hidden.xml"			Same idea as above, but with the toolbar.
 	 */
-	public String menus = "dock.xml;toolbar-new.xml;context-subtree.xml";
+	public String menus = "dock.xml;toolbar-new.xml;context.xml";
 
 	/* Colors: You can modify the foreground and background colors which PhyloWidget uses.
 	 * The new value should be formatted as below; a triplet of integer RGB values enclosed in parentheses.
@@ -160,11 +160,11 @@ public class PhyloConfig
 	public boolean outputAllInnerNodes = false; // Kind of a strange one: if set to true, PhyloWidget will *always* output 
 	//    the labels of non-leaf nodes. Sometimes these are just stupid-looking numbers.
 	public boolean enforceUniqueLabels = false; // Enforce uniqueness of node labels.
-    public boolean scrapeNaughtyChars = false; // Should we scrape away naughty characters from node labels when exporting the tree file?
+	public boolean scrapeNaughtyChars = false; // Should we scrape away naughty characters from node labels when exporting the tree file?
 	public boolean outputFullSizeImages = false; // Output images in the tree at full size, instead of thumbnail (may require LOTS of memory!!)
 	public boolean useAnimations = true; // Use animated transitions?
 	public boolean animateNewTree = false; // Try to animate between the current tree and new tree? (EXPERIMENTAL IF SET TO TRUE)
-	
+
 	public boolean suppressMessages = false;
 	public boolean colorHoveredBranch = true;
 	public boolean respondToMouseWheel = true;
@@ -182,9 +182,11 @@ public class PhyloConfig
 	 * The rest is all just code involved in making these configuration parameters work properly...
 	 */
 
+	private PWContext context;
 	public PhyloConfig()
 	{
 		super();
+		context = PWPlatform.getInstance().getThisAppContext();
 		//		setRemoteConfig("http://www.phylowidget.org/nhx_test/ensembl.properties");
 	}
 
@@ -251,7 +253,7 @@ public class PhyloConfig
 		else
 			return Color.parseColor(branchColor);
 	}
-	
+
 	private Color alignmentC = Color.parseColor(alignmentColor);
 
 	public void setAlignmentColor(String s)
@@ -276,10 +278,10 @@ public class PhyloConfig
 	{
 		if (!respond)
 		{
-			PhyloWidget.trees.camera.makeUnresponsive();
+			context.trees().camera.makeUnresponsive();
 		} else
 		{
-			PhyloWidget.trees.camera.makeResponsive();
+			context.trees().camera.makeResponsive();
 		}
 	}
 
@@ -289,7 +291,7 @@ public class PhyloConfig
 		{
 			public void run()
 			{
-				PhyloWidget.trees.setTree(s);
+				context.trees().setTree(s);
 				tree = s;
 			}
 		}.start();
@@ -298,7 +300,7 @@ public class PhyloConfig
 	public void setUseBranchLengths(boolean useEm)
 	{
 		useBranchLengths = useEm;
-		PhyloWidget.ui.layout();
+		context.ui().layout();
 	}
 
 	//	public void setStretchToFit(boolean fitMe)
@@ -309,13 +311,13 @@ public class PhyloConfig
 	public void setSearch(String s)
 	{
 		this.search = s;
-		PhyloWidget.ui.search();
+		context.ui().search();
 	}
 
 	public void setEnforceUniqueLabels(boolean b)
 	{
 		enforceUniqueLabels = b;
-		RootedTree t = PhyloWidget.trees.getTree();
+		RootedTree t = context.trees().getTree();
 		if (t != null)
 			t.setEnforceUniqueLabels(b);
 	}
@@ -325,16 +327,16 @@ public class PhyloConfig
 		s = s.toLowerCase();
 		if (s.equals("diagonal"))
 		{
-			PhyloWidget.trees.diagonalRender();
+			context.trees().diagonalRender();
 		} else if (s.equals("circular"))
 		{
-			PhyloWidget.trees.circleRender();
+			context.trees().circleRender();
 		} else if (s.equals("unrooted"))
 		{
-			PhyloWidget.trees.unrootedRender();
+			context.trees().unrootedRender();
 		} else
 		{
-			PhyloWidget.trees.rectangleRender();
+			context.trees().rectangleRender();
 		}
 	}
 
@@ -371,7 +373,7 @@ public class PhyloConfig
 			@Override
 			public void run()
 			{
-				PhyloWidget.ui.setMenus();
+				context.ui().setMenus();
 			}
 		}.start();
 	}
@@ -384,7 +386,7 @@ public class PhyloConfig
 	public void setPrioritizeDistantLabels(boolean prioritizeDistanceLabels)
 	{
 		this.prioritizeDistantLabels = prioritizeDistanceLabels;
-		PhyloWidget.ui.layout();
+		context.ui().layout();
 	}
 
 	public void destroy()
@@ -395,47 +397,79 @@ public class PhyloConfig
 	public void setTextSize(float textSize)
 	{
 		this.textScaling = textSize;
-		//		PhyloWidget.ui.layout();
+		//		context.ui().layout();
 	}
 
 	public void setLayoutAngle(float layoutAngle)
 	{
 		this.layoutAngle = layoutAngle;
-		PhyloWidget.ui.forceLayout();
+		context.ui().forceLayout();
 	}
 
 	public void setViewportX(float newX)
 	{
-		PhyloWidget.trees.camera.nudgeTo(-newX, PhyloWidget.trees.camera.getY());
+		context.trees().camera.nudgeTo(-newX, context.trees().camera.getY());
 	}
 
 	public void setViewportY(float newY)
 	{
-		PhyloWidget.trees.camera.nudgeTo(PhyloWidget.trees.camera.getX(), -newY);
+		context.trees().camera.nudgeTo(context.trees().camera.getX(), -newY);
 	}
 
 	public void setViewportZoom(float newZoom)
 	{
-		PhyloWidget.trees.camera.zoomTo(newZoom);
+		context.trees().camera.zoomTo(newZoom);
 	}
 
 	public void setBranchScaling(float newBranchScaling)
 	{
 		this.branchScaling = newBranchScaling;
-		PhyloWidget.ui.forceLayout();
+		context.ui().forceLayout();
 	}
 
 	public void setShowScaleBar(boolean show)
 	{
 		if (show)
 		{
-			PhyloWidget.trees.showScaleBar();
+			context.trees().showScaleBar();
 		} else
 		{
-			PhyloWidget.trees.hideScaleBar();
+			context.trees().hideScaleBar();
 		}
 	}
-	
+
 	public final static String DEFAULT_TREE = "PhyloWidget";
 
+	
+	public static Map<String, Object> getChangedFields(Object a, Object b)
+	{
+		Class aClass = a.getClass();
+		Class bClass = b.getClass();
+		if (!aClass.equals(bClass))
+		{
+			System.out.println("Classes a and b not equal!");
+		}
+
+		HashMap<String, Object> changedFields = new HashMap<String, Object>();
+
+		Field[] fields = aClass.getFields();
+		for (Field f : fields)
+		{
+			try
+			{
+				if (f.get(a).equals(f.get(b)))
+				{
+					System.out.println("Equal on field " + f.getName());
+				} else
+				{
+					changedFields.put(f.getName(), f.get(a));
+				}
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return changedFields;
+	}
 }

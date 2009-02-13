@@ -19,7 +19,7 @@ public class LayoutUnrooted extends LayoutBase
 	@Override
 	public void layoutImpl()
 	{
-		float angle = STARTING_ANGLE + PhyloWidget.cfg.layoutAngle / 360f * (float)Math.PI*2f;
+		float angle = STARTING_ANGLE + context.config().layoutAngle / 360f * (float)Math.PI*2f;
 		layoutNode((PhyloNode)tree.getRoot(),angle, angle + 2*Math.PI);
 	}
 

@@ -23,12 +23,10 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 
 import processing.core.PApplet;
@@ -407,7 +405,7 @@ public class NumberScroller extends MenuItem
 					startY = tempPt.y;
 					startVal = getValue();
 					scrolling = true;
-					UIGlobals.g.focus().setModalFocus(this.menu);
+					nearestMenu.context.focus().setModalFocus(this.menu);
 				}
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
@@ -425,7 +423,7 @@ public class NumberScroller extends MenuItem
 				{
 					e.consume();
 					scrolling = false;
-					UIGlobals.g.focus().removeFromFocus(this.menu);
+					nearestMenu.context.focus().removeFromFocus(this.menu);
 				}
 				break;
 		}

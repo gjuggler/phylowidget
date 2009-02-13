@@ -1,7 +1,7 @@
 package org.phylowidget.ui;
 
 import org.andrewberman.ui.menu.RadialLinkItem;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.tree.PhyloNode;
 
 public class PhyloLinkItem extends RadialLinkItem
@@ -38,7 +38,7 @@ public class PhyloLinkItem extends RadialLinkItem
 		/*
 		 * Try and get the annotation for the current node.
 		 */
-		PhyloNode n = PhyloWidget.ui.getCurNode();
+		PhyloNode n = PWPlatform.getInstance().getThisAppContext().ui().getCurNode();
 		if (n == null)
 			return null;
 		String value = n.getLabel();

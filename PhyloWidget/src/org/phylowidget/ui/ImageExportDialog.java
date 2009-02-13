@@ -22,8 +22,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
-import org.andrewberman.ui.UIGlobals;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.render.RenderOutput;
 import org.phylowidget.render.TreeRenderer;
 
@@ -86,8 +86,9 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		fileFormat.add("TIF");
 		
 
-		int w = UIGlobals.g.getP().width;
-		int h = UIGlobals.g.getP().height;
+		PApplet applet = PWPlatform.getInstance().getThisAppContext().getApplet();
+		int w = applet.width;
+		int h = applet.height;
 		String small = w+"x"+h;
 		String med = w*2+"x"+h*2;
 		String large = 4*w+"x"+4*h;
@@ -225,8 +226,9 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		int w = Integer.parseInt(s[0]);
 		int h = Integer.parseInt(s[1]);
 	
-		TreeRenderer r = PhyloWidget.trees.getRenderer();
-		PApplet p = UIGlobals.g.getP();
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
+		TreeRenderer r = context.trees().getRenderer();
+		PApplet p = context.getPW();
 		
 //		setEnabled(false);
 		ok.setEnabled(false);

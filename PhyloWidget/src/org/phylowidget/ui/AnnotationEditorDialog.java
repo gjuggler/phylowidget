@@ -19,6 +19,7 @@ import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 
@@ -163,7 +164,8 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 		 * node colors and whatnot... There should be a better way to avoid having to 
 		 * trigger a layout from here, but frankly I'm too lazy to think of one!
 		 */
-		PhyloWidget.ui.layout();
+		PWPlatform.getInstance().getThisAppContext().ui().layout();
+//		PhyloWidget.ui.layout();
 		node.getTree().modPlus();
 	}
 

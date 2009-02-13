@@ -25,7 +25,8 @@ import java.awt.event.MouseEvent;
 import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.UIGlobals;
+import org.andrewberman.ui.UIContext;
+import org.andrewberman.ui.UIPlatform;
 import org.andrewberman.ui.camera.Camera;
 
 import processing.core.PApplet;
@@ -33,6 +34,7 @@ import processing.core.PApplet;
 public abstract class Tool extends AbstractUIObject
 {
 	protected PApplet p;
+	protected UIContext context;
 
 	Camera camera;
 
@@ -43,6 +45,7 @@ public abstract class Tool extends AbstractUIObject
 	public Tool(PApplet p)
 	{
 		this.p = p;
+		this.context = UIPlatform.getInstance().getThisAppContext();
 		downPoint = new Point(0, 0);
 		curPoint = new Point(0, 0);
 	}
@@ -126,12 +129,12 @@ public abstract class Tool extends AbstractUIObject
 				break;
 			case (MouseEvent.MOUSE_RELEASED):
 				if (modalFocusWhileDragging())
-					UIGlobals.g.focus().removeFromFocus(this);
+					context.focus().removeFromFocus(this);
 				mousePressed = false;
 				break;
 			case (MouseEvent.MOUSE_DRAGGED):
 				if (modalFocusWhileDragging())
-					UIGlobals.g.focus().setModalFocus(this);
+					context.focus().setModalFocus(this);
 			case (MouseEvent.MOUSE_MOVED):
 				curPoint = (Point) screen.clone();
 				break;

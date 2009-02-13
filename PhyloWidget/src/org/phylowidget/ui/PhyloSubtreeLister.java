@@ -1,14 +1,10 @@
 package org.phylowidget.ui;
 
-import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIEvent;
-import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.unsorted.JSCaller;
 import org.phylowidget.PhyloTree;

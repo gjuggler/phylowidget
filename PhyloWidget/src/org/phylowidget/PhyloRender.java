@@ -6,7 +6,8 @@ public class PhyloRender
 	public static void main(String[] args) throws Exception
 	{
 		PhyloWidget.main(null);
-		PhyloWidget p = PhyloWidget.p;
+//		PhyloWidget p = PhyloWidget.p;
+		PhyloWidget p = null;
 		p.changeSetting("tree", "(a,(b,c))");
 //		p.changeSetting("viewportX", "-200");
 //		p.changeSetting("layout","unrooted");

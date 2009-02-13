@@ -20,17 +20,16 @@ package org.phylowidget.net;
 
 import java.util.ArrayList;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 
 public class NodeInfoUpdater extends DelayedAction
 {
 
-	JSCaller caller = new JSCaller(UIGlobals.g.getP());
+	JSCaller caller = new JSCaller(PWPlatform.getInstance().getThisAppContext().getApplet());
 	RootedTree tree;
 	PhyloNode node;
 //	String jsCall;

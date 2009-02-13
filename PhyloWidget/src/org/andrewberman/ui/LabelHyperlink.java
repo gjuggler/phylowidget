@@ -57,22 +57,22 @@ public class LabelHyperlink extends Label
 	{
 //		super.draw();
 		cache();
-		Color c = color;
+		Color col = color;
 		if (pressed)
-			c = color.darker(80);
+			col = color.darker(80);
 		
-		app.fill(c.getRGB());
-		app.textFont(UIGlobals.g.getPFont());
-		app.textSize(fontSize);
-		app.smooth();
-		app.textAlign(PApplet.LEFT);
-		app.text(label, x, y);
+		p.fill(col.getRGB());
+		p.textFont(c.getPFont());
+		p.textSize(fontSize);
+		p.smooth();
+		p.textAlign(PApplet.LEFT);
+		p.text(label, x, y);
 		
 		if (hovered)
 		{
-			app.strokeWeight(fontSize/10);
-			app.stroke(c.getRGB());
-			app.line(x, y+fontSize/4, x+cacheW, y+fontSize/10);
+			p.strokeWeight(fontSize/10);
+			p.stroke(col.getRGB());
+			p.line(x, y+fontSize/4, x+cacheW, y+fontSize/10);
 		}
 	}
 	
@@ -87,7 +87,7 @@ public class LabelHyperlink extends Label
 
 	void openURL()
 	{
-		app.link(getURL(),"_new");
+		p.link(getURL(),"_new");
 //		app.getAppletContext().
 	}
 	
@@ -100,7 +100,7 @@ public class LabelHyperlink extends Label
 		{
 			if (UIUtils.getCursorOwner() == null)
 			{
-				UIUtils.setCursor(this, app, Cursor.HAND_CURSOR);
+				UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
 				hovered = true;
 			}
 			
@@ -112,7 +112,7 @@ public class LabelHyperlink extends Label
 		} else
 		{
 			hovered = false;
-			UIUtils.releaseCursor(this, app);
+			UIUtils.releaseCursor(this, p);
 		}
 		if (e.getID() == MouseEvent.MOUSE_RELEASED)
 			pressed = false;

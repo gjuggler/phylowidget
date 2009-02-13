@@ -24,9 +24,9 @@ import java.awt.event.MouseEvent;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIEvent;
-import org.andrewberman.ui.UIGlobals;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.RootedTree;
@@ -35,6 +35,7 @@ import processing.core.PApplet;
 
 public class PhyloTextField extends TextField
 {
+	PWContext context;
 	NodeRange curRange;
 	String oldValue;
 
@@ -45,6 +46,7 @@ public class PhyloTextField extends TextField
 	public PhyloTextField(PApplet p)
 	{
 		super(p);
+		this.context = PWPlatform.getInstance().getThisAppContext();
 		hidden = true;
 		alwaysAnchorLeft = true;
 	}
@@ -60,7 +62,7 @@ public class PhyloTextField extends TextField
 
 	protected void startEditing(NodeRange r, int editMode)
 	{
-		PhyloWidget.setMessage("Enter to commit, Esc to revert.");
+		context.getPW().setMessage("Enter to commit, Esc to revert.");
 		this.editMode = editMode;
 		curRange = r;
 		RootedTree t = r.render.getTree();
@@ -78,14 +80,14 @@ public class PhyloTextField extends TextField
 		text.replace(0, text.length(), oldValue);
 		show();
 		selectAll();
-		UIGlobals.g.focus().setModalFocus(this);
+		context.focus().setModalFocus(this);
 	}
 
 	public void hide()
 	{
 		super.hide();
-		UIGlobals.g.focus().removeFromFocus(this);
-		PhyloWidget.setMessage("");
+		context.focus().removeFromFocus(this);
+		context.getPW().setMessage("");
 	}
 
 	void hideAndCommit()
@@ -123,12 +125,12 @@ public class PhyloTextField extends TextField
 					} catch (Exception e)
 					{
 //						e.printStackTrace();
-						PhyloWidget.ui.layout();
+						context.ui().layout();
 						return;
 					}
 			}
 			r.layoutTrigger();
-			PhyloWidget.ui.updateNodeInfo(r.getTree(), curRange.node);
+			context.ui().updateNodeInfo(r.getTree(), curRange.node);
 		}
 	}
 

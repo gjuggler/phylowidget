@@ -19,6 +19,8 @@
 package org.phylowidget.net;
 
 import org.andrewberman.ui.unsorted.DelayedAction;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.ui.TreeClipboard;
 
@@ -33,8 +35,9 @@ public class PWClipUpdater extends DelayedAction
 	
 	public void run()
 	{
-		PhyloWidget.ui.clipboard.setClipFromJS(parseMe);
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
+		context.ui().clipboard.setClipFromJS(parseMe);
 		System.out.println(parseMe.length());
-		PhyloWidget.setMessage("Clipboard text set to: "+parseMe);
+		context.getPW().setMessage("Clipboard text set to: "+parseMe);
 	}
 }

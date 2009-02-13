@@ -24,6 +24,8 @@ import java.util.HashMap;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenQuad;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
@@ -76,9 +78,12 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	private ImageSearcher searchResults;
 	public NodeRange range;
 
+	PWContext context;
+	
 	public PhyloNode()
 	{
 		super();
+		this.context = PWPlatform.getInstance().getThisAppContext();
 		xTween = new Tween(null, quad, Tween.OUT, (float) layoutX, (float) layoutX, 30f);
 		yTween = new Tween(null, quad, Tween.OUT, (float) layoutY, (float) layoutY, 30f);
 		range = new NodeRange();
@@ -111,7 +116,7 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	@Override
 	public double getBranchLength()
 	{
-		if (!PhyloWidget.cfg.useBranchLengths)
+		if (!context.config().useBranchLengths)
 			return 1;
 		return super.getBranchLength();
 	}
@@ -127,7 +132,7 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	public void update()
 	{
 		//		zoomTextSize *= 0.9f;
-		if (PhyloWidget.cfg.useAnimations)
+		if (context.config().useAnimations)
 		{
 		xTween.update();
 		yTween.update();
@@ -155,13 +160,13 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 
 	public void setLayoutX(float x)
 	{
-		xTween.continueTo(x * mult, PhyloWidget.cfg.animationFrames);
+		xTween.continueTo(x * mult, context.config().animationFrames);
 		this.layoutX = x;
 	}
 
 	public void setLayoutY(float y)
 	{
-		yTween.continueTo(y * mult, PhyloWidget.cfg.animationFrames);
+		yTween.continueTo(y * mult, context.config().animationFrames);
 		this.layoutY = y;
 	}
 
@@ -283,7 +288,7 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	 */
 	public String getAnnotation(String key)
 	{
-		if (PhyloWidget.cfg.ignoreAnnotations)
+		if (context.config().ignoreAnnotations)
 			return null;
 		if (annotations == null)
 			return null;
@@ -298,7 +303,7 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	 */
 	public HashMap<String, String> getAnnotations()
 	{
-		if (PhyloWidget.cfg.ignoreAnnotations)
+		if (context.config().ignoreAnnotations)
 			return null;
 		return annotations;
 	}

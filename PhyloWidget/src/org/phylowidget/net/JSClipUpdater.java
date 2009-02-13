@@ -18,7 +18,6 @@
  */
 package org.phylowidget.net;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
 

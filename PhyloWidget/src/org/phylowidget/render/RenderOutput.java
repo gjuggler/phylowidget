@@ -28,6 +28,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.UIUtils;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.TreeManager;
@@ -47,26 +49,29 @@ public class RenderOutput
 
 	public static Document doc;
 	
+	
+	
 	public static synchronized void savePDF(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels)
 	{
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
 		isOutputting = true;
 		RootedTree t = r.getTree();
-		float oldThreshold = PhyloWidget.cfg.renderThreshold;
-		PhyloWidget.cfg.renderThreshold = Integer.MAX_VALUE;
-		boolean oldDoubleBuff = PhyloWidget.cfg.useDoubleBuffering;
-		PhyloWidget.cfg.useDoubleBuffering = false;
-		float oldTextSize = PhyloWidget.cfg.minTextSize;
+		float oldThreshold = context.config().renderThreshold;
+		context.config().renderThreshold = Integer.MAX_VALUE;
+		boolean oldDoubleBuff = context.config().useDoubleBuffering;
+		context.config().useDoubleBuffering = false;
+		float oldTextSize = context.config().minTextSize;
 		if (showAllLabels)
-			PhyloWidget.cfg.minTextSize = 0;
+			context.config().minTextSize = 0;
 		try
 		{
-			PhyloWidget.setMessage("Outputting PDF...");
+			context.getPW().setMessage("Outputting PDF...");
 			preprocess(t);
 			//			File f = p.outputFile("Save PDF as...");
 			//			String s = p.selectOutput("Save PDF as...");
 			String fileType = "PDF";
 			FileDialog fd =
-					new FileDialog(PhyloWidget.ui.getFrame(), "Choose your desination " + fileType + " file.",
+					new FileDialog(context.ui().getFrame(), "Choose your desination " + fileType + " file.",
 							FileDialog.SAVE);
 			fd.pack();
 			fd.setVisible(true);
@@ -74,7 +79,7 @@ public class RenderOutput
 			String filename = fd.getFile();
 			if (filename == null)
 			{
-				PhyloWidget.setMessage("Output cancelled.");
+				context.getPW().setMessage("Output cancelled.");
 				return;
 			}
 			// Fix a non-PDF extension.
@@ -88,7 +93,7 @@ public class RenderOutput
 			canvas.setPath(f.getAbsolutePath());
 			canvas.setSize(p.width, p.height);
 			canvas.beginDraw();
-			if (PhyloWidget.cfg.debug)
+			if (context.config().debug)
 				System.out.println("BEGIN DRAW");
 
 			/*
@@ -100,7 +105,7 @@ public class RenderOutput
 			{
 				TreeManager.camera.fillScreen(0.5f);
 				TreeManager.camera.fforward();
-				PhyloWidget.trees.update();
+				context.trees().update();
 				rect = TreeManager.cameraRect;
 			}
 			/*
@@ -108,20 +113,20 @@ public class RenderOutput
 			 */
 			r.render(canvas, rect.x, rect.y, rect.width, rect.height, true);
 
-			if (PhyloWidget.cfg.debug)
+			if (context.config().debug)
 				System.out.println("END DRAW");
 			canvas.endDraw();
 			canvas.dispose();
-			PhyloWidget.setMessage("Output complete.");
+			context.getPW().setMessage("Output complete.");
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			PhyloWidget.setMessage("PDF output failed: " + e.getMessage());
+			context.getPW().setMessage("PDF output failed: " + e.getMessage());
 		} finally
 		{
-			PhyloWidget.cfg.renderThreshold = oldThreshold;
-			PhyloWidget.cfg.minTextSize = oldTextSize;
-			PhyloWidget.cfg.useDoubleBuffering = oldDoubleBuff;
+			context.config().renderThreshold = oldThreshold;
+			context.config().minTextSize = oldTextSize;
+			context.config().useDoubleBuffering = oldDoubleBuff;
 			isOutputting = false;
 			p.loop();
 		}
@@ -130,22 +135,23 @@ public class RenderOutput
 	public static synchronized void save(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels,
 			String fileType, int w, int h)
 	{
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
 		isOutputting = true;
-		float oldThreshold = PhyloWidget.cfg.renderThreshold;
-		PhyloWidget.cfg.renderThreshold = Integer.MAX_VALUE;
-		boolean oldDoubleBuff = PhyloWidget.cfg.useDoubleBuffering;
-		PhyloWidget.cfg.useDoubleBuffering = false;
-		float oldTextSize = PhyloWidget.cfg.minTextSize;
+		float oldThreshold = context.config().renderThreshold;
+		context.config().renderThreshold = Integer.MAX_VALUE;
+		boolean oldDoubleBuff = context.config().useDoubleBuffering;
+		context.config().useDoubleBuffering = false;
+		float oldTextSize = context.config().minTextSize;
 		if (showAllLabels)
-			PhyloWidget.cfg.minTextSize = 0;
+			context.config().minTextSize = 0;
 		try
 		{
-			PhyloWidget.setMessage("Outputting image...");
+			context.getPW().setMessage("Outputting image...");
 			RootedTree t = r.getTree();
 			preprocess(t);
 
 			FileDialog fd =
-					new FileDialog(PhyloWidget.ui.getFrame(), "Choose your desination " + fileType + " file.",
+					new FileDialog(context.ui().getFrame(), "Choose your desination " + fileType + " file.",
 							FileDialog.SAVE);
 			fd.pack();
 			fd.setVisible(true);
@@ -153,7 +159,7 @@ public class RenderOutput
 			String filename = fd.getFile();
 			if (filename == null)
 			{
-				PhyloWidget.setMessage("Output cancelled.");
+				context.getPW().setMessage("Output cancelled.");
 				return;
 			}
 			if (!filename.toLowerCase().endsWith(fileType.toLowerCase()))
@@ -199,18 +205,18 @@ public class RenderOutput
 			canvas.g2 = oldG2;
 			canvas.width = oldW;
 			canvas.height = oldH;
-			PhyloWidget.setMessage("Output complete.");
+			context.getPW().setMessage("Output complete.");
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			PhyloWidget.setMessage("Output failed: " + e.getMessage());
+			context.getPW().setMessage("Output failed: " + e.getMessage());
 			System.gc();
 			return;
 		} finally
 		{
-			PhyloWidget.cfg.renderThreshold = oldThreshold;
-			PhyloWidget.cfg.minTextSize = oldTextSize;
-			PhyloWidget.cfg.useDoubleBuffering = oldDoubleBuff;
+			context.config().renderThreshold = oldThreshold;
+			context.config().minTextSize = oldTextSize;
+			context.config().useDoubleBuffering = oldDoubleBuff;
 			isOutputting = false;
 			p.loop();
 		}
@@ -236,7 +242,9 @@ public class RenderOutput
 			PhyloNode n = (PhyloNode) nodes.get(i);
 			n.setState(PhyloNode.NONE);
 		}
-		PhyloTree pt = (PhyloTree) PhyloWidget.trees.getTree();
+		
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
+		PhyloTree pt = (PhyloTree) context.trees().getTree();
 		pt.hoveredNode = null;
 	}
 }

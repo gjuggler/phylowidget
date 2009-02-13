@@ -22,10 +22,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.ifaces.UIObject;
-import org.andrewberman.ui.tools.Tool;
 
 import processing.core.PApplet;
 
@@ -36,7 +33,7 @@ public class ToolDock extends Dock implements UIObject
 	public ToolDock(PApplet app)
 	{
 		super(app);
-		UIGlobals.g.tools().setToolDock(this);
+		context.tools().setToolDock(this);
 	}
 
 	public MenuItem create(String s)
@@ -49,7 +46,7 @@ public class ToolDock extends Dock implements UIObject
 
 	public void keyEvent(KeyEvent e)
 	{
-		UIGlobals.g.getToolManager().checkToolShortcuts(e);
+		context.getToolManager().checkToolShortcuts(e);
 	}
 
 	public void selectItem(MenuItem item, boolean performAction)

@@ -26,7 +26,7 @@ public class LayoutCircular extends LayoutBase
 	public synchronized void layoutImpl()
 	{
 			numLeaves = leaves.length;
-			curAngle = STARTING_ANGLE + PhyloWidget.cfg.layoutAngle / 360f * (float)Math.PI*2f;
+			curAngle = STARTING_ANGLE + context.config().layoutAngle / 360f * (float)Math.PI*2f;
 			int index = 0;
 			for (PhyloNode leaf : leaves)
 			{
@@ -67,7 +67,7 @@ public class LayoutCircular extends LayoutBase
 		float hiAngle = hiAngle(cAr.angle,pAr.angle);
 		canvas.arc(rootX, rootY, pRad, pRad, loAngle, hiAngle);
 
-		if (!PhyloWidget.cfg.useBranchLengths || !tree.isLeaf(c))
+		if (!context.config().useBranchLengths || !tree.isLeaf(c))
 		{
 			if (UIUtils.isJava2D(canvas))
 			{
@@ -206,12 +206,12 @@ public class LayoutCircular extends LayoutBase
 //		theta = theta % (float)Math.PI * 2f;
 		float radius = 1;
 		float leafRadius = 1;
-		if (PhyloWidget.cfg.useBranchLengths)
+		if (context.config().useBranchLengths)
 			leafRadius = calcRadius(n);
 
 		float yPos = (float) Math.sin(theta) * radius;
 		float xPos = (float) Math.cos(theta) * radius;
-		//		if (PhyloWidget.cfg.useBranchLengths)
+		//		if (context.config().useBranchLengths)
 		//		xPos = calcXPosition(n);
 		setPosition(n, xPos, yPos);
 		setAngle(n, theta);
@@ -220,7 +220,7 @@ public class LayoutCircular extends LayoutBase
 
 	private float calcRadius(PhyloNode n)
 	{
-		if (PhyloWidget.cfg.useBranchLengths)
+		if (context.config().useBranchLengths)
 		{
 			if (tree.isRoot(n))
 				return 0;

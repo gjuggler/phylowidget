@@ -8,7 +8,7 @@ import java.net.URL;
 
 import javax.swing.JLabel;
 
-import org.andrewberman.ui.UIGlobals;
+import org.phylowidget.PWPlatform;
 
 public class HyperlinkLabel extends JLabel implements MouseListener
 {
@@ -41,7 +41,7 @@ public class HyperlinkLabel extends JLabel implements MouseListener
 		{
 			String url = getUrl();
 			URL realURL = new URL(url);
-			UIGlobals.g.getP().getAppletContext().showDocument(realURL,"_new");
+			PWPlatform.getInstance().getThisAppContext().getApplet().getAppletContext().showDocument(realURL,"_new");
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();

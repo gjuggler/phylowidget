@@ -45,9 +45,9 @@ public class ShortcutManager implements KeyListener
 
 	int meta = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-	public ShortcutManager(PApplet app)
+	public ShortcutManager(UIContext app)
 	{
-		p = app;
+		p = app.getApplet();
 		keys = new ArrayList();
 		setup();
 	}

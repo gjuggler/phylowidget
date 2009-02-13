@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.TextField;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
@@ -32,6 +34,8 @@ public final class NodeRenderer implements UsefulConstants
 	static FontMetrics fm;
 	static BasicTreeRenderer r;
 
+	static PWContext context = PWPlatform.getInstance().getThisAppContext();
+	
 	static float[] ZEROES = new float[] { 0, 0 };
 
 	/*
@@ -74,7 +78,7 @@ public final class NodeRenderer implements UsefulConstants
 		float y = n.getY();
 		if (r.treeLayout instanceof LayoutCladogram && r.tree.isLeaf(n))
 		{
-			if (PhyloWidget.cfg.alignLabels || n.getAnnotation("cigar") != null)
+			if (context.config().alignLabels || n.getAnnotation("cigar") != null)
 			{
 				PhyloNode mostDistant = (PhyloNode) r.tree.getFurthestLeafFromVertex(r.tree.getRoot());
 				x = mostDistant.getX();
@@ -94,9 +98,9 @@ public final class NodeRenderer implements UsefulConstants
 		float rowHeight = r.getTextSize();
 		float dotWidth = r.getNodeOffset(n);
 
-		if (PhyloWidget.cfg.treatNodesAsLabels)
+		if (context.config().treatNodesAsLabels)
 		{
-			boolean drawNode = (actuallyRender && n.drawLabel) || PhyloWidget.cfg.showAllLeafNodes;
+			boolean drawNode = (actuallyRender && n.drawLabel) || context.config().showAllLeafNodes;
 			nr.render(canvas, n, drawNode, true);
 		}
 
@@ -122,10 +126,10 @@ public final class NodeRenderer implements UsefulConstants
 			boolean drawNode = (actuallyRender && n.drawLineAndNode);
 			if (ri == nr)
 			{
-				if (PhyloWidget.cfg.treatNodesAsLabels)
+				if (context.config().treatNodesAsLabels)
 					continue;
 				// GJ 19-09-08 clarify: this is a special case, where we want all nodes to be drawn.
-				drawNode = (actuallyRender && n.drawLineAndNode) || PhyloWidget.cfg.showAllLeafNodes;
+				drawNode = (actuallyRender && n.drawLineAndNode) || context.config().showAllLeafNodes;
 			}
 			ri.render(canvas, n, drawNode, false);
 		}
@@ -244,7 +248,7 @@ public final class NodeRenderer implements UsefulConstants
 			// Multiply by inner ratio.
 			if (!r.tree.isLeaf(n))
 			{
-				thisDotSize *= PhyloWidget.cfg.innerNodeRatio;
+				thisDotSize *= context.config().innerNodeRatio;
 			}
 
 			// Look for the NSZ annotations.
@@ -268,7 +272,7 @@ public final class NodeRenderer implements UsefulConstants
 
 			if (thisDotSize == 0)
 				return ZEROES;
-			if (n.isNHX() && PhyloWidget.cfg.colorDuplications && !tree.isLeaf(n))
+			if (n.isNHX() && context.config().colorDuplications && !tree.isLeaf(n))
 			{
 				String s = n.getAnnotation(DUPLICATION);
 				if (s != null)
@@ -286,7 +290,7 @@ public final class NodeRenderer implements UsefulConstants
 			// Transparent google chart: http://chart.apis.google.com/chart?cht=p&chd=t:60,40&chs=50x50&chf=bg,s,FFFFFF00
 			
 			// GJ 19-09-08: Try out registering node points for overlap...
-			if (PhyloWidget.cfg.treatNodesAsLabels)
+			if (context.config().treatNodesAsLabels)
 			{
 				registerPoint(canvas, n, offX - thisDotSize / 2, offY - thisDotSize / 2);
 				registerPoint(canvas, n, offX + thisDotSize / 2, offY + thisDotSize / 2);
@@ -361,7 +365,7 @@ public final class NodeRenderer implements UsefulConstants
 		static int getNodeShape(PhyloNode n)
 		{
 			String annotation = n.getAnnotation(UsefulConstants.NODE_SHAPE);
-			String shape = PhyloWidget.cfg.nodeShape.toLowerCase();
+			String shape = context.config().nodeShape.toLowerCase();
 			if (annotation != null)
 			{
 				shape = annotation.toLowerCase();
@@ -384,7 +388,7 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				return RenderConstants.foundColor.getRGB();
 			}
-			if (n == ((PhyloTree) r.tree).hoveredNode && PhyloWidget.cfg.colorHoveredBranch)
+			if (n == ((PhyloTree) r.tree).hoveredNode && context.config().colorHoveredBranch)
 			{
 				return RenderConstants.hoverColor.getRGB();
 			}
@@ -396,7 +400,7 @@ public final class NodeRenderer implements UsefulConstants
 					return RenderConstants.copyColor.getRGB();
 				case (PhyloNode.NONE):
 				default:
-					int c = PhyloWidget.cfg.getNodeColor().getRGB();
+					int c = context.config().getNodeColor().getRGB();
 
 					String nodeColor = n.getAnnotation(NODE_COLOR);
 					if (nodeColor != null)
@@ -443,20 +447,20 @@ public final class NodeRenderer implements UsefulConstants
 			r.canvas.stroke(lineColor(c));
 
 			PhyloTree tree = (PhyloTree) r.getTree();
-			if (c == tree.hoveredNode && PhyloWidget.cfg.colorHoveredBranch)
+			if (c == tree.hoveredNode && context.config().colorHoveredBranch)
 			{
 				r.canvas.stroke(RenderConstants.hoverColor.getRGB());
 				r.canvas.strokeWeight(weight * RenderConstants.hoverStroke);
 			}
 
-			if (c.isNHX() && PhyloWidget.cfg.colorBootstrap && !c.found)
+			if (c.isNHX() && context.config().colorBootstrap && !c.found)
 			{
 				double d = getFloatAnnotation(c, BOOTSTRAP);
 				if (d > -1)
 				{
 					d = (100 - d) * 200f / 100f;
 					d = r.clamp(d, 0, 255);
-					r.canvas.stroke(PhyloWidget.cfg.getBranchColor().brighter(d).getRGB());
+					r.canvas.stroke(context.config().getBranchColor().brighter(d).getRGB());
 				}
 			}
 			r.getTreeLayout().drawLine(r.canvas, p, c);
@@ -487,7 +491,7 @@ public final class NodeRenderer implements UsefulConstants
 					return RenderConstants.copyColor.getRGB();
 				case (PhyloNode.NONE):
 				default:
-					int c = PhyloWidget.cfg.getBranchColor().getRGB();
+					int c = context.config().getBranchColor().getRGB();
 					String branchColor = n.getAnnotation(BRANCH_COLOR);
 					if (branchColor != null)
 					{
@@ -511,9 +515,9 @@ public final class NodeRenderer implements UsefulConstants
 
 		private float imageSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
-			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.imageSize * n.bulgeFactor;
-			if (!PhyloWidget.cfg.showAllLabels)
-				thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+			float thisRowSize = r.getTextSize() * context.config().imageSize * n.bulgeFactor;
+			if (!context.config().showAllLabels)
+				thisRowSize = Math.max(thisRowSize, context.config().minTextSize);
 
 			// If we find a NHX image size annotation, scale accordingly.
 			float iMult = getFloatAnnotation(n, IMAGE_SIZE);
@@ -552,7 +556,7 @@ public final class NodeRenderer implements UsefulConstants
 					dx -= scaledW;
 
 				Image img = null;
-				if (RenderOutput.isOutputting && PhyloWidget.cfg.outputFullSizeImages)
+				if (RenderOutput.isOutputting && context.config().outputFullSizeImages)
 				{
 					try
 					{
@@ -560,7 +564,7 @@ public final class NodeRenderer implements UsefulConstants
 					} catch (Exception e)
 					{
 						e.printStackTrace();
-						img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+						img = context.trees().imageLoader.getImageForNode(n);
 					}
 				} else
 				{
@@ -570,7 +574,7 @@ public final class NodeRenderer implements UsefulConstants
 						System.out.println("Loading full image...");
 						n.loadFullImage();
 					}
-					img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+					img = context.trees().imageLoader.getImageForNode(n);
 				}
 				if (img != null)
 				{
@@ -595,7 +599,7 @@ public final class NodeRenderer implements UsefulConstants
 
 		public float[] imageSize(PhyloNode n, float rowHeight)
 		{
-			Image img = PhyloWidget.trees.imageLoader.getImageForNode(n);
+			Image img = context.trees().imageLoader.getImageForNode(n);
 			if (img == null)
 				return new float[] { 0, 0 };
 
@@ -661,9 +665,9 @@ public final class NodeRenderer implements UsefulConstants
 				return ZEROES;
 			}
 
-			if (PhyloWidget.cfg.textRotation != 0)
+			if (context.config().textRotation != 0)
 			{
-				canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
+				canvas.rotate(PApplet.radians(context.config().textRotation));
 			}
 
 			RootedTree tree = r.tree;
@@ -701,7 +705,7 @@ public final class NodeRenderer implements UsefulConstants
 
 			if (!tree.isLeaf(n))
 			{
-				if (PhyloWidget.cfg.showCladeLabels)
+				if (context.config().showCladeLabels)
 				{
 					float s = strokeForNode(n);
 
@@ -731,9 +735,9 @@ public final class NodeRenderer implements UsefulConstants
 				}
 			} else
 			{
-//				if (PhyloWidget.cfg.textRotation != 0)
+//				if (context.config().textRotation != 0)
 //				{
-//					canvas.rotate(-PApplet.radians(PhyloWidget.cfg.textRotation));
+//					canvas.rotate(-PApplet.radians(context.config().textRotation));
 //				}
 				if (alignRight)
 				{
@@ -749,9 +753,9 @@ public final class NodeRenderer implements UsefulConstants
 					registerPoint(canvas, n, dx, curTextSize / 2);
 					
 				}
-//				if (PhyloWidget.cfg.textRotation != 0)
+//				if (context.config().textRotation != 0)
 //				{
-//					canvas.rotate(PApplet.radians(PhyloWidget.cfg.textRotation));
+//					canvas.rotate(PApplet.radians(context.config().textRotation));
 //				}
 				if (actuallyRender)
 					canvas.text(tree.getLabel(n), 0, 0 + r.dFont * curTextSize / r.textSize);
@@ -769,16 +773,16 @@ public final class NodeRenderer implements UsefulConstants
 			boolean alwaysShow = false;
 			if (always != null && always.equals("1"))
 				alwaysShow = true;
-			if (PhyloWidget.cfg.hideAllLabels && !alwaysShow)
+			if (context.config().hideAllLabels && !alwaysShow)
 				return 0;
-			float thisRowSize = r.getTextSize() * PhyloWidget.cfg.textScaling * n.bulgeFactor;
+			float thisRowSize = r.getTextSize() * context.config().textScaling * n.bulgeFactor;
 
-			if (PhyloWidget.cfg.showAllLabels) // If showing all labels, don't do the mintext setting.
-				return r.getTextSize() * PhyloWidget.cfg.textScaling;
+			if (context.config().showAllLabels) // If showing all labels, don't do the mintext setting.
+				return r.getTextSize() * context.config().textScaling;
 
-//			thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
-			if (thisRowSize < PhyloWidget.cfg.minTextSize)
-				thisRowSize = PhyloWidget.cfg.minTextSize;
+//			thisRowSize = Math.max(thisRowSize, context.config().minTextSize);
+			if (thisRowSize < context.config().minTextSize)
+				thisRowSize = context.config().minTextSize;
 			return thisRowSize;
 		}
 
@@ -786,7 +790,7 @@ public final class NodeRenderer implements UsefulConstants
 		{
 			if (r.getTree().isCollapsed(n))
 			{
-				return PhyloWidget.cfg.getTextColor().brighter(128).getRGB();
+				return context.config().getTextColor().brighter(128).getRGB();
 			}
 			if (n.isNHX())
 			{
@@ -797,17 +801,17 @@ public final class NodeRenderer implements UsefulConstants
 				if (labelColor != null)
 				{
 					c = Color.parseColor(labelColor).getRGB();
-				} else if (tax != null && PhyloWidget.cfg.colorSpecies)
+				} else if (tax != null && context.config().colorSpecies)
 				{
 					c = taxonColorMap.get(tax).intValue();
-				} else if (spec != null && PhyloWidget.cfg.colorSpecies)
+				} else if (spec != null && context.config().colorSpecies)
 				{
 					c = taxonColorMap.get(spec);
 				}
 				return c;
 			} else
 			{
-				return PhyloWidget.cfg.getTextColor().getRGB();
+				return context.config().getTextColor().getRGB();
 			}
 		}
 
@@ -861,7 +865,7 @@ public final class NodeRenderer implements UsefulConstants
 
 			// Calculate how much to scale the aligned blocks.
 			float thisRowSize = cigarSizeForNode(r, n);
-			float totalWidth = PhyloWidget.cfg.cigarScaling * thisRowSize;
+			float totalWidth = context.config().cigarScaling * thisRowSize;
 			float widthPerBp = totalWidth / (float) length;
 
 			if (actuallyRender)
@@ -914,8 +918,8 @@ public final class NodeRenderer implements UsefulConstants
 		private float cigarSizeForNode(BasicTreeRenderer r, PhyloNode n)
 		{
 			float thisRowSize = r.getTextSize();
-			if (!PhyloWidget.cfg.showAllLabels)
-				thisRowSize = Math.max(thisRowSize, PhyloWidget.cfg.minTextSize);
+			if (!context.config().showAllLabels)
+				thisRowSize = Math.max(thisRowSize, context.config().minTextSize);
 
 			// If we find a NHX image size annotation, scale accordingly.
 			float iMult = getFloatAnnotation(n, CIGAR_SIZE);
@@ -938,7 +942,7 @@ public final class NodeRenderer implements UsefulConstants
 					return c;
 				}
 			}
-			return PhyloWidget.cfg.getAlignmentColor().getRGB();
+			return context.config().getAlignmentColor().getRGB();
 		}
 	}
 

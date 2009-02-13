@@ -2,9 +2,12 @@ package org.phylowidget.render;
 
 import java.awt.geom.Rectangle2D;
 
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.ui.PhyloConfig;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -15,6 +18,8 @@ public abstract class LayoutBase
 	protected PhyloNode[] leaves;
 	protected PhyloNode[] nodes;
 
+	protected PWContext context = PWPlatform.getInstance().getThisAppContext();
+	
 	protected double loX;
 	protected double loY;
 	protected double hiX;
@@ -45,9 +50,10 @@ public abstract class LayoutBase
 		loX = loY = Double.MAX_VALUE;
 		hiX = hiY = Double.MIN_VALUE;
 
-		if (PhyloWidget.cfg.angleHandling.toLowerCase().equals("quantize"))
+		PhyloConfig cfg = PWPlatform.getInstance().getThisAppContext().config();
+		if (cfg.angleHandling.toLowerCase().equals("quantize"))
 			angleHandling = ANGLE_QUANTIZE;
-		else if (PhyloWidget.cfg.angleHandling.toLowerCase().equals("level"))
+		else if (cfg.angleHandling.toLowerCase().equals("level"))
 			angleHandling = ANGLE_LEVEL;
 		else
 			angleHandling = ANGLE_NONE;

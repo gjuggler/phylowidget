@@ -42,6 +42,7 @@ import javax.imageio.ImageIO;
 
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 import org.phylowidget.render.images.ImageLoader;
@@ -135,7 +136,8 @@ public class TreeIO
 			} catch (SecurityException e)
 			{
 				e.printStackTrace();
-				PhyloWidget.setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
+				
+				PWPlatform.getInstance().getThisAppContext().getPW().setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
 			} catch (MalformedURLException e)
 			{
 				e.printStackTrace();
@@ -580,7 +582,7 @@ public class TreeIO
 			 * 
 			 * 2. double-escape single quotes
 			 */
-			if (PhyloWidget.cfg.scrapeNaughtyChars)
+			if (PWPlatform.getInstance().getThisAppContext().config().scrapeNaughtyChars)
 			{
 				/*
 				 * If this setting is set, simply scrape away naughty characters from the label.
@@ -605,7 +607,7 @@ public class TreeIO
 		 */
 		if (!includeStupidLabels && !t.isLabelSignificant(s) && !t.isLeaf(v))
 		{
-			boolean pr = PhyloWidget.cfg.outputAllInnerNodes;
+			boolean pr = PWPlatform.getInstance().getThisAppContext().config().outputAllInnerNodes;
 			if (!pr)
 			{
 				s = "";
@@ -741,7 +743,7 @@ public class TreeIO
 
 	public static void outputTreeImages(RootedTree t, File dir)
 	{
-		ImageLoader loader = PhyloWidget.trees.imageLoader;
+		ImageLoader loader = PWPlatform.getInstance().getThisAppContext().trees().imageLoader;
 		ArrayList<PhyloNode> nodes = new ArrayList<PhyloNode>();
 		t.getAll(t.getRoot(), null, nodes);
 

@@ -35,7 +35,7 @@ import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
 import org.andrewberman.ui.UIEvent;
-import org.andrewberman.ui.UIGlobals;
+import org.andrewberman.ui.UIPlatform;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.ifaces.Malleable;
 import org.andrewberman.ui.ifaces.Positionable;
@@ -167,7 +167,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		items = new ArrayList<MenuItem>(1);
 		zSortedItems = new ArrayList<MenuItem>(1);
 		style = new MenuStyle();
-		timer = UIGlobals.g.getMenuTimer();
+		timer = UIPlatform.getInstance().getThisAppContext().getMenuTimer();
 	}
 
 	ArrayList<MenuItem> itemsToAdd = new ArrayList();
@@ -853,7 +853,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public MenuItem setShortcut(String s)
 	{
-		shortcut = UIGlobals.g.shortcuts().createShortcut(s);
+		shortcut = UIPlatform.getInstance().getThisAppContext().shortcuts().createShortcut(s);
 		if (action != null)
 		{
 			shortcut.action = action;

@@ -86,7 +86,8 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	static final int OFFSET = 10;
 
-	PApplet canvas;
+	PApplet p;
+	UIContext c;
 	PGraphicsJava2D pg;
 	TextFieldStyle style;
 	PFont pFont;
@@ -123,10 +124,12 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public TextField(PApplet p)
 	{
+		c = UIPlatform.getInstance().getThisAppContext();
+		
 		StringClipboard.lazyLoad();
 		Blinker.lazyLoad();
 
-		canvas = p;
+		this.p = p;
 		style = new TextFieldStyle();
 		style.set("f.fontSize", 12);
 		pFont = style.getFont("font");
@@ -140,12 +143,12 @@ public class TextField extends AbstractUIObject implements Malleable
 		x = 0;
 		y = 0;
 
-		if (UIUtils.isJava2D(canvas))
+		if (UIUtils.isJava2D(p))
 		{
 			/*
 			 * If the canvas is Java2D, we can draw directly to it.
 			 */
-			pg = (PGraphicsJava2D) canvas.g;
+			pg = (PGraphicsJava2D) p.g;
 			layout();
 		} else
 		{
@@ -153,12 +156,12 @@ public class TextField extends AbstractUIObject implements Malleable
 			pg = createBuffer(OFFSET, OFFSET);
 			layout();
 		}
-		UIGlobals.g.event().add(this);
+		c.event().add(this);
 	}
 
 	PGraphicsJava2D createBuffer(int w, int h)
 	{
-		PGraphicsJava2D asdf = (PGraphicsJava2D) canvas.createGraphics(w, h, PApplet.JAVA2D);
+		PGraphicsJava2D asdf = (PGraphicsJava2D) p.createGraphics(w, h, PApplet.JAVA2D);
 		return asdf;
 	}
 
@@ -184,7 +187,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		height = textHeight;
 		offsetY = ascent;
 
-		if (!UIUtils.isJava2D(canvas))
+		if (!UIUtils.isJava2D(p))
 		{
 			float fullHeight = height + pad * 2 + OFFSET * 2;
 			float fullWidth = width + pad * 2 + OFFSET * 2;
@@ -200,9 +203,9 @@ public class TextField extends AbstractUIObject implements Malleable
 			return;
 		calculateViewport();
 		// hint();
-		canvas.pushMatrix();
+		p.pushMatrix();
 		resetMatrix();
-		if (!UIUtils.isJava2D(canvas))
+		if (!UIUtils.isJava2D(p))
 		{
 			pg.beginDraw();
 			pg.background(255, 0);
@@ -221,13 +224,13 @@ public class TextField extends AbstractUIObject implements Malleable
 				doTheDrawing();
 			}
 		}
-		canvas.popMatrix();
+		p.popMatrix();
 	}
 
 	public void hide()
 	{
 		hidden = true;
-		UIUtils.releaseCursor(this, canvas);
+		UIUtils.releaseCursor(this, p);
 	}
 
 	public void show()
@@ -241,7 +244,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		int h = (int) (height + OFFSET * 2);
 		// canvas.pushMatrix();
 		// resetMatrix();
-		canvas.image(pg, (int) (x - OFFSET), (int) (y - OFFSET), w, h, 0, 0, w, h);
+		p.image(pg, (int) (x - OFFSET), (int) (y - OFFSET), w, h, 0, 0, w, h);
 		// canvas.popMatrix();
 	}
 
@@ -249,18 +252,18 @@ public class TextField extends AbstractUIObject implements Malleable
 	{
 		if (useCameraCoordinates)
 			return;
-		if (UIUtils.isJava2D(canvas))
-			canvas.resetMatrix();
+		if (UIUtils.isJava2D(p))
+			p.resetMatrix();
 		else
 		{
-			canvas.camera();
+			p.camera();
 			// canvas.translate(-canvas.width/2,-canvas.height/2);
 		}
 	}
 
 	public void dispose()
 	{
-		UIGlobals.g.event().remove(this);
+		c.event().remove(this);
 		blinker.stop();
 		blinker = null;
 	}
@@ -312,7 +315,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		/*
 		 * Draw the caret.
 		 */
-		if (blinker.isOn && UIGlobals.g.focus().isFocused(this) && selHi - selLo == 0)
+		if (blinker.isOn && c.focus().isFocused(this) && selHi - selLo == 0)
 		{
 			// System.out.println("Heyoo");
 			pg.g2.setStroke(new BasicStroke(1));
@@ -722,7 +725,7 @@ public class TextField extends AbstractUIObject implements Malleable
 	{
 		if (hidden)
 			return;
-		if (!UIGlobals.g.focus().isFocused(this))
+		if (!c.focus().isFocused(this))
 		{
 			return;
 		}
@@ -875,10 +878,10 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			mouseDragging = false;
 
-			if (UIGlobals.g.focus().isFocused(this) && UIGlobals.g.focus().isModal())
+			if (c.focus().isFocused(this) && c.focus().isModal())
 			{
-				UIGlobals.g.focus().removeFromFocus(this);
-				UIGlobals.g.focus().setFocus(this);
+				c.focus().removeFromFocus(this);
+				c.focus().setFocus(this);
 			}
 		}
 		if (e.getID() == MouseEvent.MOUSE_MOVED || e.getID() == MouseEvent.MOUSE_RELEASED
@@ -886,10 +889,10 @@ public class TextField extends AbstractUIObject implements Malleable
 		{
 			if (withinInnerRect(pt) || mouseDragging)
 			{
-				UIUtils.setCursor(this, canvas, Cursor.TEXT_CURSOR);
+				UIUtils.setCursor(this, p, Cursor.TEXT_CURSOR);
 			} else
 			{
-				UIUtils.releaseCursor(this, canvas);
+				UIUtils.releaseCursor(this, p);
 			}
 			return;
 		}
@@ -904,7 +907,7 @@ public class TextField extends AbstractUIObject implements Malleable
 			if (withinInnerRect(pt) || mouseDragging) // contained within text
 			// area.
 			{
-				UIGlobals.g.focus().setFocus(this);
+				c.focus().setFocus(this);
 				// Find the correct insertion point.
 				int insertionIndex = viewLo;
 				float ult = x + getPosForIndex(viewLo);
@@ -928,7 +931,7 @@ public class TextField extends AbstractUIObject implements Malleable
 				if (e.getID() == MouseEvent.MOUSE_DRAGGED)
 				{
 					mouseDragging = true;
-					UIGlobals.g.focus().setModalFocus(this);
+					c.focus().setModalFocus(this);
 					mouseDragPos = pt.x;
 					// if (insertionIndex <= viewLo || insertionIndex >= viewHi)
 					if (insertionIndex > 1 && insertionIndex < text.length() - 1)
@@ -958,7 +961,7 @@ public class TextField extends AbstractUIObject implements Malleable
 		} else if (e.getID() == MouseEvent.MOUSE_PRESSED)
 		{
 			// Point is not contained within this box, so unset focus.
-			if (UIGlobals.g.focus().removeFromFocus(this))
+			if (c.focus().removeFromFocus(this))
 				clearSelection();
 		}
 	}

@@ -24,7 +24,8 @@ import processing.core.PApplet;
 
 public class Label extends AbstractUIObject implements Malleable
 {
-	PApplet app;
+	PApplet p;
+	protected UIContext c;
 
 	String label;
 
@@ -34,8 +35,9 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public Label(PApplet p)
 	{
-		this.app = p;
-		UIGlobals.g.event().add(this);
+		this.p = p;
+		c = UIPlatform.getInstance().getThisAppContext();
+		c.event().add(this);
 
 		color = new Color(Color.black);
 		label = "";
@@ -46,8 +48,8 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void dispose()
 	{
-		UIGlobals.g.event().remove(this);
-		app = null;
+		c.event().remove(this);
+		p = null;
 		label = null;
 		color = null;
 	}
@@ -70,13 +72,13 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void draw()
 	{
-		if (UIUtils.isJava2D(app))
-			app.smooth();
-		app.fill(color.getRGB());
-		app.textFont(UIGlobals.g.getPFont());
-		app.textSize(fontSize);
-		app.textAlign(PApplet.LEFT);
-		app.text(label, x, y);
+		if (UIUtils.isJava2D(p))
+			p.smooth();
+		p.fill(color.getRGB());
+		p.textFont(c.getPFont());
+		p.textSize(fontSize);
+		p.textAlign(PApplet.LEFT);
+		p.text(label, x, y);
 	}
 
 	public float getX()
@@ -147,13 +149,13 @@ public class Label extends AbstractUIObject implements Malleable
 			return;
 		cacheS = label;
 		cacheFS = fontSize;
-		cacheH = UIUtils.getTextHeight(app.g, UIGlobals.g.getPFont(),
+		cacheH = UIUtils.getTextHeight(p.g, c.getPFont(),
 				fontSize, label, true);
-		cacheW = UIUtils.getTextWidth(app.g, UIGlobals.g.getPFont(),
+		cacheW = UIUtils.getTextWidth(p.g, c.getPFont(),
 				fontSize, label, true);
-		cacheA = UIUtils.getTextAscent(app.g, UIGlobals.g.getPFont(),
+		cacheA = UIUtils.getTextAscent(p.g, c.getPFont(),
 				fontSize, true);
-		cacheD = UIUtils.getTextDescent(app.g, UIGlobals.g.getPFont(),
+		cacheD = UIUtils.getTextDescent(p.g, c.getPFont(),
 				fontSize, true);
 	}
 

@@ -19,12 +19,8 @@
 package org.andrewberman.ui.menu;
 
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Constructor;
 
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.tools.Tool;
-
-import processing.core.PApplet;
 
 public class ToolDockItem extends DockItem
 {
@@ -49,7 +45,7 @@ public class ToolDockItem extends DockItem
 
 	public void setTool(String toolClass)
 	{
-		tool = UIGlobals.g.getToolManager().createTool(getName(), toolClass);
+		tool = nearestMenu.context.getToolManager().createTool(getName(), toolClass);
 		if (shortcutString != null)
 			tool.setShortcut(shortcutString);
 	}
@@ -71,6 +67,6 @@ public class ToolDockItem extends DockItem
 //		System.out.println(tool);
 //		System.out.println(UIGlobals.g.tools().getCurrentTool());
 //		if (tool != UIGlobals.g.tools().getCurrentTool())
-		UIGlobals.g.tools().switchTool(getName());
+		nearestMenu.context.tools().switchTool(getName());
 	}
 }

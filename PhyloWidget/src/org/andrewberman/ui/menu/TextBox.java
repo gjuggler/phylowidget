@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent;
 import org.andrewberman.ui.LayoutUtils;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
-import org.andrewberman.ui.UIGlobals;
 
 import processing.core.PApplet;
 
@@ -54,7 +53,7 @@ public class TextBox extends Menu
 	public void performAction()
 	{
 		super.performAction();
-		UIGlobals.g.focus().removeFromFocus(tf);
+		context.focus().removeFromFocus(tf);
 	}
 	
 	@Override

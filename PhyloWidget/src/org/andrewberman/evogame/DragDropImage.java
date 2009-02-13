@@ -5,7 +5,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 
 import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.tween.PropertyTween;
@@ -257,7 +256,8 @@ public class DragDropImage extends Menu
 
 	PhyloNode getTarget()
 	{
-		return EvoGameApplet.ui.getHoveredNode();
+		return null;
+//		return EvoGameApplet.ui.getHoveredNode();
 	}
 
 	boolean isAttached()
@@ -334,8 +334,8 @@ public class DragDropImage extends Menu
 					int ind = path.lastIndexOf("/");
 					if (ind != -1)
 						path = path.substring(0,ind);
-					if (PhyloWidget.cfg.debug)	
-						System.out.println(path);
+//					if (PhyloWidget.cfg.debug)	
+//						System.out.println(path);
 					img = EvoGameApplet.p.loadImage(path+"/"+filename);
 //			}
 //		}

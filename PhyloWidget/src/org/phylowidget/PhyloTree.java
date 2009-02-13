@@ -41,8 +41,8 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 	public PhyloTree()
 	{
 		super(DefaultWeightedEdge.class);
-		if (PhyloWidget.cfg != null)
-			setEnforceUniqueLabels(PhyloWidget.cfg.enforceUniqueLabels);
+		if (PWPlatform.getInstance().getThisAppContext() != null)
+			setEnforceUniqueLabels(PWPlatform.getInstance().getThisAppContext().config().enforceUniqueLabels);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 	public void collapseNode(PhyloNode v)
 	{
 		v.setAnnotation("collapse", "yes");
-		new NodeUncollapser(PhyloWidget.p,v);
+		new NodeUncollapser(PWPlatform.getInstance().getThisAppContext().getPW(),v);
 		modPlus();
 	}
 	

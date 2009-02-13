@@ -9,9 +9,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.imageio.ImageIO;
 
-import org.andrewberman.ui.UIGlobals;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 
@@ -23,8 +23,11 @@ public class ImageLoader implements Runnable
 	static Hashtable<String, Integer> loadedImageURLs;
 	static Thread thread;
 
+	PWContext context;
+	
 	public ImageLoader()
 	{
+		context = PWPlatform.getInstance().getThisAppContext();
 	}
 
 	boolean loadingImg = false;
@@ -57,7 +60,7 @@ public class ImageLoader implements Runnable
 				}
 				return img;
 			}
-			PhyloWidget.setMessage("Loading image...");
+			context.getPW().setMessage("Loading image...");
 			String oldImgS = n.getAnnotation(ImageSearcher.OLD_IMG_TAG);
 			if (oldImgS != null)
 			{
@@ -87,7 +90,7 @@ public class ImageLoader implements Runnable
 	{
 //		if (!PhyloWidget.ui.canAccessInternet())
 //		{
-//			PhyloWidget.setMessage("Image loading failed: requires PhyloWidget full!");
+//			context.getP().setMessage("Image loading failed: requires PhyloWidget full!");
 //			return;
 //		}
 		if (!loadedImageURLs.containsKey(imageURL))
@@ -114,7 +117,7 @@ public class ImageLoader implements Runnable
 					try {
 						url = new URL(imgS);
 					} catch (Exception e) {
-						RootedTree t = PhyloWidget.p.trees.getTree();
+						RootedTree t = context.trees().getTree();
 						PhyloTree pt = (PhyloTree) t;
 						if (pt.getBaseURL().length() > 0)
 						{
@@ -124,7 +127,7 @@ public class ImageLoader implements Runnable
 						}
 					}
 					
-					PApplet p = UIGlobals.g.getP();
+					PApplet p = context.getPW();
 					//					InputStream in = p.openStream(imgS);
 					//					byte[] bytes = PApplet.loadBytes(in);
 					//					if (bytes == null)
@@ -134,7 +137,7 @@ public class ImageLoader implements Runnable
 					//					}
 //					Image img = p.getImage(new URL(imgS));
 					Image img = ImageIO.read(url);
-					PhyloWidget.setMessage("Finished loading image!");
+					context.getPW().setMessage("Finished loading image!");
 					//					System.out.println(img);
 					//					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
 					//					bytes = null;

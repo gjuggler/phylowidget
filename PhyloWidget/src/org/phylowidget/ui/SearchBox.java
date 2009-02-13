@@ -7,6 +7,8 @@ import org.andrewberman.ui.LayoutUtils;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.menu.TextBox;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
 
@@ -14,7 +16,7 @@ import processing.core.PApplet;
 
 public class SearchBox extends TextBox implements UIListener
 {
-
+	PWContext context;
 	Label label;
 
 	float myWidth;
@@ -22,6 +24,7 @@ public class SearchBox extends TextBox implements UIListener
 	public SearchBox(PApplet p)
 	{
 		super(p);
+		context = PWPlatform.getInstance().getThisAppContext();
 		label = new Label(p);
 		tf.addListener(this);
 	}
@@ -98,8 +101,9 @@ public class SearchBox extends TextBox implements UIListener
 	{
 		if (e.getID() == UIEvent.TEXT_VALUE)
 		{
-			PhyloWidget.cfg.search = getText();
-			PhyloTree t = (PhyloTree) PhyloWidget.trees.getTree();
+			
+			context.config().search = getText();
+			PhyloTree t = (PhyloTree) context.trees().getTree();
 			if (t != null)
 			{
 				t.searchAndMarkFound(getText());

@@ -22,7 +22,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
 import org.phylowidget.render.BasicTreeRenderer;
@@ -41,6 +40,7 @@ import processing.core.PApplet;
 public class TreeManager extends AbstractUIObject
 {
 	protected PApplet p;
+	protected PWContext context;
 
 	public static RectMover camera;
 	public static UIRectangle cameraRect;
@@ -63,7 +63,8 @@ public class TreeManager extends AbstractUIObject
 	public TreeManager(PApplet p)
 	{
 		this.p = p;
-		UIGlobals.g.event().add(this);
+		this.context = PWPlatform.getInstance().getThisAppContext();
+		context.event().add(this);
 	}
 
 	public void setup()
@@ -73,18 +74,19 @@ public class TreeManager extends AbstractUIObject
 		cameraRect = new UIRectangle(0, 0, 0, 0);
 		camera = new RectMover(p);
 		fillScreen();
-		camera.nudgeTo(-PhyloWidget.cfg.viewportX, -PhyloWidget.cfg.viewportY);
-		camera.zoomTo(PhyloWidget.cfg.viewportZoom);
+		camera.nudgeTo(-context.config().viewportX, -context.config().viewportY);
+		camera.zoomTo(context.config().viewportZoom);
 		camera.fforward();
 		/*
 		 * We need to let the ToolManager know our current Camera object.
 		 */
-		UIGlobals.g.event().setCamera(camera);
+		System.out.println(camera);
+		context.event().setCamera(camera);
 
-		setTree(TreeIO.parseNewickString(new PhyloTree(), PhyloWidget.cfg.tree));
+		setTree(TreeIO.parseNewickString(new PhyloTree(), context.config().tree));
 
 		setRenderer(new BasicTreeRenderer());
-		PhyloWidget.cfg.setLayout(PhyloWidget.cfg.layout);
+		context.config().setLayout(context.config().layout);
 		try
 		{
 			PhyloTree pt = (PhyloTree) getTree();
@@ -94,7 +96,7 @@ public class TreeManager extends AbstractUIObject
 			// Do nothing.
 		}
 		
-		if (PhyloWidget.cfg.showScaleBar)
+		if (context.config().showScaleBar)
 			scaleBar = new PhyloScaleBar(p);
 	}
 
@@ -131,9 +133,9 @@ public class TreeManager extends AbstractUIObject
 			camera.update();
 			updateCameraRect();
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width, cameraRect.height, true);
-			PhyloWidget.cfg.viewportX = -camera.getX();
-			PhyloWidget.cfg.viewportY = -camera.getY();
-			PhyloWidget.cfg.viewportZoom = camera.getZ();
+			context.config().viewportX = -camera.getX();
+			context.config().viewportY = -camera.getY();
+			context.config().viewportZoom = camera.getZ();
 		}
 		if (mutateMe)
 		{
@@ -265,7 +267,7 @@ public class TreeManager extends AbstractUIObject
 		this.r = r;
 		if (getTree() != null)
 			r.setTree(getTree());
-		PhyloWidget.ui.search();
+		context.ui().search();
 	}
 
 	public void triggerMutation()

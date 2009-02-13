@@ -18,7 +18,6 @@
  */
 package org.phylowidget.render;
 
-import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -33,17 +32,16 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
-import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.unsorted.BulgeUtil;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
 import org.jgrapht.event.GraphVertexChangeEvent;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.UsefulConstants;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
@@ -187,10 +185,13 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	private float tsf;
 
+	PWContext context;
+	
 	public BasicTreeRenderer()
 	{
 		rect = new Rectangle2D.Float(0, 0, 0, 0);
-		font = UIGlobals.g.getPFont();
+		this.context = PWPlatform.getInstance().getThisAppContext();
+		font = context.getPFont();
 		if (decorator == null)
 			decorator = new NodeRenderer();
 
@@ -219,11 +220,11 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	protected void draw()
 	{
 		float minSize = Math.min(rowSize, colSize);
-		baseStroke = getNormalLineWidth() * PhyloWidget.cfg.lineWidth;
+		baseStroke = getNormalLineWidth() * context.config().lineWidth;
 		canvas.noStroke();
 		canvas.fill(0);
 
-		canvas.textFont(UIGlobals.g.getPFont());
+		canvas.textFont(context.getPFont());
 		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 
 		hint();
@@ -264,7 +265,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				foundItems.add(n);
 			else if (n.getAnnotation(UsefulConstants.LABEL_ALWAYSSHOW_ALT) != null)
 				foundItems.add(n);
-			if (nodesDrawn >= PhyloWidget.cfg.renderThreshold && !PhyloWidget.cfg.showAllLabels)
+			if (nodesDrawn >= context.config().renderThreshold && !context.config().showAllLabels)
 				continue;
 			if (!n.isWithinScreen)
 				continue;
@@ -377,7 +378,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		//		if (!tree.isLeaf(n)) // Do nothing and pretend no overlap for branch nodes.
 		//			return false;
-		if (PhyloWidget.cfg.showAllLabels)
+		if (context.config().showAllLabels)
 			return false;
 		float angle = n.getAngle();
 		if (angle % Math.PI / 2 == 0)
@@ -436,7 +437,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	protected void drawBootstrap(PhyloNode n)
 	{
-		if (n.isNHX() && PhyloWidget.cfg.showBootstrapValues)
+		if (n.isNHX() && context.config().showBootstrapValues)
 		{
 			String boot = n.getAnnotation(BOOTSTRAP);
 			if (boot != null)
@@ -447,7 +448,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				float curTextSize = textSize * 0.5f;
 				canvas.textFont(font);
 				canvas.textSize(curTextSize);
-				canvas.fill(PhyloWidget.cfg.getTextColor().brighter(100).getRGB());
+				canvas.fill(context.config().getTextColor().brighter(100).getRGB());
 				canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
 				//				float s = strokeForNode(n) / 2 + rowSize * RenderConstants.labelSpacing;
 				float s = 0;
@@ -604,7 +605,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		if (tree.isLeaf(n))
 			return;
-		if (PhyloWidget.cfg.showCladeLabels && tree.isLabelSignificant(tree.getLabel(n)))
+		if (context.config().showCladeLabels && tree.isLabelSignificant(tree.getLabel(n)))
 		{
 			boolean overlap = insertAndReturnOverlap(n);
 			if (!overlap)
@@ -620,7 +621,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
 			oldRH = g2.getRenderingHints();
-			if (PhyloWidget.cfg.antialias)
+			if (context.config().antialias)
 			{
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			} else
@@ -629,7 +630,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			}
 		} else
 		{
-			if (PhyloWidget.cfg.antialias)
+			if (context.config().antialias)
 			{
 				canvas.smooth();
 			} else
@@ -740,7 +741,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				sigLeaves[i] = leaves[i];
 			}
 			int dir = 1;
-			if (PhyloWidget.cfg.prioritizeDistantLabels)
+			if (context.config().prioritizeDistantLabels)
 				dir = -1;
 			Arrays.sort(sigLeaves, 0, sigLeaves.length, tree.new DepthToRootComparator(dir));
 			Thread.yield();
@@ -786,7 +787,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			 * This is done within this loop just to save the effort of looping through all
 			 * nodes again during layout.
 			 */
-			if (n.isNHX() && PhyloWidget.cfg.colorSpecies)
+			if (n.isNHX() && context.config().colorSpecies)
 			{
 				String tax = n.getAnnotation(TAXON_ID);
 				if (tax != null)
@@ -807,7 +808,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 		Thread.yield();
 
-		if (PhyloWidget.cfg.colorSpecies)
+		if (context.config().colorSpecies)
 		{
 			decorator.getColorsForSpeciesMap();
 		}
@@ -837,7 +838,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		rowSize = rect.height / leaves.length;
 		textSize = rowSize * 0.9f;
 
-		dotWidth = getNormalLineWidth() * PhyloWidget.cfg.nodeSize;
+		dotWidth = getNormalLineWidth() * context.config().nodeSize;
 		//		rad = dotWidth / 2;
 
 		//		System.out.println(rect);
@@ -874,7 +875,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	//	public float getBranchLengthScaling()
 	//	{
-	//		return PhyloWidget.cfg.branchLengthScaling;
+	//		return context.config().branchLengthScaling;
 	//	}
 
 	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender)
@@ -883,7 +884,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
-		if (PhyloWidget.cfg.useDoubleBuffering)
+		if (context.config().useDoubleBuffering)
 		{
 			drawToCanvas(canvas);
 		} else
@@ -968,7 +969,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			tree = t;
 			tree.addGraphListener(this);
 			needsLayout = true;
-			if (!PhyloWidget.cfg.animateNewTree)
+			if (!context.config().animateNewTree)
 				fforwardMe = true;
 		}
 	}
@@ -1088,7 +1089,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		this.oldLayout = this.treeLayout;
 		this.treeLayout = layout;
 		layoutTrigger();
-		framesToSwitch = (int) PhyloWidget.cfg.animationFrames / 2;
+		framesToSwitch = (int) context.config().animationFrames / 2;
 	}
 
 	public LayoutBase getTreeLayout()

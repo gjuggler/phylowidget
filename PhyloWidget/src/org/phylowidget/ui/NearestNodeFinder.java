@@ -18,24 +18,7 @@
  */
 package org.phylowidget.ui;
 
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-
 import org.andrewberman.ui.AbstractUIObject;
-import org.andrewberman.ui.Point;
-import org.andrewberman.ui.UIGlobals;
-import org.andrewberman.ui.UIRectangle;
-import org.andrewberman.ui.UIUtils;
-import org.phylowidget.PhyloWidget;
-import org.phylowidget.TreeManager;
-import org.phylowidget.render.NodeRange;
-import org.phylowidget.tree.PhyloNode;
-
-import processing.core.PApplet;
 
 public class NearestNodeFinder extends AbstractUIObject
 {

@@ -22,15 +22,13 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.Shortcut;
-import org.andrewberman.ui.UIGlobals;
+import org.andrewberman.ui.UIContext;
 import org.andrewberman.ui.UIUtils;
-import org.andrewberman.ui.ifaces.UIObject;
 import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.ToolDockItem;
 
@@ -39,17 +37,19 @@ import processing.core.PApplet;
 public class ToolManager
 {
 	PApplet p;
+	UIContext context;
 	Tool curTool;
 	ToolDock toolDock;
 	HashMap<String, Tool> tools;
 
 	Tool scrollTool;
 	
-	public ToolManager(PApplet p)
+	public ToolManager(UIContext context)
 	{
-		this.p = p;
+		this.context = context;
+		this.p = context.getApplet();
 		tools = new HashMap<String, Tool>();
-		UIGlobals.g.event().setToolManager(this);
+		context.event().setToolManager(this);
 	}
 
 	public void setToolDock(ToolDock td)
@@ -93,7 +93,7 @@ public class ToolManager
 		if (curTool != null)
 			curTool.exit();
 		curTool = t;
-		curTool.setCamera(UIGlobals.g.event().toolCamera);
+		curTool.setCamera(context.event().toolCamera);
 		curTool.enter();
 		UIUtils.setBaseCursor(p, curTool.getCursor());
 	}
@@ -129,7 +129,7 @@ public class ToolManager
 		checkToolShortcuts(e);
 		if (curTool != null)
 			curTool.keyEvent(e);
-//		if (UIGlobals.g.focus().getFocusedObject() != null)
+//		if (context.focus().getFocusedObject() != null)
 //		{
 			if (e.getKeyCode() == KeyEvent.VK_SPACE)
 			{
@@ -167,7 +167,7 @@ public class ToolManager
 	
 	public void checkToolShortcuts(KeyEvent e)
 	{
-		Object o = UIGlobals.g.focus().getFocusedObject();
+		Object o = context.focus().getFocusedObject();
 		if (o != null && o != this)
 		{
 			return;

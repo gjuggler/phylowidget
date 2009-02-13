@@ -7,16 +7,23 @@ import java.awt.geom.GeneralPath;
 
 import org.andrewberman.ui.Color;
 import org.andrewberman.ui.Style;
-import org.andrewberman.ui.UIGlobals;
+import org.andrewberman.ui.UIPlatform;
 
 import processing.core.PFont;
 
 public class MenuStyle extends Style
 {
 
-	static
+	public MenuStyle()
 	{
-		defaults = new MenuStyle();
+		super();
+		
+		loadDefaults(this);
+	}
+	
+	protected void loadDefaults(MenuStyle defaults)
+	{
+//		MenuStyle defaults = new MenuStyle();
 
 		defaults.set("c.background", new Color(245, 245, 255));
 		defaults.set("c.foreground", new Color(0,0,0));
@@ -28,7 +35,7 @@ public class MenuStyle extends Style
 		defaults.set("c.gradientHi", new Color(190, 210, 245));
 
 		defaults.set("f.fontSize", 11f);
-		defaults.set("font", UIGlobals.g.getPFont());
+		defaults.set("font", UIPlatform.getInstance().getThisAppContext().getPFont());
 		defaults.set("c.font", new Color(0, 0, 0));
 
 		defaults.set("f.padY", 3.5f);

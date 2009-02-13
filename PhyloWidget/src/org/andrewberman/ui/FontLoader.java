@@ -34,10 +34,11 @@ public class FontLoader
 	public PFont veraNonNative;
 	public Font font;
 	
-	public FontLoader(PApplet p)
+	public FontLoader(UIContext context)
 	{
+		
 //		p.hint(PApplet.ENABLE_NATIVE_FONTS);
-		this.p = p;
+		this.p = context.getApplet();
 		vera = p.loadFont("BitstreamVeraSans-Roman-36.vlw");
 //		vera = p.createFont("Courier New",12);
 		InputStream in = p.createInput("vera.ttf");

@@ -18,20 +18,24 @@
  */
 package org.phylowidget.net;
 
-import java.net.URL;
-
-import org.andrewberman.ui.UIGlobals;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
-import org.phylowidget.PhyloWidget;
+import org.phylowidget.PWContext;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 
 public class JSTreeUpdater extends DelayedAction
 {
-	JSCaller caller = new JSCaller(UIGlobals.g.getP());
+//	JSCaller caller = new JSCaller(UIGlobals.g.getP());
+	JSCaller caller;
 //	String jsCall = "updateTree";
 
+public JSTreeUpdater()
+{
+	caller = new JSCaller(PWPlatform.getInstance().getThisAppContext().getApplet());
+}
+	
 	public void triggerUpdate(RootedTree t)
 	{
 		trigger(200);
@@ -39,9 +43,10 @@ public class JSTreeUpdater extends DelayedAction
 
 	public void run()
 	{
-		PhyloWidget.ui.search();
+		PWContext context = PWPlatform.getInstance().getThisAppContext();
+		context.ui().search();
 		String s = TreeIO
-				.createNewickString(PhyloWidget.trees.getTree(), false);
+				.createNewickString(context.trees().getTree(), false);
 //		String cmd = jsCall;
 		try
 		{

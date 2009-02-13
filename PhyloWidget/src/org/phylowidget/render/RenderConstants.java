@@ -24,6 +24,7 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 import org.andrewberman.ui.Color;
+import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloWidget;
 
 public class RenderConstants
@@ -37,7 +38,7 @@ public class RenderConstants
 	public static Color hoverColor = new Color(100,150,255);
 	public static float hoverStroke = 1.5f;
 
-	public static Color dimColor = PhyloWidget.cfg.getTextColor().brighter(200);
+	public static Color dimColor = PWPlatform.getInstance().getThisAppContext().config().getTextColor().brighter(200);
 	public static float dimStroke = 1f;
 
 	public static Color copyColor = new Color(255,0,0);

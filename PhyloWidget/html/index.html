@@ -9,6 +9,101 @@
 <link rel="stylesheet" href="style.css"/>
 <link rel="shortcut icon" href="img/pw.ico"/>
 <script src="scripts/phylowidget.js"></script>
+
+<script type="text/javascript">
+pw_tree = function()
+{
+	var applet = PhyloWidget.getApplet();
+	var newickString = applet.getTreeString();
+	var el = getObject("pw_treetext");
+	if (el != null)
+		el.value = newickString;
+}
+pw_clip = function()
+{
+	var applet = PhyloWidget.getApplet();
+	var newickString = applet.getTreeString();
+	var el = getObject("pw_cliptext");
+	if (el != null)
+		el.value = newickString;
+}
+pw_hover = function()
+{
+	var applet = PhyloWidget.getApplet();
+	
+	var map = {
+		"Name" : applet.getHoveredNode(),
+		"Branch Length" : applet.getHoveredBranchLength(),
+		"Enclosed Leaves" : applet.getHoveredLeafCount(),
+		"Depth to Root" : applet.getHoveredDepthToRoot(),
+		"Branch Length to Root" : applet.getHoveredDistanceToRoot()
+	};
+
+	var html = "<table>";
+	for (var key in map)
+	{
+		var val = map[key];
+		html += "<tr><td class='key'><b>"+key+":"+"</b></td>";
+		html += "<td class='val'>"+val+"</td>";
+		html += "</tr>";
+	}
+	html += "</table>";
+	
+	var newickString = applet.getTreeString();
+	var el = getObject("pw_nodeinfo");
+	
+	el.innerHTML = html;
+}
+pw_treeTextBlur = function()
+{
+	var treeText = getObject("pw_treetext").value;
+	PhyloWidget.getApplet().setTree(treeText);
+}
+pw_clipTextBlur = function()
+{
+	var clipText = getObject("pw_cliptext").value;
+	PhyloWidget.getApplet().setClipboard(clipText);
+}
+pw_treeTextFocus = function()
+{
+    pw_setMessage("Click away to update the tree.");
+}
+pw_clipTextFocus = function()
+{
+    pw_setMessage("Click away to update the clipboard.");
+}
+pw_setMessage = function(message)
+{
+	var applet = PhyloWidget.getApplet();
+	applet.setMessage(message);
+}
+
+toggleToolbox = function()
+{
+        var el = getObject("pw_toolbox");
+        if (el == null)
+                return;
+        if (el.style.display=="none")
+        {
+                el.style.display="";
+                text = getObject("hideshow");
+                text.innerHTML = "hide";
+        } else
+        {
+                el.style.display="none";
+                text = getObject("hideshow");
+                text.innerHTML = "show";
+        }
+}
+
+// Wrapper function to get an object from the DOM via its ID attribute.
+function getObject(id){
+        var el = document.getElementById(id);
+        return (el);
+};
+
+</script>
+
 </head>
 <body>
 
@@ -25,14 +120,35 @@
 	
 	<script type="text/javascript">
 		document.write('<div id="PhyloWidget" style="width:'+PhyloWidget.getWidth()+'px;">');
-	</script>
+		
+		var pw = new PhyloWidget.applet();
+		pw.loadWidget("PhyloWidget");
+		//pw.writeWidget();
+		
+		document.write('</div>');
+	</script> 
 	
-	<!-- <div id="PhyloWidget" style="width:${applet.width}px;"> -->
-	</div>
 </div>
 	<div id="floater2" style="width:300px;float:right;">
-		<h1>${project.name} Toolbox (<a href="javascript:PhyloWidget.toggleToolbox();"><span id="hideshow">hide</span></a>)</h1>
-		<div id="toolbox"></div>
+		<h1>${project.name} Toolbox (<a href="javascript:window.toggleToolbox();"><span id="hideshow">hide</span></a>)</h1>
+		<div id="pw_toolbox">
+			<h1>Tree:</h1>
+			<div class='indent'>
+				<textarea rows="3" cols="40" style="font-size:10px;" id="pw_treetext" onblur="javascript:pw_treeTextBlur()" onfocus="javascript:pw_treeTextFocus()">
+				</textarea>
+			</div>
+			
+			<h1>Clipboard:</h1>
+			<div class='indent'>
+				<textarea rows="3" cols="40" style="font-size:10px;" id="pw_cliptext" onblur="javascript:pw_clipTextBlur()" onfocus="javascript:pw_clipTextFocus()">
+				</textarea>
+			</div>
+			
+			<h1>Node Info:</h1>
+			<div class="indent">
+				<div id="pw_nodeinfo" style=''></div>
+			</div>
+		</div>
 	</div>
 	
 	<div style="width:300px;float:right;margin-top:15px;">
@@ -46,14 +162,6 @@
 	Head back to the <a href="../index.html">PhyloWidget Homepage</a>
 	</div>
 </div>
-
-<!-- BEGIN: JAVASCRIPT INSERTION -->
-<script type="text/javascript">
-	PhyloWidget.loadWidget('PhyloWidget');
-	PhyloWidget.loadToolbox('toolbox');
-	//PhyloWidget.loadWidgetPanel();
-</script>
-<!-- END: JAVASCRIPT INSERTION -->
 
 <div id="footer">
 Copyright © 2008 <a href="http://www.andrewberman.org/">Gregory Jordan</a>. Code released under the <a href="http://www.fsf.org/licensing/licenses/info/GPLv2.html">GPL</a> license.

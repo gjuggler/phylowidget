@@ -12,20 +12,21 @@
 </head>
 <body>
 
-<script type="text/javascript">
-//	var totalWidth = PhyloWidget.getWidth()+300+50;
-//	document.write('<div id="content-wrapper" style="width:'+totalWidth+'px;">');
-</script>
-<!-- <div id="content-wrapper"> -->
-<script type="text/javascript">
-	document.write('<div id="PhyloWidget" style="width:'+PhyloWidget.getWidth()+'px;">');
-</script>
-<!-- BEGIN: JAVASCRIPT INSERTION -->
-<script type="text/javascript">
-	PhyloWidget.loadWidget('PhyloWidget');
-//	PhyloWidget.loadToolbox('toolbox');
-	//PhyloWidget.loadWidgetPanel();
-</script>
+<div id="PhyloWidget">
+	<script type="text/javascript">
+		var pw = new PhyloWidget.applet();
+		pw.writeWidget();
+	</script>
+</div>
+
+<div id="PW2">
+	<script type="text/javascript">
+		var pw2 = new PhyloWidget.applet();
+		pw2.writeWidget();
+	</script>
+</div>
+
+
 <!-- END: JAVASCRIPT INSERTION -->
 </body>
 </html>

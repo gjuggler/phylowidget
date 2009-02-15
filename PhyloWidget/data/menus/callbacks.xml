@@ -1,0 +1,15 @@
+<!--
+	An example "callback" menu item, which causes a javascript callback to be triggered on certain events.
+	Possible event types include: 
+		treeChange
+		nodeGlow (when a node is caused to "glow")
+		nodeHover (when a node is hovered with the mouse)
+		nodeOpen (when a node menu is opened)
+		clipChange (when the PW clipboard changes)
+	<menu name="callback" type="org.phylowidget.ui.Callback" event="treeChange" callback="phylowidget_callback" />
+-->
+<menuset>
+	<menu name="callback" type="org.phylowidget.ui.Callback" event="treeChange" callback="pw_tree" limitRate="true"/>
+	<menu name="callback2" type="org.phylowidget.ui.Callback" event="nodeHover" callback="pw_hover" limitRate="true"/>
+	<menu name="callback3" type="org.phylowidget.ui.Callback" event="clipChange" callback="pw_clip" limitRate="true"/>
+</menuset>

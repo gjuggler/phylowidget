@@ -249,7 +249,7 @@ public abstract class Menu extends MenuItem implements UIObject
 		super();
 
 		canvas = app;
-		context = UIPlatform.getInstance().getThisAppContext();
+		context = UIPlatform.getInstance().getAppContext(app);
 		
 		setMenu(this);
 		/*

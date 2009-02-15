@@ -277,7 +277,10 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 		if (value == null)
 			annotations.remove(key);
 		else
-			annotations.put(key.toLowerCase(), value);
+			if (key.length() <= 3)
+				annotations.put(key.toLowerCase(),value);
+			else
+				annotations.put(key, value); // GJ 2009-02-15 : stop lower-casing annotations for longer keys.
 	}
 
 	/**

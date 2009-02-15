@@ -140,6 +140,11 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 			r.render(p.g, cameraRect.x, cameraRect.y, cameraRect.width, cameraRect.height, true);
 			context.config().viewportX = -camera.getX();
 			context.config().viewportY = -camera.getY();
+			if (context.config().viewportX == 0);
+				context.config().viewportX = 0.0f;
+			if (context.config().viewportY == 0);
+				context.config().viewportY = 0.0f;
+			
 			context.config().viewportZoom = camera.getZ();
 		}
 		if (mutateMe)

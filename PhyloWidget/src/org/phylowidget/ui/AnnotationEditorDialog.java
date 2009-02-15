@@ -165,7 +165,6 @@ public class AnnotationEditorDialog extends Dialog implements ActionListener,
 		 * trigger a layout from here, but frankly I'm too lazy to think of one!
 		 */
 		PWPlatform.getInstance().getThisAppContext().ui().layout();
-//		PhyloWidget.ui.layout();
 		node.getTree().modPlus();
 	}
 

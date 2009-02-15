@@ -45,7 +45,7 @@ public class PhyloWidget extends PWPublicMethods
 
 	public PWContext pwc;
 	
-	public static float FRAMERATE = 60;
+	public static float FRAMERATE = 40;
 
 	private static String messageString = new String();
 
@@ -56,7 +56,24 @@ public class PhyloWidget extends PWPublicMethods
 		super();
 		time = System.currentTimeMillis();
 	}
+	
+	@Override
+	public void start()
+	{
+//		super.start();
+		pwc = (PWContext) PWPlatform.getInstance().registerApp(this);	
+		// When running inside a browser, start() will be called when someone
+	    // returns to a page containing this applet.
+	    // http://dev.processing.org/bugs/show_bug.cgi?id=581
+	    finished = false;
 
+	    if (getThread() != null) return;
+	    
+	    Thread t = pwc.createThread(this);
+	    setThread(t);
+	    getThread().start();
+	}
+	
 	public void setup()
 	{
 		if (frame != null)
@@ -82,17 +99,16 @@ public class PhyloWidget extends PWPublicMethods
 			//			size(getWidth(),getHeight(),P2D);
 		}
 		frameRate(FRAMERATE);
-
-		pwc = (PWContext) PWPlatform.getInstance().registerApp(this);
 		
-		new Thread()
+		Runnable setup = new Runnable()
 		{
 			public void run()
 			{
 				pwc.ui().setup();
 				pwc.trees().setup();
 			}
-		}.start();
+		};
+		pwc.createThread(setup).start();
 
 		unregisterDraw(pwc.event());
 

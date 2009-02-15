@@ -124,13 +124,14 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public TextField(PApplet p)
 	{
-		c = UIPlatform.getInstance().getThisAppContext();
+		c = UIPlatform.getInstance().getAppContext(p);
 		
 		StringClipboard.lazyLoad();
 		Blinker.lazyLoad();
 
 		this.p = p;
 		style = new TextFieldStyle();
+		style.set("font",c.getPFont());
 		style.set("f.fontSize", 12);
 		pFont = style.getFont("font");
 		font = pFont.getFont();

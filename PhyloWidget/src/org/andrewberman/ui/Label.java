@@ -36,7 +36,7 @@ public class Label extends AbstractUIObject implements Malleable
 	public Label(PApplet p)
 	{
 		this.p = p;
-		c = UIPlatform.getInstance().getThisAppContext();
+		c = UIPlatform.getInstance().getAppContext(p);
 		c.event().add(this);
 
 		color = new Color(Color.black);

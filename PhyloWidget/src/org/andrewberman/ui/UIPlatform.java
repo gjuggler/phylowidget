@@ -1,9 +1,12 @@
 package org.andrewberman.ui;
 
+import java.applet.Applet;
+import java.applet.AppletContext;
 import java.util.ArrayList;
 import java.util.List;
 
 import processing.core.PApplet;
+import sun.applet.AppletAudioClip;
 
 public class UIPlatform
 {
@@ -21,6 +24,7 @@ public class UIPlatform
 	
 	public UIContext getThisAppContext()
 	{
+//		System.out.println(Thread.currentThread().getName()+"  "+Thread.currentThread().getThreadGroup().getName());
 		// In most cases, there will be only one registered App. In that case, this method
 		// returns as quickly as possible.
 		if (allContexts == null)
@@ -44,7 +48,7 @@ public class UIPlatform
 			{
 				UIContext context = allContexts.get(i);
 				ThreadGroup contextThreadGroup = context.getThreadGroup();
-				if (contextThreadGroup == currentThreadGroup || contextThreadGroup.parentOf(currentThreadGroup))
+				if (contextThreadGroup == currentThreadGroup || contextThreadGroup.parentOf(currentThreadGroup) || currentThreadGroup.parentOf(contextThreadGroup))
 				{
 					return context;
 				}
@@ -60,7 +64,7 @@ public class UIPlatform
 		}
 	}
 
-	private synchronized UIContext getAppContext(PApplet app)
+	public synchronized UIContext getAppContext(PApplet app)
 	{
 		if (mainContext != null && mainContext.getApplet() == app)
 		{
@@ -101,7 +105,9 @@ public class UIPlatform
 
 	public UIContext createNewContext(PApplet app)
 	{
-		return new UIContext(app);
+		UIContext asdf = new UIContext(app);
+		asdf.getThreadGroup();
+		return asdf;
 	}
 
 	public synchronized UIContext registerAppWithContext(PApplet app, UIContext newContext)

@@ -445,7 +445,6 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 			if (t.respondToOtherEvents())
 			{
 				RootedTree tree = r.render.getTree();
-				context.ui().updateNodeInfo(tree, r.node);
 			}
 		}
 		/*

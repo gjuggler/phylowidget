@@ -124,7 +124,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	public static final int DOWN = 2;
 
 	public static final int OVER = 1;
-	protected static MenuTimer timer;
+//	protected static MenuTimer timer;
 
 	/**
 	 * Constants that define the values for the "state" field.
@@ -140,6 +140,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	protected Menu menu;
 	protected boolean mouseInside;
 	protected String name;
+	protected MenuTimer timer;
 
 	protected Menu nearestMenu;
 	protected boolean needsZSort;
@@ -718,7 +719,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	protected void menuTriggerLogic()
 	{
-		if (timer.item == this || !nearestMenu.clickToggles)
+		if (nearestMenu.timer.item == this || !nearestMenu.clickToggles)
 		{
 			if (nearestMenu.singletNavigation && parent != null)
 			{
@@ -853,7 +854,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 
 	public MenuItem setShortcut(String s)
 	{
-		shortcut = UIPlatform.getInstance().getThisAppContext().shortcuts().createShortcut(s);
+		shortcut = UIPlatform.getInstance().getAppContext(nearestMenu.canvas).shortcuts().createShortcut(s);
 		if (action != null)
 		{
 			shortcut.action = action;

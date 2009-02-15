@@ -11,6 +11,8 @@ import org.andrewberman.ui.Color;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
+import org.phylowidget.PhyloTree;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 
 public class PhyloConfig
@@ -39,7 +41,7 @@ public class PhyloConfig
 	 * The configurable parameters are displayed below, generally in order from most to least useful. Enjoy!
 	 */
 
-	public boolean debug = true;
+	public boolean debug = false;
 
 	/*
 	 * If you specify a valid URL pointing to a properties file, then PhyloWidget will attempt to load the properties remotely.
@@ -125,7 +127,7 @@ public class PhyloConfig
 	 *   "quantize" -- Quantize the rotation in 45-degree increments (a little faster...)
 	 *   "level" -- Level all angles to horizontal (much faster!)
 	 */
-	public String angleHandling = "none";
+	public String angleHandling = "level";
 
 	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	public float textRotation = 0f; // Text rotation, in degrees.
@@ -140,10 +142,10 @@ public class PhyloConfig
 	//	public float branchLengthScaling = 1f; 			// DEPRECATED.
 	public float branchScaling = 1f; // Only used with the Cladogram renderer... scales the width.
 	public float cigarScaling = 10f; // How wide should 1bp of cigar line be, relative to the row height
-	public float layoutAngle = 0; // The starting angle for the layout (only applicable for circular and unrooted layouts)
-	public float animationFrames = 30; // The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
-	public float viewportX = 0; // The x position of the viewport.
-	public float viewportY = 0; // Ditto.
+	public float layoutAngle = 0f; // The starting angle for the layout (only applicable for circular and unrooted layouts)
+	public float animationFrames = 15f; // The number of frames it should take nodes to animate to a new destination. (30 frames ~ 1 sec)
+	public float viewportX = 0.0f; // The x position of the viewport.
+	public float viewportY = 0.0f; // Ditto.
 	public float viewportZoom = 0.8f; // I'll bet you can guess this one.
 
 	public boolean showScaleBar = false; // Show a scale bar when showing branch lengths.
@@ -339,6 +341,8 @@ public class PhyloConfig
 
 	public void setLayout(String s)
 	{
+		if (!layout.equals(s))
+			layout = s;
 		s = s.toLowerCase();
 		if (s.equals("diagonal"))
 		{
@@ -457,7 +461,7 @@ public class PhyloConfig
 	public final static String DEFAULT_TREE = "PhyloWidget";
 
 	
-	public static Map<String, Object> getChangedFields(Object a, Object b)
+	public static Map<String, String> getChangedFields(Object a, Object b)
 	{
 		Class aClass = a.getClass();
 		Class bClass = b.getClass();
@@ -466,7 +470,7 @@ public class PhyloConfig
 			System.out.println("Classes a and b not equal!");
 		}
 
-		HashMap<String, Object> changedFields = new HashMap<String, Object>();
+		HashMap<String, String> changedFields = new HashMap<String, String>();
 
 		Field[] fields = aClass.getFields();
 		for (Field f : fields)
@@ -475,10 +479,10 @@ public class PhyloConfig
 			{
 				if (f.get(a).equals(f.get(b)))
 				{
-					System.out.println("Equal on field " + f.getName());
+//					System.out.println("Equal on field " + f.getName());
 				} else
 				{
-					changedFields.put(f.getName(), f.get(a));
+					changedFields.put(f.getName(), f.get(a).toString());
 				}
 			} catch (Exception e)
 			{
@@ -487,5 +491,10 @@ public class PhyloConfig
 		}
 
 		return changedFields;
+	}
+	
+	public static Map<String,String> getConfigSnapshot(PhyloConfig currentConfig)
+	{
+		return getChangedFields(currentConfig,new PhyloConfig());
 	}
 }

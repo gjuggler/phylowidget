@@ -20,7 +20,10 @@ public class UIContext
 	private ShortcutManager shortcutManager;
 	private MenuTimer menuTimer;
 	private ToolManager toolManager;
+	
+	private ThreadLocal threadLocalId;
 
+	private int myContextID = 0;
 	private ThreadGroup threadGroup = null;
 	private static int nextContextID = 0;
 
@@ -33,7 +36,10 @@ public class UIContext
 
 	public void init()
 	{
+//		getThreadGroup();
+//		nextContextID++;
 		System.out.println("Initting "+this);
+		System.out.println(Thread.currentThread().getName()+"  "+Thread.currentThread().getThreadGroup().getName());
 		eventManager = new EventManager(this);
 		focusManager = new FocusManager(this);
 		fontLoader = new FontLoader(this);
@@ -48,10 +54,16 @@ public class UIContext
 	{
 		if (threadGroup == null || threadGroup.isDestroyed())
 		{
-			threadGroup = new ThreadGroup("PulpCore-App" + nextContextID);
+			threadGroup = new ThreadGroup("UIContextThreadGroup" + nextContextID);
+			myContextID = nextContextID;
 			nextContextID++;
 		}
 		return threadGroup;
+	}
+	
+	public Thread createThread(Runnable r)
+	{
+		return new Thread(getThreadGroup(),r,"UIContextThread"+myContextID);
 	}
 	
     public PApplet getApplet()

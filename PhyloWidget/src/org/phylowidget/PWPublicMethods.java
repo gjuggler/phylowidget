@@ -5,9 +5,10 @@ import java.util.List;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.ui.JavascriptAccessibleMethods;
 
+import processing.core.ExtendedPApplet;
 import processing.core.PApplet;
 
-public class PWPublicMethods extends PApplet implements JavascriptAccessibleMethods
+public class PWPublicMethods extends ExtendedPApplet implements JavascriptAccessibleMethods
 {
 
 	private PhyloTree getTree_obj()

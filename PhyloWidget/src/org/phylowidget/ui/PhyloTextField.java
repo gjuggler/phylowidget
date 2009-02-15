@@ -129,7 +129,6 @@ public class PhyloTextField extends TextField
 					}
 			}
 			r.layoutTrigger();
-			context.ui().updateNodeInfo(r.getTree(), curRange.node);
 		}
 	}
 

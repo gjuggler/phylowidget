@@ -38,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -47,6 +48,7 @@ import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.Toolbar;
+import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
@@ -80,7 +82,7 @@ public class PhyloUI implements Runnable
 	public Toolbar toolbar;
 	public SearchBox search;
 
-	NodeInfoUpdater nodeUpdater;
+
 
 	public PhyloUI(PhyloWidget p)
 	{
@@ -97,11 +99,10 @@ public class PhyloUI implements Runnable
 		keys = context.shortcuts();
 
 		text = new PhyloTextField(p);
-		nodeUpdater = new NodeInfoUpdater();
-
 		clipboard = new TreeClipboard(p);
 
-		thread = new Thread(this);
+//		thread = new Thread(this);
+		thread = context.createThread(this);
 		thread.start();
 	}
 
@@ -348,11 +349,6 @@ public class PhyloUI implements Runnable
 		return canAccessInternet;
 	}
 
-	public void updateNodeInfo(RootedTree t, PhyloNode n)
-	{
-		nodeUpdater.triggerUpdate(t, n);
-	}
-
 	public RootedTree getCurTree()
 	{
 		return context.trees().getTree();
@@ -368,6 +364,16 @@ public class PhyloUI implements Runnable
 		if (context.trees().getRenderer() != null)
 			context.trees().getRenderer().layoutTrigger();
 		context.trees().fireCallback();
+		
+		if (getCurTree() != null)
+		{
+			System.out.println("Heyo!");
+			PhyloNode n = (PhyloNode) getCurTree().getRoot();
+			if (n.getAnnotations() != null)
+			{
+				MethodAndFieldSetter.setMethodsAndFields(context.config(), n.getAnnotations());
+			}
+		}
 	}
 
 	public void forceLayout()
@@ -592,22 +598,22 @@ public class PhyloUI implements Runnable
 
 	public void viewUnrooted()
 	{
-		context.trees().unrootedRender();
+		context.config().setLayout("unrooted");
 	}
 
 	public void viewRectangular()
 	{
-		context.trees().rectangleRender();
+		context.config().setLayout("rectangle");
 	}
 
 	public void viewDiagonal()
 	{
-		context.trees().diagonalRender();
+		context.config().setLayout("diagonal");
 	}
 
 	public void viewCircular()
 	{
-		context.trees().circleRender();
+		context.config().setLayout("circular");
 	}
 
 	public void zoomToFull()
@@ -700,6 +706,16 @@ public class PhyloUI implements Runnable
 		context.trees().stopMutatingTree();
 	}
 
+	public void treeSaveConfigIntoTree()
+	{
+		Map<String,String> changedFields = PhyloConfig.getConfigSnapshot(context.config());
+		PhyloNode root = (PhyloNode) getCurTree().getRoot();
+		for (String key : changedFields.keySet())
+		{
+			root.setAnnotation(key, changedFields.get(key));
+		}
+	}
+	
 	public void nodeLoadImage()
 	{
 		new Thread()
@@ -952,7 +968,6 @@ public class PhyloUI implements Runnable
 		contextMenu = null;
 		toolbar = null;
 		search = null;
-		nodeUpdater = null;
 		thread = null;
 		menus = null;
 	}

@@ -152,7 +152,7 @@ public class Callback extends Menu implements UIListener
 	private void fireJavascriptCallback()
 	{
 		try {
-			System.out.println(callbackEvent+"  " + callback);
+//			System.out.println(callbackEvent+"  " + callback);
 			if (caller.reflectionWorking)
 				caller.call(callback);
 		} catch (Exception e)

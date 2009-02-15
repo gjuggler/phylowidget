@@ -1,0 +1,41 @@
+<menu name="context" type="org.phylowidget.ui.PhyloContextMenu" glow="true">
+	<item name="Node Edit" hint="e">
+		<item name="Name" action="nodeEditName" hint="n" condition="isInternalNode"/>
+		<item name="Branch length" action="nodeEditBranchLength" hint="b"/>
+		<item name="Annotations" action="nodeEditAnnotation" hint="a"/>
+	</item>
+	<item name="Tree Edit" hint="t">
+		<item name="Add" hint="a">
+			<item name="Child" action="nodeAddChild" hint="c"/>
+			<item name="Sister" action="nodeAddSister" hint="s"/>
+		</item>
+		<item name="Delete" hint="d">
+			<item name="This node" action="nodeDelete" hint="t"/>
+			<item name="Subtree" action="nodeDeleteSubtree" hint="s"/>
+		</item>
+		<item name="Collapse" action="nodeCollapse" hint="c"/>
+	</item>
+	<item name="Web" hint="w" icon="links/hyperlink.png">
+		<item name="Load Image" hint="i" action="nodeLoadImage" condition="canAccessInternet"/>
+		<item type="org.phylowidget.ui.PhyloLinkItem" icon="links/google.png"  name="Google" url="http://www.google.com/search?q=%s" hint="g"/>
+		<item type="org.phylowidget.ui.PhyloLinkItem" icon="links/ubio.png" name="uBio" url="http://www.ubio.org/browser/search.php?search_all=%s" hint="u"/>
+		<item type="org.phylowidget.ui.PhyloLinkItem" icon="links/wikipedia.png" name="Wikipedia" url="http://wikipedia.org/wiki/Special:Search?search=%s" hint="k"/>
+		<item type="org.phylowidget.ui.PhyloLinkItem" icon="links/tol.png" name="ToL Web" url="http://tolweb.org/tree?group=%s" hint="t"/>
+		<item type="org.phylowidget.ui.PhyloLinkItem" icon="links/ebi.png" name="EBI" url="http://www.ebi.ac.uk/ebisearch/search.ebi?db=allebi&amp;query=%s" hint="e"/>
+	</item>
+	<item name="Layout" hint="a">
+		<!-- Notice the fancy conditional disabling of menu items. We set the "condition" attribute
+		to the name of a boolean method in the PyloUI class, which will let us know whether to be 
+		enabled or disabled. Sweet! -->
+		<item name="Reroot" action="nodeReroot" hint="r" condition="isNotRoot" />
+		<item name="Flip subtree" action="nodeFlipSubtree" hint="f"/>
+		<item name="Swap children" action="nodeSwitchChildren" hint="s"/>
+	</item>
+	<item name="Clipboard" hint="c">
+		<item name="Cut" action="nodeCut" hint="x"/>
+		<item name="Copy" action="nodeCopy" hint="c"/>
+		<item name="Paste" action="nodePaste" hint="v" condition="hasClipboard"/>
+		<item name="Swap" action="nodeSwap" hint="s" condition="hasClipboard"/>
+		<item name="Clear" action="nodeClearClipboard" hint="r" condition="hasClipboard"/>
+	</item>
+</menu>

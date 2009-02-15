@@ -18,6 +18,7 @@
 			<item name="Options">
 				<item name="Branch Scaling" type="NumberScroller" property="branchScaling" increment="0.05" min="0.01" max="30" format="0.00"/>
 				<item name="Layout Angle" type="NumberScroller" property="layoutAngle" increment="1" min="-360" max="360" format="0.0"/>
+				<item name="Angle Handling" type="EnumScroller" property="angleHandling" values="none, quantize, level"/>
 			</item>
 		</item>
 		<item name="Rendering">

@@ -1,0 +1,3 @@
+<menu name="context" type="org.phylowidget.ui.PhyloSubtreeLister" glow="true" callback="select_leaves" highlight="true" highlightColor="red">
+	<item name=""/>
+</menu>

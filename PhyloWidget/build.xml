@@ -65,9 +65,9 @@ This Ant task assumes a certain structure within your project directory:
 
 		<!-- Create properties for the filenames of the final jar, source and standalone .zips -->
 		<property name="internal.finaljar" value="${project.safename}.jar" />
-		<property name="internal.sourcezip" value="${zip}/${project.safename}_src.zip" />
-		<property name="internal.standalonezip" value="${zip}/${project.safename}_standalone.zip" />
-		<property name="internal.projectzip" value="${zip}/${project.safename}_project.zip" />
+		<property name="internal.sourcezip" value="${zip}/${project.safename}_src_${DSTAMP}.zip" />
+		<property name="internal.standalonezip" value="${zip}/${project.safename}_standalone_${DSTAMP}.zip" />
+		<property name="internal.projectzip" value="${zip}/${project.safename}_project_${DSTAMP}.zip" />
 		
 		<!-- Some behavior-modifying properties -->
 		<property name="internal.overwrite" value="true" />
@@ -164,6 +164,16 @@ This Ant task assumes a certain structure within your project directory:
 		
 	</target>
 
+	<!-- TARGET: RUN -->
+	<target name="run" depends="build,loadjars" description="Build and run PhyloWidget">
+		<java classname="org.phylowidget.PhyloWidget" fork="true">
+			<classpath>
+				<fileset dir="${applet}" />
+			</classpath>
+		</java>
+	</target>
+
+	
 	<!-- TARGET: STANDALONE -->
 	<target name="standalone">
 		<!-- Create the Windows-specific .bat file. Requires SEMICOLON-separated jar names. -->
@@ -428,6 +438,7 @@ This Ant task assumes a certain structure within your project directory:
 			<param name="project.standalonezip" value="true"/>
 			<param name="applet" id="applet" value="${applet_full}"/>
 		</antcall>
+		
 		<!-- COPY FULL SCRIPTS TO THE WEB/SCRIPTS DIRECTORY -->
 		<copy todir="web/scripts" overwrite="true">
 			<fileset dir="${applet_full}/scripts/"/>
@@ -435,7 +446,10 @@ This Ant task assumes a certain structure within your project directory:
 		<copy todir="web/zip" overwrite="true">
 			<fileset dir="${applet_full}/${zip}"/>
 		</copy>
-		<zip destfile="web/zip/phylowidget_project.zip" includes="**/*.*" excludes="web/zip/phylowidget_project.zip,build/**/*.*,applet/**/*.*" basedir="."/>
+		<copy tofile="web/zip/phylowidget_standalone.zip" file="web/${internal.standalonezip}" overwrite="true"/>
+		<copy tofile="web/zip/phylowidget_src.zip" file="web/${internal.sourcezip}" overwrite="true"/>
+			
+		<zip destfile="web/zip/phylowidget_project_${DSTAMP}.zip" includes="**/*.*" excludes="web/zip/*.zip,build/**/*.*,applet/**/*.*" basedir="."/>
 
 		<!-- UPLOAD THE WEB DIRECTORY TO THE SERVER -->
 		<!--

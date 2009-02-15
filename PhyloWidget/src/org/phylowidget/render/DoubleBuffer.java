@@ -23,6 +23,7 @@ public class DoubleBuffer implements Runnable
 	Rectangle2D.Float onscreenRect;
 
 	boolean shouldRepaint;
+	protected boolean shouldTriggerRepaint = false;
 	Thread repaintThread;
 
 	public DoubleBuffer()
@@ -32,6 +33,8 @@ public class DoubleBuffer implements Runnable
 		repaintThread = new Thread(this, "DoubleBuffer");
 		//		repaintThread.setPriority(Thread.MIN_PRIORITY);
 		repaintThread.start();
+		
+		shouldTriggerRepaint = true;
 
 		//		dummyGraphics.g2.dispose();
 		//		dummyGraphics.smooth();
@@ -74,7 +77,7 @@ public class DoubleBuffer implements Runnable
 		//		onscreen = canvas.parent.createGraphics(canvas.width, canvas.height, PGraphics.JAVA2D);
 	}
 
-	public void drawToCanvas(PGraphics canvas)
+	public void drawDoubleBuffered(PGraphics canvas)
 	{
 		if (offscreen == null || offscreen.getWidth() != canvas.width
 				|| offscreen.getHeight() != canvas.height)
@@ -88,7 +91,10 @@ public class DoubleBuffer implements Runnable
 		/*
 		 * Trigger a repaint in the double-buffering thread.
 		 */
-		triggerRepaint();
+		if (shouldTriggerRepaint)
+		{
+			triggerRepaint();
+		}
 
 		synchronized (onscreen)
 		{
@@ -107,7 +113,7 @@ public class DoubleBuffer implements Runnable
 
 	public void drawToBuffer(PGraphics g)
 	{
-
+//		System.out.println("Draw" + System.currentTimeMillis());
 	}
 
 	public void run()
@@ -122,8 +128,6 @@ public class DoubleBuffer implements Runnable
 				{
 					dummyGraphics.image = offscreen;
 					dummyGraphics.g2 = offscreenG;
-
-//					dummyGraphics.
 
 					try
 					{

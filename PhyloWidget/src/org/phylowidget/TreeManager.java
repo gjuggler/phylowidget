@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
+import org.jgrapht.event.GraphChangeEvent;
+import org.jgrapht.event.GraphEdgeChangeEvent;
+import org.jgrapht.event.GraphListener;
+import org.jgrapht.event.GraphVertexChangeEvent;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.LayoutCircular;
 import org.phylowidget.render.LayoutCladogram;
@@ -37,7 +41,7 @@ import org.phylowidget.ui.PhyloScaleBar;
 
 import processing.core.PApplet;
 
-public class TreeManager extends AbstractUIObject
+public class TreeManager extends AbstractUIObject implements GraphListener
 {
 	protected PApplet p;
 	protected PWContext context;
@@ -90,11 +94,12 @@ public class TreeManager extends AbstractUIObject
 		try
 		{
 			PhyloTree pt = (PhyloTree) getTree();
-			pt.updateNewick();
 		} catch (Exception e)
 		{
 			// Do nothing.
 		}
+		
+		fireCallback();
 		
 		if (context.config().showScaleBar)
 			scaleBar = new PhyloScaleBar(p);
@@ -214,11 +219,13 @@ public class TreeManager extends AbstractUIObject
 			 */
 			synchronized (t)
 			{
+				t.removeGraphListener(this);
 				t.dispose();
 				t = null;
 			}
 		}
 		this.t = tree;
+		tree.addGraphListener(this);
 		if (getRenderer() != null)
 		{
 			getRenderer().setTree(tree);
@@ -226,7 +233,6 @@ public class TreeManager extends AbstractUIObject
 		if (tree instanceof PhyloTree)
 		{
 			PhyloTree pt = (PhyloTree) tree;
-			pt.setSynchronizedWithJS(true);
 		}
 		fforwardMe = true;
 		mutator = new RandomTreeMutator(tree);
@@ -301,5 +307,36 @@ public class TreeManager extends AbstractUIObject
 	public void fillScreen()
 	{
 		camera.fillScreen(0.7f);
+	}
+
+	public final static int TREE_CHANGE_EVENT = 81294187;
+	private void treeChanged(GraphChangeEvent e)
+	{
+		fireEvent(TREE_CHANGE_EVENT);
+	}
+	
+	public void fireCallback()
+	{
+		fireEvent(TREE_CHANGE_EVENT);
+	}
+	
+	public void edgeAdded(GraphEdgeChangeEvent e)
+	{
+//		treeChanged(e);
+	}
+
+	public void edgeRemoved(GraphEdgeChangeEvent e)
+	{
+//		treeChanged(e);
+	}
+
+	public void vertexAdded(GraphVertexChangeEvent e)
+	{
+		treeChanged(e);
+	}
+
+	public void vertexRemoved(GraphVertexChangeEvent e)
+	{
+		treeChanged(e);
 	}
 }

@@ -253,6 +253,8 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 		}
 	}
 
+	private PhyloNode previousHoveredNode;
+	
 	boolean pressedWithinNode;
 	public void mouseEvent(MouseEvent e, Point screen, Point model)
 	{
@@ -287,6 +289,12 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 				{
 					UIUtils.setCursor(this, p, Cursor.HAND_CURSOR);
 					tree.setHoveredNode(getCurRange().node);
+					PhyloNode hoveredNode = getCurRange().node;
+					if (hoveredNode != previousHoveredNode)
+					{
+						fireEvent(NODE_OVER_EVENT); // GJ 2009-02-15 adding hover and glow event firing.
+						previousHoveredNode = hoveredNode;
+					}
 				} else
 				{
 					UIUtils.releaseCursor(this, p);
@@ -424,10 +432,15 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 		return dot / len - len / 30;
 	}
 
+	public static final int NODE_GLOW_EVENT = 23987325;
+	public static final int NODE_OVER_EVENT = 23987326;
 	public void setCurRange(NodeRange r)
 	{
 		if (r != null && r != curNodeRange)
 		{
+			// This is a "new" hovered node. Trigger an event!
+			fireEvent(this.NODE_GLOW_EVENT);
+			
 			Tool t = context.event().getToolManager().getCurrentTool();
 			if (t.respondToOtherEvents())
 			{

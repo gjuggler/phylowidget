@@ -267,6 +267,7 @@ public class MenuIO
 				return (MenuItem) newMenu;
 			} catch (Exception e2)
 			{
+				e.printStackTrace();
 				e2.printStackTrace();
 				return null;
 			}

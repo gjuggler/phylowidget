@@ -475,7 +475,7 @@ public class TreeIO
 	 * 
 	 * @param s
 	 */
-	static String translateName(String s)
+	private static String translateName(String s)
 	{
 		String mapped = translationMap.get(s);
 		if (mapped != null)
@@ -484,17 +484,39 @@ public class TreeIO
 			return s;
 	}
 
-	public static String createNewickString(RootedTree tree, boolean includeStupidLabels)
+	public static String createNewickString(RootedTree tree)
 	{
+		TreeOutputConfig config = new TreeOutputConfig();
+		config.outputNHX = false;
+		return createTreeString(tree,config);
+	}
+	
+	public static String createNHXString(RootedTree tree)
+	{
+		TreeOutputConfig config = new TreeOutputConfig();
+		config.outputNHX = true;
+		return createTreeString(tree,config);
+	}
+	
+//	public static String createXMLString(RootedTree tree)
+//	{
+//		// Not implemented.
+//	}
+	
+	private static String createTreeString(RootedTree tree, TreeOutputConfig config)
+	{
+		if (config == null)
+			config = new TreeOutputConfig();
+		
 		StringBuffer sb = new StringBuffer();
 		synchronized (tree)
 		{
-			outputVertex(tree, sb, tree.getRoot(), includeStupidLabels);
+			outputVertex(tree, sb, tree.getRoot(), config);
 		}
 		return sb.toString() + ";";
 	}
 
-	private static void outputVertex(RootedTree tree, StringBuffer sb, DefaultVertex v, boolean includeStupidLabels)
+	private static void outputVertex(RootedTree tree, StringBuffer sb, DefaultVertex v, TreeOutputConfig config)
 	{
 		/*
 		 * Ok, I was gonna make this one iterative instead of recursive (like
@@ -507,7 +529,7 @@ public class TreeIO
 			List<DefaultVertex> l = tree.getChildrenOf(v);
 			for (int i = 0; i < l.size(); i++)
 			{
-				outputVertex(tree, sb, l.get(i), includeStupidLabels);
+				outputVertex(tree, sb, l.get(i), config);
 				if (i != l.size() - 1)
 					sb.append(',');
 			}
@@ -515,7 +537,7 @@ public class TreeIO
 		}
 		// Call this to make the vertex's label nicely formatted for Nexus
 		// output.
-		String s = getNexusCompliantLabel(tree, v, includeStupidLabels);
+		String s = getNexusCompliantLabel(tree, v, config.includeStupidLabels);
 		if (s.length() != 0)
 			sb.append(s);
 		Object p = tree.getParentOf(v);
@@ -525,7 +547,7 @@ public class TreeIO
 //			if (ew != 1.0)
 			sb.append(":" + Double.toString(ew));
 		}
-		if (v instanceof PhyloNode)
+		if (v instanceof PhyloNode && config.outputNHX)
 		{
 			/*
 			 * Output annotations if they exist.
@@ -833,6 +855,20 @@ public class TreeIO
 			//				s = s.replace(key, annotationMap.get(key));
 			//			}
 			return s;
+		}
+	}
+	
+	
+	static final class TreeOutputConfig{
+		public boolean outputNHX;
+		public boolean includeStupidLabels;
+		public boolean outputTreeImages;
+		
+		public TreeOutputConfig()
+		{
+			outputNHX = true;
+			includeStupidLabels = false;
+			outputTreeImages = false;
 		}
 	}
 }

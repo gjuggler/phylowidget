@@ -244,13 +244,14 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		int nodesDrawn = 0;
 		PhyloNode[] nodesToDraw = new PhyloNode[nodes.length];
 		Thread.yield();
+		
 		for (int i = 0; i < nodes.length; i++)
 		{
 			Thread.yield();
 			PhyloNode n = nodes[i];
 			if (fforwardMe)
 				n.fforward();
-			updateNode(n);
+			updateNode(n); // GJ 2009-02-15 commented out. Node updates will happen in recalc() method now.
 			n.drawMe = false;
 			n.labelWasDrawn = false;
 			n.drawLineAndNode = false;
@@ -714,6 +715,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	{
 		if (!needsLayout)
 			return;
+//		System.out.println("Layout "+System.currentTimeMillis());
 		needsLayout = false;
 
 		ArrayList<PhyloNode> ls = new ArrayList<PhyloNode>();
@@ -835,22 +837,14 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	protected void recalc()
 	{
+		
 		rowSize = rect.height / leaves.length;
 		textSize = rowSize * 0.9f;
-
 		dotWidth = getNormalLineWidth() * context.config().nodeSize;
-		//		rad = dotWidth / 2;
-
-		//		System.out.println(rect);
-
-		//		if (rowSize == rect.height)
-		//			scaleX = 0;
-
 		scaleX = rect.width;
 		scaleY = rect.height;
 		float scale = (float) Math.min(scaleX, scaleY);
 		scaleX = scaleY = scale;
-
 		// If we have few nodes, don't fill it up so much.
 		if (leaves.length <= 10)
 		{
@@ -869,24 +863,57 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		dy += rect.getY();
 
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
-		//		System.out.println("Scale:"+scaleX+"  "+scaleY);
-		//		System.out.println("d:"+dx+"  "+dy);
 	}
 
-	//	public float getBranchLengthScaling()
-	//	{
-	//		return context.config().branchLengthScaling;
-	//	}
-
+	private void updateNodes()
+	{
+		int len = nodes.length;
+		for (int i=0; i < len; i++)
+		{
+			PhyloNode n = nodes[i];
+			updateNode(n);
+		}
+	}
+	
+	private TreeRenderState lastRenderState;
+	private long nodePositionHash;
+	
 	public void render(PGraphics canvas, float x, float y, float w, float h, boolean mainRender)
 	{
 		this.mainRender = mainRender;
 		rect.setRect(x, y, w, h);
 		if (tree == null)
 			return;
+		
+		// GJ 2009-02-15
+		shouldTriggerRepaint = true;
+		nodePositionHash = 0;
+		
+//		synchronized (this)
+//		{
+//			this.canvas = canvas;	
+//			layout();
+//		}
+//		synchronized (tree)
+//		{
+//			recalc();
+//			updateNodes();
+//		}
+		
+		// GJ 2009-02-15 : stop re-rendering when the tree ain't changing!!
+//		TreeRenderState trs = new TreeRenderState(this);
+//		if (trs.equals(lastRenderState))
+//		{
+////			System.out.println("Nothing new!!!");
+//			shouldTriggerRepaint = false;
+//		} else
+//		{
+//			lastRenderState = trs;
+//		}
+		
 		if (context.config().useDoubleBuffering)
 		{
-			drawToCanvas(canvas);
+			drawDoubleBuffered(canvas);
 		} else
 		{
 			synchronized (tree)
@@ -894,6 +921,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				this.canvas = canvas;
 				layout();
 				recalc();
+//				updateNodes();
 				draw();
 			}
 		}
@@ -915,6 +943,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	public void drawToBuffer(PGraphics g)
 	{
+		super.drawToBuffer(g);
+		
 		this.canvas = g;
 		g.background(0, 0);
 		/*
@@ -924,6 +954,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			layout();
 			recalc();
+//			updateNodes();
 			draw();
 		}
 		this.canvas = null;
@@ -1011,52 +1042,19 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		NodeRange r = n.range;
 
 		decorator.setCornerPoints(this, n);
-		//		if (r == null)
-		//			return;
 
-		//		float[][] points = decorator.getCornerPoints(this, n, textSize);
-
-		//		float minX, maxX, minY, maxY;
-		//		minX = minY = Float.MAX_VALUE;
-		//		maxX = maxY = Float.MIN_VALUE;
-		//		for (float[] xy : points)
-		//		{
-		//			float x = xy[0];
-		//			float y = xy[1];
-		//
-		//			if (x < minX)
-		//				minX = x;
-		//			if (x > maxX)
-		//				maxX = x;
-		//			if (y < minY)
-		//				minY = y;
-		//			if (y > maxY)
-		//				maxY = y;
-		//		}
 		if (n.rect.getWidth() == 0)
 		{
 			n.rect.setFrame(n.getX(), n.getY(), 0, 0);
 		}
-		//		tempPt.setLocation(n.getRealX(), n.getRealY());
-		//		n.rect.add(tempPt);
-
-		r.loX = (float) n.rect.getMinX();
-		r.hiX = (float) n.rect.getMaxX();
-		r.loY = (float) n.rect.getMinY();
-		r.hiY = (float) n.rect.getMaxY();
-
-		//		System.out.println(n.rect);
-
-		//		float realTextSize = textSize * n.zoomTextSize;
-		//		r.loX = getX(n) - dotWidth / 2;
-		//		float textHeight = (font.ascent() + font.descent()) * realTextSize;
-		////		float textHeight = getRowHeight();
-		//		r.loY = getY(n) - textHeight / 2;
-		//		r.hiY = getY(n) + textHeight / 2;
-		//		float textWidth = (float) n.aspectRatio * textSize;
-		////		r.hiX = getX(n) + dotWidth / 2 + textWidth;
-		//		r.hiX = getX(n) + (float)n.aspectRatio * getRowHeight();
-		//		n.lastTextSize = realTextSize;
+		
+		r.loX = n.rect.x;
+		r.hiX = n.rect.x + n.rect.width;
+		r.loY = n.rect.y;
+		r.hiY = n.rect.y + n.rect.height;
+		
+		nodePositionHash += n.getX();
+		nodePositionHash += n.getY();
 	}
 
 	/**
@@ -1129,6 +1127,32 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			}
 		}
 
+	}
+	
+	class TreeRenderState
+	{
+		public int treeModCount;
+		public double x;
+		public double y;
+		public double zoom;
+		public long nodePositionHash;
+		
+		public TreeRenderState(BasicTreeRenderer r)
+		{
+			this.treeModCount = r.tree.getModCount();
+			this.x = r.rect.x;
+			this.y = r.rect.y;
+			this.zoom = r.rect.getWidth();
+			this.nodePositionHash = r.nodePositionHash;
+		}
+		
+		public boolean equals(Object o)
+		{
+			if (o == null)
+				return false;
+			TreeRenderState b = (TreeRenderState) o;
+			return (b.x == x && b.y == y && b.treeModCount == treeModCount && b.zoom == zoom && b.nodePositionHash == nodePositionHash);
+		}
 	}
 
 }

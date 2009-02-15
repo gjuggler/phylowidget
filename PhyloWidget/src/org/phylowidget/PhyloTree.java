@@ -31,12 +31,7 @@ import org.phylowidget.ui.NodeUncollapser;
 public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 {
 	private static final long serialVersionUID = 1L;
-
-	private JSTreeUpdater updater;
-
 	private SearchIndex<PhyloNode> index = new SearchIndex<PhyloNode>();
-
-	private boolean synchronizedWithJS;
 
 	public PhyloTree()
 	{
@@ -114,6 +109,18 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 		super.flipChildren(parent);
 	}
 
+	public PhyloNode getHoveredNode()
+	{
+		return hoveredNode;
+	}
+	
+	int modCount = 0;
+	@Override
+	public int getModCount()
+	{
+		return modCount;
+	}
+	
 	public void reverseSubtree(PhyloNode vertex)
 	{
 		super.reverseSubtree(vertex);
@@ -125,15 +132,6 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 		index.remove((PhyloNode) vertex);
 		super.setLabel(vertex, label);
 		index.add((PhyloNode) vertex);
-	}
-
-	public void updateNewick()
-	{
-		if (isValid())
-		{
-			if (synchronizedWithJS)
-				updater.triggerUpdate(this);
-		}
 	}
 
 	void removeFound()
@@ -201,7 +199,9 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 	public void modPlus()
 	{
 		super.modPlus();
-		updateNewick();
+		modCount++;
+		if (modCount > 1000)
+			modCount = 0;
 	}
 
 	//	class NewickUpdater implements GraphListener
@@ -240,20 +240,6 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 	//		}
 	//	}
 
-	public boolean isSynchronizedWithJS()
-	{
-		return synchronizedWithJS;
-	}
-
-	public void setSynchronizedWithJS(boolean synchronizedWithJS)
-	{
-		this.synchronizedWithJS = synchronizedWithJS;
-		if (synchronizedWithJS && updater == null)
-		{
-			updater = new JSTreeUpdater();
-			//			addGraphListener(new NewickUpdater());
-		}
-	}
 
 	//	public static void main(String... args)
 	//	{

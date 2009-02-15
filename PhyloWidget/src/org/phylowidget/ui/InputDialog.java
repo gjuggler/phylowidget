@@ -36,8 +36,8 @@ public class InputDialog extends Dialog implements WindowListener, KeyListener
 		setLayout(new BorderLayout());
 
 		text = new TextArea("", 5, 40, TextArea.SCROLLBARS_BOTH);
-		String s = TreeIO.createNewickString(
-			PWPlatform.getInstance().getThisAppContext().trees().getTree(), false);
+		String s = TreeIO.createNHXString(
+			PWPlatform.getInstance().getThisAppContext().trees().getTree());
 		text.setText(s);
 		add(
 			text, BorderLayout.CENTER);

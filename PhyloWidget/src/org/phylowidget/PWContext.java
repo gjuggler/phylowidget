@@ -29,8 +29,8 @@ public class PWContext extends UIContext
 		super.init();
 		
 		this.config = new PhyloConfig();
-		this.trees = new TreeManager(getApplet());
 		this.ui = new PhyloUI(getPW());
+		this.trees = new TreeManager(getPW());
 	}
 	
 	public PhyloWidget getPW()

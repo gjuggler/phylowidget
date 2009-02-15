@@ -697,7 +697,8 @@ public final class NodeRenderer implements UsefulConstants
 			curTextSize = Math.min(curTextSize, 128);
 			//			if (curTextSize*100 == 0 && actuallyRender)
 			//				return new float[]{dx,curTextSize};
-			canvas.textSize(curTextSize);
+			if (canvas.textFont != null)
+				canvas.textSize(curTextSize);
 			if (n.found)
 			{
 				canvas.fill(RenderConstants.foundForeground.getRGB());

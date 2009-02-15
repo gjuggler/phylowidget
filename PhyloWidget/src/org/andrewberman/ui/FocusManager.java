@@ -55,6 +55,7 @@ public class FocusManager implements FocusListener
 	public FocusManager(UIContext context)
 	{
 		p = context.getApplet();
+		p.removeFocusListener(this);
 		p.addFocusListener(this);
 	}
 	

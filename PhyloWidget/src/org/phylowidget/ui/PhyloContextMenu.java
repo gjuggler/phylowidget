@@ -22,14 +22,16 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 import org.andrewberman.ui.Point;
+import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.UIRectangle;
+import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.menu.RadialMenu;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.PhyloNode;
 
 import processing.core.PApplet;
 
-public class PhyloContextMenu extends RadialMenu
+public class PhyloContextMenu extends RadialMenu implements UIListener
 {
 	//	HoverHalo hover;
 	public NodeTraverser traverser;
@@ -41,6 +43,7 @@ public class PhyloContextMenu extends RadialMenu
 	{
 		super(p);
 		traverser = new NodeTraverser(p);
+		traverser.addListener(this);
 	}
 
 	public void setOptions()
@@ -60,12 +63,15 @@ public class PhyloContextMenu extends RadialMenu
 		super.draw();
 	}
 
+	public static final int CONTEXT_OPEN_EVENT = 3023928;
+	public static final int CONTEXT_CLOSE_EVENT = 3023929;
 	public void open(NodeRange r)
 	{
 		super.open();
 		setNodeRange(r);
 		aTween.continueTo(1f);
 		aTween.fforward();
+		fireEvent(CONTEXT_OPEN_EVENT);
 	}
 
 	public void close()
@@ -73,6 +79,7 @@ public class PhyloContextMenu extends RadialMenu
 		super.close();
 		if (traverser != null)
 			traverser.getCurRange();
+		fireEvent(CONTEXT_CLOSE_EVENT);
 	}
 
 	private boolean shouldGlow = true;
@@ -106,7 +113,7 @@ public class PhyloContextMenu extends RadialMenu
 			return;
 		//		if (!isOpen())
 		//			return;
-
+		
 		if (mouseInside)
 			return;
 
@@ -126,6 +133,19 @@ public class PhyloContextMenu extends RadialMenu
 		} else
 		{
 			close();
+		}
+	}
+
+	public static final int NODE_GLOW_EVENT = 24014;
+	public static final int NODE_HOVER_EVENT = 91248;
+	public void uiEvent(UIEvent e)
+	{
+		if (e.getID() == NodeTraverser.NODE_GLOW_EVENT)
+		{
+			fireEvent(NODE_GLOW_EVENT); // Re-trigger the event so listeners on the context menu can "hear" the hover.
+		} else if (e.getID() == NodeTraverser.NODE_OVER_EVENT)
+		{
+			fireEvent(NODE_HOVER_EVENT);
 		}
 	}
 }

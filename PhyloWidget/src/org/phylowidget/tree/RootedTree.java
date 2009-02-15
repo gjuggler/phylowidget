@@ -266,6 +266,16 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return verts;
 	}
 
+	public List<V> getAllLeaves()
+	{
+		return getAllLeaves(getRoot());
+	}
+	
+	public List<V> getAllNodes()
+	{
+		return getAllNodes(getRoot());
+	}
+	
 	public List<V> getAllLeaves(V vertex)
 	{
 		List<V> leaves = new ArrayList<V>();
@@ -404,6 +414,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 
 	}
 
+	public int getModCount()
+	{
+		return 0;
+	}
+	
 	List<V> sortChildrenList(V vertex, List<V> l, Comparator<V> sorter)
 	{
 		// Sort the resulting list.
@@ -486,6 +501,16 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return false;
 	}
 
+	public String getNewick()
+	{
+		return TreeIO.createNewickString(this);
+	}
+	
+	public String getNHX()
+	{
+		return TreeIO.createNHXString(this);
+	}
+	
 	public int getMaxDepthToLeaf(V vertex)
 	{
 		int maxDepth = 0;
@@ -556,6 +581,22 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return furthestVertex;
 	}
 
+	public double getMaxTreeLength()
+	{
+		return getMaxHeightToLeaf(getRoot());
+	}
+	
+	public double getTotalTreeLength()
+	{
+		List<V> nodes = getAllNodes();
+		double totalLength = 0;
+		for (V node : nodes)
+		{
+			totalLength += getBranchLength(node);
+		}
+		return totalLength;
+	}
+	
 	public double getMaxHeightToLeaf(V vertex)
 	{
 		double vertexHeight = getHeightToRoot(vertex);
@@ -590,6 +631,16 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return height;
 	}
 
+	public synchronized int getLeafCount()
+	{
+		return getNumEnclosedLeaves(getRoot());
+	}
+	
+	public synchronized int getNodeCount()
+	{
+		return getAllNodes().size();
+	}
+	
 	public synchronized int getNumEnclosedLeaves(V vertex)
 	{
 		return getEnclosedLeaves(vertex).size();

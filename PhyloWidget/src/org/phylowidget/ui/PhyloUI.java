@@ -115,13 +115,14 @@ public class PhyloUI implements Runnable
 		try
 		{
 			p.callMethod("setMenusIfNull");
-			loadFromApplet(p);
+			loadFromAppletParams(p);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 			// Do nothing. Continue on...
 		}
 		checkPermissions();
+		layout();
 	}
 
 	public void setMenusIfNull()
@@ -157,8 +158,8 @@ public class PhyloUI implements Runnable
 	public synchronized void setMenus()
 	{
 		disposeMenus();
-		if (context.config().debug)
-			System.out.println("Disposed!"); 
+		//		if (context.config().debug)
+		//			System.out.println("Disposed!"); 
 		String[] menuFiles = context.config().menus.split(";");
 		ArrayList<MenuItem> allMenus = new ArrayList<MenuItem>();
 		for (String menuFile : menuFiles)
@@ -166,13 +167,14 @@ public class PhyloUI implements Runnable
 			if (menuFile.trim().length() == 0)
 				continue;
 			if (context.config().debug)
-				System.out.println(menuFile);
+				System.out.println("PhyloUI setMenus(): " + menuFile);
 			// GJ 27-8-08: remove quotes from menu specification.
 			menuFile.replaceAll("'", "");
 			menuFile.replaceAll("\"", "");
 			PhyloMenuIO io = new PhyloMenuIO();
 			Reader r = null;
 			InputStream in = null;
+			Exception asdf = null;
 			if (menuFile.toLowerCase().startsWith("http"))
 			{
 				try
@@ -185,22 +187,28 @@ public class PhyloUI implements Runnable
 				}
 			} else
 			{
-				in = p.createInput("menus/" + menuFile);
-				//				in = p.openStream("menus/" + menuFile);
-				if (in == null)
+				try
 				{
-					//				in = p.openStream(menuFile);
-					//					in = p.openStream(menuFile);
-					in = p.createInput(menuFile);
-				}
-				if (in == null)
+					in = p.createInput("menus/" + menuFile);
+					//				in = p.openStream("menus/" + menuFile);
+					if (in == null)
+					{
+						//				in = p.openStream(menuFile);
+						//					in = p.openStream(menuFile);
+						in = p.createInput(menuFile);
+					}
+					if (in == null)
+					{
+						String path = p.getDocumentBase().toString();
+						int ind = path.lastIndexOf("/");
+						if (ind != -1)
+							path = path.substring(0, ind);
+						//					System.out.println(path);
+						in = p.createInput(path + "/" + menuFile);
+					}
+				} catch (Exception e)
 				{
-					String path = p.getDocumentBase().toString();
-					int ind = path.lastIndexOf("/");
-					if (ind != -1)
-						path = path.substring(0, ind);
-					//					System.out.println(path);
-					in = p.createInput(path + "/" + menuFile);
+					asdf = e;
 				}
 			}
 			/*
@@ -214,8 +222,12 @@ public class PhyloUI implements Runnable
 				r = new InputStreamReader(in);
 				//				r = new StringReader(fileS);
 			}
+			if (in == null)
+			{
+				asdf.printStackTrace();
+			}
 			ArrayList<MenuItem> theseMenus = io.loadFromXML(r, p, context.ui(), p, context.config());
-			System.out.println(menuFile);
+			//			System.out.println(menuFile);
 			configureMenus(theseMenus);
 			allMenus.addAll(theseMenus);
 		}
@@ -242,7 +254,7 @@ public class PhyloUI implements Runnable
 		}
 	}
 
-	public void loadFromApplet(PApplet app) throws Exception
+	public void loadFromAppletParams(PApplet app) throws Exception
 	{
 		/*
 		 * Let's first load the URL query parameters.
@@ -282,7 +294,7 @@ public class PhyloUI implements Runnable
 			MenuItem menu = (MenuItem) menus.get(i);
 			if (menu instanceof PhyloContextMenu)
 			{
-//				System.out.println("ASDF");
+				//				System.out.println("ASDF");
 				this.contextMenu = (PhyloContextMenu) menu;
 				continue;
 			}
@@ -341,23 +353,21 @@ public class PhyloUI implements Runnable
 		nodeUpdater.triggerUpdate(t, n);
 	}
 
-	public void updateJS()
-	{
-		PhyloTree t = (PhyloTree) context.trees().getTree();
-		if (t != null)
-			t.updateNewick();
-	}
-
 	public RootedTree getCurTree()
 	{
 		return context.trees().getTree();
+	}
+
+	public PhyloTree getTree()
+	{
+		return (PhyloTree) getCurTree();
 	}
 
 	public void layout()
 	{
 		if (context.trees().getRenderer() != null)
 			context.trees().getRenderer().layoutTrigger();
-		updateJS();
+		context.trees().fireCallback();
 	}
 
 	public void forceLayout()
@@ -367,7 +377,7 @@ public class PhyloUI implements Runnable
 			BasicTreeRenderer render = (BasicTreeRenderer) context.trees().getRenderer();
 			render.forceLayout();
 		}
-		updateJS();
+		context.trees().fireCallback();
 	}
 
 	public PhyloNode getCurNode()
@@ -741,7 +751,7 @@ public class PhyloUI implements Runnable
 				p.noLoop();
 				File dir = f.getParentFile();
 				TreeIO.outputTreeImages(context.trees().getTree(), dir);
-				String s = TreeIO.createNewickString(context.trees().getTree(), false);
+				String s = TreeIO.createNHXString(context.trees().getTree());
 				try
 				{
 					f.createNewFile();
@@ -946,4 +956,5 @@ public class PhyloUI implements Runnable
 		thread = null;
 		menus = null;
 	}
+
 }

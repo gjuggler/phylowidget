@@ -24,6 +24,8 @@ public class UIContext
 	private ThreadGroup threadGroup = null;
 	private static int nextContextID = 0;
 
+	private boolean inited;
+	
 	public UIContext(PApplet p)
 	{
 		this.applet = p;
@@ -31,12 +33,15 @@ public class UIContext
 
 	public void init()
 	{
+		System.out.println("Initting "+this);
 		eventManager = new EventManager(this);
 		focusManager = new FocusManager(this);
 		fontLoader = new FontLoader(this);
 		shortcutManager = new ShortcutManager(this);
 		menuTimer = new MenuTimer();
+		menuTimer.start();
 		toolManager = new ToolManager(this);
+		inited = true;
 	}
 	
 	public ThreadGroup getThreadGroup()
@@ -117,5 +122,10 @@ public class UIContext
 		this.menuTimer.stop();
 		this.toolManager = null;
 		this.shortcutManager = null;
+	}
+	
+	public boolean isInited()
+	{
+		return inited;
 	}
 }

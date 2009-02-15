@@ -18,6 +18,7 @@
  */
 package org.phylowidget.ui;
 
+import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.StringClipboard;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -31,18 +32,18 @@ import org.phylowidget.tree.TreeIO;
 
 import processing.core.PApplet;
 
-public class TreeClipboard
+public class TreeClipboard extends AbstractUIObject
 {
 	String newickString;
 	//	String fullNewickString;
 	RootedTree origTree;
 	PhyloNode origVertex;
 
-	JSClipUpdater updater;
+//	JSClipUpdater updater;
 
 	public TreeClipboard(PApplet p)
 	{
-		updater = new JSClipUpdater(p);
+//		updater = new JSClipUpdater(p);
 	}
 
 	public boolean isEmpty()
@@ -53,11 +54,14 @@ public class TreeClipboard
 			return (newickString.length() == 0);
 	}
 
+	public static final int CLIPBOARD_UPDATED = 123432;
+	
 	public void clearClipboard()
 	{
 		clearTree();
 		newickString = "";
-		updater.triggerUpdate(newickString);
+//		updater.triggerUpdate(newickString);
+		fireEvent(CLIPBOARD_UPDATED);
 	}
 
 	void clearTree()
@@ -88,10 +92,11 @@ public class TreeClipboard
 	{
 		setStateRecursive(tree,(PhyloNode) tree.getRoot(),PhyloNode.NONE);
 		RootedTree clone = tree.cloneSubtree(node);
-		newickString = TreeIO.createNewickString(clone, false);
+		newickString = TreeIO.createNHXString(clone);
 		origTree = tree;
 		origVertex = node;
-		updater.triggerUpdate(newickString);
+//		updater.triggerUpdate(newickString);
+		fireEvent(CLIPBOARD_UPDATED);
 	}
 	
 	public void setClipFromJS(String newick)

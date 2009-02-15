@@ -47,8 +47,9 @@ public class JSClipUpdater extends DelayedAction
 	{
 //		String cmd = jsCall;
 		try {
-			Object o = caller.getMember("PhyloWidget");
-			caller.callWithObject(o, "updateClip", newClip);
+			caller.call("pw_clip");
+//			Object o = caller.getMember("PhyloWidget");
+//			caller.callWithObject(o, "updateClip", newClip);
 //			caller.eval("PhyloWidget.updateClip(\""+newClip+"\");");
 			
 		} catch (Exception e)

@@ -59,6 +59,10 @@ public class PhyloConfig
 	 */
 	public String tree = DEFAULT_TREE;
 	/*
+	 * Set the clipboard text.
+	 */
+	public String clipboard = "";
+	/*
 	 * Set the starting search string.
 	 */
 	public String search = "";
@@ -95,7 +99,7 @@ public class PhyloConfig
 	 *   								to switch between tools.
 	 *   - "toolbar-hidden.xml"			Same idea as above, but with the toolbar.
 	 */
-	public String menus = "dock.xml;toolbar-new.xml;context.xml";
+	public String menus = "context.xml;dock.xml;toolbar-new.xml;callbacks.xml";
 
 	/* Colors: You can modify the foreground and background colors which PhyloWidget uses.
 	 * The new value should be formatted as below; a triplet of integer RGB values enclosed in parentheses.
@@ -297,6 +301,17 @@ public class PhyloConfig
 		}.start();
 	}
 
+	public void setClipboard(final String s)
+	{
+		new Thread()
+		{
+			public void run()
+			{
+				context.ui().clipboard.setClipFromJS(s);
+			}
+		}.start();
+	}
+	
 	public void setUseBranchLengths(boolean useEm)
 	{
 		useBranchLengths = useEm;
@@ -373,6 +388,7 @@ public class PhyloConfig
 			@Override
 			public void run()
 			{
+//				System.out.println("PhyloConfig MenuLoader!");
 				context.ui().setMenus();
 			}
 		}.start();

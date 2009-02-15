@@ -97,7 +97,6 @@ public class PhyloTextField extends TextField
 		if (t instanceof PhyloTree)
 		{
 			PhyloTree pt = (PhyloTree) t;
-			pt.updateNewick();
 		}
 	}
 

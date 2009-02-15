@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
 
 import org.andrewberman.ui.UIUtils;
+import org.andrewberman.ui.unsorted.JSCaller;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.andrewberman.ui.unsorted.StringPair;
 import org.phylowidget.net.JSClipUpdater;
@@ -38,14 +39,11 @@ import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
 
-public class PhyloWidget extends PApplet
+public class PhyloWidget extends PWPublicMethods
 {
 	private static final long serialVersionUID = -7096870051293017660L;
 
-	public PWContext context;
-
-	JSTreeUpdater treeUpdater;
-	JSClipUpdater clipUpdater;
+	public PWContext pwc;
 	
 	public static float FRAMERATE = 60;
 
@@ -85,30 +83,30 @@ public class PhyloWidget extends PApplet
 		}
 		frameRate(FRAMERATE);
 
-		context = (PWContext) PWPlatform.getInstance().registerApp(this);
+		pwc = (PWContext) PWPlatform.getInstance().registerApp(this);
 		
-//		cfg = new PhyloConfig();
-//		ui = new PhyloUI(this);
-//		trees = new TreeManager(this);
-//
-//		treeUpdater = new PWTreeUpdater();
-//		clipUpdater = new PWClipUpdater();
+		new Thread()
+		{
+			public void run()
+			{
+				pwc.ui().setup();
+				pwc.trees().setup();
+			}
+		}.start();
 
-//		new Thread()
-//		{
-//			public void run()
-//			{
-				context.ui().setup();
-				context.trees().setup();
-//			}
-//		}.start();
+		unregisterDraw(pwc.event());
 
-		unregisterDraw(context.event());
-
-		treeUpdater = new JSTreeUpdater();
-		clipUpdater = new JSClipUpdater(this);
-		
 		clearQueues();
+		
+		JSCaller call = new JSCaller(this);
+		try
+		{
+			// Make this Javascript call to satisfy the PulpCore javascript loader that we're using.
+			call.call("pulpcore_appletLoaded", null);
+		} catch (Exception e)
+		{
+			// If we're not in a browser, we'll get an exception here.
+		}
 	}
 
 	DoubleBuffer dbr;
@@ -117,28 +115,22 @@ public class PhyloWidget extends PApplet
 	public void resize(int width, int height)
 	{
 		super.resize(width, height);
-		//		PGraphicsJava2D pg = (PGraphicsJava2D) g;
-		//		if (pg == null)
-		//			return;
 		UIUtils.setRenderingHints(g);
-
 	}
 
 	boolean drawnOnce = false;
 
 	public synchronized void draw()
 	{
-		background(context.config().getBackgroundColor().getRGB(), 1.0f);
+		background(pwc.config().getBackgroundColor().getRGB(), 1.0f);
 
 		// If we have setting changes or method calls on the queue, run them now.
 		if (drawnOnce)
 			clearQueues();
 
-		drawnOnce = true;
+		pwc.event().draw();
 
-		context.event().draw();
-
-		if (!context.config().suppressMessages)
+		if (!pwc.config().suppressMessages)
 		{
 			if (frameCount - messageFrame > (frameRateTarget * messageDecay))
 				messageString = "";
@@ -147,12 +139,14 @@ public class PhyloWidget extends PApplet
 				drawMessage();
 			}
 
-			if (context.config().debug)
+			if (pwc.config().debug)
 			{
 				drawNumLeaves();
 				drawFrameRate();
 			}
 		}
+		
+		drawnOnce = true;
 	}
 
 	Pattern parens = Pattern.compile("(.*?)\\((.*)\\)");
@@ -182,12 +176,12 @@ public class PhyloWidget extends PApplet
 						args = new Object[] { match.group(2) };
 						System.out.println(s + "  " + args);
 						m = PhyloUI.class.getMethod(s, String.class);
-						m.invoke(context.ui(), args);
+						m.invoke(pwc.ui(), args);
 					}
 					if (!matched)
 					{
 						m = PhyloUI.class.getMethod(s);
-						m.invoke(context.ui());
+						m.invoke(pwc.ui());
 					}
 				} catch (Exception e)
 				{
@@ -197,7 +191,7 @@ public class PhyloWidget extends PApplet
 			{
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put(sp.a, sp.b);
-				MethodAndFieldSetter.setMethodsAndFields(context.config(), map);
+				MethodAndFieldSetter.setMethodsAndFields(pwc.config(), map);
 			}
 		}
 	}
@@ -209,16 +203,15 @@ public class PhyloWidget extends PApplet
 
 	public synchronized void destroy()
 	{
-		//		System.out.println("Destroying.");
 		noLoop();
 		super.destroy();
-		context.destroy();
+		pwc.destroy();
 	}
 
 	protected void drawFrameRate()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(context.getPFont());
+		textFont(pwc.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(String.valueOf(round(frameRate * 10) / 10.0), width - 40, height - 10);
@@ -230,13 +223,13 @@ public class PhyloWidget extends PApplet
 
 	protected void drawNumLeaves()
 	{
-		RootedTree tree = context.trees().getTree();
+		RootedTree tree = pwc.trees().getTree();
 		if (tree == null)
 			return;
 		int leaves = tree.getNumEnclosedLeaves(tree.getRoot());
 		String nleaves = String.valueOf(leaves);
 		textAlign(PApplet.LEFT);
-		textFont(context.getPFont());
+		textFont(pwc.getPFont());
 		textSize(10);
 		fill(255, 0, 0);
 		text(nleaves, width - 100, height - 10);
@@ -245,7 +238,7 @@ public class PhyloWidget extends PApplet
 	protected void drawMessage()
 	{
 		textAlign(PApplet.LEFT);
-		textFont(context.getPFont());
+		textFont(pwc.getPFont());
 		textSize(10);
 		float w = textWidth(messageString);
 		fill(255, 255, 255);
@@ -266,31 +259,6 @@ public class PhyloWidget extends PApplet
 		messageFrame = frameCount;
 	}
 
-	//	public void size(int w, int h)
-	//	{
-	//		super.size(w,h);
-	////		if (width != w || h != h)
-	////			size(w, h, JAVA2D);
-	//		// size(w,h,P3D);
-	//		// size(w,h,OPENGL);
-	//			// pg.g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-	//			// RenderingHints.VALUE_STROKE_PURE);
-	//			// p.smooth();
-	//	}
-
-	//	@Override
-	//	public void resize(int w, int h)
-	//	{
-	////		super.resize(width, height);
-	//		if (g != null && (getWidth()!=w || getHeight()!=h))
-	//		{
-	//			size(w,h);
-	//		}
-	////		setup();
-	//		System.out.println("resize!"+width);
-	////		size(width,height);
-	//	}
-
 	public boolean jsTest()
 	{
 		return true;
@@ -305,21 +273,21 @@ public class PhyloWidget extends PApplet
 		}
 	}
 
-	public boolean updateTree(String s)
+	public void setTree(String s)
 	{
-//		treeUpdater.triggerUpdate(s);
-		return true;
+		changeSetting("tree",s);
+		setMessage("Tree updated.");
 	}
-
-	public boolean updateClip(String s)
+	
+	public void setClipboard(String s)
 	{
-		clipUpdater.triggerUpdate(s);
-		return true;
+		changeSetting("clipboard",s);
+		setMessage("Clipboard updated.");
 	}
-
+	
 	public synchronized void changeSetting(String setting, String newValue)
 	{
-		if (context.config().debug)
+		if (pwc.config().debug)
 		{
 			System.out.println(setting + "\t" + newValue);
 		}

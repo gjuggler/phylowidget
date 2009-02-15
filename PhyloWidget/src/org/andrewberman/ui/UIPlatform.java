@@ -119,9 +119,11 @@ public class UIPlatform
 			allContexts.add(newContext);
 		}
 		// Setup a temporary context for init
-//		initContext = newContext;
-//		initContextThread = Thread.currentThread();
-		newContext.init();
+		initContext = newContext;
+		initContextThread = Thread.currentThread();
+		
+		if (!newContext.isInited())
+			newContext.init();
 		return newContext;
 	}
 	

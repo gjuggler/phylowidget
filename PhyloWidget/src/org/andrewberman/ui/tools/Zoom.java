@@ -112,18 +112,15 @@ public class Zoom extends Tool
 	void reset()
 	{
 		controlPressed = false;
-		System.out.println("1");
 		downPoint = (Point) curPoint.clone();
 		targetX = downPoint.x - p.width / 2;
 		targetY = downPoint.y - p.height / 2;
-		System.out.println("2");
 		downCameraX = getCamera().getX();
 		downCameraY = getCamera().getY();
 		
 		downZoom = getCamera().getZ();
 		zoomFactor = getCamera().getZ();
 		zoomTween.continueTo((float) zoomFactor);
-		System.out.println("3");
 		zoomTween.fforward();
 	}
 

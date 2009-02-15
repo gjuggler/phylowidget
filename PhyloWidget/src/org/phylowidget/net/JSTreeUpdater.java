@@ -43,17 +43,20 @@ public JSTreeUpdater()
 
 	public void run()
 	{
-		PWContext context = PWPlatform.getInstance().getThisAppContext();
-		context.ui().search();
-		String s = TreeIO
-				.createNewickString(context.trees().getTree(), false);
 //		String cmd = jsCall;
 		try
 		{
 //			System.out.println(caller.reflectionWorking);
 //			caller.injectJavaScript(file)
-			Object o = caller.getMember("PhyloWidget");
-			caller.callWithObject(o, "updateTree", s);
+//			PWContext context = PWPlatform.getInstance().getThisAppContext();
+//			String s = TreeIO
+//			.createNHXString(context.trees().getTree());
+//			Object o = caller.getMember("PhyloWidget");
+//			caller.callWithObject(o, "updateTree", s);
+//			context.ui().search();
+			
+			caller.call("pw_tree");
+			
 //			caller.eval("PhyloWidget.updateTree(\""+s+"\");");
 //			caller.eval("alert('hey!');");
 		} catch (Exception e)

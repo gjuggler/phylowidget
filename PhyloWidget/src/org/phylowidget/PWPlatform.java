@@ -18,8 +18,6 @@ public class PWPlatform extends UIPlatform
 	public PWContext getThisAppContext()
 	{
 		PWContext pw = (PWContext) super.getThisAppContext();
-//		return (PWContext)super.getThisAppContext();
-//		System.out.println(pw);
 		return pw;
 	}
 	
@@ -33,7 +31,9 @@ public class PWPlatform extends UIPlatform
 	@Override
 	public synchronized UIContext registerApp(PApplet app)
 	{
+		// Use the base UIPlatform method to register the current app, creating a new context if necessary.
 		UIContext context = super.registerApp(app);
+		// Register the created context with the base UIPLatform class.
 		UIPlatform.getInstance().registerAppWithContext(app,context);
 		return context;
 	}

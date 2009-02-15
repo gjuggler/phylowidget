@@ -61,7 +61,7 @@ public class JSCaller
 		 */
 		if (!reflectionWorking)
 		{
-			throw new RuntimeException("Reflection not working!");
+//			throw new RuntimeException("Reflection not working!");
 		}
 		if (jsObject != null)
 			return;
@@ -128,6 +128,11 @@ public class JSCaller
 		return callWithObject(jsObject, methodName, args);
 	}
 
+	public synchronized Object call(String methodName) throws Exception
+	{
+		return callWithObject(jsObject,methodName);
+	}
+	
 	public synchronized Object callWithObject(Object object,String methodName, Object... args) throws Exception
 	{
 		initialize();

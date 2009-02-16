@@ -367,7 +367,6 @@ public class PhyloUI implements Runnable
 		
 		if (getCurTree() != null)
 		{
-			System.out.println("Heyo!");
 			PhyloNode n = (PhyloNode) getCurTree().getRoot();
 			if (n.getAnnotations() != null)
 			{

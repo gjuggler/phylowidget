@@ -1,8 +1,104 @@
+/*
+	Copyright (c) 2009, Gregory Jordan (gjuggler AT gmail DOT com)
+	All rights reserved.
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions are met:
+
+		* Redistributions of source code must retain the above copyright
+		  notice, this list of conditions and the following disclaimer.
+		* Redistributions in binary form must reproduce the above copyright
+		  notice, this list of conditions and the following disclaimer in the
+		  documentation and/or other materials provided with the distribution.
+		* Neither the name of Interactive Pulp, LLC nor the names of its
+		  contributors may be used to endorse or promote products derived from
+		  this software without specific prior written permission.
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+	ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+	LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+	CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+	SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+	INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+	CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+	ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+	POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/*
+Phylowidget.js -- Javascript API for running the PhyloWidget applet.
+
+Version history:
+---
+GJ 2009-02-16: Major rewrite. Much better now (I hope).
+
+NOTES:
+I've rewritten the bulk of this API to make things simpler and more object-oriented. The PhyloWidget class and PhyloWidget.object
+are fashioned after those used in the pulpcore.js script, which is directly appended to the bottom of this script.
+
+See the documentation above each method for more information. 
+
+EXAMPLE USAGE:
+// Create a new instance of PhyloWidget.object .
+var pw = new PhyloWidget.object();
+
+// A simple call will immediately write the applet-embedding code directly to the page.
+pw.writeWidget();
+
+// Or, you can dynamically insert the applet into an HTML object with the given ID:
+pw.loadWidget("myFavoriteDiv");
+
+// Both of the above calls can take an optional parameter object, with various configuration parameters for the applet tags and the PhyloWidget
+// applet. Basically, everything that goes into this params object gets written as <param> tags in the HTML embedded applet. These are then passed to the PhyloWidget applet.
+// Some useful parameters:
+// - autostart ('auto' [default], 'true', or 'false'): Controls whether the applet is loaded immediately, or requires a user to click before starting the JVM.
+// - codebase: The path to the directory containing the phylowidget.jar file.
+// Additionally, you can specify any of the parameters contained in the PhyloConfig class:
+   - http://code.google.com/p/phylowidget/source/browse/trunk/PhyloWidget/src/org/phylowidget/ui/PhyloConfig.java
+var params = {
+  autostart: 'false',
+  layout: 'diagonal',
+  menus: 'context.xml;dock.xml;toolbar-new.xml;callbacks.xml',
+  nodeShape: 'square',
+  innerNodeRatio: 0.5
+};
+pw.loadWidget("myFavoriteDiv",params);
+pw.writeWidget(params);
+
+// You can change settings or call methods by using the object.changeSetting() method, or its variants:
+pw.changeSetting("innerNodeRatio",0.2);
+pw.changeSetting("tree","(my,(new,tree));");
+pw.call  
+
+// To access the actual Java applet, use the getApplet() method:
+var applet = pw.getApplet();
+
+// From here, you can all any of the publicly available methods from the PhyloWidget applet. These are conveniently listed in the PWPublicMethods.java file:
+//   http://phylowidget.googlecode.com/svn/trunk/PhyloWidget/src/org/phylowidget/PWPublicMethods.java
+// Most of the methods are for retrieving data from PhyloWidget, such as: 
+alert("Your tree in newick format is: "+applet.getTreeNewick());
+alert("Number of leaf nodes: "+applet.getLeafCount());
+// Some of the public Java applet methods can also effect changes in the applet:
+applet.setMessage("Hello from Javascript!"); // Causes the applet to display this message in the PhyloWidget status bar.
+applet.setTree("(a,(b,c));"); // Causes a new tree to be loaded.
+
+
+---
+GJ 2008-03-01: First version. I hardly knew Javascript at the time, so it was awful. My sincerest apologies.
+---
+*/
+
 var PhyloWidget = window.PhyloWidget || {
-	applets: [ ],
+	/**
+	 *  The variable that holds all the PhyloWidget.object objects created.
+	 *  Most users won't have to pay attention to this.
+	 */
+	objects: [ ],
 	
 	/**
-	 *  Loads the properties from "loadFrom" into "loadInto"
+	 *  A utility function to load the properties from "loadFrom" into "loadInto"
 	 */
 	mergeObjects: function(loadInto,loadFrom) {
 		if (loadInto === null)
@@ -18,7 +114,7 @@ var PhyloWidget = window.PhyloWidget || {
 	},
 	
 	/**
-	 * A utility function that grabs the GET query parameters from the given url, or (if no URL is given) the
+	 * A utility function that grabs the GET query parameters from the given url, or (if no URL is given) from the
 	 * URL of the current page.
 	 */
 	getQueryParameters: function(destObject, url) {
@@ -50,6 +146,9 @@ var PhyloWidget = window.PhyloWidget || {
 	    return destObject;
 	},
 	
+	/*
+	 * Returns the set of default applet parameters for running PhyloWidget.
+	 */
 	defaultParams: function()
 	{
 		var defaultParams = {
@@ -88,50 +187,87 @@ var PhyloWidget = window.PhyloWidget || {
                 return 500;
 	},
 	
-	// Creates a new widget and loads it into the designated div.
+	/*
+	 * Creates a new PhyloWidget.object, and inserts it into the given div.
+	 * Returns the PhyloWidget.object.
+	 */
 	loadWidget: function(dest_div,params)
 	{
-		var pw = new PhyloWidget.applet();
+		var pw = new PhyloWidget.object();
 		pw.loadWidget(dest_div,params);
 		return pw;
 	},
-	// Creates a new widget and immediately writes it to the current document.
+	
+	/*
+	 * Creates a new PhyloWidget.object, and writes it directly to the document..
+	 * Returns the PhyloWidget.object.
+	 */
 	writeWidget: function(params)
 	{
-		var pw = new PhyloWidget.applet();
+		var pw = new PhyloWidget.object();
 		pw.writeWidget(params);
 		return pw;
 	},
 	
+	/*
+	 * ONLY INCLUDED FOR BACKWARDS COMPATIBILITY.
+	 * Recommended to access a PhyloWidget.object directly and call its changeSettings method instead.
+	 */
 	changeSettings: function(settings)
 	{
 		var myApplet = this.getLatest();
 		myApplet.changeSettings(settings);
 	},
 	
+	/*
+	 * ONLY INCLUDED FOR BACKWARDS COMPATIBILITY.
+	 * Recommended to access a PhyloWidget.object directly and call its changeSetting method instead.
+	 */
 	changeSetting: function(setting,newValue)
 	{
 		var myApplet = this.getLatest();
 		myApplet.changeSetting(setting,newValue);
 	},
 	
+	/*
+	 * ONLY INCLUDED FOR BACKWARDS COMPATIBILITY.
+	 * Recommended to access a PhyloWidget.object directly and call its callMethod method instead.
+	 */
 	callMethod: function(method)
 	{
 		var myApplet = this.getLatest();
 		myApplet.callMethod(method);
 	},
 	
-	// Changes the setting of the last created applet.
-	getLatest: function()
+	/* PhyloWidget.getObject(index)
+	 * Returns the PhyloWidget.object object at the specified index.
+	 */
+	getObject: function(index)
 	{
-		if (this.applets.length == 0)
+		if (index < this.objects.length)
+		{
+			return this.objects[index];
+		} else
+		{
 			return null;
-		var index = this.applets.length-1;
-		var applet = this.applets[index];
-		return applet;
+		}
 	},
 	
-	// Gets the applet object from the last created applet.
+	/*
+	 * Returns the latest PhyloWidget.object created.
+	 */
+	getLatest: function()
+	{
+		if (this.objects.length == 0)
+			return null;
+		var index = this.objects.length-1;
+		var object = this.objects[index];
+		return object;
+	},
+	
+	/*
+	 *
+	 */
 	getApplet: function()
 	{
 		var myPw = this.getLatest();
@@ -139,32 +275,43 @@ var PhyloWidget = window.PhyloWidget || {
 	}
 };
 
-PhyloWidget.applet = function() {
-	this.id = PhyloWidget.applets.length;
+PhyloWidget.object = function() {
+	this.id = PhyloWidget.objects.length;
 	this.appletHTML = "";
 	this.appletInserted = false;
 	
-	PhyloWidget.applets[this.id] = this;
+	PhyloWidget.objects[this.id] = this;
 };
 
-PhyloWidget.applet.prototype = {
-	dest_div: '',
-	codebase: 'lib',
-	newwindow: '',
-    curWindow: window,
-    autostart: false,
-    widgetInserted: false,
-    pulpCoreApplet: null,
+/*
+PhyloWidget.object -- an object to encapsulate a single instance of a PhyloWidget applet.
+*/
+PhyloWidget.object.prototype = {	
+	dest_div: '',				// The div into which our applet tags were placed.
+	codebase: 'lib',			// The codebase from where to get the PhyloWidget jars 
+    curWindow: window,			// The current window DOM object.
+    widgetInserted: false,		// Has this widget been inserted yet?
+    pulpCoreApplet: null,		// the underlying Pulpcore.applet object
+	
+	/*
+	 * Sets the codebase to use PhyloWidget.org's hosted "full" (signed) applet libraries.
+	 */
 	useFull: function()
 	{
 		this.codebase="http://www.phylowidget.org/full/lib";
 	},
  
+ 	/*
+	 * Sets the codebase to use PhyloWidget.org's hosted "lite" (unsigned) applet libraries.
+	 */
 	useLite: function()
 	{
 	 	this.codebase="http://www.phylowidget.org/lite/lib";
 	},
  
+ 	/*
+ 	 * Loads a popup window with the PhyloWidget applet and the given parameters.
+ 	 */
 	remotePopup: function(version,params)
 	{
 	 	// the 'version' parameter should be either 'full' or 'lite'.
@@ -178,13 +325,15 @@ PhyloWidget.applet.prototype = {
 		window.open(url,'PW','height='+height+',width='+width+",menubar=no,toolbar=no,location=no");
 	},
 	
+	/*
+	 * Overlays the given parameters onto the PhyloWidget defaults,
+	 * and applies them to the necessary global-level pulpcore variables (these are what PulpCore uses to generate the applet)
+	 */
 	getParams: function(params)
 	{
 		var defaults = PhyloWidget.defaultParams();
 		defaults['codebase'] = this.codebase;
-		
 		defaults = PhyloWidget.getQueryParameters(defaults);
-		
 		var myParams = PhyloWidget.mergeObjects(defaults,params);
 		window.pulpcore_class = myParams['code'];
 		window.pulpcore_width = myParams['width'];
@@ -196,12 +345,13 @@ PhyloWidget.applet.prototype = {
 		window.pulpcore_splash = myParams['splash'];
 		window.pulpcore_play_splash = myParams['play_splash'];
 		window.pulpcore_start = myParams['autostart'] || 'auto'; // Can be "true", "auto", or "false". Auto makes one applet automatically start, but holds the others.
-		
 		window.pulpcore_params = myParams;
-		
 		return myParams;
 	},
 
+	/*
+	 *  Immediately prints the embedding HTML out to the document.
+	 */ 
 	writeWidget: function(params)
 	{
 		if (this.widgetInserted)
@@ -214,6 +364,9 @@ PhyloWidget.applet.prototype = {
 		document.write(this.pulpCoreApplet.getObjectHTML());
 	},
 	
+	/*
+	 * Loads the embedding HTML into the given div.
+	 */ 
 	loadWidget: function(dest_div,params)
 	{
 		if (this.widgetInserted)
@@ -238,7 +391,7 @@ PhyloWidget.applet.prototype = {
 	},
 	
 	/**
-	 * Attempts to stop the applet with the given "name" attribute.
+	 * Attempts to stop the applet.
 	 */
 	stopApplet: function()
 	{
@@ -250,17 +403,26 @@ PhyloWidget.applet.prototype = {
 	 	}
 	},
 	
+	/*
+	 * Gets the Java applet object for this PhyloWidget.object. You can use this returned object to call the public Java applet methods.
+	 */
 	getApplet: function()
 	{
 		var applet = document.getElementById("pulpcore_object"+ this.pulpCoreApplet.id);
 		return applet;
 	},
 	
+	/*
+	 *  Changes a single setting of the PhyloWidget applet.
+	 */
 	changeSetting: function(setting,newValue)
 	{
 		this.getApplet().changeSetting(setting,newValue);
 	},
 	
+	/*
+	 *  Changes the settings using the (key,value) pairs stored in the settings object.
+	 */ 
 	changeSettings: function(settings)
 	{
 		for (var key in settings)
@@ -269,12 +431,15 @@ PhyloWidget.applet.prototype = {
 		}
 	},
 	
+	/*
+	 *  Calls a method (without parameters) on the Java applet object. If you need more control or would like to use parameters,
+	 *  use the Java applet object returned by the getApplet() method.
+	 */
 	callMethod: function(method)
 	{
 		this.getApplet().callMethod(method);
 	}
 };
-
 
 /*
 	Copyright (c) 2009, Interactive Pulp, LLC

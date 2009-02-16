@@ -28,7 +28,7 @@
 				<item name="Scaling" type="NumberScroller" property="textScaling" increment=".025" min="0" max="10" format="0.00"/>
 				<item name="Minimum Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="72" format="0.0"/>
 				<item name="Angle" type="NumberScroller" property="textRotation" increment=".2" min="-60" max="60" format="0.0"/>
-				<item name="Angle Quantize" type="EnumScroller" property="angleHandling" values="none, quantize, level"/>
+				<item name="Angle Quantize" type="EnumScroller" property="angleHandling" values="none, quantize, level" value="level"/>
 			</item>
 			<item name="Tree">
 				<item name="Node Size" type="NumberScroller" property="nodeSize" increment ="0.05" min="0" max="50" format="0.00"/>

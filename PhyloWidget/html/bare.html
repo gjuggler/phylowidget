@@ -11,22 +11,14 @@
 <script src="scripts/phylowidget.js"></script>
 </head>
 <body>
-
 <div id="PhyloWidget">
 	<script type="text/javascript">
-		var pw = new PhyloWidget.applet();
+		// Create a new PhyloWidget.object instance
+		var pw = new PhyloWidget.object();
+		// Immediately write the embedding HTML to the page.
 		pw.writeWidget();
 	</script>
 </div>
-
-<div id="PW2">
-	<script type="text/javascript">
-		var pw2 = new PhyloWidget.applet();
-		pw2.writeWidget();
-	</script>
-</div>
-
-
 <!-- END: JAVASCRIPT INSERTION -->
 </body>
 </html>

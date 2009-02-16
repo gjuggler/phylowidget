@@ -336,4 +336,10 @@ public class PhyloWidget extends PWPublicMethods
 	{
 		PApplet.main(new String[] { "org.phylowidget.PhyloWidget" });
 	}
+
+	@Override
+	public String getClipboardString()
+	{
+		return pwc.ui().clipboard.getClipboardText();
+	}
 }

@@ -14,6 +14,11 @@ public class EnumScroller extends NumberScroller
 		numToString = new HashMap<Integer, String>();
 	}
 	
+	public void setValue(String value)
+	{
+		setValue(parseValueFromString(value));
+	}
+	
 	public void setValues(String values)
 	{
 		String[] tokens = values.split(",");

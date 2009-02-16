@@ -11,26 +11,45 @@
 <script src="scripts/phylowidget.js"></script>
 
 <script type="text/javascript">
+// Last update: GJ 2009-02-16
+// See the phylowidet.js script for extensive documentation on general use of the PhyloWidget Javascript API.
+// I'll document what's going on here for anyone interested in how to implement callbacks using PhyloWidget.
+
+/* The three methods below are automatically called by the PhyloWidget applet when certain UI events occur:
+ *  - pw_tree : when the tree is modified.
+ *  - pw_clip : when the clipboard is updated.
+ *  - pw_hover : when a node is hovered with the mouse.
+ */ 
 pw_tree = function()
 {
+	// Get the latest PhyloWidget Java applet object.
 	var applet = PhyloWidget.getApplet();
+	// Get the Newick string.
 	var newickString = applet.getTreeString();
+	// Update the textbox with the newick string.
 	var el = getObject("pw_treetext");
 	if (el != null)
 		el.value = newickString;
 }
 pw_clip = function()
 {
+	// Get the Java applet.
 	var applet = PhyloWidget.getApplet();
-	var newickString = applet.getTreeString();
+	// Get the clipboard string.
+	var newickString = applet.getClipboardString();
+	// Update the textbox.
 	var el = getObject("pw_cliptext");
 	if (el != null)
 		el.value = newickString;
 }
 pw_hover = function()
 {
+	// Get the Java applet.
 	var applet = PhyloWidget.getApplet();
 	
+	// Create a mapping of key-value pairs.
+	// We're getting information on the currently hovered node by calling the "hoveredXYZ" methods from the PWPublicMethods.java definitions:
+	// http://phylowidget.googlecode.com/svn/trunk/PhyloWidget/src/org/phylowidget/PWPublicMethods.java
 	var map = {
 		"Name" : applet.getHoveredNode(),
 		"Branch Length" : applet.getHoveredBranchLength(),
@@ -39,6 +58,7 @@ pw_hover = function()
 		"Branch Length to Root" : applet.getHoveredDistanceToRoot()
 	};
 
+	// Create some HTML based on the key-value pairs.
 	var html = "<table>";
 	for (var key in map)
 	{
@@ -49,35 +69,41 @@ pw_hover = function()
 	}
 	html += "</table>";
 	
-	var newickString = applet.getTreeString();
-	var el = getObject("pw_nodeinfo");
-	
+	// Update the node info box.
+	var el = getObject("pw_nodeinfo");	
 	el.innerHTML = html;
 }
+
+// When the tree textbox is defocused, update the Java applet.
 pw_treeTextBlur = function()
 {
 	var treeText = getObject("pw_treetext").value;
 	PhyloWidget.getApplet().setTree(treeText);
 }
+// When the clip textbox is defocused, update the Java applet.
 pw_clipTextBlur = function()
 {
 	var clipText = getObject("pw_cliptext").value;
 	PhyloWidget.getApplet().setClipboard(clipText);
 }
+// When the tree textbox is focused, put a message into the Java applet.
 pw_treeTextFocus = function()
 {
     pw_setMessage("Click away to update the tree.");
 }
+// When the clip textbos is focused, put a message into the Java applet.
 pw_clipTextFocus = function()
 {
     pw_setMessage("Click away to update the clipboard.");
 }
+// A generic function for putting a message into the Java applet.
 pw_setMessage = function(message)
 {
 	var applet = PhyloWidget.getApplet();
 	applet.setMessage(message);
 }
 
+// A simple utility function to toggle the toolbox open or closed.
 toggleToolbox = function()
 {
         var el = getObject("pw_toolbox");
@@ -101,7 +127,6 @@ function getObject(id){
         var el = document.getElementById(id);
         return (el);
 };
-
 </script>
 
 </head>
@@ -111,18 +136,20 @@ function getObject(id){
 	var totalWidth = PhyloWidget.getWidth()+300+50;
 	document.write('<div id="content-wrapper" style="width:'+totalWidth+'px;">');
 </script>
-<!-- <div id="content-wrapper"> -->
 
 <div id="content">
-
 <div id="floater" style="float:left;">
 	<h1>${project.name}</h1>
 	
 	<script type="text/javascript">
 		document.write('<div id="PhyloWidget" style="width:'+PhyloWidget.getWidth()+'px;">');
 		
-		var pw = new PhyloWidget.applet();
+		// Create a new PhyloWidget.object instance.
+		var pw = new PhyloWidget.object();
+		// Load the widget HTML into the element with the given ID.
 		pw.loadWidget("PhyloWidget");
+		
+		// Alternatively, we could have immediately written the embedding HTML into the document:
 		//pw.writeWidget();
 		
 		document.write('</div>');

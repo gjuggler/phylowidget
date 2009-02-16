@@ -39,11 +39,8 @@ public class TreeClipboard extends AbstractUIObject
 	RootedTree origTree;
 	PhyloNode origVertex;
 
-//	JSClipUpdater updater;
-
 	public TreeClipboard(PApplet p)
 	{
-//		updater = new JSClipUpdater(p);
 	}
 
 	public boolean isEmpty()
@@ -60,7 +57,6 @@ public class TreeClipboard extends AbstractUIObject
 	{
 		clearTree();
 		newickString = "";
-//		updater.triggerUpdate(newickString);
 		fireEvent(CLIPBOARD_UPDATED);
 	}
 
@@ -88,6 +84,11 @@ public class TreeClipboard extends AbstractUIObject
 		setStateRecursive(tree, copyMe, PhyloNode.COPY);
 	}
 
+	public String getClipboardText()
+	{
+		return newickString;
+	}
+	
 	public void setClip(RootedTree tree, PhyloNode node)
 	{
 		setStateRecursive(tree,(PhyloNode) tree.getRoot(),PhyloNode.NONE);
@@ -95,7 +96,6 @@ public class TreeClipboard extends AbstractUIObject
 		newickString = TreeIO.createNHXString(clone);
 		origTree = tree;
 		origVertex = node;
-//		updater.triggerUpdate(newickString);
 		fireEvent(CLIPBOARD_UPDATED);
 	}
 	

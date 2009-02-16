@@ -8,7 +8,7 @@ import org.phylowidget.ui.JavascriptAccessibleMethods;
 import processing.core.ExtendedPApplet;
 import processing.core.PApplet;
 
-public class PWPublicMethods extends ExtendedPApplet implements JavascriptAccessibleMethods
+public abstract class PWPublicMethods extends ExtendedPApplet implements JavascriptAccessibleMethods
 {
 
 	private PhyloTree getTree_obj()
@@ -110,21 +110,14 @@ public class PWPublicMethods extends ExtendedPApplet implements JavascriptAccess
 	
 	public String getTreeString()
 	{
-		return getTreeNewick();
+		return getTreeNHX();
 	}
 	
-	public void setClipboard(String clip)
-	{
-		// This is implemented in PhyloWidget.java
-	}
+	public abstract String getClipboardString(); // This is implemented in PhyloWidget.java
 	
-	public void setMessage(String message)
-	{
-		// This is implemented in PhyloWidget.java
-	}
+	public abstract void setClipboard(String clip); // This is implemented in PhyloWidget.java
 	
-	public void setTree(String tree)
-	{
-		// This is implemented in PhyloWidget.java
-	}
+	public abstract void setMessage(String message); // This is implemented in PhyloWidget.java
+	
+	public abstract void setTree(String tree); // This is implemented in PhyloWidget.java
 }

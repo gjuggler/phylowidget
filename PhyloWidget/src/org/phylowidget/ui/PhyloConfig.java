@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.andrewberman.ui.Color;
+import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
@@ -136,6 +137,8 @@ public class PhyloConfig
 	 *   "bezier" -- Bezier curve lines
 	 */
 	public String lineStyle = "square";
+	
+	public String font = "Bitstream Vera Sans";
 	
 	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	public float textRotation = 0f; // Text rotation, in degrees.
@@ -468,6 +471,12 @@ public class PhyloConfig
 
 	public final static String DEFAULT_TREE = "PhyloWidget";
 
+	public void setFont(String newFont)
+	{
+		FontLoader fl = context.trees().getRenderer().getFontLoader();
+		fl.setFont(newFont);
+		this.font = fl.getFontName();
+	}
 	
 	public static Map<String, String> getChangedFields(Object a, Object b)
 	{
@@ -487,7 +496,7 @@ public class PhyloConfig
 			{
 				if (f.get(a).equals(f.get(b)))
 				{
-//					System.out.println("Equal on field " + f.getName());
+//					System.out.println("Equal on field " + f.getName() + f.get(a) + "  "+f.get(b));
 				} else
 				{
 					changedFields.put(f.getName(), f.get(a).toString());
@@ -503,6 +512,11 @@ public class PhyloConfig
 	
 	public static Map<String,String> getConfigSnapshot(PhyloConfig currentConfig)
 	{
-		return getChangedFields(currentConfig,new PhyloConfig());
+		Map<String,String> changed = getChangedFields(currentConfig,new PhyloConfig());
+		changed.remove("viewportX");
+		changed.remove("viewportY");
+		changed.remove("viewportZ");
+		changed.remove("menus");
+		return changed;
 	}
 }

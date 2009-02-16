@@ -96,16 +96,19 @@ var PhyloWidget = window.PhyloWidget || {
 	 *  Most users won't have to pay attention to this.
 	 */
 	objects: [ ],
-	
 	/**
 	 *  A utility function to load the properties from "loadFrom" into "loadInto"
 	 */
-	mergeObjects: function(loadInto,loadFrom) {
+	mergeObjects: function(loadInto, loadFrom)
+	{
 		if (loadInto === null)
-			var loadInto = {};
+		{
+			loadInto = {};
+		}
 		if (loadFrom === null)
-			var loadFrom = {};
-			
+		{
+			loadFrom = {};
+		}	
 		for (var key in loadFrom)
 		{
 			loadInto[key] = loadFrom[key];
@@ -118,8 +121,10 @@ var PhyloWidget = window.PhyloWidget || {
 	 * URL of the current page.
 	 */
 	getQueryParameters: function(destObject, url) {
-		if (!destObject)
-			var destObject = {};
+		if (destObject === null)
+		{
+			destObject = {};
+		}
 		
 	    var i, len, idx, queryString, params, tokens;
 	    url = url || top.location.href;
@@ -134,7 +139,7 @@ var PhyloWidget = window.PhyloWidget || {
 	    params = queryString.split("&");
 	
 		var obj = {};
-	    for (var i = 0, len = params.length; i < len; i++) {
+	    for (i = 0, len = params.length; i < len; i++) {
 	        tokens = params[i].split("=");
 	        if (tokens.length >= 2) {
 	        	var key = unescape(tokens[0]).replace(/["']/g,"");
@@ -162,7 +167,7 @@ var PhyloWidget = window.PhyloWidget || {
 			width: '500',
 			height: '500',
 			bgcolor: '#FFFFFF',					// Background color. Used by Java AND Javascript.
-			fgcolor: '#3399CC',
+			fgcolor: '#3399CC'
 		};
 		return(defaultParams);
 	},	
@@ -172,9 +177,12 @@ var PhyloWidget = window.PhyloWidget || {
         var params = PhyloWidget.defaultParams();
         PhyloWidget.getQueryParameters(params);
         if (params['width'])
-                return parseInt(params['width']);
-        else
-                return 500;
+        {
+            return parseInt(params['width']);
+        } else
+        {
+          	return 500;
+        }
 	},
 
 	getHeight: function()
@@ -258,7 +266,7 @@ var PhyloWidget = window.PhyloWidget || {
 	 */
 	getLatest: function()
 	{
-		if (this.objects.length == 0)
+		if (this.objects.length === 0)
 			return null;
 		var index = this.objects.length-1;
 		var object = this.objects[index];
@@ -274,6 +282,8 @@ var PhyloWidget = window.PhyloWidget || {
 		return myPw.getApplet();
 	}
 };
+
+alert(PhyloWidget);
 
 PhyloWidget.object = function() {
 	this.id = PhyloWidget.objects.length;
@@ -318,7 +328,7 @@ PhyloWidget.object.prototype = {
 	 	//var url = 'http://www.phylowidget.org/'+version+'/bare.html?';
 	 	var url = 'bare.html?';
 	 	if (!params)
-	 		var params = {width:500,height:500};
+	 		params = {width:500,height:500};
 	 	url += this.getParamString(params);
 		var width = params.width || 500;
 		var height = params.height || 500;
@@ -354,8 +364,9 @@ PhyloWidget.object.prototype = {
 	 */ 
 	writeWidget: function(params)
 	{
-		if (this.widgetInserted)
+		if (this.widgetInserted) {
 			return;
+		}
 		if (this.pulpCoreApplet == null) {
 			this.pulpCoreApplet = new PulpCore.applet();
 		}
@@ -369,18 +380,19 @@ PhyloWidget.object.prototype = {
 	 */ 
 	loadWidget: function(dest_div,params)
 	{
-		if (this.widgetInserted)
+		if (this.widgetInserted) {
 			return;
-		if (dest_div == null || dest_div == '') {
+		}
+		if (dest_div === null || dest_div === '') {
 			dest_div = 'pulpcore_object' + this.id;
 		}
 		var myParams = this.getParams(params);
-		if (this.pulpCoreApplet == null) {
+		if (this.pulpCoreApplet === null) {
 			this.pulpCoreApplet = new PulpCore.applet();
 		}
 		var gameContainer = document.getElementById(dest_div);
 		var self = this;
-		if (gameContainer == null)
+		if (gameContainer === null)
 		{
 			setTimeout(function() { self.insertWidget(params); }, 500);
 		} else
@@ -396,7 +408,7 @@ PhyloWidget.object.prototype = {
 	stopApplet: function()
 	{
 		var applet = this.getApplet();
-	 	if (applet != null)
+	 	if (applet !== null)
 	 	{
 		  applet.stop();
 		  applet.destroy();

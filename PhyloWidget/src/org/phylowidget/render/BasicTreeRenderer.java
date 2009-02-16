@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.andrewberman.sortedlist.SortedXYRangeList;
+import org.andrewberman.ui.FontLoader;
 import org.andrewberman.ui.Point;
 import org.andrewberman.ui.TextField;
 import org.andrewberman.ui.UIUtils;
@@ -62,6 +63,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 {
 	float baseStroke;
 
+	protected FontLoader fonts;
+	
 	protected LayoutBase treeLayout = new LayoutUnrooted();
 
 	protected OverlapDetector overlap = new OverlapDetector();
@@ -88,11 +91,6 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	protected double dx;
 
 	protected double dy;
-
-	/**
-	 * Font to be used to draw the nodes.
-	 */
-	protected PFont font;
 
 	// protected ArrayList<NodeRange> ranges = new ArrayList<NodeRange>();
 
@@ -187,11 +185,11 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 
 	PWContext context;
 	
-	public BasicTreeRenderer()
+	public BasicTreeRenderer(PWContext context)
 	{
 		rect = new Rectangle2D.Float(0, 0, 0, 0);
-		this.context = PWPlatform.getInstance().getThisAppContext();
-		font = context.getPFont();
+		this.context = context;
+		fonts = new FontLoader(context.getPW());
 		if (decorator == null)
 			decorator = new NodeRenderer();
 
@@ -224,7 +222,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		canvas.noStroke();
 		canvas.fill(0);
 
-		canvas.textFont(context.getPFont());
+		canvas.textFont(fonts.getPFont());
 		canvas.textAlign(PConstants.LEFT, PConstants.CENTER);
 
 		hint();
@@ -300,7 +298,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		{
 			PhyloTree pt = (PhyloTree) tree;
 			PhyloNode h = pt.hoveredNode;
-			if (h != null)
+			if (h != null && pt.containsVertex(h))
 			{
 				Point point = new Point(getX(h), getY(h));
 				float dist = (float) point.distance(mousePt);
@@ -447,7 +445,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				canvas.translate(getX(n), getY(n));
 				Double value = Double.parseDouble(boot);
 				float curTextSize = textSize * 0.5f;
-				canvas.textFont(font);
+				canvas.textFont(fonts.getPFont());
 				canvas.textSize(curTextSize);
 				canvas.fill(context.config().getTextColor().brighter(100).getRGB());
 				canvas.textAlign(canvas.RIGHT, canvas.BOTTOM);
@@ -804,7 +802,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 			}
 			//			Graphics2D g2 = ((PGraphicsJava2D) canvas).g2;
 			//				width = (float) fm.getStringBounds(n.getLabel(), g2).getWidth() / 100f;
-			float width = UIUtils.getTextWidth(canvas, font, 100, n.getLabel(), true) / 100f;
+			float width = UIUtils.getTextWidth(canvas, fonts.getPFont(), 100, n.getLabel(), true) / 100f;
 			n.unitTextWidth = width;
 		}
 
@@ -862,6 +860,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		dx += rect.getX();
 		dy += rect.getY();
 
+		PFont font = fonts.getPFont();
 		dFont = (font.ascent() - font.descent()) * textSize / 2;
 	}
 
@@ -925,7 +924,6 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 				draw();
 			}
 		}
-		framesToSwitch--;
 	}
 
 	//		this.rect.setFrame(x, y, w, h);
@@ -1080,14 +1078,12 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 	}
 
 	private LayoutBase oldLayout = null;
-	private int framesToSwitch = 0;
 
 	public void setLayout(LayoutBase layout)
 	{
 		this.oldLayout = this.treeLayout;
 		this.treeLayout = layout;
 		layoutTrigger();
-		framesToSwitch = (int) context.config().animationFrames / 2;
 	}
 
 	public LayoutBase getLayout()
@@ -1152,4 +1148,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		}
 	}
 
+	public FontLoader getFontLoader()
+	{
+		return fonts;
+	}
 }

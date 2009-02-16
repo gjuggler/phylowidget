@@ -424,6 +424,21 @@ public class PhyloUI implements Runnable
 		text.startEditing(curRange(), PhyloTextField.LABEL);
 	}
 
+	FontChooserDialog fontChooser;
+	public void changeFont()
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
+
+			public void run()
+			{
+				if (fontChooser == null)
+					fontChooser = new FontChooserDialog(getFrame(), context);
+				fontChooser.setVisible(true);
+			}
+		});		
+	}
+	
 	AnnotationEditorDialog annotation;
 
 	public void nodeEditAnnotation()
@@ -577,9 +592,10 @@ public class PhyloUI implements Runnable
 	{
 		NodeRange r = curRange();
 		RootedTree g = r.render.getTree();
+		final PhyloNode n = getCurNode();
 		synchronized (g)
 		{
-			g.deleteSubtree(getCurNode());
+			g.deleteSubtree(n);
 		}
 	}
 
@@ -953,7 +969,11 @@ public class PhyloUI implements Runnable
 	
 	public boolean isRectangleRender()
 	{
-		BasicTreeRenderer rend = (BasicTreeRenderer) context.trees().getRenderer();
+		if (context.trees() == null)
+			return false;
+		if (context.trees().getRenderer() == null)
+			return false;
+		BasicTreeRenderer rend = context.trees().getRenderer();
 		return rend.getLayout() instanceof LayoutCladogram;
 	}
 

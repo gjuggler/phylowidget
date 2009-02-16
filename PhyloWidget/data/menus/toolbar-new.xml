@@ -22,9 +22,7 @@
 				
 		<item name="Style">
 			<item name="Labels">
-				<!-- Not yet, but it's coming soon... 
-				<item name="Font ..." action="doSomething"/>
-				--> 
+				<item name="Font ..." action="changeFont"/>
 				<item name="Scaling" type="NumberScroller" property="textScaling" increment=".025" min="0" max="10" format="0.00"/>
 				<item name="Minimum Size" type="NumberScroller" property="minTextSize" increment =".1" min="0" max="72" format="0.0"/>
 				<item name="Angle" type="NumberScroller" property="textRotation" increment=".2" min="-60" max="60" format="0.0"/>

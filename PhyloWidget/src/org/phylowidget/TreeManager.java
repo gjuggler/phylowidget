@@ -52,7 +52,7 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 	//	protected ArrayList renderers;
 
 	public static ImageLoader imageLoader;
-	TreeRenderer r;
+	BasicTreeRenderer r;
 	RootedTree t;
 
 	// public Navigator nav;
@@ -89,7 +89,7 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), context.config().tree));
 
-		setRenderer(new BasicTreeRenderer());
+		setRenderer(new BasicTreeRenderer(context));
 		context.config().setLayout(context.config().layout);
 		try
 		{
@@ -200,7 +200,7 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 		return t;
 	}
 
-	public TreeRenderer getRenderer()
+	public BasicTreeRenderer getRenderer()
 	{
 		return r;
 	}

@@ -42,7 +42,7 @@ public class UIContext
 		System.out.println(Thread.currentThread().getName()+"  "+Thread.currentThread().getThreadGroup().getName());
 		eventManager = new EventManager(this);
 		focusManager = new FocusManager(this);
-		fontLoader = new FontLoader(this);
+		fontLoader = new FontLoader(this.applet);
 		shortcutManager = new ShortcutManager(this);
 		menuTimer = new MenuTimer();
 		menuTimer.start();
@@ -90,7 +90,7 @@ public class UIContext
 	{
 		return focusManager;
 	}
-
+	
 	public ShortcutManager getShortcutManager()
 	{
 		return shortcutManager;
@@ -123,7 +123,7 @@ public class UIContext
 
 	public PFont getPFont()
 	{
-		return fontLoader.vera;
+		return fontLoader.getPFont();
 	}
 	
 	public void destroy()

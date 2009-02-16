@@ -66,9 +66,9 @@ public class PhyloScaleBar extends Menu
 		
 		BasicTreeRenderer renderer = (BasicTreeRenderer) context.trees().getRenderer();
 
-		if (renderer.getTreeLayout() instanceof LayoutDiagonal)
+		if (renderer.getLayout() instanceof LayoutDiagonal)
 			return;
-		if (renderer.getTreeLayout() instanceof LayoutCircular)
+		if (renderer.getLayout() instanceof LayoutCircular)
 			return;
 		
 		if (mode == MODE_SCALE)
@@ -93,7 +93,7 @@ public class PhyloScaleBar extends Menu
 
 			double branchLengthPerPixel = 1;
 			
-			LayoutBase curLayout = renderer.getTreeLayout();
+			LayoutBase curLayout = renderer.getLayout();
 			if (curLayout instanceof LayoutUnrooted)
 			{
 				// Find the per-pixel length.

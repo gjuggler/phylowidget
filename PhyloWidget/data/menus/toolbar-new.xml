@@ -33,6 +33,7 @@
 			<item name="Tree">
 				<item name="Node Size" type="NumberScroller" property="nodeSize" increment ="0.05" min="0" max="50" format="0.00"/>
 				<item name="Line Size" type="NumberScroller" property="lineWidth" increment ="0.05" min="0" max="50" format="0.00"/>
+				<item name="Line Style" type="EnumScroller" property="lineStyle" values="square, round, bezier" value="square" condition="isRectangleRender"/>
 			</item>
 			
 			<item name="Performance">

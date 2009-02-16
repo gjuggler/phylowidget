@@ -1090,11 +1090,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, Gra
 		framesToSwitch = (int) context.config().animationFrames / 2;
 	}
 
-	public LayoutBase getTreeLayout()
+	public LayoutBase getLayout()
 	{
-		//		if (framesToSwitch > 0)
-		//			return oldLayout;
-		//		else
 		return treeLayout;
 	}
 

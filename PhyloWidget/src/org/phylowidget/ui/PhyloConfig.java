@@ -128,7 +128,15 @@ public class PhyloConfig
 	 *   "level" -- Level all angles to horizontal (much faster!)
 	 */
 	public String angleHandling = "level";
-
+	
+	/*
+	 * Line style when drawn with the Rectangle renderer:
+	 *   "square" -- Regular, square corners
+	 *   "round" -- Rounded corners
+	 *   "bezier" -- Bezier curve lines
+	 */
+	public String lineStyle = "square";
+	
 	//The following parameters can be set using any numerical value, e.g. "textRotation = 0.25" 
 	public float textRotation = 0f; // Text rotation, in degrees.
 	public float textScaling = .8f; // Text scaling, where a value of 1.0 is normal size.
@@ -137,8 +145,8 @@ public class PhyloConfig
 	//    10 is as high as you'll want to go.
 	public float nodeSize = 2f; // Node size. Same range as line width: 0 to 10 is reasonable.
 	public float innerNodeRatio = 1f; // Ratio between the size of the inner (non-leaf) nodes and the outer (leaf) nodes. Default 1.
-	public float renderThreshold = 200f; // Maximum number of nodes to render per frame.
-	public float minTextSize = 10; // Minimum text size for leaf node labels.
+	public float renderThreshold = 500f; // Maximum number of nodes to render per frame.
+	public float minTextSize = 8; // Minimum text size for leaf node labels.
 	//	public float branchLengthScaling = 1f; 			// DEPRECATED.
 	public float branchScaling = 1f; // Only used with the Cladogram renderer... scales the width.
 	public float cigarScaling = 10f; // How wide should 1bp of cigar line be, relative to the row height
@@ -172,7 +180,7 @@ public class PhyloConfig
 	public boolean animateNewTree = false; // Try to animate between the current tree and new tree? (EXPERIMENTAL IF SET TO TRUE)
 
 	public boolean suppressMessages = false;
-	public boolean colorHoveredBranch = true;
+	public boolean colorHoveredBranch = false;
 	public boolean respondToMouseWheel = true;
 
 	public boolean ignoreAnnotations = false; // ANNOTATIONS: Set to true if you want to globally disable PhyloWidget's display and output of NHX annotations.

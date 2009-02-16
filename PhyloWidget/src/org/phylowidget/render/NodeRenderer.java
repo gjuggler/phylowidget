@@ -463,7 +463,7 @@ public final class NodeRenderer implements UsefulConstants
 					r.canvas.stroke(context.config().getBranchColor().brighter(d).getRGB());
 				}
 			}
-			r.getTreeLayout().drawLine(r.canvas, p, c);
+			r.getLayout().drawLine(r.canvas, p, c);
 			//			r.canvas.line(p.getRealX(), p.getRealY(), p.getRealX(), c.getRealY());
 			//			r.canvas.line(p.getRealX(), c.getRealY(), c.getRealX(),c.getRealY());
 		}

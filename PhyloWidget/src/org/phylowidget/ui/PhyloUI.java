@@ -56,6 +56,7 @@ import org.phylowidget.PhyloWidget;
 import org.phylowidget.net.NodeInfoUpdater;
 import org.phylowidget.net.SecurityChecker;
 import org.phylowidget.render.BasicTreeRenderer;
+import org.phylowidget.render.LayoutCladogram;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.PhyloNode;
@@ -948,6 +949,12 @@ public class PhyloUI implements Runnable
 		if (getCurTree() == null || getCurNode() == null)
 			return true;
 		return !getCurTree().isLeaf(getCurNode());
+	}
+	
+	public boolean isRectangleRender()
+	{
+		BasicTreeRenderer rend = (BasicTreeRenderer) context.trees().getRenderer();
+		return rend.getLayout() instanceof LayoutCladogram;
 	}
 
 	public void destroy()

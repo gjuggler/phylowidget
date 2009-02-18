@@ -39,9 +39,9 @@ import org.andrewberman.ui.tween.TweenQuad;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
+import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.NodeRange;
 import org.phylowidget.render.RenderConstants;
-import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 
@@ -143,7 +143,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 			 * If we haven't set a "focused" NodeRange yet, set it to the root
 			 * node.
 			 */
-			TreeRenderer render = context.trees().getRenderer();
+			BasicTreeRenderer render = context.trees().getRenderer();
 			if (render == null)
 				return null;
 			RootedTree t = render.getTree();
@@ -411,7 +411,7 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 		context.ui().contextMenu.open(getCurRange());
 	}
 
-	private NodeRange rangeForNode(TreeRenderer tr, PhyloNode n)
+	private NodeRange rangeForNode(BasicTreeRenderer tr, PhyloNode n)
 	{
 		return n.range;
 	}

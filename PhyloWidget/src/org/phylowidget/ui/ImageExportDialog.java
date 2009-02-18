@@ -24,8 +24,8 @@ import javax.swing.SwingUtilities;
 
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
+import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.RenderOutput;
-import org.phylowidget.render.TreeRenderer;
 
 import processing.core.PApplet;
 
@@ -227,7 +227,7 @@ public class ImageExportDialog extends Dialog implements ActionListener
 		int h = Integer.parseInt(s[1]);
 	
 		PWContext context = PWPlatform.getInstance().getThisAppContext();
-		TreeRenderer r = context.trees().getRenderer();
+		BasicTreeRenderer r = context.trees().getRenderer();
 		PApplet p = context.getPW();
 		
 //		setEnabled(false);

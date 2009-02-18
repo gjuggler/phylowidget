@@ -31,7 +31,6 @@ import org.andrewberman.ui.UIUtils;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.PhyloWidget;
 import org.phylowidget.TreeManager;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
@@ -51,7 +50,7 @@ public class RenderOutput
 	
 	
 	
-	public static synchronized void savePDF(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels)
+	public static synchronized void savePDF(PApplet p, BasicTreeRenderer r, boolean zoomToFull, boolean showAllLabels)
 	{
 		PWContext context = PWPlatform.getInstance().getThisAppContext();
 		isOutputting = true;
@@ -132,7 +131,7 @@ public class RenderOutput
 		}
 	}
 
-	public static synchronized void save(PApplet p, TreeRenderer r, boolean zoomToFull, boolean showAllLabels,
+	public static synchronized void save(PApplet p, BasicTreeRenderer r, boolean zoomToFull, boolean showAllLabels,
 			String fileType, int w, int h)
 	{
 		PWContext context = PWPlatform.getInstance().getThisAppContext();

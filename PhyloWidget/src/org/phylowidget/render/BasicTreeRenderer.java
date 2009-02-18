@@ -59,7 +59,7 @@ import processing.core.PGraphicsJava2D;
  * @author Greg Jordan
  */
 @SuppressWarnings("unchecked")
-public class BasicTreeRenderer extends DoubleBuffer implements TreeRenderer, GraphListener, UsefulConstants
+public class BasicTreeRenderer extends DoubleBuffer implements GraphListener, UsefulConstants
 {
 	float baseStroke;
 

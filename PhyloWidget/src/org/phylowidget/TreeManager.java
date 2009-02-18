@@ -33,7 +33,6 @@ import org.phylowidget.render.LayoutCircular;
 import org.phylowidget.render.LayoutCladogram;
 import org.phylowidget.render.LayoutDiagonal;
 import org.phylowidget.render.LayoutUnrooted;
-import org.phylowidget.render.TreeRenderer;
 import org.phylowidget.render.images.ImageLoader;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;

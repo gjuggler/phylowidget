@@ -140,10 +140,12 @@ var PhyloWidget = window.PhyloWidget || {
 	
 		var obj = {};
 	    for (i = 0, len = params.length; i < len; i++) {
-	        tokens = params[i].split("=");
-	        if (tokens.length >= 2) {
-	        	var key = unescape(tokens[0]).replace(/["']/g,"");
-	        	var val = unescape(tokens[1]).replace(/["']/g,"");
+	        var str = params[i];
+	        //tokens = str.split("=",1);
+	        var idx2 = str.indexOf("=");
+	        if (idx2 > -1) {
+	        	var key = unescape(str.substring(0,idx2)).replace(/["']/g,"");
+	        	var val = unescape(str.substring(idx2+1,str.length)).replace(/["']/g,"");
 	        	obj[key] = val;
 	        }
 	    }
@@ -282,8 +284,6 @@ var PhyloWidget = window.PhyloWidget || {
 		return myPw.getApplet();
 	}
 };
-
-alert(PhyloWidget);
 
 PhyloWidget.object = function() {
 	this.id = PhyloWidget.objects.length;

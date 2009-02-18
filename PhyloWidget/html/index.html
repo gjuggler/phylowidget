@@ -30,6 +30,8 @@ pw_tree = function()
 	var el = getObject("pw_treetext");
 	if (el != null)
 		el.value = newickString;
+		
+	//pw_urlFocus();
 }
 pw_clip = function()
 {
@@ -72,6 +74,23 @@ pw_hover = function()
 	// Update the node info box.
 	var el = getObject("pw_nodeinfo");	
 	el.innerHTML = html;
+}
+
+pw_urlFocus = function()
+{
+	var applet = PhyloWidget.getApplet();
+	var urlQuery = applet.getUrlParameters();
+	
+	// Grab the vanilla URL for this page.
+	var url = top.location.href;
+	var idx = url.indexOf("?");
+    var baseURL = idx >= 0 ? url.substr(0,idx) : url;
+	idx = baseURL.lastIndexOf("#");
+	baseURL = idx >= 0 ? baseURL.substr(0, idx) : baseURL;
+	
+	// Update the url link box.
+	var el = getObject("pw_linktext");
+	el.value = baseURL+"?"+urlQuery;
 }
 
 // When the tree textbox is defocused, update the Java applet.
@@ -179,6 +198,14 @@ function getObject(id){
 	</div>
 	
 	<div style="width:300px;float:right;margin-top:15px;">
+	
+	<!--
+	<h1>Link to this page (experimental):</h1>
+	<div>
+		<textarea rows="2" cols="30" style="font-size:8px;" id="pw_linktext" onfocus="javascript:pw_urlFocus();">
+		</textarea>
+	</div>
+	-->
 	<h1>Problems?</h1>
 	Try visiting the <a href="../troubleshooting.html">Troubleshooting Page</a>
 	<p></p>

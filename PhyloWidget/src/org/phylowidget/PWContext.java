@@ -1,12 +1,8 @@
 package org.phylowidget;
 
 import org.andrewberman.ui.UIContext;
-import org.phylowidget.net.JSClipUpdater;
-import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
-
-import processing.core.PApplet;
 
 public class PWContext extends UIContext
 {
@@ -14,9 +10,6 @@ public class PWContext extends UIContext
 	private PhyloConfig config;
 	private TreeManager trees;
 	private PhyloUI ui;
-	
-	private JSTreeUpdater treeUpdater;
-	private JSClipUpdater clipUpdater;
 	
 	public PWContext(PhyloWidget p)
 	{

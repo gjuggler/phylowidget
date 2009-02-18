@@ -113,6 +113,8 @@ public abstract class PWPublicMethods extends ExtendedPApplet implements Javascr
 		return getTreeNHX();
 	}
 	
+	public abstract String getUrlParameters();
+	
 	public abstract String getClipboardString(); // This is implemented in PhyloWidget.java
 	
 	public abstract void setClipboard(String clip); // This is implemented in PhyloWidget.java

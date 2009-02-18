@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.andrewberman.ui.unsorted.SearchIndex;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.ui.NodeUncollapser;

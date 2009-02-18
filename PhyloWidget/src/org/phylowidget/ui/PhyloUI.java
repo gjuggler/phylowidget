@@ -53,7 +53,6 @@ import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
-import org.phylowidget.net.NodeInfoUpdater;
 import org.phylowidget.net.SecurityChecker;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.LayoutCladogram;
@@ -83,8 +82,6 @@ public class PhyloUI implements Runnable
 	public Toolbar toolbar;
 	public SearchBox search;
 
-
-
 	public PhyloUI(PhyloWidget p)
 	{
 		this.p = p;
@@ -102,7 +99,6 @@ public class PhyloUI implements Runnable
 		text = new PhyloTextField(p);
 		clipboard = new TreeClipboard(p);
 
-//		thread = new Thread(this);
 		thread = context.createThread(this);
 		thread.start();
 	}
@@ -136,7 +132,7 @@ public class PhyloUI implements Runnable
 	boolean runningInBrowser()
 	{
 		String appViewer = p.getAppletContext().getClass().getCanonicalName();
-		System.out.println(appViewer);
+//		System.out.println(appViewer);
 		if (appViewer.toLowerCase().contains("appletviewer"))
 			return false;
 		else
@@ -299,9 +295,7 @@ public class PhyloUI implements Runnable
 				//				System.out.println("ASDF");
 				this.contextMenu = (PhyloContextMenu) menu;
 				continue;
-			}
-
-			if (menu.getClass() == Toolbar.class)
+			} else if (menu.getClass() == Toolbar.class)
 			{
 				toolbar = (Toolbar) menu;
 				MenuItem item = toolbar.get("Search:");
@@ -310,9 +304,7 @@ public class PhyloUI implements Runnable
 					search = (SearchBox) item;
 					search.setText(context.config().search);
 				}
-			}
-
-			if (menu.getClass() == ToolDock.class)
+			} else if (menu.getClass() == ToolDock.class)
 			{
 				ToolDock td = (ToolDock) menu;
 			}

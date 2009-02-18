@@ -29,7 +29,7 @@ public class DelayedAction
 	boolean threaded;
 	Timer timer;
 
-	public void trigger(int delay)
+	public synchronized void trigger(int delay)
 	{
 		if (timer != null)
 		{

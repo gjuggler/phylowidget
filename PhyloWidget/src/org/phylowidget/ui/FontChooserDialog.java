@@ -12,6 +12,7 @@ import java.awt.Insets;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextArea;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -55,7 +56,7 @@ public class FontChooserDialog extends Dialog implements ActionListener, KeyList
 	private String originalFontName;
 
 	protected InputList fontNameInputList;
-	public static String[] fontNames;
+	public String[] fontNames;
 
 	public FontChooserDialog(Frame owner, PWContext pwc)
 	{
@@ -70,7 +71,8 @@ public class FontChooserDialog extends Dialog implements ActionListener, KeyList
 			public void windowClosing(WindowEvent e)
 			{
 				super.windowClosing(e);
-				cancel();
+//				cancel();
+				setVisible(false);
 			}
 		});
 
@@ -82,16 +84,19 @@ public class FontChooserDialog extends Dialog implements ActionListener, KeyList
 		c.add(l);
 		add(c, BorderLayout.NORTH);
 
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		fontNames = ge.getAvailableFontFamilyNames();
+		if (fontNames == null)
+		{
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			fontNames = ge.getAvailableFontFamilyNames();
+		}
 		fontNameInputList = new InputList(fontNames, "Font name:");
 		add(fontNameInputList, BorderLayout.CENTER);
 		ListSelectionListener listSelectListener = new ListSelectionListener()
 		{
 			public void valueChanged(ListSelectionEvent e)
 			{
-//				if (e.getValueIsAdjusting())
-//					return;
+				//				if (e.getValueIsAdjusting())
+				//					return;
 				SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()
@@ -152,7 +157,7 @@ public class FontChooserDialog extends Dialog implements ActionListener, KeyList
 				cancel();
 			}
 		});
-//		p.add(new Label("Esc to cancel, \nCtrl-Enter to commit.     "));
+		//		p.add(new Label("Esc to cancel, \nCtrl-Enter to commit.     "));
 		//		p.add(apply);
 		p.add(ok);
 		p.add(cancel);

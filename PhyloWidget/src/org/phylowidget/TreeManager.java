@@ -84,23 +84,15 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 		/*
 		 * We need to let the ToolManager know our current Camera object.
 		 */
-		System.out.println(camera);
 		context.event().setCamera(camera);
 
 		setTree(TreeIO.parseNewickString(new PhyloTree(), context.config().tree));
 
 		setRenderer(new BasicTreeRenderer(context));
 		context.config().setLayout(context.config().layout);
-		try
-		{
-			PhyloTree pt = (PhyloTree) getTree();
-		} catch (Exception e)
-		{
-			// Do nothing.
-		}
+		context.config().setFont(context.config().font);
 		
 		fireCallback();
-		
 		if (context.config().showScaleBar)
 			scaleBar = new PhyloScaleBar(p);
 	}

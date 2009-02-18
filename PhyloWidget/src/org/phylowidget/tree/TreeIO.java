@@ -370,17 +370,31 @@ public class TreeIO
 		String nameAndLength = s;
 
 		int nhxInd = -1;
+		int altNhxInd = -1;
 		if (useNhx)
 		{
 			nhxInd = s.indexOf("[&&NHX");
-			if (nhxInd != -1)
+			altNhxInd = s.indexOf("[**NHX");
+			if (nhxInd != -1 || altNhxInd != -1)
 			{
-				nameAndLength = s.substring(0, nhxInd);
-				String nhx = s.substring(nhxInd, s.length());
-				nhx = nhx.replaceAll("(\\[&&NHX:|\\])", "");
+				String nhx = "";
+				if (nhxInd != -1)
+				{
+					nameAndLength = s.substring(0, nhxInd);
+					nhx = s.substring(nhxInd, s.length());
+					nhx = nhx.replaceAll("(\\[&&NHX:|\\])", "");
+				} else if (altNhxInd != -1)
+				{
+					nameAndLength = s.substring(0, altNhxInd);
+					nhx = s.substring(altNhxInd, s.length());
+					System.out.println(nhx);
+					nhx = nhx.replaceAll("(\\[\\*\\*NHX:|\\])", "");
+				}
+				System.out.println(nhx);
 				String[] attrs = nhx.split(":");
 				for (String attr : attrs)
 				{
+					System.out.println(attr);
 					/*
 					 * All colons should be stored as "&colon;". Let's get them back.
 					 */
@@ -427,7 +441,7 @@ public class TreeIO
 		v.setBranchLengthCache(curLength);
 
 		// If there's no NHX annotation, try and break up the label using the "poor man's" NHX delimiters.
-		if (poorMan && nhxInd == -1)
+		if (poorMan && nhxInd == -1 && altNhxInd == -1)
 		{
 			int poorInd = name.indexOf(POOR_MANS_NHX);
 			if (poorInd != -1)
@@ -643,6 +657,7 @@ public class TreeIO
 
 	private static String parseNexusLabel(String label)
 	{
+		label = label.replaceAll("`","'");
 		if (label.indexOf("'") == 0)
 		{
 			label = label.substring(1, label.length() - 1);

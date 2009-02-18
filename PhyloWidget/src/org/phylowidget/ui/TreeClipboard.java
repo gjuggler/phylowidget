@@ -23,7 +23,6 @@ import org.andrewberman.ui.StringClipboard;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.phylowidget.PhyloTree;
-import org.phylowidget.net.JSClipUpdater;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.DefaultVertex;
 import org.phylowidget.tree.PhyloNode;

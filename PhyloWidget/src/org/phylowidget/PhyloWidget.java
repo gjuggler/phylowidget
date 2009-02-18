@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,12 +30,12 @@ import javax.swing.SwingUtilities;
 
 import org.andrewberman.ui.UIUtils;
 import org.andrewberman.ui.unsorted.JSCaller;
+import org.andrewberman.ui.unsorted.JavaUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.andrewberman.ui.unsorted.StringPair;
-import org.phylowidget.net.JSClipUpdater;
-import org.phylowidget.net.JSTreeUpdater;
 import org.phylowidget.render.DoubleBuffer;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
 
 import processing.core.PApplet;
@@ -44,7 +45,7 @@ public class PhyloWidget extends PWPublicMethods
 	private static final long serialVersionUID = -7096870051293017660L;
 
 	public PWContext pwc;
-	
+
 	public static float FRAMERATE = 40;
 
 	private static String messageString = new String();
@@ -56,24 +57,18 @@ public class PhyloWidget extends PWPublicMethods
 		super();
 		time = System.currentTimeMillis();
 	}
-	
+
 	@Override
 	public void start()
 	{
-//		super.start();
-		pwc = (PWContext) PWPlatform.getInstance().registerApp(this);	
+		pwc = (PWContext) PWPlatform.getInstance().registerApp(this);
+		super.start();
 		// When running inside a browser, start() will be called when someone
-	    // returns to a page containing this applet.
-	    // http://dev.processing.org/bugs/show_bug.cgi?id=581
-	    finished = false;
-
-	    if (getThread() != null) return;
-	    
-	    Thread t = pwc.createThread(this);
-	    setThread(t);
-	    getThread().start();
+		// returns to a page containing this applet.
+		// http://dev.processing.org/bugs/show_bug.cgi?id=581
+		finished = false;
 	}
-	
+
 	public void setup()
 	{
 		if (frame != null)
@@ -96,33 +91,39 @@ public class PhyloWidget extends PWPublicMethods
 			 * We're locked into an applet. Don't fight it.
 			 */
 			size(getWidth(), getHeight(), JAVA2D);
-			//			size(getWidth(),getHeight(),P2D);
+			final PhyloWidget pw = this;
+			Runnable callHome = new Runnable()
+			{
+				public void run()
+				{
+					JSCaller call = new JSCaller(pw);
+					try
+					{
+						// Make this Javascript call to satisfy the PulpCore javascript loader that we're using.
+						call.call("pulpcore_appletLoaded", null);
+					} catch (Exception e)
+					{
+						// If we're not in a browser, we'll get an exception here.
+					}
+				}
+			};
+			pwc.createThread(callHome).start();
 		}
 		frameRate(FRAMERATE);
-		
+		unregisterDraw(pwc.event());
+
+		final PhyloWidget pw = this;
 		Runnable setup = new Runnable()
 		{
 			public void run()
 			{
 				pwc.ui().setup();
 				pwc.trees().setup();
+				clearQueues();
 			}
 		};
+		//		setup.run();
 		pwc.createThread(setup).start();
-
-		unregisterDraw(pwc.event());
-
-		clearQueues();
-		
-		JSCaller call = new JSCaller(this);
-		try
-		{
-			// Make this Javascript call to satisfy the PulpCore javascript loader that we're using.
-			call.call("pulpcore_appletLoaded", null);
-		} catch (Exception e)
-		{
-			// If we're not in a browser, we'll get an exception here.
-		}
 	}
 
 	DoubleBuffer dbr;
@@ -161,7 +162,7 @@ public class PhyloWidget extends PWPublicMethods
 				drawFrameRate();
 			}
 		}
-		
+
 		drawnOnce = true;
 	}
 
@@ -291,16 +292,16 @@ public class PhyloWidget extends PWPublicMethods
 
 	public void setTree(String s)
 	{
-		changeSetting("tree",s);
+		changeSetting("tree", s);
 		setMessage("Tree updated.");
 	}
-	
+
 	public void setClipboard(String s)
 	{
-		changeSetting("clipboard",s);
+		changeSetting("clipboard", s);
 		setMessage("Clipboard updated.");
 	}
-	
+
 	public synchronized void changeSetting(String setting, String newValue)
 	{
 		if (pwc.config().debug)
@@ -341,5 +342,25 @@ public class PhyloWidget extends PWPublicMethods
 	public String getClipboardString()
 	{
 		return pwc.ui().clipboard.getClipboardText();
+	}
+
+	@Override
+	public String getUrlParameters()
+	{
+		Map<String, String> changedFields = PhyloConfig.getConfigSnapshot(pwc.config());
+		PhyloTree tree = (PhyloTree) pwc.trees().getTree();
+		// Replace the &'s with *'s. TreeIO was modified to accept this alternative NHX signifier.
+		String nhx = tree.getNHX();
+		nhx = nhx.replaceAll("&", "*");
+		nhx = nhx.replaceAll("'", "`");
+		changedFields.put("tree", nhx);
+		ArrayList<String> keyvals = new ArrayList<String>();
+		for (String key : changedFields.keySet())
+		{
+			String s = "";
+			s += key + "=" + "'" + changedFields.get(key) + "'";
+			keyvals.add(s);
+		}
+		return JavaUtils.join("&", keyvals);
 	}
 }

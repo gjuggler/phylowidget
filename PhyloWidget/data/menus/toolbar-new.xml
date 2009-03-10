@@ -57,6 +57,7 @@
 			<item name="Stop Mutating" action="treeStopMutating" shortcut="control-shift-m"/>
 		</item>
 		<item name="Structure">
+			<item name="Log Transform" action="treeLogTransform"/>
 			<item name="Align all Leaves" action="treeAlignLeaves" shortcut="control-shift-A"/>
 			<item name="Flip Tree" action="treeFlip" shortcut="control-R"/>
 			<item name="Auto-sort Tree" action="treeAutoSort" shortcut="control-L"/>

@@ -9,7 +9,7 @@
 	<menu name="callback" type="org.phylowidget.ui.Callback" event="treeChange" callback="phylowidget_callback" />
 -->
 <menuset>
-	<menu name="callback" type="org.phylowidget.ui.Callback" event="treeChange" callback="pw_tree" limitRate="true"/>
-	<menu name="callback2" type="org.phylowidget.ui.Callback" event="nodeHover" callback="pw_hover" limitRate="true"/>
-	<menu name="callback3" type="org.phylowidget.ui.Callback" event="clipChange" callback="pw_clip" limitRate="true"/>
+	<menu name="treeChangeCallback" type="org.phylowidget.ui.Callback" event="treeChange" callback="pw_tree" limitRate="true"/>
+	<menu name="nodeHoverCallback" type="org.phylowidget.ui.Callback" event="nodeHover" callback="pw_hover" limitRate="true" includeNodeInfo="true" />
+	<menu name="clipChangeCallback" type="org.phylowidget.ui.Callback" event="clipChange" callback="pw_clip" limitRate="true"/>
 </menuset>

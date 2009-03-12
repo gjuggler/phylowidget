@@ -21,7 +21,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-
 public class NexmlIO
 {
 
@@ -64,7 +63,7 @@ public class NexmlIO
 		classFactory = new HashMap<String, Class>();
 		classFactory.put("tree", treeClass);
 	}
-	
+
 	private void addOtusToMap(HashMap<String, HashMap<String, String>> map, Element otus)
 	{
 		HashMap<String, String> otuMap = createOtusMap(otus);
@@ -100,45 +99,43 @@ public class NexmlIO
 		String nodeLabel = el.getAttribute("label");
 		if (nodeLabel.length() > 0)
 		{
-			nodeLabel = nodeLabel.replaceAll("&amp;","&");
+			nodeLabel = nodeLabel.replaceAll("&amp;", "&");
 			node.setLabel(nodeLabel);
 		}
 
 		String label = otusMap.get(el.getAttribute("otu"));
 		if (label != null && label.length() > 0)
 		{
-			label = label.replaceAll("&amp;","&");
+			label = label.replaceAll("&amp;", "&");
 			node.setLabel(label);
 		}
-		
+
 		// Load annotations from any contained dict elements.
-		List<Element> dicts = getSubElementsByName(el,"dict");
-		for (Element dict : dicts)
+		List<Node> metas = getSubElementsByName(el, "meta");
+		for (Node meta : metas)
 		{
-			List<Element> keyvals = getSubElementsByName(dict,"*");
-			for (Element keyval : keyvals)
+			String key = ((Element)meta).getAttribute("property");
+			String value = meta.getTextContent().trim();
+			if (node instanceof PhyloNode)
 			{
-				if (node instanceof PhyloNode)
-				{
-					PhyloNode pn = (PhyloNode) node;
-					pn.setAnnotation(keyval.getNodeName(), keyval.getTextContent());
-				}
+				PhyloNode pn = (PhyloNode) node;
+				pn.setAnnotation(key,value);
 			}
 		}
 		return node;
 	}
 
-	private List<Element> getSubElementsByName(Element el,String name)
+	private List<Node> getSubElementsByName(Element el, String name)
 	{
 		NodeList subNodes = el.getElementsByTagName(name);
-		ArrayList<Element> els = new ArrayList<Element>(subNodes.getLength());
-		for (int i=0; i < subNodes.getLength(); i++)
+		ArrayList<Node> els = new ArrayList<Node>(subNodes.getLength());
+		for (int i = 0; i < subNodes.getLength(); i++)
 		{
-			els.add((Element) subNodes.item(i));
+			els.add(subNodes.item(i));
 		}
 		return els;
 	}
-		
+
 	private Object objFromElement(Element elt)
 	{
 		String tagName = elt.getTagName();
@@ -229,7 +226,7 @@ public class NexmlIO
 
 		// Fix up the sorting.
 		tree.fixSortingByAnnotation("first");
-		
+
 		return tree;
 	}
 
@@ -259,36 +256,33 @@ public class NexmlIO
 
 	private static String createNeXMLString(RootedTree tree, TreeOutputConfig config)
 	{
-		int nodeId = 0;
-		int edgeId = 0;
-		int otuId = 0;
-		int otusId = 0;
-		int treeId = 0;
-		int treesId = 0;
-		int dictId = 0;
-		int globalDummyId = 0;
+		//		int nodeId = 0;
+		//		int edgeId = 0;
+		//		int otuId = 0;
+		//		int otusId = 0;
+		//		int treeId = 0;
+		//		int treesId = 0;
+		//		int metaId = 0;
+		//		int globalDummyId = 0;
+		int globalId = 0;
 		StringBuffer sb = new StringBuffer();
 
-		String boilerplate = "<nex:nexml version=\"0.8\" " +
-				"xmlns=\"http://www.nexml.org/1.0\" " +
-				"xmlns:nex=\"http://www.nexml.org/1.0\" " +
-				"xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" "+
-				"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "+
-				"xsi:schemaLocation=\"http://www.nexml.org/1.0 http://www.nexml.org/1.0/nexml.xsd\" " +
-				" >";
-		
-//		addLine(sb, "<?xml version='1.0' encoding='ISO-8859-1'?>", 0);
-		addLine(
-			sb,
-			boilerplate,
-			0);
+		String boilerplate =
+				"<nex:nexml version=\"0.8\" " + "xmlns=\"http://www.nexml.org/1.0\" "
+						+ "xmlns:nex=\"http://www.nexml.org/1.0\" "
+						+ "xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" "
+						+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+						+ "xsi:schemaLocation=\"http://www.nexml.org/1.0 http://www.nexml.org/1.0/nexml.xsd\" " + " >";
+
+		//		addLine(sb, "<?xml version='1.0' encoding='ISO-8859-1'?>", 0);
+		addLine(sb, boilerplate, 0);
 
 		addLine(sb, "<otus id=\"otus1\" label=\"onlyOtus\">", 1);
 		List leaves = tree.getAllLeaves();
 		HashMap<Object, String> leafToOtuId = new HashMap<Object, String>();
 		for (Object leaf : leaves)
 		{
-			int myId = otuId++;
+			int myId = globalId++;
 			String otuIdS = "otu" + myId;
 			String label = tree.getLabel((DefaultVertex) leaf);
 			label = escapeXml(label);
@@ -301,23 +295,23 @@ public class NexmlIO
 		addLine(sb, "<tree id=\"tree1\" label=\"onlyTree\" xsi:type=\"nex:FloatTree\" >", 2);
 
 		List<DefaultVertex> nodes = tree.getAllNodes();
-		HashMap<Object,String> nodeToId = new HashMap<Object,String>();
+		HashMap<Object, String> nodeToId = new HashMap<Object, String>();
 		for (DefaultVertex o : nodes)
 		{
-			nodeId++;
-			String nodeIdString = "node"+nodeId;
+			globalId++;
+			String nodeIdString = "node" + globalId;
 			String labelAndRoot = "";
 			if (tree.getLabel(o).length() > 0)
-				labelAndRoot += " label="+qw(tree.getLabel(o))+" ";
+				labelAndRoot += " label=" + qw(tree.getLabel(o)) + " ";
 			if (tree.isRoot(o))
-				labelAndRoot += " root="+qw("true")+" ";
+				labelAndRoot += " root=" + qw("true") + " ";
 			if (leafToOtuId.containsKey(o))
 			{
-				labelAndRoot += " otu="+qw(leafToOtuId.get(o))+" ";
+				labelAndRoot += " otu=" + qw(leafToOtuId.get(o)) + " ";
 			}
 			labelAndRoot = escapeXml(labelAndRoot);
 
-			HashMap<String,String> anns = null;
+			HashMap<String, String> anns = null;
 			if (o instanceof PhyloNode)
 			{
 				PhyloNode pn = (PhyloNode) o;
@@ -338,44 +332,41 @@ public class NexmlIO
 					anns = null;
 				}
 			}
+
+			String aboutString = qw("about" + (++globalId));
 			if (anns != null)
 			{
-				addLine(sb, "<node id="+qw(nodeIdString)+" "+labelAndRoot+">",3);
-				
-				dictId++;
-				String dictIdString = "dict"+dictId;
-				addLine(sb,"<dict id="+qw(dictIdString)+">",4);
+				addLine(sb, "<node id=" + qw(nodeIdString) + " " + labelAndRoot + " about=" + aboutString + ">", 3);
 				for (String s : anns.keySet())
 				{
-					globalDummyId++;
-					String dummyString = qw("dummy"+globalDummyId);
-					addLine(sb,"<"+s+" id="+dummyString+">"+escapeXml(anns.get(s))+"</"+s+">",5);
+					String line = "<meta property=" + qw(escapeXml(s)) + ">" +escapeXml(anns.get(s))+"</meta>";  
+					addLine(sb, line , 4);
 				}
-				addLine(sb,"</dict>",4);
-				addLine(sb,"</node>",3);
+				addLine(sb, "</node>", 3);
 			} else
 			{
-				addLine(sb, "<node id="+qw(nodeIdString)+" "+labelAndRoot+"/>",3);
+				addLine(sb, "<node id=" + qw(nodeIdString) + " " + labelAndRoot + " about=" + aboutString + "/>", 3);
 			}
-			
-			
+
 			nodeToId.put(o, nodeIdString);
 		}
-			
+
 		// Go through and add edges.
 		for (DefaultVertex o : nodes)
 		{
 			if (tree.getParentOf(o) != null)
 			{
-				edgeId++;
-				String edgeIdString = "edge"+edgeId;
+				globalId++;
+				String edgeIdString = "edge" + globalId;
 				String sourceAndTarget = "";
 				String targetId = nodeToId.get(o);
 				String sourceId = nodeToId.get(tree.getParentOf(o));
-				sourceAndTarget = " source="+qw(sourceId)+" target="+qw(targetId)+" ";
-				
-				String length = " length="+qw(tree.getBranchLength(o)+"")+" ";
-				addLine(sb, "<edge id="+qw(edgeIdString)+" "+sourceAndTarget+length+"/>",3);
+				sourceAndTarget = " source=" + qw(sourceId) + " target=" + qw(targetId) + " ";
+
+				String length = " length=" + qw(tree.getBranchLength(o) + "") + " ";
+				String aboutString = qw("about" + (++globalId));
+				addLine(sb, "<edge id=" + qw(edgeIdString) + " " + sourceAndTarget + length + " about=" + aboutString
+						+ " />", 3);
 			}
 		}
 
@@ -393,7 +384,7 @@ public class NexmlIO
 		s = s.replaceAll("&", "&amp;");
 		return s;
 	}
-	
+
 	private static String qw(String s)
 	{
 		return "\"" + s + "\"";

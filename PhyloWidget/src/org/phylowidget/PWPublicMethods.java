@@ -2,6 +2,7 @@ package org.phylowidget;
 
 import java.util.List;
 
+import org.andrewberman.ui.unsorted.Json;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.ui.JavascriptAccessibleMethods;
 
@@ -113,6 +114,16 @@ public abstract class PWPublicMethods extends ExtendedPApplet implements Javascr
 		return getTreeNHX();
 	}
 	
+	public String getTreeNeXML()
+	{
+		return getTree_obj().getNeXML();
+	}
+	
+	public String getNodeInfoJSON()
+	{
+		return Json.hashToJson(getCurNode().getNodeInfo());
+	}
+	
 	public abstract String getUrlParameters();
 	
 	public abstract String getClipboardString(); // This is implemented in PhyloWidget.java
@@ -122,4 +133,8 @@ public abstract class PWPublicMethods extends ExtendedPApplet implements Javascr
 	public abstract void setMessage(String message); // This is implemented in PhyloWidget.java
 	
 	public abstract void setTree(String tree); // This is implemented in PhyloWidget.java
+	
+	public abstract void setAnnotation(String nodeLabel, String key, String value); // This is implemented in PhyloWidget.java
+	
+	public abstract void setAnnotations(String nodeLabel, String annotationJson); // This is implemented in PhyloWidget.java
 }

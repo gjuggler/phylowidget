@@ -320,7 +320,7 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 			return null;
 		}
 	}
-
+	
 	public double getBranchLength(V vertex)
 	{
 		V parent = getParentOf(vertex);
@@ -435,6 +435,16 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return l;
 	}
 
+	public DepthFirstIterator<V, E> getDepthFirstIterator()
+	{
+		return getDepthFirstIterator(getRoot());
+	}
+	
+	public DepthFirstIterator<V, E> getDepthFirstIterator(V v)
+	{
+		return new DepthFirstIterator<V, E>(this,v);
+	}
+	
 	public V getFirstLeaf(V vertex)
 	{
 		V cur = vertex;
@@ -504,6 +514,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 	public String getNewick()
 	{
 		return TreeIO.createNewickString(this);
+	}
+	
+	public String getNeXML()
+	{
+		return TreeIO.createNeXMLString(this);
 	}
 	
 	public String getNHX()
@@ -631,6 +646,15 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		return height;
 	}
 
+	public double getMya(V vertex)
+	{
+		double maxHeight = this.getMaxHeightToLeaf(this.getRoot());
+		double heightToRoot = this.getHeightToRoot(vertex);
+		if (Math.abs(heightToRoot-maxHeight) < maxHeight/100000)
+			return 0;
+		return maxHeight - heightToRoot;
+	}
+	
 	public synchronized int getLeafCount()
 	{
 		return getNumEnclosedLeaves(getRoot());
@@ -763,15 +787,18 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 	{
 		if (getParentOf(vertex) != null)
 		{
-			V parent = getParentOf(vertex);
-			double weightToParent = getEdgeWeight(getEdge(parent, vertex));
-			List<V> children = getChildrenOf(vertex);
-			for (int i = 0; i < children.size(); i++)
+			if (!isLeaf(vertex))
 			{
-				V child = children.get(i);
-				double weight = getEdgeWeight(getEdge(vertex, child));
-				E edge = addEdge(parent, child);
-				setEdgeWeight(edge, weightToParent + weight);
+				V parent = getParentOf(vertex);
+				double weightToParent = getEdgeWeight(getEdge(parent, vertex));
+				List<V> children = getChildrenOf(vertex);
+				for (int i = 0; i < children.size(); i++)
+				{
+					V child = children.get(i);
+					double weight = getEdgeWeight(getEdge(vertex, child));
+					E edge = addEdge(parent, child);
+					setEdgeWeight(edge, weightToParent + weight);
+				}
 			}
 			removeVertex(vertex);
 		} else
@@ -1106,18 +1133,39 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 			return REVERSE_I;
 	}
 
-	/**
-	 * Removes "elbowed" nodes from the subtree below the given vertex. An
-	 * elbowed node is defined as a node that has a single parent and a single
-	 * child.
-	 * 
-	 * @param vertex
-	 *            the node at which to begin culling
+	/*
+	 * Removes "elbowed" nodes below the given vertex, but does NOT remove nodes
+	 * that are contained in the doNotRemove list.
 	 */
-	public void removeElbowsBelow(V vertex)
+	public void removeElbowsBelow(V vertex,List<V> doNotRemove)
 	{
-		ArrayList<V> list = new ArrayList<V>();
-		getAll(vertex, null, list);
+		HashSet<V> keeperSet = new HashSet<V>();
+		if (doNotRemove != null)
+			keeperSet.addAll(doNotRemove);
+		
+		// Continue if this node was flagged as a keeper.
+		for (V v : keeperSet)
+		{
+			if (!this.containsVertex(v)) // Because we're removing things from the tree as we go through the keepers, we need to check for existence.
+				continue;
+			// GJ 2009-03-03 : Delete other nodes until this guy isn't an elbow anymore.
+			while (isElbow(v))
+			{
+				V child = getFirstChild(v);
+				if (keeperSet.contains(child) && !isLeaf(child)) // Keep the child if it is ALSO a keeper (strange, but should work.)
+				{
+					continue;
+				} else if (isLeaf(child))
+				{
+					break;
+				} else
+				{
+					deleteNode(child);
+				}
+			}
+		}
+		
+		List<V> list = getAllNodes(vertex);
 		for (int i = 0; i < list.size(); i++)
 		{
 			V o = list.get(i);
@@ -1138,6 +1186,24 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 				removeVertex(o);
 			}
 		}
+	}
+	
+	public boolean isElbow(V vertex)
+	{
+		return getParentOf(vertex) != null && getChildrenOf(vertex).size() == 1;
+	}
+	
+	/**
+	 * Removes "elbowed" nodes from the subtree below the given vertex. An
+	 * elbowed node is defined as a node that has a single parent and a single
+	 * child.
+	 * 
+	 * @param vertex
+	 *            the node at which to begin culling
+	 */
+	public void removeElbowsBelow(V vertex)
+	{
+		removeElbowsBelow(vertex, null);
 	}
 
 	/**
@@ -1392,6 +1458,34 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
+	public void logTransform(V v, double factor)
+	{
+		double totalLength = getTotalTreeLength();
+		
+		// First, store a HashMap of each node and its log-transformed distance-to-root.
+		List<V> nodes = getAllNodes();
+		
+		double maxMya = 0;
+		HashMap<V,Double> distances = new HashMap<V,Double>();
+		for (V node : nodes)
+		{
+			double mya = getMya(node);
+			if (mya > maxMya)
+				maxMya = mya;
+		}
+		
+		for (V node : nodes)
+		{
+			double mya = getMya(node);
+			distances.put(node, Math.log(mya+factor));
+		}
+		this.setBranchLengthsFromMyaMatrix(distances);
+		
+		// Re-scale the tree so it has the same total branch length.
+		double newTotalLength = getTotalTreeLength();
+		this.scaleSubtree(getRoot(), totalLength/newTotalLength);
+	}
+	
 	public void makeSubtreeUltrametric(V v)
 	{
 		makeSubtreeUltrametric(v, 1, false);
@@ -1452,12 +1546,23 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
-	public void spliceOutInternalNode(V vertex)
+	public void setBranchLengthsFromMyaMatrix(Map<V,Double> nodeMyas)
 	{
-		List<V> children = getChildrenOf(vertex);
-
+		Collection<Double> ages = nodeMyas.values();
+		double maxMya = Collections.max(ages);
+		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, getRoot());
+		while (it.hasNext())
+		{
+			V vertex = it.next();
+			double nodeAge = nodeMyas.get(vertex);
+			setBranchLength(vertex,0);
+			double currentHeightToRoot = getHeightToRoot(vertex);
+			double desiredHeightToRoot = maxMya - nodeAge;
+			double change = desiredHeightToRoot - currentHeightToRoot;
+			setBranchLength(vertex,change);
+		}
 	}
-
+	
 	public void translateLabels(V v, Map<String, String> oldToNew)
 	{
 		DepthFirstIterator<V, E> it = new DepthFirstIterator<V, E>(this, v);
@@ -1483,6 +1588,30 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		}
 	}
 
+	public String getAnnotation(V vertex, String key)
+	{
+		return null;
+	}
+	
+	public void clearAnnotation(V vertex, String key)
+	{
+		// Do nothing.
+	}
+	
+	public void fixSortingByAnnotation(String annotation)
+	{
+		List<V> nodes = getAllNodes();
+		for (V v : nodes)
+		{
+			V lastChild = getLastChild(v);
+			String s = getAnnotation(lastChild,annotation);
+			if (s != null)
+			{
+				setSorting(v,getSorting(v)*-1);
+			}
+		}
+	}
+	
 	public void dispose()
 	{
 		sorting = null;

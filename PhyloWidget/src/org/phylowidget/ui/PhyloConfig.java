@@ -42,7 +42,7 @@ public class PhyloConfig
 	 * The configurable parameters are displayed below, generally in order from most to least useful. Enjoy!
 	 */
 
-	public boolean debug = false;
+	public boolean debug = true;
 
 	/*
 	 * If you specify a valid URL pointing to a properties file, then PhyloWidget will attempt to load the properties remotely.

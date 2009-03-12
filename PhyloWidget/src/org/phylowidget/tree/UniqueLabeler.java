@@ -20,6 +20,7 @@ package org.phylowidget.tree;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class UniqueLabeler
 {
@@ -88,8 +89,7 @@ public class UniqueLabeler
 	protected void resetVertexLabels(RootedTree t)
 	{
 		vertexLabels.clear();
-		ArrayList nodes = new ArrayList();
-		t.getAll(t.getRoot(), null, nodes);
+		List nodes = t.getAllNodes();
 		for (int i = 0; i < nodes.size(); i++)
 		{
 			Object o = nodes.get(i);

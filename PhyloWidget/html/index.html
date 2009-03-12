@@ -44,20 +44,23 @@ pw_clip = function()
 	if (el != null)
 		el.value = newickString;
 }
-pw_hover = function()
+pw_hover = function(json_data)
 {
 	// Get the Java applet.
 	var applet = PhyloWidget.getApplet();
+	
+	var json = eval("("+json_data+")");
+	var ann = json["Annotations"];
 	
 	// Create a mapping of key-value pairs.
 	// We're getting information on the currently hovered node by calling the "hoveredXYZ" methods from the PWPublicMethods.java definitions:
 	// http://phylowidget.googlecode.com/svn/trunk/PhyloWidget/src/org/phylowidget/PWPublicMethods.java
 	var map = {
-		"Name" : applet.getHoveredNode(),
-		"Branch Length" : applet.getHoveredBranchLength(),
-		"Enclosed Leaves" : applet.getHoveredLeafCount(),
-		"Depth to Root" : applet.getHoveredDepthToRoot(),
-		"Branch Length to Root" : applet.getHoveredDistanceToRoot()
+		"Name" : ann["Label"],
+		"Branch Length" : ann["Branch Length"],
+		"Enclosed Leaves" : json["Enclosed Leaves"],
+		"Depth to Root" : json["Depth to Root"],
+		"Branch Length to Root" : json["Branch Length to Root"]
 	};
 
 	// Create some HTML based on the key-value pairs.

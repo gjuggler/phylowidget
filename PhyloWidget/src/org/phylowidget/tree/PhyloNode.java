@@ -20,10 +20,16 @@ package org.phylowidget.tree;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.andrewberman.ui.tween.Tween;
 import org.andrewberman.ui.tween.TweenQuad;
+import org.andrewberman.ui.unsorted.Json;
+import org.json.simple.JSONObject;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
@@ -38,8 +44,7 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	private float realX, realY; // Real-world (i.e. screen) position, after scaling and translation of the layout.
 	private float angle; // Angle (in radians) at which the node should be drawn. Clockwise from horizontal.
 
-	public Point2D[] corners =
-			new Point2D.Float[] { new Point2D.Float(), new Point2D.Float(), new Point2D.Float(), new Point2D.Float() };
+	public Point2D[] corners;
 	public Rectangle2D.Float rect = new Rectangle2D.Float();
 
 	private byte textAlign = ALIGN_LEFT;
@@ -270,17 +275,40 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 		annotations.remove(key);
 	}
 
+	static NumberFormat fmt = DecimalFormat.getInstance();
+	static {fmt.setMaximumFractionDigits(3);}
+	
+	public void setAnnotation(String key, double value)
+	{
+		String dblString = fmt.format(value);
+		setAnnotation(key,dblString);
+	}
+	
 	public void setAnnotation(String key, String value)
 	{
 		if (annotations == null)
 			annotations = new HashMap<String, String>();
 		if (value == null)
+		{
 			annotations.remove(key);
-		else
-			if (key.length() <= 3)
+		} else
+		{
+			if (key.equalsIgnoreCase("name"))
+			{
+				getTree().setLabel(this, value);
+				return;
+			} else if (key.equalsIgnoreCase("branch length"))
+			{
+				getTree().setBranchLength(this, Double.parseDouble(value));
+				return;
+			} else if (key.length() <= 3)
+			{
 				annotations.put(key.toLowerCase(),value);
-			else
+			} else
+			{
 				annotations.put(key, value); // GJ 2009-02-15 : stop lower-casing annotations for longer keys.
+			}
+		}
 	}
 
 	/**
@@ -291,6 +319,13 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	 */
 	public String getAnnotation(String key)
 	{
+		if (context == null)
+		{
+			if (annotations != null)
+				return annotations.get(key.toLowerCase());
+			else
+				return null;
+		}
 		if (context.config().ignoreAnnotations)
 			return null;
 		if (annotations == null)
@@ -306,9 +341,33 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 	 */
 	public HashMap<String, String> getAnnotations()
 	{
-		if (context.config().ignoreAnnotations)
+		if (context != null && context.config().ignoreAnnotations)
 			return null;
 		return annotations;
+	}
+	
+	public HashMap<String,String> getFullAnnotations()
+	{
+		HashMap<String,String> annot = getAnnotations();
+		if (annot == null)
+			annot = new HashMap<String,String>();
+		HashMap<String,String> clone = (HashMap<String, String>) annot.clone();
+		clone.put("Label",getLabel());
+		clone.put("Branch Length",""+getTree().getBranchLength(this));
+		return clone;
+	}
+	
+	public HashMap<String,Object> getNodeInfo()
+	{
+		HashMap<String,Object> nodeInfo = new HashMap<String,Object>();
+		HashMap<String,String> annotations = getFullAnnotations();
+		HashMap<String,Object> calculations = new HashMap<String,Object>();
+		calculations.put("Enclosed Leaves", getTree().getNumEnclosedLeaves(this));
+		calculations.put("Depth to Root", getTree().getDepthToRoot(this));
+		calculations.put("Branch Length to Root", getTree().getHeightToRoot(this));
+		nodeInfo.put("calculations",calculations);
+		nodeInfo.put("annotations",annotations);
+		return nodeInfo;
 	}
 
 	public void setAngle(float angle)
@@ -351,6 +410,23 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 		}
 		System.out.println("Range null!");
 		return null;
+	}
+	
+	public void setAnnotationsFromJson(String jsonString)
+	{
+		JSONObject map = (JSONObject) Json.jsonToHash(jsonString);
+		Set<Object> keys = map.keySet();
+		for (Object o : keys)
+		{
+			String key = o.toString();
+			String val = map.get(key).toString();
+			if (key.equalsIgnoreCase("name"))
+				getTree().setLabel(this, val);
+			else if (key.equalsIgnoreCase("branch length"))
+				getTree().setBranchLength(this, Double.parseDouble(val));
+			else
+				setAnnotation(key, val);
+		}
 	}
 	
 	//	public float getTrueAngle()

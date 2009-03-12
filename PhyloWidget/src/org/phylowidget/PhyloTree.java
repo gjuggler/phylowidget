@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.andrewberman.ui.unsorted.SearchIndex;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.traverse.DepthFirstIterator;
 import org.phylowidget.tree.CachedRootedTree;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.ui.NodeUncollapser;
@@ -62,6 +63,22 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 	public void setBaseURL(String baseURL)
 	{
 		this.baseURL = baseURL;
+	}
+	
+	@Override
+	public String getAnnotation(PhyloNode vertex,String key)
+	{
+		if (vertex == null)
+			return null;
+		return vertex.getAnnotation(key);
+//		return super.getAnnotation(vertex);
+	}
+	
+	public void clearAnnotation(PhyloNode vertex, String key)
+	{
+		if (vertex == null)
+			return;
+		vertex.clearAnnotation(key);
 	}
 	
 	public String getBaseURL()
@@ -176,6 +193,23 @@ public class PhyloTree extends CachedRootedTree<PhyloNode, DefaultWeightedEdge>
 		return matches;
 	}
 
+
+	public PhyloNode getVertexForAnnotation(String key, String searchValue)
+	{
+		DepthFirstIterator<PhyloNode,DefaultWeightedEdge> it = new DepthFirstIterator<PhyloNode,DefaultWeightedEdge>(this, getRoot());
+		while (it.hasNext())
+		{
+			PhyloNode vertex = it.next();
+			String value = vertex.getAnnotation(key);
+			if (value != null) {
+				if (value.equalsIgnoreCase(searchValue)) {
+					return vertex;
+				}
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public boolean removeVertex(PhyloNode o)
 	{

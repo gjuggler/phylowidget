@@ -1,11 +1,14 @@
 package org.phylowidget.ui;
 
+import java.util.HashMap;
+
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.ifaces.UIListener;
 import org.andrewberman.ui.menu.Menu;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.unsorted.DelayedAction;
 import org.andrewberman.ui.unsorted.JSCaller;
+import org.andrewberman.ui.unsorted.Json;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.TreeManager;
@@ -53,7 +56,7 @@ public class Callback extends Menu implements UIListener
 		{
 			if (limitRate)
 			{
-				action.trigger(200);
+				action.trigger(50);
 			} else
 			{
 				fireJavascriptCallback();
@@ -107,6 +110,12 @@ public class Callback extends Menu implements UIListener
 		this.limitRate = limitRate;
 	}
 	
+	private boolean includeNodeInfo = false;
+	public void setIncludeNodeInfo(boolean includeNodeInfo)
+	{
+		this.includeNodeInfo = includeNodeInfo;
+	}
+	
 	private String callbackEvent;
 	public void setEvent(String event)
 	{
@@ -152,15 +161,28 @@ public class Callback extends Menu implements UIListener
 	private void fireJavascriptCallback()
 	{
 		try {
+//			System.out.println(callback+"  "+getName());
 			if (caller == null)
 				return;
 			if (callback == null)
 				return;
 			if (caller.reflectionWorking)
-				caller.call(callback);
+			{
+				if (includeNodeInfo)
+				{
+//					System.out.println("Callback with node info!");
+					HashMap<String,Object> map = pwc.ui().getHoveredNode().getNodeInfo();
+//					System.out.println(map);
+					caller.call(callback,Json.hashToJson(map));
+				} else
+				{
+					caller.call(callback);
+				}
+			}
 		} catch (Exception e)
 		{
-			System.err.println(e.getMessage());
+			e.printStackTrace();
+//			System.err.println(e.getMessage());
 		}
 	}
 	

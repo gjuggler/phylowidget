@@ -253,6 +253,8 @@ public final class NodeRenderer implements UsefulConstants
 
 			// Look for the NSZ annotations.
 			float nS = getFloatAnnotation(n, NODE_SIZE);
+			if (nS == -1)
+				nS = getFloatAnnotation(n, NODE_SIZE_ALT);
 			if (nS > -1)
 				thisDotSize *= nS;
 
@@ -365,6 +367,8 @@ public final class NodeRenderer implements UsefulConstants
 		static int getNodeShape(PhyloNode n)
 		{
 			String annotation = n.getAnnotation(UsefulConstants.NODE_SHAPE);
+			if (annotation == null)
+				annotation = n.getAnnotation(UsefulConstants.NODE_SHAPE_ALT);	
 			String shape = context.config().nodeShape.toLowerCase();
 			if (annotation != null)
 			{
@@ -403,6 +407,8 @@ public final class NodeRenderer implements UsefulConstants
 					int c = context.config().getNodeColor().getRGB();
 
 					String nodeColor = n.getAnnotation(NODE_COLOR);
+					if (nodeColor == null)
+						nodeColor = n.getAnnotation(NODE_COLOR_ALT);
 					if (nodeColor != null)
 					{
 						c = Color.parseColor(nodeColor).getRGB();
@@ -472,6 +478,8 @@ public final class NodeRenderer implements UsefulConstants
 		{
 			float stroke = strokeForNode(n);
 			float bSize = getFloatAnnotation(n, BRANCH_SIZE);
+			if (bSize == -1)
+				bSize = getFloatAnnotation(n, BRANCH_SIZE_ALT);	
 			if (bSize > -1)
 				stroke *= bSize;
 			return stroke;
@@ -493,6 +501,8 @@ public final class NodeRenderer implements UsefulConstants
 				default:
 					int c = context.config().getBranchColor().getRGB();
 					String branchColor = n.getAnnotation(BRANCH_COLOR);
+					if (branchColor == null)
+						branchColor = n.getAnnotation(BRANCH_COLOR_ALT);
 					if (branchColor != null)
 					{
 						c = Color.parseColor(branchColor).getRGB();
@@ -521,6 +531,8 @@ public final class NodeRenderer implements UsefulConstants
 
 			// If we find a NHX image size annotation, scale accordingly.
 			float iMult = getFloatAnnotation(n, IMAGE_SIZE);
+			if (iMult == -1)
+				iMult = getFloatAnnotation(n, IMAGE_SIZE_ALT);
 			if (iMult > -1)
 				thisRowSize *= iMult;
 
@@ -640,6 +652,8 @@ public final class NodeRenderer implements UsefulConstants
 
 			// Grab the NHX annotated label size mult. factor
 			float labelMult = getFloatAnnotation(n, LABEL_SIZE);
+			if (labelMult == -1)
+				labelMult = getFloatAnnotation(n, LABEL_SIZE_ALT);
 			if (labelMult > -1)
 				curTextSize *= labelMult;
 
@@ -797,6 +811,8 @@ public final class NodeRenderer implements UsefulConstants
 			{
 				int c = Color.black.getRGB();
 				String labelColor = n.getAnnotation(LABEL_COLOR);
+				if (labelColor == null)
+					labelColor = n.getAnnotation(LABEL_COLOR_ALT);
 				String tax = n.getAnnotation(TAXON_ID);
 				String spec = n.getAnnotation(SPECIES_NAME);
 				if (labelColor != null)
@@ -935,6 +951,8 @@ public final class NodeRenderer implements UsefulConstants
 			if (n.isNHX())
 			{
 				String labelColor = n.getAnnotation(ALIGNMENT_COLOR);
+				if (labelColor == null)
+					labelColor = n.getAnnotation(ALIGNMENT_COLOR_ALT);	
 				String tax = n.getAnnotation(TAXON_ID);
 				String spec = n.getAnnotation(SPECIES_NAME);
 				if (labelColor != null)

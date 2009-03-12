@@ -33,22 +33,31 @@ public interface UsefulConstants
 	public static final String CIGAR = "CIGAR"; // Cigar line, for gene tree alignments.
 	
 	public static final String LABEL_COLOR = "LCOL";	// Color of a node's label
+	public static final String LABEL_COLOR_ALT = "LABEL_COLOR";
 	public static final String NODE_COLOR = "NCOL";		// Color of a node's dot marker
+	public static final String NODE_COLOR_ALT = "NODE_COLOR";
 	public static final String BRANCH_COLOR = "BCOL";	// Color of a node's branch (the branch leading to its parent)
+	public static final String BRANCH_COLOR_ALT = "BRANCH_COLOR";
 	public static final String ALIGNMENT_COLOR = "ALNCOL";	// Color of a node's branch (the branch leading to its parent)
+	public static final String ALIGNMENT_COLOR_ALT = "BRANCH_COLOR";
 	// NB: The values of the color annotations should be in R,G,B format, either with or without parentheses (your choice!)
 	//     [Alternatively, if you specify a single integer value, it will be interpreted as a single grayscale value]
 	// NB: The above color annotations take precedence over any other auto-coloring that is usually done.
 	public static final String LABEL_SIZE = "LSZ"; 		// Multiplier for label text size.
+	public static final String LABEL_SIZE_ALT = "LABEL_SIZE";
 	public static final String NODE_SIZE = "NSZ";		// Multiplier for node marker size.
+	public static final String NODE_SIZE_ALT = "NODE_SIZE";
 	public static final String NODE_SHAPE = "NSH";
-	   public static final String SHAPE_SQUARE = "s";
-	   public static final String SHAPE_TRIANGLE = "t";
-	   public static final String SHAPE_STAR = "x";
-	   public static final String SHAPE_FILLED_CIRCLE = "o";
+	public static final String NODE_SHAPE_ALT = "NODE_SHAPE";
+	public static final String SHAPE_SQUARE = "s";
+	public static final String SHAPE_TRIANGLE = "t";
+	public static final String SHAPE_STAR = "x";
+	public static final String SHAPE_FILLED_CIRCLE = "o";
 	
 	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
+	public static final String BRANCH_SIZE_ALT = "BRANCH_SIZE";
 	public static final String IMAGE_SIZE = "ISZ";		// Multiplier for photo size.
+	public static final String IMAGE_SIZE_ALT = "IMAGE_SIZE";
 	public static final String CIGAR_SIZE = "ALNSZ";		// Multiplier for photo size.
 	public static final String LABEL_ALWAYSSHOW = "PW_ALWAYS";    // Pretty hacky, but this is a tag to make sure a label is ALWAYS shown, no matter what.
 	public static final String LABEL_ALWAYSSHOW_ALT = "PW_A"; // A shorter version of the above.

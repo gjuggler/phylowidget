@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.andrewberman.ui.AbstractUIObject;
 import org.andrewberman.ui.UIRectangle;
 import org.andrewberman.ui.camera.RectMover;
+import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.jgrapht.event.GraphChangeEvent;
 import org.jgrapht.event.GraphEdgeChangeEvent;
 import org.jgrapht.event.GraphListener;
@@ -34,6 +35,7 @@ import org.phylowidget.render.LayoutCladogram;
 import org.phylowidget.render.LayoutDiagonal;
 import org.phylowidget.render.LayoutUnrooted;
 import org.phylowidget.render.images.ImageLoader;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.PhyloScaleBar;
@@ -205,6 +207,19 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 		setTree(TreeIO.parseNewickString(new PhyloTree(), s));
 	}
 
+	private void setConfigParametersFromTree()
+	{
+		if (getTree() != null)
+		{
+			PhyloNode n = (PhyloNode) getTree().getRoot();
+			if (n.getAnnotations() != null)
+			{
+				MethodAndFieldSetter.setMethodsAndFields(context.config(), n.getAnnotations());
+			}
+		}
+	}
+
+	
 	public void setTree(final RootedTree tree)
 	{
 		if (t != null)
@@ -232,6 +247,7 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 		}
 		fforwardMe = true;
 		mutator = new RandomTreeMutator(tree);
+		setConfigParametersFromTree();
 	}
 
 	public synchronized void diagonalRender()

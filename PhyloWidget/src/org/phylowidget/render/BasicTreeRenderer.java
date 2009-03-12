@@ -241,6 +241,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements GraphListener, Us
 		foundItems.clear();
 		int nodesDrawn = 0;
 		PhyloNode[] nodesToDraw = new PhyloNode[nodes.length];
+		
 		Thread.yield();
 		
 		for (int i = 0; i < nodes.length; i++)
@@ -380,7 +381,7 @@ public class BasicTreeRenderer extends DoubleBuffer implements GraphListener, Us
 		if (context.config().showAllLabels)
 			return false;
 		float angle = n.getAngle();
-		if (angle % Math.PI / 2 == 0)
+		if (angle == 0 || angle % Math.PI / 2 == 0)
 		{
 			if (intersectsRect(n, a))
 				return true;
@@ -427,11 +428,11 @@ public class BasicTreeRenderer extends DoubleBuffer implements GraphListener, Us
 	private void fillPolygon(PhyloNode n, Polygon p)
 	{
 		p.reset();
-		Point2D[] points = n.corners;
-		for (Point2D pt : points)
-		{
-			p.addPoint((int) (pt.getX() * POLYMULT), (int) (pt.getY() * POLYMULT));
-		}
+//		Point2D[] points = n.corners;
+//		for (Point2D pt : points)
+//		{
+//			p.addPoint((int) (pt.getX() * POLYMULT), (int) (pt.getY() * POLYMULT));
+//		}
 	}
 
 	protected void drawBootstrap(PhyloNode n)

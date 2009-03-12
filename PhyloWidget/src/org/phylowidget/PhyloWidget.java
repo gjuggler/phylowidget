@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +35,7 @@ import org.andrewberman.ui.unsorted.JavaUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.andrewberman.ui.unsorted.StringPair;
 import org.phylowidget.render.DoubleBuffer;
+import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
@@ -362,5 +364,30 @@ public class PhyloWidget extends PWPublicMethods
 			keyvals.add(s);
 		}
 		return JavaUtils.join("&", keyvals);
+	}
+
+	@Override
+	public void setAnnotations(String nodeLabel, String annotationJson)
+	{
+		PhyloTree tree = (PhyloTree) pwc.trees().getTree();
+		if (tree == null)
+			return;
+		List<PhyloNode> nodes = tree.search(nodeLabel);
+		PhyloNode n = nodes.get(0);
+		if (n == null)
+			return;
+		n.setAnnotationsFromJson(annotationJson);
+	}
+	
+	public void setAnnotation(String nodeLabel, String key, String value)
+	{
+		PhyloTree tree = (PhyloTree) pwc.trees().getTree();
+		if (tree == null)
+			return;
+		List<PhyloNode> nodes = tree.search(nodeLabel);
+		PhyloNode n = nodes.get(0);
+		if (n == null)
+			return;
+		n.setAnnotation(key, value);
 	}
 }

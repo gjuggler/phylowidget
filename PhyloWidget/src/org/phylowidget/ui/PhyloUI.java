@@ -48,11 +48,13 @@ import org.andrewberman.ui.ShortcutManager;
 import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.ToolDock;
 import org.andrewberman.ui.menu.Toolbar;
+import org.andrewberman.ui.unsorted.FileUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
 import org.phylowidget.PhyloTree;
 import org.phylowidget.PhyloWidget;
+import org.phylowidget.net.PhyloTransformServices;
 import org.phylowidget.net.SecurityChecker;
 import org.phylowidget.render.BasicTreeRenderer;
 import org.phylowidget.render.LayoutCladogram;
@@ -357,17 +359,8 @@ public class PhyloUI implements Runnable
 		if (context.trees().getRenderer() != null)
 			context.trees().getRenderer().layoutTrigger();
 		context.trees().fireCallback();
-		
-		if (getCurTree() != null)
-		{
-			PhyloNode n = (PhyloNode) getCurTree().getRoot();
-			if (n.getAnnotations() != null)
-			{
-				MethodAndFieldSetter.setMethodsAndFields(context.config(), n.getAnnotations());
-			}
-		}
 	}
-
+	
 	public void forceLayout()
 	{
 		if (context.trees().getRenderer() != null)
@@ -649,6 +642,16 @@ public class PhyloUI implements Runnable
 		t.reverseSubtree(t.getRoot());
 		t.modPlus();
 		layout();
+		String nexml = t.getNeXML();
+		System.out.println(nexml);
+		try {
+			String returned = PhyloTransformServices.transformTree("http://www.ebi.ac.uk/~greg/cgi-bin/random_mess.pl", nexml);
+			context.trees().setTree(returned);
+			System.out.println(returned);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void treeAutoSort()
@@ -694,6 +697,22 @@ public class PhyloUI implements Runnable
 		}.start();
 	}
 
+	public void treeLogTransform()
+	{
+		new Thread()
+		{
+			@Override
+			public void run()
+			{
+				setMessage("Log transforming tree...");
+				RootedTree tree = getCurTree();
+				tree.logTransform(tree.getRoot(),1000);
+				layout();
+				setMessage("");
+			}
+		}.start();
+	}
+	
 	public void treeMutateOnce()
 	{
 		context.trees().mutateTree();
@@ -775,7 +794,23 @@ public class PhyloUI implements Runnable
 				p.noLoop();
 				File dir = f.getParentFile();
 				TreeIO.outputTreeImages(context.trees().getTree(), dir);
-				String s = TreeIO.createNHXString(context.trees().getTree());
+				
+				// Get the extension.
+				String ext = FileUtils.getFileExtension(f);
+				String s;
+				RootedTree tree = context.trees().getTree();
+				if (ext.equals("nh"))
+				{
+					s = tree.getNewick();
+				} else if (ext.equals("xml"))
+				{
+					s = tree.getNeXML();
+				} else
+				{
+					s = tree.getNHX();
+				}
+				
+//				String s = TreeIO.createNHXString(context.trees().getTree());
 				try
 				{
 					f.createNewFile();

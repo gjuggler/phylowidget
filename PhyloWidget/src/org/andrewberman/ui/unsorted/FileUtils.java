@@ -6,6 +6,15 @@ import java.io.FileReader;
 public class FileUtils
 {
 
+	public static String getFileExtension(File f)
+	{
+		int dotIndex = f.getAbsolutePath().lastIndexOf(".");
+		if (dotIndex == -1)
+			return "";
+		String extension = f.getAbsolutePath().substring(dotIndex+1);
+		return extension;
+	}
+	
 	public static String getFileAsString(String filename) throws Exception
 	{
 		return getFileAsString(new File(filename));

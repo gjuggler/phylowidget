@@ -98,6 +98,7 @@ public class PhyloTextField extends TextField
 		{
 			PhyloTree pt = (PhyloTree) t;
 		}
+		context.ui().layout();
 	}
 
 	void hideAndReject()

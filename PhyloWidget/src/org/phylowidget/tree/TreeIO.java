@@ -63,7 +63,7 @@ public class TreeIO
 			BufferedReader br = new BufferedReader(isr);
 			if (t instanceof PhyloTree)
 			{
-				PhyloTree pt = (PhyloTree)t;
+				PhyloTree pt = (PhyloTree) t;
 				String str = f.getParent();
 				pt.setBaseURL(str);
 			}
@@ -80,7 +80,6 @@ public class TreeIO
 		String line;
 		StringBuffer buff = new StringBuffer();
 		translationMap.clear();
-
 		boolean isNexus = false;
 		try
 		{
@@ -97,6 +96,7 @@ public class TreeIO
 			e.printStackTrace();
 			return null;
 		}
+
 		if (isNexus)
 		{
 			String newickFromNexus = getNewickFromNexus(buff.toString());
@@ -106,11 +106,33 @@ public class TreeIO
 		return parseNewickString(t, buff.toString());
 	}
 
+	private static boolean isNeXML(String s)
+	{
+		return s.contains("nex:nexml");
+	}
+
 	public static RootedTree parseNewickString(RootedTree tree, String s)
 	{
+		// GJ 2009-03-10: Try to catch a NeXML file, and parse it using our NexmlIO.
+		if (isNeXML(s))
+		{
+			NexmlIO io = new NexmlIO(tree.getClass());
+			try
+			{
+				return io.parseString(s);
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		boolean oldEnforceUniqueLabels = tree.getEnforceUniqueLabels();
+		tree.setEnforceUniqueLabels(false);
 		if (tree instanceof PhyloTree)
 		{
 			PhyloTree pt = (PhyloTree) tree;
+			//			pt.setHoldCalculations(true);
 		}
 
 		//		System.out.println(s);
@@ -136,8 +158,9 @@ public class TreeIO
 			} catch (SecurityException e)
 			{
 				e.printStackTrace();
-				
-				PWPlatform.getInstance().getThisAppContext().getPW().setMessage("Error: to load a tree from a URL, please use PhyloWidget Full!");
+
+				PWPlatform.getInstance().getThisAppContext().getPW().setMessage(
+					"Error: to load a tree from a URL, please use PhyloWidget Full!");
 			} catch (MalformedURLException e)
 			{
 				e.printStackTrace();
@@ -165,7 +188,9 @@ public class TreeIO
 		 * Snag the annotations and store them in a hashtable for later retrieval.
 		 */
 		NHXHandler nhxHandler = new NHXHandler();
-		s = nhxHandler.stripAnnotations(s);
+		boolean stripAnnotations = false;
+		if (stripAnnotations)
+			s = nhxHandler.stripAnnotations(s);
 
 		/*
 		 * Contains an Integer of the number of items for each depth level.
@@ -177,7 +202,7 @@ public class TreeIO
 		 * correct sorting order of nodes and leaves. key = parent node; value =
 		 * first child node
 		 */
-		HashMap<DefaultVertex, DefaultVertex> firstChildren = new HashMap<DefaultVertex, DefaultVertex>(1000);
+		HashMap<DefaultVertex, DefaultVertex> firstChildren = new HashMap<DefaultVertex, DefaultVertex>();
 		/*
 		 * The current depth level being parsed.
 		 */
@@ -193,6 +218,7 @@ public class TreeIO
 		boolean parsingNumber = false;
 		boolean innerNode = false;
 		boolean withinEscapedString = false;
+		boolean withinNHX = false;
 		/*
 		 * Pattern matcher.
 		 */
@@ -206,15 +232,27 @@ public class TreeIO
 			System.out.println(System.currentTimeMillis() + "\tChar loop...");
 
 		long len = s.length();
+		//		char[] chars = s.toCharArray();
 		for (int i = 0; i < len; i++)
 		{
 			char c = s.charAt(i);
 			boolean isControl = (c == '(' || c == ')' || c == ';' || c == ',');
 			if (DEBUG)
 			{
-				if (i % (len / 100 + 1) == 0)
+				if (i % (len / 50 + 1) == 0)
+				{
 					System.out.print(".");
+				}
 			}
+
+			// GJ 2009-03-05 - NHX handling, so we can have commas within NHX annotations.
+			if (c == '[' && !withinNHX)
+				withinNHX = true;
+			else if (withinNHX && c == ']')
+				withinNHX = false;
+			if (withinNHX)
+				isControl = false;
+
 			if (withinEscapedString)
 			{
 				temp.append(c);
@@ -256,7 +294,8 @@ public class TreeIO
 					// Do I need this stuff here? YUP.
 					curLabel = temp.toString();
 					curLabel = curLabel.trim();
-					curLabel = nhxHandler.replaceAnnotation(curLabel);
+					if (stripAnnotations)
+						curLabel = nhxHandler.replaceAnnotation(curLabel);
 
 					PhyloNode curNode = newNode(tree, curLabel, nhx, poorMans);
 
@@ -319,13 +358,14 @@ public class TreeIO
 		}
 		tree.setRoot(root);
 		if (DEBUG)
-			System.out.println(System.currentTimeMillis() + "\tSorting nodes...");
+			System.out.println(System.currentTimeMillis() + "\nSorting nodes...");
 		/*
 		 * Now, to recreate the newick file's node sorting. We previously
 		 * recorded the "first" child node for each parent node, which we'll now
 		 * use to determine whether we want to sort that node in forward or
 		 * reverse.
 		 */
+		PhyloTree pt = (PhyloTree) tree;
 		BreadthFirstIterator dfi = new BreadthFirstIterator(tree, tree.getRoot());
 		while (dfi.hasNext())
 		{
@@ -346,10 +386,16 @@ public class TreeIO
 		/*
 		 * ModPlus if we're a cached tree.
 		 */
-		if (tree instanceof CachedRootedTree)
-		{
-			((CachedRootedTree) tree).modPlus();
-		}
+		((CachedRootedTree) tree).modPlus();
+
+		// GJ 2009-03-01: if we have a massive tree, never enforce unique labels (it's too slow!)
+		if (tree.getNumEnclosedLeaves(tree.getRoot()) > 1000)
+			tree.setEnforceUniqueLabels(false);
+		else
+			tree.setEnforceUniqueLabels(oldEnforceUniqueLabels);
+
+		if (DEBUG)
+			System.out.println(System.currentTimeMillis() + "\nDone loading tree!");
 		return tree;
 	}
 
@@ -363,10 +409,15 @@ public class TreeIO
 	public static final String POOR_MANS_NHX = "**";
 	public static final String POOR_MANS_DELIM = "*";
 
+	static int newNodeCount = 0;
+
 	static PhyloNode newNode(RootedTree t, String s, boolean useNhx, boolean poorMan)
 	{
 		PhyloNode v = new PhyloNode();
 
+		//		newNodeCount++;
+		//		if (newNodeCount % 100 == 0 && DEBUG)
+		//			System.out.print("!");
 		String nameAndLength = s;
 
 		int nhxInd = -1;
@@ -387,14 +438,14 @@ public class TreeIO
 				{
 					nameAndLength = s.substring(0, altNhxInd);
 					nhx = s.substring(altNhxInd, s.length());
-					System.out.println(nhx);
+					//					System.out.println(nhx);
 					nhx = nhx.replaceAll("(\\[\\*\\*NHX:|\\])", "");
 				}
-				System.out.println(nhx);
+				//				System.out.println(nhx);
 				String[] attrs = nhx.split(":");
 				for (String attr : attrs)
 				{
-					System.out.println(attr);
+					//					System.out.println(attr);
 					/*
 					 * All colons should be stored as "&colon;". Let's get them back.
 					 */
@@ -502,26 +553,27 @@ public class TreeIO
 	{
 		TreeOutputConfig config = new TreeOutputConfig();
 		config.outputNHX = false;
-		return createTreeString(tree,config);
+		return createTreeString(tree, config);
 	}
-	
+
 	public static String createNHXString(RootedTree tree)
 	{
 		TreeOutputConfig config = new TreeOutputConfig();
 		config.outputNHX = true;
-		return createTreeString(tree,config);
+		return createTreeString(tree, config);
 	}
 	
-//	public static String createXMLString(RootedTree tree)
-//	{
-//		// Not implemented.
-//	}
-	
+	public static String createNeXMLString(RootedTree tree)
+	{
+		NexmlIO io = new NexmlIO(tree.getClass());
+		return io.createNeXMLString(tree);
+	}
+
 	private static String createTreeString(RootedTree tree, TreeOutputConfig config)
 	{
 		if (config == null)
 			config = new TreeOutputConfig();
-		
+
 		StringBuffer sb = new StringBuffer();
 		synchronized (tree)
 		{
@@ -551,14 +603,16 @@ public class TreeIO
 		}
 		// Call this to make the vertex's label nicely formatted for Nexus
 		// output.
-		String s = getNexusCompliantLabel(tree, v, config.includeStupidLabels);
+		String s =
+				getNexusCompliantLabel(tree, v, config.includeStupidLabels, config.scrapeNaughtyChars,
+					config.outputAllInnerNodes);
 		if (s.length() != 0)
 			sb.append(s);
 		Object p = tree.getParentOf(v);
 		if (p != null)
 		{
 			double ew = tree.getEdgeWeight(tree.getEdge(p, v));
-//			if (ew != 1.0)
+			//			if (ew != 1.0)
 			sb.append(":" + Double.toString(ew));
 		}
 		if (v instanceof PhyloNode && config.outputNHX)
@@ -605,7 +659,8 @@ public class TreeIO
 
 	static Pattern quotePattern = Pattern.compile("'");
 
-	private static String getNexusCompliantLabel(RootedTree t, DefaultVertex v, boolean includeStupidLabels)
+	public static String getNexusCompliantLabel(RootedTree t, DefaultVertex v, boolean includeStupidLabels,
+			boolean scrapeNaughtyChars, boolean outputAllInnerNodes)
 	{
 		String s = v.toString();
 		Matcher m = naughtyPattern.matcher(s);
@@ -618,7 +673,8 @@ public class TreeIO
 			 * 
 			 * 2. double-escape single quotes
 			 */
-			if (PWPlatform.getInstance().getThisAppContext().config().scrapeNaughtyChars)
+			System.out.println(s);
+			if (scrapeNaughtyChars)
 			{
 				/*
 				 * If this setting is set, simply scrape away naughty characters from the label.
@@ -643,7 +699,7 @@ public class TreeIO
 		 */
 		if (!includeStupidLabels && !t.isLabelSignificant(s) && !t.isLeaf(v))
 		{
-			boolean pr = PWPlatform.getInstance().getThisAppContext().config().outputAllInnerNodes;
+			boolean pr = outputAllInnerNodes;
 			if (!pr)
 			{
 				s = "";
@@ -657,7 +713,7 @@ public class TreeIO
 
 	private static String parseNexusLabel(String label)
 	{
-		label = label.replaceAll("`","'");
+		label = label.replaceAll("`", "'");
 		if (label.indexOf("'") == 0)
 		{
 			label = label.substring(1, label.length() - 1);
@@ -832,6 +888,8 @@ public class TreeIO
 
 		public String stripAnnotations(String s)
 		{
+			if (DEBUG)
+				System.out.println("Stripping annotations... ");
 			StringBuffer sb = new StringBuffer(s);
 
 			int i = 1;
@@ -872,18 +930,22 @@ public class TreeIO
 			return s;
 		}
 	}
-	
-	
-	static final class TreeOutputConfig{
+
+	static final class TreeOutputConfig
+	{
+		public boolean scrapeNaughtyChars;
+		public boolean outputAllInnerNodes;
 		public boolean outputNHX;
 		public boolean includeStupidLabels;
 		public boolean outputTreeImages;
-		
+
 		public TreeOutputConfig()
 		{
 			outputNHX = true;
 			includeStupidLabels = false;
 			outputTreeImages = false;
+			scrapeNaughtyChars = true;
+			outputAllInnerNodes = false;
 		}
 	}
 }

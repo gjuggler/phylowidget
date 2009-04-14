@@ -34,9 +34,11 @@ import org.andrewberman.ui.unsorted.JSCaller;
 import org.andrewberman.ui.unsorted.JavaUtils;
 import org.andrewberman.ui.unsorted.MethodAndFieldSetter;
 import org.andrewberman.ui.unsorted.StringPair;
+import org.phylowidget.net.PhyloTransformServices;
 import org.phylowidget.render.DoubleBuffer;
 import org.phylowidget.tree.PhyloNode;
 import org.phylowidget.tree.RootedTree;
+import org.phylowidget.tree.TreeIO;
 import org.phylowidget.ui.PhyloConfig;
 import org.phylowidget.ui.PhyloUI;
 
@@ -139,6 +141,17 @@ public class PhyloWidget extends PWPublicMethods
 
 	boolean drawnOnce = false;
 
+	public void drawLongWaitingMessage()
+	{
+		;
+		fill(100f, 200f);
+		rect(0, 0, width, height);
+		fill(255);
+		textSize(14);
+		textAlign(PApplet.CENTER, PApplet.CENTER);
+		text("Doing something that \nmight take a while...", width / 2, height / 2);
+	}
+
 	public synchronized void draw()
 	{
 		background(pwc.config().getBackgroundColor().getRGB(), 1.0f);
@@ -148,6 +161,11 @@ public class PhyloWidget extends PWPublicMethods
 			clearQueues();
 
 		pwc.event().draw();
+
+		if (doingSomethingLong)
+		{
+			drawLongWaitingMessage();
+		}
 
 		if (!pwc.config().suppressMessages)
 		{
@@ -175,6 +193,8 @@ public class PhyloWidget extends PWPublicMethods
 
 	protected void clearQueues()
 	{
+		internalTransformTree();
+
 		while (!settingsAndMethods.isEmpty())
 		{
 			StringPair sp = settingsAndMethods.remove(0); // Remove first.
@@ -369,6 +389,7 @@ public class PhyloWidget extends PWPublicMethods
 	@Override
 	public void setAnnotations(String nodeLabel, String annotationJson)
 	{
+		System.out.println("SETTING ANNOTATION\n");
 		PhyloTree tree = (PhyloTree) pwc.trees().getTree();
 		if (tree == null)
 			return;
@@ -376,9 +397,10 @@ public class PhyloWidget extends PWPublicMethods
 		PhyloNode n = nodes.get(0);
 		if (n == null)
 			return;
+		System.out.println("JSON: " + annotationJson);
 		n.setAnnotationsFromJson(annotationJson);
 	}
-	
+
 	public void setAnnotation(String nodeLabel, String key, String value)
 	{
 		PhyloTree tree = (PhyloTree) pwc.trees().getTree();
@@ -389,5 +411,54 @@ public class PhyloWidget extends PWPublicMethods
 		if (n == null)
 			return;
 		n.setAnnotation(key, value);
+	}
+
+	private boolean doingSomethingLong = false;
+
+	@Override
+	public void transformTree(final String url)
+	{
+		treeTransform = url;
+	}
+
+	String treeTransform = null;
+
+	private void internalTransformTree()
+	{
+		// For the record: Java security sucks. GJ 2009-03-13.
+
+		if (treeTransform == null)
+		{
+			return;
+		} else
+		{
+			doingSomethingLong = true;
+			pwc.event().setDisabled(true);
+			final String url = treeTransform;
+			this.treeTransform = null;
+
+			final PhyloTree tree = (PhyloTree) pwc.trees().getTree();
+			new Thread()
+			{
+				public void run()
+				{
+					String nexml = tree.getNeXML();
+					try
+					{
+						//			String url = "http://www.phylowidget.org/cgi-bin/random_mess.pl";
+						//			String url = "http://www.phylowidget.org/cgi-bin/images_from_morphbank.pl";
+						//			String url = "http://www.phylowidget.org/cgi-bin/images_from_tolweb.pl";
+						String returned = PhyloTransformServices.transformTree(url, nexml);
+						PhyloTree newTree = (PhyloTree) TreeIO.parseNewickString(new PhyloTree(), returned);
+						pwc.trees().setTree(newTree);
+					} catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+					pwc.event().setDisabled(false);
+					doingSomethingLong = false;
+				}
+			}.start();
+		}
 	}
 }

@@ -130,7 +130,7 @@ public abstract class Menu extends MenuItem implements UIObject
 	 * The graphics2D object to which we may be drawing.
 	 */
 	protected PGraphicsJava2D buff;
-	Rectangle2D.Float buffRect = new Rectangle2D.Float(0, 0, 0, 0);
+	protected Rectangle2D.Float buffRect = new Rectangle2D.Float(0, 0, 0, 0);
 	/**
 	 * The current "canvas" PApplet object.
 	 */
@@ -264,7 +264,13 @@ public abstract class Menu extends MenuItem implements UIObject
 	@Override
 	public void dispose()
 	{
-		context.event().remove(this);
+		if (context != null)
+		{
+			if (context.event() != null)
+			{
+				context.event().remove(this);		
+			}
+		}
 		super.dispose();
 	}
 	
@@ -542,10 +548,10 @@ public abstract class Menu extends MenuItem implements UIObject
 		 */
 		mousePt.setLocation(useMe);
 		// mousePt.translate(-x, -y);
+		setCursor(-1);
 		/*
 		 * Send the mouse events through the tree of sub-items.
 		 */
-		setCursor(-1);
 		itemMouseEvent(e, mousePt);
 		if (!mouseInside && isOpen() && e.getID() == MouseEvent.MOUSE_PRESSED)
 		{

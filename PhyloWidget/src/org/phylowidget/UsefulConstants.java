@@ -53,6 +53,7 @@ public interface UsefulConstants
 	public static final String SHAPE_TRIANGLE = "t";
 	public static final String SHAPE_STAR = "x";
 	public static final String SHAPE_FILLED_CIRCLE = "o";
+	public static final String SHAPE_PIE = "p";
 	
 	public static final String BRANCH_SIZE = "BSZ";		// Multiplier for branch thickness size.
 	public static final String BRANCH_SIZE_ALT = "BRANCH_SIZE";
@@ -62,4 +63,5 @@ public interface UsefulConstants
 	public static final String LABEL_ALWAYSSHOW = "PW_ALWAYS";    // Pretty hacky, but this is a tag to make sure a label is ALWAYS shown, no matter what.
 	public static final String LABEL_ALWAYSSHOW_ALT = "PW_A"; // A shorter version of the above.
 	public static final String Z_ORDER = "PW_Z"; // Another hack: specify the z-order of the node, to be used in combination with ALWAYSSHOW.
+	public static final String CHILD_ORDER = "PW_INDEX"; // Specify the sorting index of the node; lower-valued nodes show up earlier / higher.
 }

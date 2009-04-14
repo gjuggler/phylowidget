@@ -439,7 +439,8 @@ public class BasicTreeRenderer extends DoubleBuffer implements GraphListener, Us
 	{
 		if (n.isNHX() && context.config().showBootstrapValues)
 		{
-			String boot = n.getAnnotation(BOOTSTRAP);
+//			String boot = n.getAnnotation(BOOTSTRAP);
+			String boot = null;
 			if (boot != null)
 			{
 				canvas.pushMatrix();

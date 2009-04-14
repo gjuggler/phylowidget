@@ -29,9 +29,11 @@ public class DelayedAction
 	boolean threaded;
 	Timer timer;
 
+	boolean needsNewTimer = true;
+
 	public synchronized void trigger(int delay)
 	{
-		if (timer == null)
+		if (needsNewTimer)
 		{
 			timer = new Timer(delay, new ActionListener()
 			{
@@ -40,33 +42,23 @@ public class DelayedAction
 					if (!updating)
 					{
 						doUpdate();
-						synchronized (timer)
-						{
-							timer = null;
-						}
+						needsNewTimer = true;
 					} else
 					{
 						if (timer != null)
 						{
-							synchronized (timer)
-							{
-								timer.start();
-							}
+							timer.start();
 						}
 					}
 				}
 			});
-			synchronized (timer) {
-				timer.setRepeats(false);
-				timer.start();
-			}
+			timer.setRepeats(false);
+			timer.start();
+			needsNewTimer = false;
 		}
-		synchronized (timer)
-		{
-			timer.stop();
-			timer.setInitialDelay(delay);
-			timer.restart();
-		}
+		timer.stop();
+		timer.setInitialDelay(delay);
+		timer.restart();
 	}
 
 	private void doUpdate()

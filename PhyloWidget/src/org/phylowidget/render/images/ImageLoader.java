@@ -21,6 +21,7 @@ public class ImageLoader implements Runnable
 {
 	static Hashtable<String, Image> imageMap;
 	static Hashtable<String, Integer> loadedImageURLs;
+	static Hashtable<String, PhyloNode> urlsToNodes;
 	static Thread thread;
 
 	PWContext context;
@@ -38,6 +39,7 @@ public class ImageLoader implements Runnable
 		{
 			loadedImageURLs = new Hashtable<String, Integer>();
 			imageMap = new Hashtable<String, Image>();
+			urlsToNodes = new Hashtable<String,PhyloNode>();
 			thread = new Thread(this);
 			thread.start();
 		}
@@ -45,7 +47,7 @@ public class ImageLoader implements Runnable
 		String imgS = n.getAnnotation(ImageSearcher.IMG_TAG);
 		if (imgS != null)
 		{
-			addImage(imgS);
+			addImage(imgS,n);
 			Image img = imageMap.get(imgS);
 			if (img != null)
 			{
@@ -86,7 +88,7 @@ public class ImageLoader implements Runnable
 
 	static final Integer integer = new Integer(0);
 
-	synchronized void addImage(String imageURL)
+	synchronized void addImage(String imageURL,PhyloNode n)
 	{
 //		if (!PhyloWidget.ui.canAccessInternet())
 //		{
@@ -97,6 +99,7 @@ public class ImageLoader implements Runnable
 		{
 			loadedImageURLs.put(imageURL, integer);
 			imagesToLoad.add(imageURL);
+			urlsToNodes.put(imageURL,n);
 			notifyAll();
 		}
 	}
@@ -142,6 +145,13 @@ public class ImageLoader implements Runnable
 					//					Image img = Toolkit.getDefaultToolkit().createImage(bytes);
 					//					bytes = null;
 					imageMap.put(imgS, img);
+					
+					PhyloNode n = urlsToNodes.get(imgS);
+					if (n != null)
+					{
+						n.setAnnotation("img_a", 0);
+					}
+					
 				} catch (Exception e)
 				{
 					e.printStackTrace();

@@ -42,7 +42,7 @@ public class PhyloConfig
 	 * The configurable parameters are displayed below, generally in order from most to least useful. Enjoy!
 	 */
 
-	public boolean debug = true;
+	public boolean debug = false;
 
 	/*
 	 * If you specify a valid URL pointing to a properties file, then PhyloWidget will attempt to load the properties remotely.
@@ -508,6 +508,12 @@ public class PhyloConfig
 		}
 
 		return changedFields;
+	}
+	
+	public void setIgnoreAnnotations(boolean ignore)
+	{
+		this.ignoreAnnotations = ignore;
+		context.ui().layout();
 	}
 	
 	public static Map<String,String> getConfigSnapshot(PhyloConfig currentConfig)

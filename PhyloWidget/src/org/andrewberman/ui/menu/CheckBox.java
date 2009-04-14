@@ -55,6 +55,17 @@ public class CheckBox extends MenuItem
 	
 	public void setProperty(Object obj, String prop)
 	{
+		// First try to set the method call if it exists.
+		try {
+			String methodName = "set"+upperFirst(prop);
+			Method m = obj.getClass().getMethod(methodName,Boolean.TYPE);
+			setMethodCall(obj, methodName);
+			return;
+		} catch (Exception e)
+		{
+//			e.printStackTrace()
+		}
+		
 		try
 		{
 			field = obj.getClass().getField(prop);
@@ -68,6 +79,12 @@ public class CheckBox extends MenuItem
 		}
 	}
 
+	static private String upperFirst(String s)
+	{
+		String sub = s.substring(0, 1).toUpperCase();
+		return sub + s.substring(1);
+	}
+	
 	public void setMethodCall(Object obj, String meth)
 	{
 		try {
@@ -232,7 +249,6 @@ public class CheckBox extends MenuItem
 	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
 	{
 		super.visibleMouseEvent(e, tempPt);
-
 		if (!isEnabled())
 			return;
 		

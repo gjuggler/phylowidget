@@ -16,7 +16,9 @@ public class LayoutCladogram extends LayoutBase
 	int numLeaves;
 	float depthLeafRatio;
 
-	public void layoutImpl()
+	float totalLayoutHeight;
+	
+	public synchronized void layoutImpl()
 	{
 		numLeaves = leaves.length;
 		float maxDepth = tree.getMaxDepthToLeaf(tree.getRoot());
@@ -24,12 +26,21 @@ public class LayoutCladogram extends LayoutBase
 
 		depthLeafRatio *= context.config().branchScaling;
 
-		int index = 0;
+		totalLayoutHeight = 0;
 		for (PhyloNode leaf : leaves)
 		{
+			totalLayoutHeight += getLayoutMult(leaf);
+		}
+		
+		double index = 0;
+		PhyloNode previousLeaf = null;
+		for (PhyloNode leaf : leaves)
+		{
+			index+= getLayoutMult(leaf)/2;
 			leaf.setTextAlign(PhyloNode.ALIGN_LEFT);
-			leafPosition(leaf, index);
-			index++;
+			leafPosition(leaf, previousLeaf, index);
+			index+= getLayoutMult(leaf)/2;
+			previousLeaf = leaf;
 		}
 
 		branchPosition((PhyloNode) tree.getRoot());
@@ -225,14 +236,23 @@ public class LayoutCladogram extends LayoutBase
 		}
 	}
 
-	private void leafPosition(PhyloNode n, int index)
+	private void leafPosition(PhyloNode n, PhyloNode previousLeaf, double index)
 	{
 		/**
 		 * Set the leaf position.
 		 */
 		float yPos = ((float) (index + .5f) / (float) (numLeaves));
+//		float yPos = 0;
+//		float addedPos = 0;
+//		if (previousLeaf != null)
+//		{
+//			yPos = previousLeaf.getLayoutY();
+//			addedPos = getLayoutMult(previousLeaf)/2;
+//		}
+//		addedPos += getLayoutMult(n)/2;
 		float xPos = calcXPosition(n);
-		setPosition(n, xPos, yPos);
+		setPosition(n,xPos,yPos);
+//		setPosition(n, xPos, yPos+addedPos/totalLayoutHeight);
 	}
 
 	private float calcXPosition(PhyloNode n)

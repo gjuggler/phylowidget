@@ -156,6 +156,17 @@ public abstract class LayoutBase
 		}
 	}
 
+	protected float getLayoutMult(PhyloNode n)
+	{
+		float lm = 1;
+		String layoutSize = n.getAnnotation("layout_size");
+		if (layoutSize != null)
+		{
+			lm = Float.parseFloat(layoutSize);
+		}
+		return lm;
+	}
+
 	private static final void noneAngles(PhyloNode n)
 	{
 		float theta = n.getAngle();

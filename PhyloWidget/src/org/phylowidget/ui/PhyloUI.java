@@ -588,7 +588,9 @@ public class PhyloUI implements Runnable
 	{
 		NodeRange r = curRange();
 		RootedTree g = r.render.getTree();
-		g.collapseNode(getCurNode());
+		PhyloNode n = getCurNode();
+		n.setAnnotation("layout_size", g.getNumEnclosedLeaves(n));
+		g.collapseNode(n);
 		g.modPlus();
 		layout();
 	}
@@ -642,16 +644,6 @@ public class PhyloUI implements Runnable
 		t.reverseSubtree(t.getRoot());
 		t.modPlus();
 		layout();
-		String nexml = t.getNeXML();
-		System.out.println(nexml);
-		try {
-			String returned = PhyloTransformServices.transformTree("http://www.ebi.ac.uk/~greg/cgi-bin/random_mess.pl", nexml);
-			context.trees().setTree(returned);
-			System.out.println(returned);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	public void treeAutoSort()

@@ -1,5 +1,7 @@
 package org.phylowidget.render;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -461,7 +463,8 @@ public final class NodeRenderer implements UsefulConstants
 
 			if (c.isNHX() && context.config().colorBootstrap && !c.found)
 			{
-				double d = getFloatAnnotation(c, BOOTSTRAP);
+//				double d = getFloatAnnotation(c, BOOTSTRAP);
+				double d = -1;
 				if (d > -1)
 				{
 					d = (100 - d) * 200f / 100f;
@@ -568,7 +571,7 @@ public final class NodeRenderer implements UsefulConstants
 					dx -= scaledW;
 
 				Image img = null;
-				if (RenderOutput.isOutputting && context.config().outputFullSizeImages)
+				if (RenderOutput.isOutputting)
 				{
 					try
 					{
@@ -583,17 +586,32 @@ public final class NodeRenderer implements UsefulConstants
 					float minSide = Math.min(scaledH, scaledW);
 					if (minSide > 300)
 					{
-						System.out.println("Loading full image...");
+//						System.out.println("Loading full image...");
 						n.loadFullImage();
 					}
 					img = context.trees().imageLoader.getImageForNode(n);
 				}
 				if (img != null)
 				{
-					if (RenderOutput.isOutputting)
-						System.out.println("DRAW IMAGE " + n.getLabel());
-					//					img.flush();
+					float alpha = 1.0f;
+					if (n.getAnnotation("img_a") != null)
+					{
+						alpha = Float.parseFloat(n.getAnnotation("img_a"));
+						alpha += 0.05;
+						if (alpha >= 1)
+						{
+							n.clearAnnotation("img_a");
+							alpha = 1;
+						} else
+						{
+							n.setAnnotation("img_a", alpha);
+						}
+					}
+					Composite old = g2.getComposite();
+					g2.setComposite(AlphaComposite.getInstance(
+						AlphaComposite.SRC_OVER, alpha));
 					g2.drawImage(img, (int) dx, (int) -scaledH / 2, (int) scaledW, (int) scaledH, null);
+					g2.setComposite(old);
 				}
 				if (RenderOutput.isOutputting && img != null)
 				{

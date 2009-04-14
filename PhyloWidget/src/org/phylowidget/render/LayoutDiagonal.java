@@ -17,10 +17,12 @@ public class LayoutDiagonal extends LayoutBase
 	{
 		numLeaves = leaves.length;
 		
-		int index = 0;
+		double index = 0;
 		for (PhyloNode leaf : leaves)
 		{
+//			index+= getLayoutMult(leaf)/2;
 			leafPosition(leaf,index);
+//			index+= getLayoutMult(leaf)/2;
 			index++;
 		}
 		
@@ -100,7 +102,7 @@ public class LayoutDiagonal extends LayoutBase
 		return numEnclosed;
 	}
 	
-	private void leafPosition(PhyloNode n, int index)
+	private void leafPosition(PhyloNode n, double index)
 	{
 		/**
 		 * Set the leaf position.

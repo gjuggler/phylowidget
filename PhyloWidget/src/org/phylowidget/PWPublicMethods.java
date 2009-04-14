@@ -137,4 +137,7 @@ public abstract class PWPublicMethods extends ExtendedPApplet implements Javascr
 	public abstract void setAnnotation(String nodeLabel, String key, String value); // This is implemented in PhyloWidget.java
 	
 	public abstract void setAnnotations(String nodeLabel, String annotationJson); // This is implemented in PhyloWidget.java
+	
+	public abstract void transformTree(String url); // Defined in PhyloWidget.java. Requires the "full" version of PhyloWidget.
+	
 }

@@ -27,12 +27,14 @@ public class LayoutCircular extends LayoutBase
 	{
 			numLeaves = leaves.length;
 			curAngle = STARTING_ANGLE + context.config().layoutAngle / 360f * (float)Math.PI*2f;
-			int index = 0;
+			double index = 0;
 			for (PhyloNode leaf : leaves)
 			{
+				index+= getLayoutMult(leaf)/2;
 				leaf.setTextAlign(PhyloNode.ALIGN_LEFT);
 				leafPosition(leaf, index);
-				index++;
+				index+= getLayoutMult(leaf)/2;
+//				index++;
 			}
 
 			branchPosition((PhyloNode) tree.getRoot());
@@ -194,14 +196,14 @@ public class LayoutCircular extends LayoutBase
 	static float PI = (float)Math.PI;
 	static float TWOPI = (float)Math.PI*2;
 	float curAngle;
-	private void leafPosition(PhyloNode n, int index)
+	private void leafPosition(PhyloNode n, double index)
 	{
 		/**
 		 * Set the leaf position.
 		 */
 		float theta = curAngle;
-		curAngle += 1f / (float)numLeaves * (float)Math.PI*2f;
-//		float theta = (float) index / (float) numLeaves * (float) Math.PI * 2f;
+//		curAngle += 1f / (float)numLeaves * (float)Math.PI*2f;
+//		curAngle = (float) index / (float) numLeaves * (float) Math.PI * 2f;
 //		theta += startingAngle;
 //		theta = theta % (float)Math.PI * 2f;
 		float radius = 1;

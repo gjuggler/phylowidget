@@ -1,11 +1,16 @@
 package org.phylowidget.ui;
 
+import java.awt.Cursor;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.Rectangle2D.Float;
 
 import org.andrewberman.ui.Label;
 import org.andrewberman.ui.LayoutUtils;
+import org.andrewberman.ui.Point;
 import org.andrewberman.ui.UIEvent;
 import org.andrewberman.ui.ifaces.UIListener;
+import org.andrewberman.ui.menu.MenuItem;
 import org.andrewberman.ui.menu.TextBox;
 import org.phylowidget.PWContext;
 import org.phylowidget.PWPlatform;
@@ -34,7 +39,22 @@ public class SearchBox extends TextBox implements UIListener
 		label.setLabel(l);
 		layout();
 	}
+	
+	@Override
+	public void setOptions()
+	{
+		super.setOptions();
+		
+		
+	}
 
+	@Override
+	public synchronized void draw()
+	{
+		label.alpha = parent.getNearestMenu().alpha;
+		super.draw();
+	}
+	
 	@Override
 	public void setName(String name)
 	{
@@ -74,6 +94,26 @@ public class SearchBox extends TextBox implements UIListener
 	}
 
 	@Override
+	protected void itemMouseEvent(MouseEvent e, Point pt)
+	{
+		super.itemMouseEvent(e, pt);
+	}
+	
+	@Override
+	protected void visibleMouseEvent(MouseEvent e, Point tempPt)
+	{
+		super.visibleMouseEvent(e, tempPt);
+		
+		if (mouseInside)
+		{
+			parent.getNearestMenu().setState(this, MenuItem.OVER);
+		} else
+		{
+			parent.getNearestMenu().setState(this, MenuItem.UP);
+		}
+	}
+	
+	@Override
 	public void setWidth(float newWidth)
 	{
 		super.setWidth(newWidth);
@@ -82,11 +122,17 @@ public class SearchBox extends TextBox implements UIListener
 	}
 
 	@Override
-	protected void getRect(Float rect, Float buff)
+	protected boolean containsPoint(Point p)
 	{
-		super.getRect(rect, buff);
+		buffRect.setRect(x, y, width, height);
+		if (tf.containsPoint(p))
+		{
+			return false;
+		}
+		return buffRect.contains(p);
+//		return super.containsPoint(p);
 	}
-
+	
 	public String getText()
 	{
 		return tf.getText();
@@ -101,7 +147,6 @@ public class SearchBox extends TextBox implements UIListener
 	{
 		if (e.getID() == UIEvent.TEXT_VALUE)
 		{
-			
 			context.config().search = getText();
 			PhyloTree t = (PhyloTree) context.trees().getTree();
 			if (t != null)

@@ -37,6 +37,14 @@ public class TextBox extends Menu
 	}
 	
 	@Override
+	public synchronized void draw()
+	{
+		this.alpha = parent.nearestMenu.alpha;
+		tf.alpha = parent.nearestMenu.alpha;
+		super.draw();
+	}
+	
+	@Override
 	public synchronized void layout()
 	{
 		float px = getStyle().getF("f.padX");
@@ -72,7 +80,7 @@ public class TextBox extends Menu
 	@Override
 	protected boolean containsPoint(Point p)
 	{
-		return false;
+		return tf.containsPoint(p);
 	}
 
 	@Override

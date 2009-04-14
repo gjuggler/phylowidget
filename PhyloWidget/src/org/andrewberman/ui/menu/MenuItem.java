@@ -410,7 +410,12 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 		return name;
 	}
 
-	protected MenuItem getNearestMenu()
+	public Menu getNearestMenu()
+	{
+		return nearestMenu;
+	}
+	
+	public MenuItem loadNearestMenu()
 	{
 		// if (nearestMenu != null) return nearestMenu;
 		MenuItem item = this;
@@ -825,7 +830,7 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 	protected void setMenu(Menu menu)
 	{
 		this.menu = menu;
-		getNearestMenu();
+		loadNearestMenu();
 		for (int i = 0; i < items.size(); i++)
 		{
 			MenuItem item = (MenuItem) items.get(i);
@@ -1011,5 +1016,5 @@ public abstract class MenuItem implements Positionable, Sizable, Malleable,
 				return false;
 		}
 	}
-
+	
 }

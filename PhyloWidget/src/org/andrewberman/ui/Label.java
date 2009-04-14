@@ -18,9 +18,13 @@
  */
 package org.andrewberman.ui;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
+
 import org.andrewberman.ui.ifaces.Malleable;
 
 import processing.core.PApplet;
+import processing.core.PGraphicsJava2D;
 
 public class Label extends AbstractUIObject implements Malleable
 {
@@ -32,6 +36,7 @@ public class Label extends AbstractUIObject implements Malleable
 	Color color;
 	float fontSize;
 	float x, y;
+	public float alpha = 1f;
 
 	public Label(PApplet p)
 	{
@@ -48,7 +53,10 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void dispose()
 	{
-		c.event().remove(this);
+		if (c != null && c.event() != null)
+		{
+			c.event().remove(this);
+		}
 		p = null;
 		label = null;
 		color = null;
@@ -72,6 +80,11 @@ public class Label extends AbstractUIObject implements Malleable
 
 	public void draw()
 	{
+		PGraphicsJava2D pg = (PGraphicsJava2D) p.g;
+		Composite origComp = pg.g2.getComposite();
+		pg.g2.setComposite(AlphaComposite.getInstance(
+			AlphaComposite.SRC_OVER, alpha));
+		
 		if (UIUtils.isJava2D(p))
 			p.smooth();
 		p.fill(color.getRGB());
@@ -79,6 +92,8 @@ public class Label extends AbstractUIObject implements Malleable
 		p.textSize(fontSize);
 		p.textAlign(PApplet.LEFT);
 		p.text(label, x, y);
+		
+		pg.g2.setComposite(origComp);
 	}
 
 	public float getX()

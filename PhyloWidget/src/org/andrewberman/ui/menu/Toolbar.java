@@ -70,6 +70,11 @@ public class Toolbar extends Menu
 		return hasOpenChildren();
 	}
 
+	public void setAutoDim(boolean auto)
+	{
+		this.autoDim = auto;
+	}
+	
 	public void setOptions()
 	{
 		super.setOptions();
@@ -400,6 +405,7 @@ public class Toolbar extends Menu
 
 	protected boolean containsPoint(Point pt)
 	{
+		
 		// buffRect.setRect(x, y, width, height);
 		// return buffRect.contains(pt);
 		return false;

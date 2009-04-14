@@ -72,6 +72,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 	private ToolManager toolManager;
 	public Camera toolCamera;
 
+	boolean disableInput = false;
+	
 	Point screen = new Point(0, 0);
 	Point model = new Point(0, 0);
 
@@ -104,6 +106,11 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 		p.registerDraw(this);
 	}
 
+	public void setDisabled(boolean disable)
+	{
+		this.disableInput = disable;
+	}
+	
 	ArrayList<UIObject> delegatesToAdd = new ArrayList();
 
 	public void add(UIObject o)
@@ -137,6 +144,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void draw()
 	{
+//		if (disabled)
+//			return;
 		//		UIUtils.setMatrix(p);
 
 		synchronized (delegates)
@@ -164,6 +173,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void mouseEvent(MouseEvent e)
 	{
+		if (disableInput)
+			return;
 		screen.setLocation(e.getX(), e.getY());
 		model.setLocation(screen.x, screen.y);
 		UIUtils.screenToModel(model);
@@ -216,6 +227,8 @@ public final class EventManager implements MouseListener, MouseMotionListener,
 
 	public void keyEvent(KeyEvent e)
 	{
+		if (disableInput)
+			return;
 		/*
 		 * We only send keyboard events to the focused object.
 		 */

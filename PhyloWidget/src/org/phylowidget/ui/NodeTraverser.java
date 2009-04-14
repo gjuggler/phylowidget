@@ -78,7 +78,10 @@ public class NodeTraverser extends AbstractUIObject implements TweenListener, Ke
 
 	public void destroy()
 	{
-		context.event().remove(this);
+		if (context != null && context.event() != null)
+		{
+			context.event().remove(this);
+		}
 		p.removeKeyListener(this);
 		glowTween = null;
 	}

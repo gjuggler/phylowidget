@@ -212,7 +212,7 @@ public class TreeManager extends AbstractUIObject implements GraphListener
 		if (getTree() != null)
 		{
 			PhyloNode n = (PhyloNode) getTree().getRoot();
-			if (n.getAnnotations() != null)
+			if (n != null && context.config() != null && n.getAnnotations() != null)
 			{
 				MethodAndFieldSetter.setMethodsAndFields(context.config(), n.getAnnotations());
 			}

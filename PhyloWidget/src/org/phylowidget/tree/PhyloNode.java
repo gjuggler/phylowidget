@@ -115,7 +115,14 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 
 	public String getFullImageURL()
 	{
-		return searchResults.getFullImageURL();
+		if (getAnnotation("print_img") != null)
+		{
+			return getAnnotation("print_img");
+		} else if (searchResults != null && context.config().outputFullSizeImages)
+		{
+			return searchResults.getFullImageURL();
+		} else
+			return null;
 	}
 
 	@Override
@@ -418,6 +425,8 @@ final public class PhyloNode extends CachedVertex implements Comparable, UsefulC
 		Set<Object> keys = map.keySet();
 		for (Object o : keys)
 		{
+			System.out.println("JSON KEY:"+o);
+			System.out.println("  VALUE:"+map.get(o).toString());
 			String key = o.toString();
 			String val = map.get(key).toString();
 			if (key.equalsIgnoreCase("name"))

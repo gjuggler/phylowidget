@@ -82,6 +82,15 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 
 		public int compare(V o1, V o2)
 		{
+			if (o1.getClass() == PhyloNode.class && o2.getClass() == PhyloNode.class) {
+				PhyloNode n1 = (PhyloNode) o1;
+				PhyloNode n2 = (PhyloNode) o2;
+				String s1 = n1.getAnnotation(UsefulConstants.CHILD_ORDER);
+				String s2 = n2.getAnnotation(UsefulConstants.CHILD_ORDER);
+				if (s1 != null && s2 != null) {
+					return Integer.parseInt(s1) < Integer.parseInt(s2) ? -1 : 1;
+				}
+			}
 			return o1.getLabel().compareTo(o2.getLabel());
 		}
 

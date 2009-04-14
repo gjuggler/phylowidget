@@ -18,7 +18,9 @@
  */
 package org.andrewberman.ui;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -206,6 +208,11 @@ public class TextField extends AbstractUIObject implements Malleable
 		// hint();
 		p.pushMatrix();
 		resetMatrix();
+		
+		Composite origComp = pg.g2.getComposite();
+		pg.g2.setComposite(AlphaComposite.getInstance(
+			AlphaComposite.SRC_OVER, alpha));
+		
 		if (!UIUtils.isJava2D(p))
 		{
 			pg.beginDraw();
@@ -226,6 +233,8 @@ public class TextField extends AbstractUIObject implements Malleable
 			}
 		}
 		p.popMatrix();
+		
+		pg.g2.setComposite(origComp);
 	}
 
 	public void hide()
@@ -239,6 +248,8 @@ public class TextField extends AbstractUIObject implements Malleable
 		hidden = false;
 	}
 
+	public float alpha = 1f;
+	
 	protected void drawToCanvas()
 	{
 		int w = (int) (width + OFFSET * 2);
@@ -264,7 +275,10 @@ public class TextField extends AbstractUIObject implements Malleable
 
 	public void dispose()
 	{
-		c.event().remove(this);
+		if (c != null && c.event() != null)
+		{
+			c.event().remove(this);
+		}
 		blinker.stop();
 		blinker = null;
 	}
@@ -856,6 +870,11 @@ public class TextField extends AbstractUIObject implements Malleable
 		return buffRect.contains(pt);
 	}
 
+	public boolean containsPoint(Point pt)
+	{
+		return withinOuterRect(pt);
+	}
+	
 	protected boolean withinInnerRect(Point pt)
 	{
 		buffRect.setRect(x + pad, y + pad, width, height);

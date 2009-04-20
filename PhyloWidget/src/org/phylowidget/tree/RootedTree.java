@@ -974,20 +974,23 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 		// V should now be the child that leads from root to newRoot.
 		double lengthB = getEdgeWeight(getEdge(root, v));
 		List<V> l = getChildrenOf(root);
-		for (int i = 0; i < l.size(); i++)
-		{
-			V child = l.get(i);
-			if (child == v) // If this is the child that "points", continue.
-				continue;
-			// Get the edge length between root and this child.
-			e = getEdge(root, child);
-			double lengthA = getEdgeWeight(e);
-			// Create the new edge between v and child.
-			removeEdge(v, child);
-			e = addEdge(v, child);
-			setEdgeWeight(e, lengthA + lengthB);
-		}
-		removeVertex(root);
+		int origRootChildCount = l.size();
+//		if (l.size() == 2) { 
+//			for (int i = 0; i < l.size(); i++)
+//			{
+//				V child = l.get(i);
+//				if (child == v) // If this is the child that "points", continue.
+//					continue;
+//				// Get the edge length between root and this child.
+//				e = getEdge(root, child);
+//				double lengthA = getEdgeWeight(e);
+//				// Create the new edge between v and child.
+//				removeEdge(v, child);
+//				e = addEdge(v, child);
+//				setEdgeWeight(e, lengthA + lengthB);
+//			}
+//			removeVertex(root);
+//		}
 		// Remove the root vertex and all its touching edges.
 		// System.out.println("Step 2...");
 		// System.out.println(this);
@@ -1046,6 +1049,11 @@ public class RootedTree<V extends DefaultVertex, E extends DefaultWeightedEdge> 
 			}
 			seen.put(curNode, stupidInt);
 		}
+		
+		if (origRootChildCount == 2) {
+			removeElbowsBelow(getRoot());
+		}
+		
 		isValid = true;
 	}
 

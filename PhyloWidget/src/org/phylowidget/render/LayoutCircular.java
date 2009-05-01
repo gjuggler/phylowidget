@@ -33,8 +33,8 @@ public class LayoutCircular extends LayoutBase
 				index+= getLayoutMult(leaf)/2;
 				leaf.setTextAlign(PhyloNode.ALIGN_LEFT);
 				leafPosition(leaf, index);
-				index+= getLayoutMult(leaf)/2;
-//				index++;
+//				index+= getLayoutMult(leaf)/2;
+				index++;
 			}
 
 			branchPosition((PhyloNode) tree.getRoot());
